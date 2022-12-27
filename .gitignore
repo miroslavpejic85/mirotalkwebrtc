@@ -1,0 +1,22 @@
+# git folder
+.git
+
+# npm
+node_modules
+npm-debug.log
+
+# package
+package-lock.json
+
+# mac
+.DS_Store
+
+# cache
+.cache
+
+# mongodb_data
+.mongodb_data
+
+# personal
+.env
+docker-push.sh

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>MiroTalk WebRTC admin</title>
+
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <meta name="description" content="MiroTalk WebRTC admin panel, for rooms scheduling." />
+
+        <meta property="og:type" content="app-mirotalk" />
+        <meta property="og:site_name" content="MiroTalk WebRTC" />
+        <meta property="og:title" content="Click the link to open the dashboard" />
+        <meta property="og:description" content="MiroTalk WebRTC rooms scheduler" />
+
+        <link rel="apple-touch-icon" href="../images/apple-touch-icon.png" />
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
+
+        <link rel="stylesheet" href="../css/client.css" />
+        <!-- https://iconscout.com/unicons/explore/line -->
+        <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap5.min.css" />
+
+        <script defer src="../js/api.js"></script>
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.2.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap5.min.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.15"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    </head>
+
+    <body>
+        <nav>
+            <div class="logo-name">
+                <div class="logo-image">
+                    <img src="../images/logo.png" alt="miroslav-pejic" />
+                </div>
+                <span class="logo_name">MiroTalk</span>
+            </div>
+
+            <div class="menu-items">
+                <ul class="nav-links">
+                    <li>
+                        <a id="navDash" href="#">
+                            <i class="uil uil-estate"></i>
+                            <span class="link-name">Dahsboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a id="navP2P" href="#">
+                            <i class="uil uil-rocket"></i>
+                            <span class="link-name">MiroTalk P2P</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a id="navSFU" href="#">
+                            <i class="uil uil-trophy"></i>
+                            <span class="link-name">MiroTalk SFU</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a id="navC2C" href="#">
+                            <i class="uil uil-star"></i>
+                            <span class="link-name">MiroTalk C2C</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a id="navSup" href="#">
+                            <i class="uil uil-heart"></i>
+                            <span class="link-name">Support</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="logout-mode">
+                    <li>
+                        <a href="/">
+                            <i class="uil uil-signout"></i>
+                            <span class="link-name">Logout</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a id="del-my-account" href="#">
+                            <i class="uil uil-user-times"></i>
+                            <span class="link-name">Delete account</span>
+                        </a>
+                    </li>
+                    <li class="mode">
+                        <a href="#">
+                            <i class="uil uil-moon"></i>
+                            <span class="link-name">Dark Mode</span>
+                        </a>
+                        <div class="mode-toggle">
+                            <span class="switch"></span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <section class="dashboard">
+            <div class="top">
+                <i class="uil uil-bars sidebar-toggle"></i>
+
+                <div id="search" class="search-box" style="display: block">
+                    <i class="uil uil-search"></i>
+                    <input id="myInput" type="text" placeholder="Search..." onkeyup="searchRows()" />
+                </div>
+
+                <a href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" target="_blank">
+                    <img src="../images/profile.png" alt="miroslav-pejic" />
+                </a>
+            </div>
+
+            <div class="dash-content">
+                <div id="dsDash" class="fadeIn" style="display: block">
+                    <div class="title">
+                        <i class="uil uil-tachometer-fast-alt"></i>
+                        <span class="text">Dashboard</span>
+                    </div>
+
+                    <div class="boxes">
+                        <div class="box box1">
+                            <i class="uil uil-thumbs-up"></i>
+                            <a class="text" href="https://github.com/miroslavpejic85/mirotalk" target="_blank"
+                                >MiroTalk P2P</a
+                            >
+                            <a
+                                class="number"
+                                href="https://github.com/miroslavpejic85/mirotalk/stargazers"
+                                target="_blank"
+                            >
+                                <img src="https://img.shields.io/github/stars/miroslavpejic85/mirotalk?style=flat" />
+                            </a>
+                        </div>
+                        <div class="box box2">
+                            <i class="uil uil-thumbs-up"></i>
+                            <a class="text" href="https://github.com/miroslavpejic85/mirotalksfu" target="_blank"
+                                >MiroTalk SFU</a
+                            >
+                            <a
+                                class="number"
+                                href="https://github.com/miroslavpejic85/mirotalksfu/stargazers"
+                                target="_blank"
+                            >
+                                <img src="https://img.shields.io/github/stars/miroslavpejic85/mirotalksfu?style=flat" />
+                            </a>
+                        </div>
+                        <div class="box box3">
+                            <i class="uil uil-thumbs-up"></i>
+                            <a class="text" href="https://github.com/miroslavpejic85/mirotalkc2c" target="_blank"
+                                >MiroTalk C2C</a
+                            >
+                            <a
+                                class="number"
+                                href="https://github.com/miroslavpejic85/mirotalkc2c/stargazers"
+                                target="_blank"
+                            >
+                                <img src="https://img.shields.io/github/stars/miroslavpejic85/mirotalkc2c?style=flat" />
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dsRooms" class="dsRooms fadeIn">
+                    <div class="title">
+                        <i class="uil uil-clock-three"></i>
+                        <span class="text">Rooms scheduler</span>
+                        <div class="actions">
+                            <i id="open-add-btn" class="uil uil-plus"></i>
+                            <i id="del-all-btn" class="uil uil-multiply"></i>
+                            <i id="refresh-page-btn" class="uil uil-sync"></i>
+                        </div>
+                    </div>
+                    <table id="myTable" class="fadeIn" style="width: 100%">
+                        <thead>
+                            <tr>
+                                <th>MiroTalk</th>
+                                <th>Tag</th>
+                                <th>Email</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Room</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="myTableBody"></tbody>
+                    </table>
+                </div>
+
+                <form id="addRowDiv" class="addRowDiv fadeIn hidden" onsubmit="return false">
+                    <i id="add-close-btn" class="uil uil-multiply" style="cursor: pointer"></i>
+                    <label for="mirotalk">MiroTalk</label>
+                    <select id="add-type" class="add-row-select-options" required>
+                        <option value="P2P">P2P</option>
+                        <option value="SFU">SFU</option>
+                        <option value="C2C">C2C</option>
+                    </select>
+                    <label for="email">Tag</label>
+                    <input id="add-tag" type="text" name="tag" required />
+                    <label for="email">Email</label>
+                    <input id="add-email" type="email" name="email" required />
+                    <label for="date-time">Date - Time</label>
+                    <div class="date-time">
+                        <input id="add-date" type="date" name="date" required />
+                        <input id="add-time" type="time" name="time" required />
+                    </div>
+                    <label for="room">Room</label>
+                    <div class="room">
+                        <input id="add-room" type="text" name="room" required />
+                        <button id="gen-room" class="uil uil-sync"></button>
+                    </div>
+                    <button id="add-row-btn"><i class="uil uil-plus"></i>Add</button>
+                </form>
+
+                <div id="p2p" class="dash-iframe fadeIn">
+                    <iframe
+                        id="p2p-iframe"
+                        allow="camera; microphone; fullscreen; display-capture; autoplay"
+                        src="https://p2p.mirotalk.com"
+                    ></iframe>
+                </div>
+
+                <div id="sfu" class="dash-iframe fadeIn">
+                    <iframe
+                        id="sfu-iframe"
+                        allow="camera; microphone; fullscreen; display-capture; autoplay"
+                        src="https://sfu.mirotalk.com"
+                    ></iframe>
+                </div>
+
+                <div id="c2c" class="dash-iframe fadeIn">
+                    <iframe
+                        id="c2c-iframe"
+                        allow="camera; microphone; fullscreen; display-capture; autoplay"
+                        src="https://c2c.mirotalk.com"
+                    ></iframe>
+                </div>
+            </div>
+        </section>
+
+        <script src="../js/client.js"></script>
+    </body>
+</html>

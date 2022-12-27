@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>MiroTalk WebRTC admin login</title>
+
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="MiroTalk WebRTC admin panel, for rooms scheduling." />
+
+        <meta property="og:type" content="app-mirotalk" />
+        <meta property="og:site_name" content="MiroTalk WebRTC" />
+        <meta property="og:title" content="Click the link to login" />
+        <meta property="og:description" content="MiroTalk WebRTC rooms scheduler" />
+
+        <link rel="apple-touch-icon" href="../images/apple-touch-icon.png" />
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
+        <link rel="stylesheet" href="../css/home.css" />
+
+        <script async defer src="https://buttons.github.io/buttons.js"></script>
+        <script defer src="../js/api.js"></script>
+        <script defer src="../js/home.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    </head>
+    <body>
+        <div class="myForm">
+            <label for="email">Email</label>
+            <input id="emailIdInput" type="email" name="email" required />
+            <label for="password">Password</label>
+            <input id="passwordIdInput" type="password" name="password" required />
+            <label for="passwordCheck">Repeat Password</label>
+            <input id="repeatPasswordIdInput" type="password" name="passwordCheck" required />
+            <button id="loginBtn">Login</button>
+            <div class="githubDiv">
+                <a
+                    class="github-button"
+                    href="https://github.com/sponsors/miroslavpejic85"
+                    data-color-scheme="no-preference: light; light: light; dark: dark;"
+                    data-icon="octicon-heart"
+                    data-size="large"
+                    aria-label="Sponsor @miroslavpejic85 on GitHub"
+                    >Support</a
+                >
+            </div>
+        </div>
+    </body>
+</html>

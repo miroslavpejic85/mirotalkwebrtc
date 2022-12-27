@@ -1,0 +1,123 @@
+'use strict';
+
+require('dotenv').config();
+
+const mongoose = require('mongoose');
+const express = require('express');
+const auth = require('./middleware/auth');
+const cors = require('cors');
+const compression = require('compression');
+const api = require('./routes/api');
+const room = require('./routes/room');
+const users = require('./routes/users');
+const path = require('path');
+const sentry = require('@sentry/node');
+const { CaptureConsole } = require('@sentry/integrations');
+
+const apiPath = '/api/v1';
+
+const SERVER_HOST = process.env.SERVER_HOST;
+const SERVER_PORT = process.env.SERVER_PORT;
+const MONGO_URL = process.env.MONGO_URL;
+const MONGO_DATABASE = process.env.MONGO_DATABASE;
+
+// Sentry monitoring (optional)
+
+const SENTRY_DSN = process.env.SENTRY_DSN;
+const SENTRY_TRACES_SAMPLE_RATE = process.env.SENTRY_TRACES_SAMPLE_RATE;
+
+if (SENTRY_DSN != '') {
+    sentry.init({
+        dsn: SENTRY_DSN,
+        integrations: [
+            new CaptureConsole({
+                levels: ['warn', 'error'],
+            }),
+        ],
+        tracesSampleRate: SENTRY_TRACES_SAMPLE_RATE,
+    });
+}
+
+// Mandatory params to make this server up and running
+
+if (!SERVER_HOST || !SERVER_PORT || !MONGO_URL || !MONGO_DATABASE) {
+    console.error('Invalid or missing .env file');
+    process.exit(1);
+}
+
+const home = 'http://' + SERVER_HOST + ':' + SERVER_PORT;
+const apiDocs = home + apiPath + '/docs';
+
+const frontendDir = path.join(__dirname, '../', 'frontend');
+
+const login = path.join(__dirname, '../', 'frontend/html/home.html');
+const client = path.join(__dirname, '../', 'frontend/html/client.html');
+
+mongoose.set('strictQuery', true);
+
+mongoose
+    .connect(MONGO_URL, { dbName: MONGO_DATABASE })
+    .then(() => {
+        const app = express();
+
+        app.use(cors());
+        app.use(compression());
+        app.use(express.static(frontendDir));
+        app.use(express.urlencoded({ extended: true }));
+        app.use(express.json());
+
+        // Logs requests
+        app.use((req, res, next) => {
+            console.log('[ ' + new Date().toISOString() + ' ] - New request:', {
+                headers: req.headers,
+                body: req.body,
+                method: req.method,
+                path: req.originalUrl,
+            });
+            next();
+        });
+
+        app.use(apiPath, api);
+        app.use(apiPath, room);
+        app.use(apiPath, users);
+
+        app.get('/', (req, res) => {
+            res.sendFile(login);
+        });
+
+        app.get('/client', auth, (req, res) => {
+            res.sendFile(client);
+        });
+
+        app.use('*', (req, res) => {
+            res.status(404).json({ message: 'Page not found' });
+        });
+
+        app.listen(SERVER_PORT, null, () => {
+            console.debug('Server', {
+                home: home,
+                apiDocs: apiDocs,
+                nodeVersion: process.versions.node,
+            });
+        });
+    })
+    .catch((err) => console.error('Mongoose init connection error: ' + err));
+
+mongoose.connection.on('connected', () => {
+    console.log('Mongoose connection open to:', { url: MONGO_URL, db: MONGO_DATABASE });
+});
+
+mongoose.connection.on('error', (err) => {
+    console.log('Mongoose connection error:', { error: err, url: MONGO_URL, db: MONGO_DATABASE });
+});
+
+mongoose.connection.on('disconnected', () => {
+    console.log('Mongoose connection disconnected');
+});
+
+process.on('SIGINT', () => {
+    mongoose.connection.close(() => {
+        console.log('Mongoose connection disconnected through app termination');
+        process.exit(0);
+    });
+});
