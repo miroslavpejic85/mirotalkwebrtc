@@ -38,8 +38,8 @@ function isValidPassword(password) {
     if (password.length < 6) {
         return '⚠️ The minimum number of password characters must be 6';
     }
-    if (password.length > 12) {
-        return '⚠️ the maximum number of password characters must be 12';
+    if (password.length > 36) {
+        return '⚠️ the maximum number of password characters must be 36';
     }
     if (
         !password.match(lowerCase) ||
