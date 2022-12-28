@@ -27,15 +27,8 @@ $ cp .env.template .env
 Change in `.env` the [MONGO](https://www.mongodb.com/) `URL & DATABASE`, with your own:
 
 ```bash
-MONGO_URL='mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}'
-MONGO_DATABASE='mirotalk'
-```
-
-Or if you have docker & docker-compose, and want only instantiate mongodb, run:
-
-```bash
-$ npm run mongo:up
-# npm run mongo:down to stop container
+MONGO_URL=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}
+MONGO_DATABASE=mirotalk
 ```
 
 ```bash
