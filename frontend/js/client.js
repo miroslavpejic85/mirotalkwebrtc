@@ -378,7 +378,7 @@ function delAllRows() {
             roomDeleteFindBy(userId)
                 .then((res) => {
                     console.log('[API] - DELETE ALL ROWS RESPONSE', res);
-                    $('#myTableBody').empty();
+                    dataTable.clear().draw();
                 })
                 .catch((err) => {
                     console.log('[API] - DELETE ALL ROWS ERROR', err);
