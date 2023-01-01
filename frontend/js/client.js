@@ -327,6 +327,8 @@ function delRow(id) {
     const dataTableTR = document.getElementById(id);
     dataTableTR.classList.add('selected');
     Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: false,
         position: 'center',
         icon: 'warning',
         title: 'Delete row',
@@ -360,6 +362,8 @@ function delRow(id) {
 
 function delAllRows() {
     Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: false,
         position: 'center',
         icon: 'warning',
         title: 'Delete all records',
@@ -390,9 +394,11 @@ function delAllRows() {
 
 function delMyAccount() {
     Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: false,
         position: 'center',
         icon: 'warning',
-        title: 'Delete my account!',
+        title: 'Delete account!',
         text: 'Are you sure to want delete your account and all associated data?',
         showDenyButton: true,
         confirmButtonText: `Yes`,
@@ -478,42 +484,4 @@ function resetFormValues() {
     addDate.value = new Date().toISOString().substring(0, 10);
     addTime.value = new Date().toISOString().substring(11, 16);
     addRoom.value = getUUID4();
-}
-
-function popupMessage(type, message, timer = 3000) {
-    switch (type) {
-        case 'info':
-        case 'success':
-        case 'warning':
-        case 'error':
-            Swal.fire({
-                position: 'center',
-                icon: type,
-                title: type,
-                text: message,
-                showClass: {
-                    popup: 'animate__animated animate__fadeInDown',
-                },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOutUp',
-                },
-            });
-            break;
-        case 'toast':
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                icon: 'info',
-                showConfirmButton: false,
-                timer: timer,
-                timerProgressBar: true,
-            });
-            Toast.fire({
-                icon: 'info',
-                title: message,
-            });
-            break;
-        default:
-            alert(message);
-    }
 }

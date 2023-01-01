@@ -9,7 +9,14 @@ const validEmail = new RegExp(
 );
 
 const checkData = (req, res, next) => {
-    const { email, password } = req.body;
+    const { username, email, password } = req.body;
+    if (username) {
+        const validUsername = isValidUsername(username);
+        console.log('Validator', { username: validUsername });
+        if (validUsername != true) {
+            return res.status(201).json({ message: validUsername });
+        }
+    }
     if (email) {
         const validMail = isValidEmail(email);
         console.log('Validator', { email: validMail });
@@ -27,6 +34,13 @@ const checkData = (req, res, next) => {
     return next();
 };
 
+function isValidUsername(username) {
+    if (username.length > 20) {
+        return '⚠️ The maximum number of username characters must be 20';
+    }
+    return true;
+}
+
 function isValidEmail(email) {
     if (!email.match(validEmail)) {
         return '⚠️ The Email field seems not valid!';
@@ -39,7 +53,7 @@ function isValidPassword(password) {
         return '⚠️ The minimum number of password characters must be 6';
     }
     if (password.length > 36) {
-        return '⚠️ the maximum number of password characters must be 36';
+        return '⚠️ The maximum number of password characters must be 36';
     }
     if (
         !password.match(lowerCase) ||

@@ -20,15 +20,23 @@
 <br/>
 
 ```bash
-# Copy .env.template to .env
+# Copy .env.template to .env and edit it
 $ cp .env.template .env
 ```
 
-Change in `.env` the [MONGO](https://www.mongodb.com/) `URL & DATABASE`, with your own:
+Change the [MONGO](https://www.mongodb.com/) `URL & DATABASE`, with your own:
 
 ```bash
 MONGO_URL=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}
 MONGO_DATABASE=mirotalk
+```
+
+Setup your email and [app password](https://support.google.com/mail/answer/185833?hl=en):
+
+```bash
+EMAIL_SERVICE=gmail
+EMAIL_USERNAME=emailUsername
+EMAIL_PASSWORD=emailPassword
 ```
 
 ```bash
@@ -50,13 +58,15 @@ $ npm start
 $ sudo apt install docker.io
 # Install docker-compose
 $ sudo apt install docker-compose
-# Copy .env.template to .env
+# Copy .env.template to .env and edit it
 $ cp .env.template .env
 # Build or rebuild services
 $ docker-compose build
 # Create and start containers (-d as daemon)
 $ docker-compose up
 ```
+
+[Docker official image](https://hub.docker.com/r/mirotalk/webrtc)
 
 Logs
 
@@ -86,6 +96,7 @@ To self-hosting this project follow [this doc](./SelfHosting.md).
 </details>
 
 <details>
+
 <summary>Discussions</summary>
 
 <br/>

@@ -52,7 +52,7 @@ input:focus {
     outline-offset: -1px;
 }
 
-button {
+#loginBtn {
     display: block;
     margin-top: 25px;
     width: 50%;
@@ -67,7 +67,7 @@ button {
     outline: none;
 }
 
-button:hover {
+#loginBtn:hover {
     outline: 2px solid #439fff;
     outline-offset: -1px;
 }
@@ -75,4 +75,21 @@ button:hover {
 .githubDiv {
     position: relative;
     top: 20px;
+}
+
+.swal2-title,
+.swal2-content {
+    background-color: var(--primary-color) !important;
+    color: var(--text-color) !important;
+    text-align: center;
+}
+
+.swal2-html-container {
+    background-color: var(--primary-color) !important;
+    color: var(--text-color) !important;
+}
+
+.swal2-popup {
+    border: 1px solid var(--secondary-color) !important;
+    background-color: var(--primary-color) !important;
 }

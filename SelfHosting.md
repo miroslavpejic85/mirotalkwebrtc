@@ -32,11 +32,11 @@ $ npm install -g npm@latest
 $ git clone https://github.com/miroslavpejic85/mirotalkwebrtc.git
 # Go to project dir
 $ cd mirotalkwebrtc
-# Copy .env.template to .env
+# Copy .env.template to .env and edit it
 $ cp .env.template .env
 ```
 
-Change in `.env` the [MONGO](https://www.mongodb.com/) URL & DATABASE, with your own:
+Change the [MONGO](https://www.mongodb.com/) URL & DATABASE, with your own:
 
 ```bash
 MONGO_URL=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}
@@ -48,6 +48,14 @@ Or if you have docker & docker-compose, and want only instantiate mongodb, run:
 ```bash
 $ npm run mongo:up
 # npm run mongo:down to stop container
+```
+
+Setup your email and [app password](https://support.google.com/mail/answer/185833?hl=en):
+
+```bash
+EMAIL_SERVICE=gmail
+EMAIL_USERNAME=emailUsername
+EMAIL_PASSWORD=emailPassword
 ```
 
 ```bash
@@ -87,7 +95,7 @@ Using `Docker`
 $ sudo apt install docker.io
 # Instal docker-compose
 $ sudo apt install docker-compose
-# Copy env.template to .env and edit it if needed
+# Copy env.template to .env and edit it
 $ cp .env.template .env
 # Build or rebuild services
 $ docker-compose build

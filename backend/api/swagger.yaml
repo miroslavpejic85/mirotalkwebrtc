@@ -73,6 +73,36 @@ paths:
                 '400':
                     description: Bad request
 
+    /user/confirmation:
+        get:
+            security:
+                - authorization: []
+            tags:
+                - user
+            summary: User confirmation
+            description: This can only be done by the logged in user.
+            operationId: userConfirmation
+            parameters:
+                - name: token
+                  in: path
+                  description: 'The id needs to be fetched.'
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '200':
+                    description: successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UserRes'
+                '400':
+                    description: Bad request
+                '403':
+                    description: Forbidden
+                '409':
+                    description: Already confirmed
+
     /user/{id}:
         get:
             security:
@@ -329,6 +359,9 @@ components:
         UserReq:
             type: object
             properties:
+                username:
+                    type: string
+                    example: 'Miroslav Pejic'
                 email:
                     type: string
                     example: 'miroslav.pejic.85@gmail.com'
@@ -344,6 +377,9 @@ components:
                 role:
                     type: string
                     example: 'guest'
+                username:
+                    type: string
+                    example: 'Miroslav Pejic'
                 email:
                     type: string
                     example: 'miroslav.pejic.85@gmail.com'
@@ -353,6 +389,10 @@ components:
                 token:
                     type: string
                     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1pcm9zbGF2LnBlamljLjg1QGdtYWlsLmNvbSIsImlhdCI6MTY3MTc5MTcwNSwiZXhwIjoxNjcxNzk4OTA1fQ.er-Trhbl8bWVJHGsZasgLvBCE5ZiloDsv9zQhNm5B-U'
+                active:
+                    type: boolean
+                    enum: [true, false]
+                    example: true
                 createdAt:
                     type: string
                     example: '2022-12-23T10:35:05.234Z'

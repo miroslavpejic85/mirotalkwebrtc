@@ -2,17 +2,23 @@
 
 console.log('Location', window.location);
 
+const usernameIn = document.getElementById('usernameInput');
 const emailIn = document.getElementById('emailIdInput');
 const passwordIdIn = document.getElementById('passwordIdInput');
 const repeatPasswordIdInput = document.getElementById('repeatPasswordIdInput');
 const loginBtn = document.getElementById('loginBtn');
 
+usernameIn.value = window.localStorage.name || '';
 emailIn.value = window.localStorage.email || '';
 
 loginBtn.addEventListener('click', (e) => {
     e.preventDefault();
+    if (usernameIn.value == '') {
+        popupMessage('warning', '⚠️ Username field empty!');
+        return false;
+    }
     if (emailIn.value == '') {
-        alert('⚠️ Email field empty!');
+        popupMessage('warning', '⚠️ Email field empty!');
         return false;
     }
     if (
@@ -20,22 +26,24 @@ loginBtn.addEventListener('click', (e) => {
         repeatPasswordIdInput.value == '' ||
         passwordIdIn.value != repeatPasswordIdInput.value
     ) {
-        alert('⚠️ Repeat password field not match!');
+        popupMessage('warning', '⚠️ Repeat password field not match!');
         return false;
     }
 
-    window.localStorage.email = emailIn.value.toLowerCase();
+    window.localStorage.name = usernameIn.value.trim();
+    window.localStorage.email = emailIn.value.toLowerCase().trim();
 
     const data = {
-        email: emailIn.value.toLowerCase(),
-        password: passwordIdIn.value,
+        username: usernameIn.value.trim(),
+        email: emailIn.value.toLowerCase().trim(),
+        password: passwordIdIn.value.trim(),
     };
 
     userLogin(data)
         .then((res) => {
             console.log('[API] - USER LOGIN RESPONSE', res);
             if (res.message) {
-                alert(res.message);
+                popupMessage('warning', res.message);
             } else {
                 window.sessionStorage.userId = res._id;
                 window.sessionStorage.userToken = res.token;
@@ -44,6 +52,6 @@ loginBtn.addEventListener('click', (e) => {
         })
         .catch((err) => {
             console.error('[API] - USER LOGIN ERROR', err);
-            alert(`⚠️ API USER LOGIN error: ${err.message}`);
+            popupMessage('error', `⚠️ API USER LOGIN error: ${err.message}`);
         });
 });

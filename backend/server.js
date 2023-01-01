@@ -18,6 +18,7 @@ const apiPath = '/api/v1';
 
 const SERVER_HOST = process.env.SERVER_HOST;
 const SERVER_PORT = process.env.SERVER_PORT;
+const SERVER_URL = process.env.SERVER_URL;
 const MONGO_URL = process.env.MONGO_URL;
 const MONGO_DATABASE = process.env.MONGO_DATABASE;
 
@@ -40,12 +41,12 @@ if (SENTRY_DSN != '') {
 
 // Mandatory params to make this server up and running
 
-if (!SERVER_HOST || !SERVER_PORT || !MONGO_URL || !MONGO_DATABASE) {
+if (!SERVER_HOST || !SERVER_PORT || !SERVER_URL || !MONGO_URL || !MONGO_DATABASE) {
     console.error('Invalid or missing .env file');
     process.exit(1);
 }
 
-const home = 'http://' + SERVER_HOST + ':' + SERVER_PORT;
+const home = SERVER_URL;
 const apiDocs = home + apiPath + '/docs';
 
 const frontendDir = path.join(__dirname, '../', 'frontend');

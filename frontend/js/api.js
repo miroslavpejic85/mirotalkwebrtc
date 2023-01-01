@@ -27,6 +27,14 @@ function userLogin(data) {
     }).then((response) => response.data);
 }
 
+function userConfirmation(token) {
+    return axios({
+        method: 'GET',
+        url: `${apiPath}/user/confirmation${token}`,
+        headers: headers,
+    }).then((response) => response.data);
+}
+
 function userGet(id) {
     return axios({
         method: 'GET',

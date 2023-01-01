@@ -3,9 +3,10 @@
 const express = require('express');
 const auth = require('../middleware/auth');
 const validator = require('../middleware/validator');
+const router = express.Router();
 const User = require('../models/users');
 const Room = require('../models/room');
-const router = express.Router();
+const nodemailer = require('../lib/nodemailer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -16,22 +17,19 @@ const JWT_KEY = process.env.JWT_KEY;
 
 router.post('/user', validator, async (req, res) => {
     try {
-        const { email, password } = req.body;
-        const userFindOne = await User.findOne({ email: email });
+        const { username, email, password } = req.body;
+        const userFindOne = await User.findOne({ username: username, email: email });
         if (userFindOne && Object.keys(userFindOne).length === 0) {
-            const encryptedPassword = await bcrypt.hash(password, 10);
-            const token = jwt.sign({ email: email }, JWT_KEY, {
+            const token = jwt.sign({ username: username, email: email, password: password }, JWT_KEY, {
                 expiresIn: JWT_EXP,
             });
-            const userData = new User({
-                email: email,
-                password: encryptedPassword,
-                token: token,
-                createdAt: new Date().toISOString(),
+            //New user, send email confirmation
+            const confirmationCode = `?token=${token}`;
+            nodemailer.sendConfirmationEmail(username, email, confirmationCode);
+            console.log('New user, sent email confirmation');
+            return res.status(201).send({
+                message: '⚠️ Pending account. <br/> Please verify your email to confirm!',
             });
-            const userSaveData = await userData.save();
-            console.log('User create OK', userSaveData);
-            res.status(200).json(userSaveData);
         } else {
             console.log('User already exist');
             res.status(409).json({ message: 'User already exist!' });
@@ -46,37 +44,75 @@ router.post('/user', validator, async (req, res) => {
 
 router.post('/user/login', validator, async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { username, email, password } = req.body;
         const dateNow = new Date().toISOString();
-        const userFindOne = await User.findOne({ email: email });
-        if (userFindOne && Object.keys(userFindOne).length != 0 && bcrypt.compare(password, userFindOne.password)) {
-            // User found just refresh the token
-            const token = jwt.sign({ email: email }, JWT_KEY, {
-                expiresIn: JWT_EXP,
-            });
+        const token = jwt.sign({ email: email, username: username, password: password }, JWT_KEY, {
+            expiresIn: JWT_EXP,
+        });
+        const userFindOne = await User.findOne({ email: email, username: username });
+        if (
+            userFindOne &&
+            Object.keys(userFindOne).length != 0 &&
+            userFindOne.active &&
+            bcrypt.compare(password, userFindOne.password)
+        ) {
+            //User found, just refresh the token
             userFindOne.token = token;
             userFindOne.updatedAt = dateNow;
             const saveUserFindOne = await userFindOne.save();
             console.log('User login OK', saveUserFindOne);
             res.status(201).json(saveUserFindOne);
         } else {
-            //Auto create the user if not found (demo purposes)
-            const encryptedPassword = await bcrypt.hash(password, 10);
-            const token = jwt.sign({ email: email }, JWT_KEY, {
-                expiresIn: JWT_EXP,
+            //New user, send email confirmation
+            const confirmationCode = `?token=${token}`;
+            nodemailer.sendConfirmationEmail(username, email, confirmationCode);
+            console.log('User login, sent email confirmation');
+            return res.status(201).send({
+                message: '⚠️ Pending account. <br/> Please verify your email to confirm!',
             });
-            const userData = new User({
-                email: email,
-                password: encryptedPassword,
-                token: token,
-                createdAt: dateNow,
-            });
-            const userSaveData = await userData.save();
-            console.log('User create OK', userSaveData);
-            res.status(201).json(userSaveData);
         }
     } catch (error) {
         console.error('login', error);
+        res.status(400).json({ message: error.message });
+    }
+});
+
+//POST: /api/v1/user/confirmation/?token=<token>
+
+router.get('/user/confirmation', auth, async (req, res) => {
+    try {
+        console.log('userConfirmation query', req.query);
+        const { token } = req.query;
+        const decoded = jwt.verify(token, JWT_KEY);
+        console.log('User confirmation token decoded', decoded);
+        const userFindOne = await User.findOne({ email: decoded.email, username: decoded.username });
+        if (!userFindOne || Object.keys(userFindOne).length === 0) {
+            //User confirmed by email, going to add it the db
+            const encryptedPassword = await bcrypt.hash(decoded.password, 10);
+            const userData = new User({
+                email: decoded.email,
+                username: decoded.username,
+                password: encryptedPassword,
+                token: token,
+                active: true,
+                createdAt: new Date().toISOString(),
+            });
+            const userSaveData = await userData.save();
+            console.log('User create OK', userSaveData);
+            userSaveData.password = decoded.password.substring(0, 5) + '************';
+            res.status(200).json(userSaveData);
+            //Send email to the user
+            nodemailer.sendConfirmationOkEmail(
+                userSaveData.username,
+                userSaveData.email,
+                JSON.stringify(userSaveData, null, 4),
+            );
+        } else {
+            console.log('User already confirmed');
+            res.status(409).json({ message: 'User already confirmed!' });
+        }
+    } catch (error) {
+        console.error('confirmationUser', error);
         res.status(400).json({ message: error.message });
     }
 });
