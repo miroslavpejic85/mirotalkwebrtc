@@ -3,12 +3,14 @@
 const nodemailer = require('nodemailer');
 
 const SERVER_URL = process.env.SERVER_URL;
-const EMAIL_SERVICE = process.env.EMAIL_SERVICE;
+const EMAIL_HOST = process.env.EMAIL_HOST;
+const EMAIL_PORT = process.env.EMAIL_PORT;
 const EMAIL_USERNAME = process.env.EMAIL_USERNAME;
 const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
 
 const transport = nodemailer.createTransport({
-    service: EMAIL_SERVICE,
+    host: EMAIL_HOST,
+    port: EMAIL_PORT,
     auth: {
         user: EMAIL_USERNAME,
         pass: EMAIL_PASSWORD,

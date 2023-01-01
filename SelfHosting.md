@@ -53,7 +53,8 @@ $ npm run mongo:up
 Setup your email and [app password](https://support.google.com/mail/answer/185833?hl=en):
 
 ```bash
-EMAIL_SERVICE=gmail
+EMAIL_HOST=emailHost
+EMAIL_PORT=emailPort
 EMAIL_USERNAME=emailUsername
 EMAIL_PASSWORD=emailPassword
 ```
