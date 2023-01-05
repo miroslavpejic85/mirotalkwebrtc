@@ -1,6 +1,6 @@
 # Self hosting MiroTalk WebRTC admin
 
-## Requirments
+## Requirements
 
 -   Recommended: [Hetzner](https://www.hetzner.com/cloud) (`CX21` it's enough, OS: `Ubuntu 20.04`) you can use [this link](https://hetzner.cloud/?ref=XdRifCzCK3bn) to receive `€⁠20 in cloud credits`.
 -   Mandatory: [Node.js](https://nodejs.org/en/) at least 16x (`16.15.1 LTS`) & npm
