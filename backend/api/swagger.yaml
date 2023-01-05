@@ -73,7 +73,7 @@ paths:
                 '400':
                     description: Bad request
 
-    /user/confirmation:
+    /user/confirmation/{token}:
         get:
             security:
                 - authorization: []

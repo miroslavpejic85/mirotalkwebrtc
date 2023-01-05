@@ -88,11 +88,11 @@ You can check the swagger document at http://localhost:9000/api/v1/docs, or live
 </details>
 
 <details>
-<summary>SelfHosting</summary>
+<summary>Self hosting</summary>
 
 <br/>
 
-To self-hosting this project follow [this doc](./SelfHosting.md).
+To self hosting this project follow [this doc](./Self-hosting.md).
 
 </details>
 
