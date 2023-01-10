@@ -19,6 +19,8 @@
 
 <br/>
 
+Install [NodeJs](https://nodejs.org/en/blog/release/v16.15.1/) and then:
+
 ```bash
 # Copy .env.template to .env and edit it
 $ cp .env.template .env
@@ -54,11 +56,9 @@ $ npm start
 
 <br/>
 
+Install [docker](https://docs.docker.com/engine/install/) and [docker-compose](https://docs.docker.com/compose/install/) and then:
+
 ```bash
-# Install docker
-$ sudo apt install docker.io
-# Install docker-compose
-$ sudo apt install docker-compose
 # Copy .env.template to .env and edit it
 $ cp .env.template .env
 # Build or rebuild services
