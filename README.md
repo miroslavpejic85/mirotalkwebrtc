@@ -19,7 +19,7 @@
 
 <br/>
 
-Install [NodeJs](https://nodejs.org/en/blog/release/v16.15.1/) and then:
+Install [NodeJs](https://nodejs.org/en/blog/release/v16.15.1/).
 
 ```bash
 # Copy .env.template to .env and edit it
@@ -56,7 +56,7 @@ $ npm start
 
 <br/>
 
-Install [docker](https://docs.docker.com/engine/install/) and [docker-compose](https://docs.docker.com/compose/install/) and then:
+Install [docker](https://docs.docker.com/engine/install/) and [docker-compose](https://docs.docker.com/compose/install/).
 
 ```bash
 # Copy .env.template to .env and edit it
