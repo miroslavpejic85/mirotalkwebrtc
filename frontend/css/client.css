@@ -25,6 +25,7 @@
     --i-act-color-hover: #efff;
     --input-color-schema: light;
     --tr-child-color: #f2f2f2;
+    --form-width: 50%;
 }
 
 body {
@@ -48,6 +49,7 @@ body.dark {
     --i-act-color-hover: #439fff;
     --input-color-schema: dark;
     --tr-child-color: #3a3b3d;
+    --form-width: 50%;
 }
 
 ::-webkit-scrollbar {
@@ -428,8 +430,8 @@ iframe {
     position: fixed;
     z-index: 99;
     top: 0px;
-    left: 0px;
-    width: 100%;
+    right: 0px;
+    width: 50%;
     height: 100%;
     padding: 30px;
     border: 1px solid var(--border-color);
@@ -754,6 +756,9 @@ tr:nth-child(even) {
     .dash-content .boxes .box {
         width: calc(100% / 2 - 15px);
         margin-top: 15px;
+    }
+    .addRowDiv {
+        width: 100%;
     }
 }
 
