@@ -25,7 +25,6 @@
     --i-act-color-hover: #efff;
     --input-color-schema: light;
     --tr-child-color: #f2f2f2;
-    --form-width: 50%;
 }
 
 body {
@@ -49,7 +48,6 @@ body.dark {
     --i-act-color-hover: #439fff;
     --input-color-schema: dark;
     --tr-child-color: #3a3b3d;
-    --form-width: 50%;
 }
 
 ::-webkit-scrollbar {
