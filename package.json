@@ -32,10 +32,10 @@
         "cors": "^2.8.5",
         "express": "^4.18.2",
         "jsonwebtoken": "^9.0.0",
-        "mongoose": "^6.8.3",
+        "mongoose": "^6.8.4",
         "nodemailer": "^6.9.0",
-        "@sentry/node": "^7.30.0",
-        "@sentry/integrations": "^7.30.0",
+        "@sentry/node": "^7.30.1",
+        "@sentry/integrations": "^7.30.1",
         "swagger-ui-express": "^4.6.0",
         "yamljs": "^0.3.0"
     },
