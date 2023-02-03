@@ -49,12 +49,16 @@ $ npm install
 $ npm start
 ```
 
+Open in browser: http://localhost:9000
+
 </details>
 
-<details>
+<details open>
 <summary>Docker</summary>
 
 <br/>
+
+![docker](./frontend/Images/docker.png)
 
 Install [docker](https://docs.docker.com/engine/install/) and [docker-compose](https://docs.docker.com/compose/install/).
 
@@ -68,13 +72,6 @@ $ docker-compose up
 ```
 
 [Docker official image](https://hub.docker.com/r/mirotalk/webrtc)
-
-Logs
-
-```bash
-# Follow the server logs
-$ docker logs -f mirotalkwebrtc
-```
 
 </details>
 
@@ -92,7 +89,7 @@ You can check the swagger document at http://localhost:9000/api/v1/docs, or live
 
 <br/>
 
-To self hosting this project follow [this doc](./Self-hosting.md).
+To self-hosting MiroTalk WEB, just follow [this steps](./SelfHosting.md).
 
 </details>
 
@@ -120,6 +117,12 @@ You can support MiroTalk's projects by [sponsoring](https://github.com/sponsors/
 
 <br/>
 
-[AGPLv3](./LICENSE)
+![AGPLv3](./frontend/images/AGPLv3.png)
+
+MiroTalk is free and can be modified and forked. But the conditions of the AGPLv3 (GNU Affero General Public License v3.0) need to be respected. In particular modifications need to be free as well and made available to the public. Get a quick overview of the license at [Choose an open source license](https://choosealicense.com/licenses/agpl-3.0/).
+
+For a MiroTalk license under conditions other than AGPLv3, please contact us at license.mirotalk@gmail.com or [purchase directly via CodeCanyon](https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313).
+
+Thank you!
 
 </details>

@@ -2,7 +2,8 @@
 
 ## Requirements
 
--   Recommended: [Hetzner](https://www.hetzner.com/cloud) (`CX21` it's enough, OS: `Ubuntu 20.04`) you can use [this link](https://hetzner.cloud/?ref=XdRifCzCK3bn) to receive `€⁠20 in cloud credits`.
+-   Recommended: [Hetzner](https://www.hetzner.com/cloud) (`CX21` it's enough, OS: `Ubuntu 20.04 LTS / 22.04.1 LTS`).
+-   Use my [personal link](https://hetzner.cloud/?ref=XdRifCzCK3bn) to receive `€⁠20 in cloud credits`.
 -   Mandatory: [Node.js](https://nodejs.org/en/) at least 16x (`16.15.1 LTS`) & npm
 -   Mandatory: Your domain name, example: `your.domain.name`
 
@@ -72,6 +73,8 @@ Check if is correctly installed: https://your.domain.name:9000
 
 ## PM2
 
+![pm2](./frontend/Images/pm2.png)
+
 Using [PM2](https://pm2.keymetrics.io)
 
 ```bash
@@ -88,6 +91,8 @@ $ pm2 startup
 ---
 
 ## Docker
+
+![docker](./frontend/Images/docker.png)
 
 Using `Docker`
 
@@ -109,6 +114,8 @@ Check if is correctly installed: https://your.domain.name:9000
 ---
 
 ## Nginx & Certbot
+
+![nginx](./frontend/Images/nginx.png)
 
 In order to use it without the port number at the end, and to have encrypted communications (`mandatory to make it work correctly`), we going to install [nginx](https://www.nginx.com) and [certbot](https://certbot.eff.org)
 
