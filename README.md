@@ -117,7 +117,7 @@ You can support MiroTalk's projects by [sponsoring](https://github.com/sponsors/
 
 <br/>
 
-![AGPLv3](./frontend/images/AGPLv3.png)
+![AGPLv3](./frontend/Images/AGPLv3.png)
 
 MiroTalk is free and can be modified and forked. But the conditions of the AGPLv3 (GNU Affero General Public License v3.0) need to be respected. In particular modifications need to be free as well and made available to the public. Get a quick overview of the license at [Choose an open source license](https://choosealicense.com/licenses/agpl-3.0/).
 
