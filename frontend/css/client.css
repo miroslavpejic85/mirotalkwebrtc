@@ -435,7 +435,9 @@ iframe {
     border: 1px solid var(--border-color);
     background-color: var(--panel-color);
     color: var(--text-color);
+    animation: reveal 0.5s forwards;
 }
+
 .addRowDiv label {
     display: block;
     margin-top: 20px;
@@ -813,5 +815,14 @@ tr:nth-child(even) {
     nav.close ~ .dashboard .top {
         left: 0;
         width: 100%;
+    }
+}
+
+@keyframes reveal {
+    from {
+        clip-path: inset(0 0 0 100%);
+    }
+    to {
+        clip-path: inset(0 0 0 0);
     }
 }
