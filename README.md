@@ -2,15 +2,13 @@
 
 <p align="center">Manage and scheduling all the MiroTalk's WebRTC rooms:</p>
 
----
+<br/>
 
--   [MiroTalk P2P](https://github.com/miroslavpejic85/mirotalk) - `Peer to peer` real-time video conferences, optimized for small groups (5-8 participants)
-
--   [MiroTalk SFU](https://github.com/miroslavpejic85/mirotalksfu) - `Selective forwarding unit` real-time video conferences, optimized for large groups (8+ participants)
-
--   [MiroTalk C2C](https://github.com/miroslavpejic85/mirotalkc2c) - `Cam to cam` (peer to peer) real-time video conferences, optimized for one to one (2 participants)
-
----
+| `MiroTalk`                                               | Description                                                                                                                                       |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🚀 [P2P](https://github.com/miroslavpejic85/mirotalk)    | `Peer to peer` real-time video conferences, optimized for small groups. Unlimited time, unlimited rooms each having 5-8 participants.             |
+| 🏆 [SFU](https://github.com/miroslavpejic85/mirotalksfu) | `Selective forwarding unit` real-time video conferences, optimized for large groups. Unlimited time, unlimited rooms each having 8+ participants. |
+| ✨ [C2C](https://github.com/miroslavpejic85/mirotalkc2c) | `Cam to cam` (peer to peer) real-time video conferences, optimized for one to one. Unlimited time ,unlimited rooms each having 2 participants.    |
 
 ![mirotalk-webrtc-admin](./frontend/Images/mirotalk-webrtc-admin.png)
 
@@ -89,7 +87,7 @@ You can check the swagger document at http://localhost:9000/api/v1/docs, or live
 
 <br/>
 
-To self-hosting MiroTalk WEB, just follow [this steps](./SelfHosting.md).
+To self-hosting MiroTalk WEB, just follow [this steps](./docs/SelfHosting.md).
 
 </details>
 

@@ -73,7 +73,7 @@ Check if is correctly installed: https://your.domain.name:9000
 
 ## PM2
 
-![pm2](./frontend/Images/pm2.png)
+![pm2](../frontend/Images/pm2.png)
 
 Using [PM2](https://pm2.keymetrics.io)
 
@@ -92,7 +92,7 @@ $ pm2 startup
 
 ## Docker
 
-![docker](./frontend/Images/docker.png)
+![docker](../frontend/Images/docker.png)
 
 Using `Docker`
 
@@ -115,7 +115,7 @@ Check if is correctly installed: https://your.domain.name:9000
 
 ## Nginx & Certbot
 
-![nginx](./frontend/Images/nginx.png)
+![nginx](../frontend/Images/nginx.png)
 
 In order to use it without the port number at the end, and to have encrypted communications (`mandatory to make it work correctly`), we going to install [nginx](https://www.nginx.com) and [certbot](https://certbot.eff.org)
 
