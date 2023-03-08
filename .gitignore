@@ -20,3 +20,4 @@ package-lock.json
 # personal
 .env
 docker-push.sh
+docker-compose.yml
