@@ -10,8 +10,6 @@ services:
         hostname: mirotalkwebrtc
         volumes:
             - .env:/src/.env:ro
-            - ./backend/:/src/backend/:ro
-            - ./frontend/:/src/frontend/:ro
         restart: unless-stopped
         ports:
             - '${SERVER_PORT}:${SERVER_PORT}'
