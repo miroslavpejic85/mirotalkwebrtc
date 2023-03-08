@@ -99,7 +99,7 @@ Using `Docker`
 ```bash
 # Install docker
 $ sudo apt install docker.io
-# Instal docker-compose
+# Install docker-compose
 $ sudo apt install docker-compose
 # Copy env.template to .env and edit it
 $ cp .env.template .env
