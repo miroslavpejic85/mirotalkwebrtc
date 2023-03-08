@@ -10,6 +10,9 @@ services:
         hostname: mirotalkwebrtc
         volumes:
             - .env:/src/.env:ro
+            # These volumes are not mandatory, uncomment if you want to use it
+            # - ./backend/:/src/backend/:ro
+            # - ./frontend/:/src/frontend/:ro
         restart: unless-stopped
         ports:
             - '${SERVER_PORT}:${SERVER_PORT}'
