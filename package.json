@@ -9,7 +9,10 @@
         "mongo:up": "docker-compose -f docker-compose-mongo.yml up -d",
         "mongo:down": "docker-compose -f docker-compose-mongo.yml down",
         "test": "echo \"Error: no test specified\" && exit 1",
-        "lint": "npx prettier --write ."
+        "lint": "npx prettier --write .",
+        "docker-build": "docker build --tag mirotalk/webrtc:latest .",
+        "docker-rmi": "docker images |grep '<none>' |awk '{print $3}' |xargs docker rmi",
+        "docker-push": "docker push mirotalk/webrtc:latest"
     },
     "repository": {
         "type": "git",
