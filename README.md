@@ -6,6 +6,9 @@
     <a href="https://webrtc.mirotalk.com">webrtc.mirotalk.com</a>
 </p>
 
+> **Note**
+> Enter a `valid email`, username and chosen password, `confirm the email` and enjoy!
+
 <hr />
 
 <p align="center">Manage and scheduling all the MiroTalk's WebRTC rooms:</p>

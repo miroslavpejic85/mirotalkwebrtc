@@ -31,20 +31,20 @@
     "license": "AGPL-3.0",
     "homepage": "https://github.com/miroslavpejic85/mirotalkwebrtc",
     "dependencies": {
-        "@sentry/node": "^7.38.0",
-        "@sentry/integrations": "^7.38.0",
+        "@sentry/node": "^7.42.0",
+        "@sentry/integrations": "^7.42.0",
         "bcryptjs": "^2.4.3",
         "compression": "^1.7.4",
         "cors": "^2.8.5",
         "express": "^4.18.2",
         "jsonwebtoken": "^9.0.0",
-        "mongoose": "^6.9.2",
+        "mongoose": "^7.0.1",
         "nodemailer": "^6.9.1",
-        "swagger-ui-express": "^4.6.1",
+        "swagger-ui-express": "^4.6.2",
         "yamljs": "^0.3.0"
     },
     "devDependencies": {
         "dotenv": "^16.0.3",
-        "prettier": "2.8.3"
+        "prettier": "2.8.4"
     }
 }

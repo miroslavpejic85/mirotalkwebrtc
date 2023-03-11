@@ -7,6 +7,7 @@ const EMAIL_HOST = process.env.EMAIL_HOST;
 const EMAIL_PORT = process.env.EMAIL_PORT;
 const EMAIL_USERNAME = process.env.EMAIL_USERNAME;
 const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
+const SUPPORT = 'https://paypal.me/mirotalk?country.x=EN&locale.x=en_EN'; // Thank you!
 
 const transport = nodemailer.createTransport({
     host: EMAIL_HOST,
@@ -47,6 +48,7 @@ module.exports.sendConfirmationOkEmail = (name, email, credential) => {
 			<pre>${credential}</pre>
             <p>Home page</p>
             <a href="${SERVER_URL}" target="_blank">${SERVER_URL}</a>
+            <br/><p>I am hoping you find the application useful. Making a small donation is a great way to let me know you like it and want me to keep working on it. Thank you!</p><a href="${SUPPORT}" target="_blanck">PayPal</a>
 		`,
         })
         .catch((err) => console.error(err));
