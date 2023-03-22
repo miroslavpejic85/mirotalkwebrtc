@@ -50,25 +50,30 @@ router.post('/user/login', validator, async (req, res) => {
             expiresIn: JWT_EXP,
         });
         const userFindOne = await User.findOne({ email: email, username: username });
-        if (
-            userFindOne &&
-            Object.keys(userFindOne).length != 0 &&
-            userFindOne.active &&
-            bcrypt.compare(password, userFindOne.password)
-        ) {
-            //User found, just refresh the token
-            userFindOne.token = token;
-            userFindOne.updatedAt = dateNow;
-            const saveUserFindOne = await userFindOne.save();
-            console.log('User login OK', saveUserFindOne);
-            res.status(201).json(saveUserFindOne);
-        } else {
-            //New user, send email confirmation
-            const confirmationCode = `?token=${token}`;
-            nodemailer.sendConfirmationEmail(username, email, confirmationCode);
-            console.log('User login, sent email confirmation');
-            return res.status(201).send({
-                message: '⚠️ Pending account. <br/> Please verify your email to confirm!',
+
+        if (userFindOne && Object.keys(userFindOne).length != 0 && userFindOne.active) {
+            //User found, but we going to check if the provided password exists
+            bcrypt.compare(password, userFindOne.password, async function (err, result) {
+                if (err) {
+                    console.error('login password check', err);
+                    res.status(400).json({ message: err });
+                }
+                if (result) {
+                    //User found, just refresh the token
+                    userFindOne.token = token;
+                    userFindOne.updatedAt = dateNow;
+                    const saveUserFindOne = await userFindOne.save();
+                    console.log('User login OK', saveUserFindOne);
+                    res.status(201).json(saveUserFindOne);
+                } else {
+                    //New user, send email confirmation
+                    const confirmationCode = `?token=${token}`;
+                    nodemailer.sendConfirmationEmail(username, email, confirmationCode);
+                    console.log('User login, sent email confirmation');
+                    return res.status(201).send({
+                        message: '⚠️ Pending account. <br/> Please verify your email to confirm!',
+                    });
+                }
             });
         }
     } catch (error) {
