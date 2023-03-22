@@ -51,7 +51,10 @@ $ npm run mongo:up
 # npm run mongo:down to stop container
 ```
 
-Setup your email and [app password](https://support.google.com/mail/answer/185833?hl=en):
+Setup your email and [app password](https://support.google.com/mail/answer/185833?hl=en).
+
+> **Note**
+> if you disable the user email verification `EMAIL_VERIFICATION=false` skip this Email config.
 
 ```bash
 EMAIL_HOST=emailHost

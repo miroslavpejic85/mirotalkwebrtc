@@ -44,6 +44,9 @@ MONGO_DATABASE=mirotalk
 
 Setup your email and [app password](https://support.google.com/mail/answer/185833?hl=en):
 
+> **Note**
+> if you disable the user email verification `EMAIL_VERIFICATION=false` skip this Email config.
+
 ```bash
 EMAIL_HOST=emailHost
 EMAIL_PORT=emailPort
