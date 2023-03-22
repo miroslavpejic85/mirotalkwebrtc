@@ -18,8 +18,9 @@ const JWT_KEY = process.env.JWT_KEY;
 router.post('/user', validator, async (req, res) => {
     try {
         const { username, email, password } = req.body;
-        const userFindOne = await User.findOne({ username: username, email: email });
-        if (userFindOne && Object.keys(userFindOne).length === 0) {
+        const userFindOne = await User.findOne({ email: email, username: username });
+        // No user found in the storage
+        if (Object.is(userFindOne, null) || Object.keys(userFindOne).length === 0) {
             const token = jwt.sign({ username: username, email: email, password: password }, JWT_KEY, {
                 expiresIn: JWT_EXP,
             });
@@ -45,10 +46,6 @@ router.post('/user', validator, async (req, res) => {
 router.post('/user/login', validator, async (req, res) => {
     try {
         const { username, email, password } = req.body;
-        const dateNow = new Date().toISOString();
-        const token = jwt.sign({ email: email, username: username, password: password }, JWT_KEY, {
-            expiresIn: JWT_EXP,
-        });
         const userFindOne = await User.findOne({ email: email, username: username });
 
         if (userFindOne && Object.keys(userFindOne).length != 0 && userFindOne.active) {
@@ -58,6 +55,10 @@ router.post('/user/login', validator, async (req, res) => {
                     console.error('login password check', err);
                     res.status(400).json({ message: err });
                 }
+                const dateNow = new Date().toISOString();
+                const token = jwt.sign({ email: email, username: username, password: password }, JWT_KEY, {
+                    expiresIn: JWT_EXP,
+                });
                 if (result) {
                     //User found, just refresh the token
                     userFindOne.token = token;
