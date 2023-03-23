@@ -12,7 +12,6 @@ const jwt = require('jsonwebtoken');
 
 const JWT_EXP = process.env.JWT_EXP;
 const JWT_KEY = process.env.JWT_KEY;
-const EMAIL_VERIFICATION = process.env.EMAIL_VERIFICATION === 'true' || false;
 
 //CREATE: /api/v1/user
 
@@ -20,13 +19,13 @@ router.post('/user', validator, async (req, res) => {
     try {
         const { username, email, password } = req.body;
         const userFindOne = await User.findOne({ email: email, username: username });
-        // No user found in the storage
+        console.log('No user found in the storage');
         if (Object.is(userFindOne, null) || Object.keys(userFindOne).length === 0) {
             const token = jwt.sign({ username: username, email: email, password: password }, JWT_KEY, {
                 expiresIn: JWT_EXP,
             });
-            if (EMAIL_VERIFICATION) {
-                //New user, send email confirmation
+            if (nodemailer.EMAIL_VERIFICATION) {
+                console.log('New user, send email confirmation');
                 const confirmationCode = `?token=${token}`;
                 nodemailer.sendConfirmationEmail(username, email, confirmationCode);
                 console.log('New user, sent email confirmation');
@@ -34,7 +33,7 @@ router.post('/user', validator, async (req, res) => {
                     message: '⚠️ Pending account. <br/> Please verify your email to confirm!',
                 });
             } else {
-                //New user, no email verification needed, going to add it the db
+                console.log('New user, no email verification needed, going to add it the storage');
                 const encryptedPassword = await bcrypt.hash(password, 10);
                 const userData = new User({
                     email: email,
@@ -74,7 +73,7 @@ router.post('/user/login', validator, async (req, res) => {
             bcrypt.compare(password, userFindOne.password, async function (err, result) {
                 if (err) {
                     console.error('login password check', err);
-                    res.status(400).json({ message: err });
+                    return res.status(400).json({ message: err });
                 }
                 if (result) {
                     console.log('User found, just refresh the token');
@@ -91,7 +90,7 @@ router.post('/user/login', validator, async (req, res) => {
                 }
             });
         } else {
-            if (EMAIL_VERIFICATION) {
+            if (nodemailer.EMAIL_VERIFICATION) {
                 console.log('New user, send email confirmation');
                 const confirmationCode = `?token=${token}`;
                 nodemailer.sendConfirmationEmail(username, email, confirmationCode);
@@ -133,7 +132,7 @@ router.get('/user/confirmation', auth, async (req, res) => {
         console.log('User confirmation token decoded', decoded);
         const userFindOne = await User.findOne({ email: decoded.email, username: decoded.username });
         if (!userFindOne || Object.keys(userFindOne).length === 0) {
-            //User confirmed by email, going to add it the storage
+            console.log('User confirmed by email, going to add it the storage');
             const encryptedPassword = await bcrypt.hash(decoded.password, 10);
             const userData = new User({
                 email: decoded.email,
@@ -147,12 +146,14 @@ router.get('/user/confirmation', auth, async (req, res) => {
             console.log('User create OK', userSaveData);
             userSaveData.password = decoded.password.substring(0, 5) + '************';
             res.status(200).json(userSaveData);
-            //Send email to the user
-            nodemailer.sendConfirmationOkEmail(
-                userSaveData.username,
-                userSaveData.email,
-                JSON.stringify(userSaveData, null, 4),
-            );
+            if (nodemailer.EMAIL_VERIFICATION) {
+                console.log('Send email to the user');
+                nodemailer.sendConfirmationOkEmail(
+                    userSaveData.username,
+                    userSaveData.email,
+                    JSON.stringify(userSaveData, null, 4),
+                );
+            }
         } else {
             console.log('User already confirmed');
             res.status(409).json({ message: 'User already confirmed!' });
@@ -201,8 +202,10 @@ router.delete('/user/:id', auth, async (req, res) => {
         const id = req.params.id;
         const dataUser = await User.findByIdAndDelete(id);
         if (dataUser && dataUser._id == id) {
-            // I'm going to delete all the rooms associated to this user id
             const deleteRooms = await Room.deleteMany({ userId: dataUser._id });
+            console.log(
+                `Going to delete User with id ${dataUser._id} and all associated rooms (${deleteRooms.deletedCount})`,
+            );
             return res.json({
                 message: `The User with id ${dataUser._id} and all associated rooms (${deleteRooms.deletedCount}) has been deleted`,
             });
