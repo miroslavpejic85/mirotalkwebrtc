@@ -67,4 +67,5 @@ module.exports = {
     sendConfirmationEmail,
     sendConfirmationOkEmail,
     EMAIL_VERIFICATION,
+    SUPPORT,
 };
