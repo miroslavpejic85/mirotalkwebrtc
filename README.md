@@ -42,10 +42,10 @@ MONGO_URL=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PO
 MONGO_DATABASE=mirotalk
 ```
 
-Setup your email and [app password](https://support.google.com/mail/answer/185833?hl=en):
-
 > **Note**
-> if you disable the user email verification `EMAIL_VERIFICATION=false` skip this Email config.
+> if you disable the user email verification `EMAIL_VERIFICATION=false` skip this email setup and config.
+
+Setup your email and [app password](https://support.google.com/mail/answer/185833?hl=en):
 
 ```bash
 EMAIL_HOST=emailHost
