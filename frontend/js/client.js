@@ -1,10 +1,5 @@
 'use-strict';
 
-const miroTalkP2PHome = 'https://p2p.mirotalk.com';
-const miroTalkSFUHome = 'https://sfu.mirotalk.com';
-const miroTalkC2CHome = 'https://c2c.mirotalk.com';
-const miroTalkSponsor = 'https://github.com/sponsors/miroslavpejic85';
-
 const isMobile = !!/Android|webOS|iPhone|iPad|iPod|BB10|BlackBerry|IEMobile|Opera Mini|Mobile|mobile/i.test(
     navigator.userAgent.toLowerCase() || '',
 );
@@ -23,6 +18,18 @@ const navSup = document.getElementById('navSup');
 const search = document.getElementById('search');
 const dsDash = document.getElementById('dsDash');
 const dsRooms = document.getElementById('dsRooms');
+
+const repoP2P = document.getElementById('repoP2P');
+const starP2P = document.getElementById('starP2P');
+const shieldsP2P = document.getElementById('shieldsP2P');
+
+const repoSFU = document.getElementById('repoSFU');
+const starSFU = document.getElementById('starSFU');
+const shieldsSFU = document.getElementById('shieldsSFU');
+
+const repoC2C = document.getElementById('repoC2C');
+const starC2C = document.getElementById('starC2C');
+const shieldsC2C = document.getElementById('shieldsC2C');
 
 const c2c = document.getElementById('c2c');
 const p2p = document.getElementById('p2p');
@@ -83,8 +90,25 @@ if (getMode && getMode === 'dark') body.classList.toggle('dark');
 if (getStatus && getStatus === 'close') sidebar.classList.toggle('close');
 
 $(document).ready(function () {
+    console.log('Config', config);
+    loadConfig();
     showDataTable();
 });
+
+function loadConfig() {
+    repoP2P.setAttribute('href', config.MiroTalk.P2P.GitHub.Repo);
+    starP2P.setAttribute('href', config.MiroTalk.P2P.GitHub.Star);
+    shieldsP2P.setAttribute('src', config.MiroTalk.P2P.GitHub.Shields);
+    repoSFU.setAttribute('href', config.MiroTalk.SFU.GitHub.Repo);
+    starSFU.setAttribute('href', config.MiroTalk.SFU.GitHub.Star);
+    shieldsSFU.setAttribute('src', config.MiroTalk.SFU.GitHub.Shields);
+    repoC2C.setAttribute('href', config.MiroTalk.C2C.GitHub.Repo);
+    starC2C.setAttribute('href', config.MiroTalk.C2C.GitHub.Star);
+    shieldsC2C.setAttribute('src', config.MiroTalk.C2C.GitHub.Shields);
+    p2pIframe.setAttribute('src', config.MiroTalk.P2P.Room);
+    sfuIframe.setAttribute('src', config.MiroTalk.SFU.Room);
+    c2cIframe.setAttribute('src', config.MiroTalk.C2C.Home);
+}
 
 modeToggle.addEventListener('click', () => {
     body.classList.toggle('dark');
@@ -101,21 +125,18 @@ navDash.addEventListener('click', () => {
 });
 
 navP2P.addEventListener('click', () => {
-    p2pIframe.setAttribute('src', `${miroTalkP2PHome}/newcall`);
     navShow([p2p]);
 });
 
 navSFU.addEventListener('click', () => {
-    sfuIframe.setAttribute('src', `${miroTalkSFUHome}/newroom`);
     navShow([sfu]);
 });
 
 navC2C.addEventListener('click', () => {
-    c2cIframe.setAttribute('src', miroTalkC2CHome);
     navShow([c2c]);
 });
 navSup.addEventListener('click', () => {
-    openURL(miroTalkSponsor, true);
+    openURL(config.Author.Support, true);
 });
 
 openAddBtn.addEventListener('click', () => {
@@ -442,13 +463,13 @@ function getRoomURL(data) {
     let roomURL;
     switch (data.type) {
         case 'P2P':
-            roomURL = `${miroTalkP2PHome}/join/${data.room}`;
+            roomURL = `${config.MiroTalk.P2P.Join}${data.room}`;
             break;
         case 'SFU':
-            roomURL = `${miroTalkSFUHome}/join/${data.room}`;
+            roomURL = `${config.MiroTalk.SFU.Join}${data.room}`;
             break;
         case 'C2C':
-            roomURL = `${miroTalkC2CHome}/?room=${data.room}`;
+            roomURL = `${config.MiroTalk.C2C.Room}${data.room}`;
             break;
     }
     return roomURL;

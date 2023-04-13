@@ -23,8 +23,6 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap5.min.css" />
 
-        <script defer src="../js/api.js"></script>
-        <script defer src="../js/swal.js"></script>
         <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.2.js"></script>
         <script type="text/javascript" src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
         <script type="text/javascript" src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap5.min.js"></script>
@@ -36,6 +34,11 @@
             data-website-id="bcf96fd0-1f56-4a88-a035-c17b1adaf8ee"
             src="https://stats.mirotalk.org/umami.js"
         ></script>
+
+        <script defer src="../js/config.js"></script>
+        <script defer src="../js/swal.js"></script>
+        <script defer src="../js/api.js"></script>
+        <script defer src="../js/client.js"></script>
     </head>
 
     <body>
@@ -131,41 +134,65 @@
                     <div class="boxes">
                         <div class="box box1">
                             <i class="uil uil-thumbs-up"></i>
-                            <a class="text" href="https://github.com/miroslavpejic85/mirotalk" target="_blank"
+                            <a
+                                id="repoP2P"
+                                class="text"
+                                href="https://github.com/miroslavpejic85/mirotalk"
+                                target="_blank"
                                 >MiroTalk P2P</a
                             >
                             <a
+                                id="starP2P"
                                 class="number"
                                 href="https://github.com/miroslavpejic85/mirotalk/stargazers"
                                 target="_blank"
                             >
-                                <img src="https://img.shields.io/github/stars/miroslavpejic85/mirotalk?style=flat" />
+                                <img
+                                    id="shieldsP2P"
+                                    src="https://img.shields.io/github/stars/miroslavpejic85/mirotalk?style=flat"
+                                />
                             </a>
                         </div>
                         <div class="box box2">
                             <i class="uil uil-thumbs-up"></i>
-                            <a class="text" href="https://github.com/miroslavpejic85/mirotalksfu" target="_blank"
+                            <a
+                                id="repoSFU"
+                                class="text"
+                                href="https://github.com/miroslavpejic85/mirotalksfu"
+                                target="_blank"
                                 >MiroTalk SFU</a
                             >
                             <a
+                                id="starSFU"
                                 class="number"
                                 href="https://github.com/miroslavpejic85/mirotalksfu/stargazers"
                                 target="_blank"
                             >
-                                <img src="https://img.shields.io/github/stars/miroslavpejic85/mirotalksfu?style=flat" />
+                                <img
+                                    id="shieldsSFU"
+                                    src="https://img.shields.io/github/stars/miroslavpejic85/mirotalksfu?style=flat"
+                                />
                             </a>
                         </div>
                         <div class="box box3">
                             <i class="uil uil-thumbs-up"></i>
-                            <a class="text" href="https://github.com/miroslavpejic85/mirotalkc2c" target="_blank"
+                            <a
+                                id="repoC2C"
+                                class="text"
+                                href="https://github.com/miroslavpejic85/mirotalkc2c"
+                                target="_blank"
                                 >MiroTalk C2C</a
                             >
                             <a
+                                id="starC2C"
                                 class="number"
                                 href="https://github.com/miroslavpejic85/mirotalkc2c/stargazers"
                                 target="_blank"
                             >
-                                <img src="https://img.shields.io/github/stars/miroslavpejic85/mirotalkc2c?style=flat" />
+                                <img
+                                    id="shieldsC2C"
+                                    src="https://img.shields.io/github/stars/miroslavpejic85/mirotalkc2c?style=flat"
+                                />
                             </a>
                         </div>
                     </div>
@@ -247,7 +274,5 @@
                 </div>
             </div>
         </section>
-
-        <script src="../js/client.js"></script>
     </body>
 </html>
