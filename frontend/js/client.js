@@ -15,6 +15,8 @@ const navP2P = document.getElementById('navP2P');
 const navSFU = document.getElementById('navSFU');
 const navSup = document.getElementById('navSup');
 
+const myProfile = document.getElementById('myProfile');
+
 const search = document.getElementById('search');
 const dsDash = document.getElementById('dsDash');
 const dsRooms = document.getElementById('dsRooms');
@@ -96,6 +98,7 @@ $(document).ready(function () {
 });
 
 function loadConfig() {
+    myProfile.setAttribute('href', config.Author.Profile);
     repoP2P.setAttribute('href', config.MiroTalk.P2P.GitHub.Repo);
     starP2P.setAttribute('href', config.MiroTalk.P2P.GitHub.Star);
     shieldsP2P.setAttribute('src', config.MiroTalk.P2P.GitHub.Shields);
