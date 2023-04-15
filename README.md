@@ -103,7 +103,7 @@ You can check the swagger document at http://localhost:9000/api/v1/docs, or live
 
 <br/>
 
-To self-hosting MiroTalk WEB, just follow [this steps](./docs/SelfHosting.md).
+To self-hosting MiroTalk WEB, just follow [this steps](./docs/self-hosting.md).
 
 </details>
 
