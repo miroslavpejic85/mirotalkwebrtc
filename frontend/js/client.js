@@ -187,7 +187,14 @@ function searchRows() {
 }
 
 function toggleAddRows() {
-    addRowDiv.classList.toggle('show');
+    if (addRowDiv.classList.contains('show')) {
+        animateCSS(addRowDiv, 'fadeOutRight').then((ok)=>{
+            addRowDiv.classList.toggle('show');
+        });
+    } else {
+        addRowDiv.classList.toggle('show');
+        animateCSS(addRowDiv, 'fadeInRight');
+    }
 }
 
 function showDataTable() {
@@ -226,7 +233,9 @@ function addRow() {
                 const tableRow = getRow(res);
                 dataTable.row.add(tableRow).node().id = res._id;
                 dataTable.draw();
-                addRowDiv.classList.toggle('show');
+                animateCSS(addRowDiv, 'fadeOutRight').then((ok) => {
+                    addRowDiv.classList.toggle('show');
+                });
             }
         })
         .catch((err) => {
@@ -508,4 +517,17 @@ function resetFormValues() {
     addDate.value = new Date().toISOString().substring(0, 10);
     addTime.value = new Date().toISOString().substring(11, 16);
     addRoom.value = getUUID4();
+}
+
+function animateCSS(element, animation, prefix = 'animate__') {
+    return new Promise((resolve, reject) => {
+        const animationName = `${prefix}${animation}`;
+        element.classList.add(`${prefix}animated`, animationName);
+        function handleAnimationEnd(event) {
+            event.stopPropagation();
+            element.classList.remove(`${prefix}animated`, animationName);
+            resolve(true);
+        }
+        element.addEventListener('animationend', handleAnimationEnd, { once: true });
+    });
 }

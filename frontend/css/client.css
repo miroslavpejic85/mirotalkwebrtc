@@ -435,7 +435,6 @@ iframe {
     border: 1px solid var(--border-color);
     background-color: var(--panel-color);
     color: var(--text-color);
-    animation: reveal 0.5s forwards;
 }
 
 .addRowDiv label {

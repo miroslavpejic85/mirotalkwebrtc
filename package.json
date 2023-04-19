@@ -39,7 +39,7 @@
         "dotenv": "^16.0.3",
         "express": "^4.18.2",
         "jsonwebtoken": "^9.0.0",
-        "mongoose": "^7.0.3",
+        "mongoose": "^7.0.4",
         "nodemailer": "^6.9.1",
         "swagger-ui-express": "^4.6.2",
         "yamljs": "^0.3.0"
