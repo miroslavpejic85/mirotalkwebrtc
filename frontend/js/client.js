@@ -233,9 +233,7 @@ function addRow() {
                 const tableRow = getRow(res);
                 dataTable.row.add(tableRow).node().id = res._id;
                 dataTable.draw();
-                animateCSS(addRowDiv, 'fadeOutRight').then((ok) => {
-                    addRowDiv.classList.toggle('show');
-                });
+                toggleAddRows();
             }
         })
         .catch((err) => {
