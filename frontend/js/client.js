@@ -188,7 +188,7 @@ function searchRows() {
 
 function toggleAddRows() {
     if (addRowDiv.classList.contains('show')) {
-        animateCSS(addRowDiv, 'fadeOutRight').then((ok)=>{
+        animateCSS(addRowDiv, 'fadeOutRight').then((ok) => {
             addRowDiv.classList.toggle('show');
         });
     } else {
