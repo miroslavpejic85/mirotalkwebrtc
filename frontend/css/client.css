@@ -424,6 +424,7 @@ iframe {
     transition: var(--tran-03);
 }
 
+.accountDiv,
 .addRowDiv {
     position: fixed;
     z-index: 99;
@@ -432,11 +433,13 @@ iframe {
     width: 50%;
     height: 100%;
     padding: 30px;
+    overflow-y: auto;
     border: 1px solid var(--border-color);
     background-color: var(--panel-color);
     color: var(--text-color);
 }
 
+.accountDiv label,
 .addRowDiv label {
     display: block;
     margin-top: 20px;
@@ -444,6 +447,7 @@ iframe {
     font-size: 16px;
 }
 
+.accountDiv input,
 .addRowDiv input {
     padding: 12px;
     margin-top: 10px;
@@ -471,11 +475,13 @@ iframe {
     width: auto;
 }
 
+.accountDiv i:hover,
 .addRowDiv i:hover {
     color: var(--color-hover);
     transition: var(--tran-03);
 }
 
+.accountDiv button,
 .addRowDiv button {
     margin-top: 10px;
     padding: 12px;
@@ -487,6 +493,13 @@ iframe {
     text-align: center;
     cursor: pointer;
 }
+
+.accountDiv button:hover {
+    background-color: red;
+    color: #fff;
+    transition: var(--tran-05);
+}
+
 .addRowDiv button:hover {
     background-color: var(--color-hover);
     color: #fff;
@@ -757,6 +770,9 @@ tr:nth-child(even) {
         margin-top: 15px;
     }
     .addRowDiv {
+        width: 100%;
+    }
+    .accountDiv {
         width: 100%;
     }
 }

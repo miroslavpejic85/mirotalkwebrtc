@@ -91,9 +91,9 @@
                         </a>
                     </li>
                     <li>
-                        <a id="del-my-account" href="javascript:void(0)">
-                            <i class="uil uil-user-times"></i>
-                            <span class="link-name">Delete account</span>
+                        <a id="navAcc" href="javascript:void(0)">
+                            <i class="uil uil-user"></i>
+                            <span class="link-name">Account</span>
                         </a>
                     </li>
                     <li class="mode">
@@ -231,7 +231,7 @@
                         <option value="SFU">SFU</option>
                         <option value="C2C">C2C</option>
                     </select>
-                    <label for="email">Tag</label>
+                    <label for="tag">Tag</label>
                     <input id="add-tag" type="text" name="tag" required />
                     <label for="email">Email</label>
                     <input id="add-email" type="email" name="email" required />
@@ -247,6 +247,23 @@
                     </div>
                     <button id="add-row-btn"><i class="uil uil-plus"></i>Add</button>
                 </form>
+
+                <div id="accountDiv" class="accountDiv hidden">
+                    <i id="account-close-btn" class="uil uil-multiply" style="cursor: pointer"></i>
+                    <label for="account-id">Id</label>
+                    <input id="account-id" type="text" name="text" readonly/>
+                    <label for="email">Email</label>
+                    <input id="account-email" type="text" name="text" readonly/>
+                    <label for="username">Username</label>
+                    <input id="account-username" type="text" name="text" readonly/>
+                    <label for="token">Token</label>
+                    <input id="account-token" type="text" name="text" readonly/>
+                    <label for="created-at">Created at</label>
+                    <input id="account-created-at" type="text" name="text" readonly/>
+                    <label for="updated-at">Updated at</label>
+                    <input id="account-updated-at" type="text" name="text" readonly/>
+                    <button id="account-delete">Delete</button>
+                </div>
 
                 <div id="p2p" class="dash-iframe fadeIn">
                     <iframe

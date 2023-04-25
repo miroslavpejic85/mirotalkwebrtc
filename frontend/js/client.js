@@ -14,6 +14,7 @@ const navC2C = document.getElementById('navC2C');
 const navP2P = document.getElementById('navP2P');
 const navSFU = document.getElementById('navSFU');
 const navSup = document.getElementById('navSup');
+const navAcc = document.getElementById('navAcc');
 
 const myProfile = document.getElementById('myProfile');
 
@@ -41,6 +42,16 @@ const p2pIframe = document.getElementById('p2p-iframe');
 const sfuIframe = document.getElementById('sfu-iframe');
 const c2cIframe = document.getElementById('c2c-iframe');
 
+const accountDiv = document.getElementById('accountDiv');
+const accountClose = document.getElementById('account-close-btn');
+const accountID = document.getElementById('account-id');
+const accountEmail = document.getElementById('account-email');
+const accountUsername = document.getElementById('account-username');
+const accountToken = document.getElementById('account-token');
+const accountCreatedAt = document.getElementById('account-created-at');
+const accountUpdatedAt = document.getElementById('account-updated-at');
+const accountDelete = document.getElementById('account-delete');
+
 const addRowDiv = document.getElementById('addRowDiv');
 const openAddBtn = document.getElementById('open-add-btn');
 const closeAddBtn = document.getElementById('add-close-btn');
@@ -53,8 +64,6 @@ const addTime = document.getElementById('add-time');
 const addRoom = document.getElementById('add-room');
 const genRoom = document.getElementById('gen-room');
 const addRowBtn = document.getElementById('add-row-btn');
-
-const delMyAccBtn = document.getElementById('del-my-account');
 
 const refreshBtn = document.getElementById('refresh-page-btn');
 const delAllBtn = document.getElementById('del-all-btn');
@@ -141,6 +150,9 @@ navC2C.addEventListener('click', () => {
 navSup.addEventListener('click', () => {
     openURL(config.Author.Support, true);
 });
+navAcc.addEventListener('click', () => {
+    getMyAccount();
+});
 
 openAddBtn.addEventListener('click', () => {
     resetFormValues();
@@ -165,7 +177,10 @@ delAllBtn.addEventListener('click', () => {
     delAllRows();
 });
 
-delMyAccBtn.addEventListener('click', () => {
+accountClose.addEventListener('click', () => {
+    toggleAccount();
+});
+accountDelete.addEventListener('click', () => {
     delMyAccount();
 });
 
@@ -194,6 +209,17 @@ function toggleAddRows() {
     } else {
         addRowDiv.classList.toggle('show');
         animateCSS(addRowDiv, 'fadeInRight');
+    }
+}
+
+function toggleAccount() {
+    if (accountDiv.classList.contains('show')) {
+        animateCSS(accountDiv, 'fadeOutRight').then((ok) => {
+            accountDiv.classList.toggle('show');
+        });
+    } else {
+        accountDiv.classList.toggle('show');
+        animateCSS(accountDiv, 'fadeInRight');
     }
 }
 
@@ -420,6 +446,28 @@ function delAllRows() {
                     popupMessage('error', `API DELETE ALL error: ${err.message}`);
                 });
         }
+    });
+}
+
+function getMyAccount() {
+    userGet(userId)
+    .then((res) => {
+        console.log('[API] - USER GET RESPONSE', res);
+        if (res.message) {
+            popupMessage('warning', `${res.message}`);
+        } else {
+            accountID.value = res._id;
+            accountEmail.value = res.email;
+            accountUsername.value = res.username;
+            accountToken.value = res.token;
+            accountCreatedAt.value = res.createdAt;
+            accountUpdatedAt.value = res.updatedAt;
+            toggleAccount();
+        }
+    })
+    .catch((err) => {
+        console.error('[API] - USER GET ERROR', err);
+        popupMessage('error', `USER GET error: ${err.message}`);
     });
 }
 
