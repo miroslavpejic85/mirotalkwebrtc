@@ -451,24 +451,24 @@ function delAllRows() {
 
 function getMyAccount() {
     userGet(userId)
-    .then((res) => {
-        console.log('[API] - USER GET RESPONSE', res);
-        if (res.message) {
-            popupMessage('warning', `${res.message}`);
-        } else {
-            accountID.value = res._id;
-            accountEmail.value = res.email;
-            accountUsername.value = res.username;
-            accountToken.value = res.token;
-            accountCreatedAt.value = res.createdAt;
-            accountUpdatedAt.value = res.updatedAt;
-            toggleAccount();
-        }
-    })
-    .catch((err) => {
-        console.error('[API] - USER GET ERROR', err);
-        popupMessage('error', `USER GET error: ${err.message}`);
-    });
+        .then((res) => {
+            console.log('[API] - USER GET RESPONSE', res);
+            if (res.message) {
+                popupMessage('warning', `${res.message}`);
+            } else {
+                accountID.value = res._id;
+                accountEmail.value = res.email;
+                accountUsername.value = res.username;
+                accountToken.value = res.token;
+                accountCreatedAt.value = res.createdAt;
+                accountUpdatedAt.value = res.updatedAt;
+                toggleAccount();
+            }
+        })
+        .catch((err) => {
+            console.error('[API] - USER GET ERROR', err);
+            popupMessage('error', `USER GET error: ${err.message}`);
+        });
 }
 
 function delMyAccount() {
