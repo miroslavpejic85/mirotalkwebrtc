@@ -22,14 +22,20 @@ const search = document.getElementById('search');
 const dsDash = document.getElementById('dsDash');
 const dsRooms = document.getElementById('dsRooms');
 
+const boxesDS = document.getElementById('boxesDS');
+const titleDS = document.getElementById('titleDS');
+
+const boxP2P = document.getElementById('boxP2P');
 const repoP2P = document.getElementById('repoP2P');
 const starP2P = document.getElementById('starP2P');
 const shieldsP2P = document.getElementById('shieldsP2P');
 
+const boxSFU = document.getElementById('boxSFU');
 const repoSFU = document.getElementById('repoSFU');
 const starSFU = document.getElementById('starSFU');
 const shieldsSFU = document.getElementById('shieldsSFU');
 
+const boxC2C = document.getElementById('boxC2C');
 const repoC2C = document.getElementById('repoC2C');
 const starC2C = document.getElementById('starC2C');
 const shieldsC2C = document.getElementById('shieldsC2C');
@@ -103,6 +109,7 @@ if (getStatus && getStatus === 'close') sidebar.classList.toggle('close');
 $(document).ready(function () {
     console.log('Config', config);
     loadConfig();
+    toggleElements();
     showDataTable();
 });
 
@@ -120,6 +127,27 @@ function loadConfig() {
     p2pIframe.setAttribute('src', config.MiroTalk.P2P.Room);
     sfuIframe.setAttribute('src', config.MiroTalk.SFU.Room);
     c2cIframe.setAttribute('src', config.MiroTalk.C2C.Home);
+}
+
+function toggleElements() {
+    elemDisplay(navP2P, config.MiroTalk.P2P.Visible);
+    elemDisplay(navSFU, config.MiroTalk.SFU.Visible);
+    elemDisplay(navC2C, config.MiroTalk.C2C.Visible);
+    elemDisplay(boxP2P, config.MiroTalk.P2P.Visible);
+    elemDisplay(boxSFU, config.MiroTalk.SFU.Visible);
+    elemDisplay(boxC2C, config.MiroTalk.C2C.Visible);
+    if (!config.MiroTalk.P2P.Visible && !config.MiroTalk.SFU.Visible && !config.MiroTalk.C2C.Visible) {
+        elemDisplay(boxesDS, false);
+        elemDisplay(titleDS, false);
+        elemDisplay(openAddBtn, false);
+        elemDisplay(delAllBtn, false);
+        elemDisplay(refreshBtn, false);
+    }
+    for (var i = 0; i < addType.length; i++) {
+        if (addType.options[i].value == 'P2P' && !config.MiroTalk.P2P.Visible) addType.remove(i);
+        if (addType.options[i].value == 'SFU' && !config.MiroTalk.SFU.Visible) addType.remove(i);
+        if (addType.options[i].value == 'C2C' && !config.MiroTalk.C2C.Visible) addType.remove(i);
+    }
 }
 
 modeToggle.addEventListener('click', () => {
@@ -232,7 +260,7 @@ function showDataTable() {
             if (res) {
                 res.forEach((obj) => {
                     const tableRow = getRow(obj);
-                    dataTable.row.add(tableRow).node().id = obj._id;
+                    if (tableRow) dataTable.row.add(tableRow).node().id = obj._id;
                 });
                 dataTable.draw();
             }
@@ -257,9 +285,11 @@ function addRow() {
                 popupMessage('warning', `${res.message}`);
             } else {
                 const tableRow = getRow(res);
-                dataTable.row.add(tableRow).node().id = res._id;
-                dataTable.draw();
-                toggleAddRows();
+                if (tableRow) {
+                    dataTable.row.add(tableRow).node().id = res._id;
+                    dataTable.draw();
+                    toggleAddRows();
+                }
             }
         })
         .catch((err) => {
@@ -269,18 +299,25 @@ function addRow() {
 }
 
 function getRow(obj) {
+    if (!config.MiroTalk.P2P.Visible && !config.MiroTalk.SFU.Visible && !config.MiroTalk.C2C.Visible) return;
+
     const isP2P = obj.type == 'P2P' ? 'selected' : '';
     const isSFU = obj.type == 'SFU' ? 'selected' : '';
     const isC2C = obj.type == 'C2C' ? 'selected' : '';
+
+    const optionP2P = config.MiroTalk.P2P.Visible ? `<option value="P2P" ${isP2P}>P2P</option>` : '';
+    const optionSFU = config.MiroTalk.SFU.Visible ? `<option value="P2P" ${isSFU}>SFU</option>` : '';
+    const optionC2C = config.MiroTalk.C2C.Visible ? `<option value="C2C" ${isC2C}>C2C</option>` : '';
+
     const shareRoomIcon = isMobile
         ? `<i id="${obj._id}_share" onclick="shareRoom('${obj._id}')" class="uil uil-share-alt"></i>`
         : '';
     return [
         `<td>
             <select id="${obj._id}_type" class="select-options">    
-                <option value="P2P" ${isP2P}>P2P</option>
-                <option value="SFU" ${isSFU}>SFU</option>
-                <option value="C2C" ${isC2C}>C2C</option>
+                ${optionP2P}
+                ${optionSFU}
+                ${optionC2C}
             </select>
         </td>`,
         `<td><input id="${obj._id}_tag" type="text" name="tag" value="${obj.tag}"/></td>`,
@@ -534,9 +571,10 @@ function getRoomURL(data) {
 }
 
 function getRowValues(id) {
+    const select_type = document.getElementById(id + '_type');
     return {
         userId: userId,
-        type: document.getElementById(id + '_type').selectedOptions[0].value,
+        type: select_type.options[select_type.selectedIndex].text,
         tag: document.getElementById(id + '_tag').value,
         email: document.getElementById(id + '_email').value.toLowerCase(),
         date: document.getElementById(id + '_date').value,
@@ -548,7 +586,7 @@ function getRowValues(id) {
 function getFormValues() {
     return {
         userId: userId,
-        type: addType.selectedOptions[0].value,
+        type: addType.options[addType.selectedIndex].text,
         tag: addTag.value,
         email: addEmail.value.toLowerCase(),
         date: addDate.value,
@@ -576,4 +614,8 @@ function animateCSS(element, animation, prefix = 'animate__') {
         }
         element.addEventListener('animationend', handleAnimationEnd, { once: true });
     });
+}
+
+function elemDisplay(elem, show) {
+    elem.style.display = show ? 'flex' : 'none';
 }

@@ -16,6 +16,7 @@ const config = {
                 Star: 'https://github.com/miroslavpejic85/mirotalk/stargazers',
                 Shields: 'https://img.shields.io/github/stars/miroslavpejic85/mirotalk?style=flat',
             },
+            Visible: true,
         },
         SFU: {
             Home: 'https://sfu.mirotalk.com',
@@ -26,6 +27,7 @@ const config = {
                 Star: 'https://github.com/miroslavpejic85/mirotalksfu/stargazers',
                 Shields: 'https://img.shields.io/github/stars/miroslavpejic85/mirotalksfu?style=flat',
             },
+            Visible: true,
         },
         C2C: {
             Home: 'https://c2c.mirotalk.com',
@@ -35,6 +37,7 @@ const config = {
                 Star: 'https://github.com/miroslavpejic85/mirotalkc2c/stargazers',
                 Shields: 'https://img.shields.io/github/stars/miroslavpejic85/mirotalkc2c?style=flat',
             },
+            Visible: true,
         },
     },
 };
