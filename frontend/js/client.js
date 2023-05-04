@@ -133,15 +133,17 @@ function toggleElements() {
     elemDisplay(navP2P, config.MiroTalk.P2P.Visible);
     elemDisplay(navSFU, config.MiroTalk.SFU.Visible);
     elemDisplay(navC2C, config.MiroTalk.C2C.Visible);
-    elemDisplay(boxP2P, config.MiroTalk.P2P.Visible);
-    elemDisplay(boxSFU, config.MiroTalk.SFU.Visible);
-    elemDisplay(boxC2C, config.MiroTalk.C2C.Visible);
+    elemDisplay(boxP2P, config.MiroTalk.P2P.GitHub.Visible);
+    elemDisplay(boxSFU, config.MiroTalk.SFU.GitHub.Visible);
+    elemDisplay(boxC2C, config.MiroTalk.C2C.GitHub.Visible);
     if (!config.MiroTalk.P2P.Visible && !config.MiroTalk.SFU.Visible && !config.MiroTalk.C2C.Visible) {
-        elemDisplay(boxesDS, false);
-        elemDisplay(titleDS, false);
         elemDisplay(openAddBtn, false);
         elemDisplay(delAllBtn, false);
         elemDisplay(refreshBtn, false);
+    }
+    if (!config.MiroTalk.P2P.GitHub.Visible && !config.MiroTalk.SFU.GitHub.Visible && !config.MiroTalk.C2C.GitHub.Visible) {
+        elemDisplay(boxesDS, false);
+        elemDisplay(titleDS, false);
     }
     for (var i = 0; i < addType.length; i++) {
         if (addType.options[i].value == 'P2P' && !config.MiroTalk.P2P.Visible) addType.remove(i);
