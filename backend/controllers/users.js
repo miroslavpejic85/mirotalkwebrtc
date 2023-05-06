@@ -6,6 +6,7 @@ const nodemailer = require('../lib/nodemailer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+const USER_REGISTRATION_MODE = process.env.USER_REGISTRATION_MODE == 'true';
 const JWT_EXP = process.env.JWT_EXP;
 const JWT_KEY = process.env.JWT_KEY;
 
@@ -82,6 +83,10 @@ async function userLogin(req, res) {
                 }
             });
         } else {
+            if (USER_REGISTRATION_MODE != true) {
+                console.error('USER REGISTRATION MODE DISABLED, user not found!');
+                return res.status(201).json({ message: 'User not found!' });
+            }
             if (nodemailer.EMAIL_VERIFICATION) {
                 console.log('New user, send email confirmation');
                 const confirmationCode = `?token=${token}`;

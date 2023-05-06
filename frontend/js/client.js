@@ -141,7 +141,11 @@ function toggleElements() {
         elemDisplay(delAllBtn, false);
         elemDisplay(refreshBtn, false);
     }
-    if (!config.MiroTalk.P2P.GitHub.Visible && !config.MiroTalk.SFU.GitHub.Visible && !config.MiroTalk.C2C.GitHub.Visible) {
+    if (
+        !config.MiroTalk.P2P.GitHub.Visible &&
+        !config.MiroTalk.SFU.GitHub.Visible &&
+        !config.MiroTalk.C2C.GitHub.Visible
+    ) {
         elemDisplay(boxesDS, false);
         elemDisplay(titleDS, false);
     }
