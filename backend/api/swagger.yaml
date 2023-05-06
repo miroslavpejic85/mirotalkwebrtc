@@ -15,8 +15,7 @@ externalDocs:
     url: https://github.com/miroslavpejic85
 
 servers:
-    - url: http://localhost:9000/api/v1
-    - url: https://webrtc.mirotalk.com/api/v1
+    - url: /api/v1
 
 tags:
     - name: user
