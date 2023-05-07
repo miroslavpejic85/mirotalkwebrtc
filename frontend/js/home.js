@@ -5,6 +5,7 @@ console.log('Location', window.location);
 const usernameIn = document.getElementById('usernameInput');
 const emailIn = document.getElementById('emailIdInput');
 const passwordIdIn = document.getElementById('passwordIdInput');
+const repeatPasswordIdLabel = document.getElementById('repeatPasswordIdLabel');
 const repeatPasswordIdInput = document.getElementById('repeatPasswordIdInput');
 const loginBtn = document.getElementById('loginBtn');
 const registerDiv = document.getElementById('registerDiv');
@@ -25,10 +26,15 @@ loginBtn.addEventListener('click', (e) => {
         popupMessage('warning', '⚠️ Email field empty!');
         return false;
     }
+    if (passwordIdIn.value == '') {
+        popupMessage('warning', '⚠️ Password field empty!');
+        return false;
+    }
     if (
-        passwordIdIn.value == '' ||
-        repeatPasswordIdInput.value == '' ||
-        passwordIdIn.value != repeatPasswordIdInput.value
+        loginBtn.innerText == 'Register' &&
+        (passwordIdIn.value == '' ||
+            repeatPasswordIdInput.value == '' ||
+            passwordIdIn.value != repeatPasswordIdInput.value)
     ) {
         popupMessage('warning', '⚠️ Repeat password field not match!');
         return false;
@@ -48,7 +54,9 @@ loginBtn.addEventListener('click', (e) => {
             console.log('[API] - USER LOGIN RESPONSE', res);
             if (res.message) {
                 popupMessage('warning', res.message);
-                loginBtn.innerText = 'Login';
+                if (!res.message.includes('Pending')) {
+                    loginBtn.innerText = 'Login';
+                }
             } else {
                 window.sessionStorage.userId = res._id;
                 window.sessionStorage.userToken = res.token;
@@ -64,12 +72,16 @@ loginBtn.addEventListener('click', (e) => {
 registerNowBtn.addEventListener('click', (e) => {
     loginBtn.innerText = 'Register';
     elementDisplay(registerDiv, false);
+    elementDisplay(repeatPasswordIdLabel, true);
+    elementDisplay(repeatPasswordIdInput, true);
     elementDisplay(loginDiv, true);
 });
 
 loginNowBtn.addEventListener('click', (e) => {
     loginBtn.innerText = 'Login';
     elementDisplay(loginDiv, false);
+    elementDisplay(repeatPasswordIdLabel, false);
+    elementDisplay(repeatPasswordIdInput, false);
     elementDisplay(registerDiv, true);
 });
 

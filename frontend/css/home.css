@@ -67,6 +67,11 @@ input:focus {
     outline: none;
 }
 
+#repeatPasswordIdLabel,
+#repeatPasswordIdInput {
+    display: none;
+}
+
 #loginBtn:hover {
     outline: 2px solid #439fff;
     outline-offset: -1px;
