@@ -56,6 +56,7 @@ loginBtn.addEventListener('click', (e) => {
                 popupMessage('warning', res.message);
                 if (!res.message.includes('Pending')) {
                     loginBtn.innerText = 'Login';
+                    showRegisterDiv();
                 }
             } else {
                 window.sessionStorage.userId = res._id;
@@ -71,19 +72,27 @@ loginBtn.addEventListener('click', (e) => {
 
 registerNowBtn.addEventListener('click', (e) => {
     loginBtn.innerText = 'Register';
-    elementDisplay(registerDiv, false);
-    elementDisplay(repeatPasswordIdLabel, true);
-    elementDisplay(repeatPasswordIdInput, true);
-    elementDisplay(loginDiv, true);
+    showLoginDiv();
 });
 
 loginNowBtn.addEventListener('click', (e) => {
     loginBtn.innerText = 'Login';
+    showRegisterDiv();
+});
+
+function showLoginDiv() {
+    elementDisplay(registerDiv, false);
+    elementDisplay(repeatPasswordIdLabel, true);
+    elementDisplay(repeatPasswordIdInput, true);
+    elementDisplay(loginDiv, true);
+}
+
+function showRegisterDiv() {
     elementDisplay(loginDiv, false);
     elementDisplay(repeatPasswordIdLabel, false);
     elementDisplay(repeatPasswordIdInput, false);
     elementDisplay(registerDiv, true);
-});
+}
 
 function elementDisplay(elem, display) {
     elem.style.display = display ? 'block' : 'none';
