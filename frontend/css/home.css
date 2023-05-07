@@ -72,9 +72,37 @@ input:focus {
     outline-offset: -1px;
 }
 
+#registerDiv {
+    margin-top: 40px;
+    display: block;
+}
+
+#loginDiv {
+    margin-top: 40px;
+    display: none;
+}
+
+#registerNowBtn,
+#loginNowBtn {
+    margin-top: 10px;
+    padding: 8px;
+    border: 0;
+    border-radius: 4px;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    cursor: pointer;
+    outline: none;
+}
+
+#registerNowBtn:hover,
+#loginNowBtn:hover {
+    color: #439fff;
+    outline-offset: -1px;
+}
+
 .githubDiv {
     position: relative;
-    top: 20px;
+    margin-top: 40px;
 }
 
 .swal2-title,

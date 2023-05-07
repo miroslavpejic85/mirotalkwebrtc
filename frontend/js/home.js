@@ -7,6 +7,10 @@ const emailIn = document.getElementById('emailIdInput');
 const passwordIdIn = document.getElementById('passwordIdInput');
 const repeatPasswordIdInput = document.getElementById('repeatPasswordIdInput');
 const loginBtn = document.getElementById('loginBtn');
+const registerDiv = document.getElementById('registerDiv');
+const loginDiv = document.getElementById('loginDiv');
+const registerNowBtn = document.getElementById('registerNowBtn');
+const loginNowBtn = document.getElementById('loginNowBtn');
 
 usernameIn.value = window.localStorage.name || '';
 emailIn.value = window.localStorage.email || '';
@@ -44,6 +48,7 @@ loginBtn.addEventListener('click', (e) => {
             console.log('[API] - USER LOGIN RESPONSE', res);
             if (res.message) {
                 popupMessage('warning', res.message);
+                loginBtn.innerText = 'Login';
             } else {
                 window.sessionStorage.userId = res._id;
                 window.sessionStorage.userToken = res.token;
@@ -55,3 +60,19 @@ loginBtn.addEventListener('click', (e) => {
             popupMessage('error', `⚠️ API USER LOGIN error: ${err.message}`);
         });
 });
+
+registerNowBtn.addEventListener('click', (e) => {
+    loginBtn.innerText = 'Register';
+    elementDisplay(registerDiv, false);
+    elementDisplay(loginDiv, true);
+});
+
+loginNowBtn.addEventListener('click', (e) => {
+    loginBtn.innerText = 'Login';
+    elementDisplay(loginDiv, false);
+    elementDisplay(registerDiv, true);
+});
+
+function elementDisplay(elem, display) {
+    elem.style.display = display ? 'block' : 'none';
+}
