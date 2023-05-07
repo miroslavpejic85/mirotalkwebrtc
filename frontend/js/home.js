@@ -55,7 +55,6 @@ loginBtn.addEventListener('click', (e) => {
             if (res.message) {
                 popupMessage('warning', res.message);
                 if (!res.message.includes('Pending')) {
-                    loginBtn.innerText = 'Login';
                     showRegisterDiv();
                 }
             } else {
@@ -71,16 +70,15 @@ loginBtn.addEventListener('click', (e) => {
 });
 
 registerNowBtn.addEventListener('click', (e) => {
-    loginBtn.innerText = 'Register';
     showLoginDiv();
 });
 
 loginNowBtn.addEventListener('click', (e) => {
-    loginBtn.innerText = 'Login';
     showRegisterDiv();
 });
 
 function showLoginDiv() {
+    loginBtn.innerText = 'Register';
     elementDisplay(registerDiv, false);
     elementDisplay(repeatPasswordIdLabel, true);
     elementDisplay(repeatPasswordIdInput, true);
@@ -88,6 +86,7 @@ function showLoginDiv() {
 }
 
 function showRegisterDiv() {
+    loginBtn.innerText = 'Login';
     elementDisplay(loginDiv, false);
     elementDisplay(repeatPasswordIdLabel, false);
     elementDisplay(repeatPasswordIdInput, false);
