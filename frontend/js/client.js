@@ -100,7 +100,7 @@ const dataTable = $('#myTable').DataTable({
     ], // [MiroTalk, Tag, Email, Date, Time, Room, Actions]
 });
 
-const getMode = window.localStorage.mode;
+const getMode = window.localStorage.mode || 'dark';
 const getStatus = window.localStorage.status;
 
 if (getMode && getMode === 'dark') body.classList.toggle('dark');
