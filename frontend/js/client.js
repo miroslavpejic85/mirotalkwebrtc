@@ -87,6 +87,13 @@ const dataTable = $('#myTable').DataTable({
     responsive: true,
     scrollX: true,
     columnDefs: [
+        { width: '5%', targets: 0 },
+        { width: '10%', targets: 1 },
+        { width: '20%', targets: 2 },
+        { width: '15%', targets: 3 },
+        { width: '10%', targets: 4 },
+        { width: '30%', targets: 5 },
+        { width: '10%', targets: 6 },
         {
             targets: [0, 1, 2, 3, 4, 5],
             type: 'string',
@@ -96,6 +103,10 @@ const dataTable = $('#myTable').DataTable({
             targets: [6],
             orderable: false,
             searchable: false,
+        },
+        {
+            targets: [0, 1, 2, 3, 4, 5, 6],
+            className: 'dt-body-justify',
         },
     ], // [MiroTalk, Tag, Email, Date, Time, Room, Actions]
 });
