@@ -411,10 +411,11 @@ async function shareRoom(id) {
 }
 
 function sendEmail(id) {
+    const newLine = '%0D%0A%0D%0A';
     const data = getRowValues(id);
     const roomURL = getRoomURL(data);
     const emailSubject = `Please join our MiroTalk ${data.type} Video Chat Meeting`;
-    const emailBody = `The meeting is scheduled at date: ${data.date} time: ${data.time}, Click to join: ${roomURL}`;
+    const emailBody = `The meeting is scheduled at: ${newLine} Date: ${data.date} ${newLine} Time: ${data.time} ${newLine} Click to join: ${roomURL} ${newLine}`;
     document.location = 'mailto:' + data.email + '?subject=' + emailSubject + '&body=' + emailBody;
 }
 
