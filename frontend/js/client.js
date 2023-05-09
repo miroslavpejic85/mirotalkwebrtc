@@ -406,7 +406,7 @@ async function shareRoom(id) {
             console.error('[Error] navigator share', err);
         }
     } else {
-        popupMessage('warning', 'Navigator share not supported on this device.');
+        popupMessage('warning', 'Navigator Share is not supported on this device.');
     }
 }
 
@@ -467,8 +467,8 @@ function delRow(id) {
         allowEscapeKey: false,
         position: 'center',
         icon: 'warning',
-        title: 'Delete row',
-        text: 'Are you sure to want delete the row?',
+        title: 'Delete room',
+        text: 'Are you sure you want to delete the room?',
         showDenyButton: true,
         confirmButtonText: `Yes`,
         denyButtonText: `No`,
@@ -502,8 +502,8 @@ function delAllRows() {
         allowEscapeKey: false,
         position: 'center',
         icon: 'warning',
-        title: 'Delete all records',
-        text: 'Are you sure to want delete all records?',
+        title: 'Delete all rooms',
+        text: 'Are you sure you want to delete all rooms?',
         showDenyButton: true,
         confirmButtonText: `Yes`,
         denyButtonText: `No`,
