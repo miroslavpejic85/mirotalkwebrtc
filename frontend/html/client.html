@@ -18,7 +18,7 @@
         <link rel="icon" type="image/x-icon" href="../Images/favicon.ico" />
 
         <link rel="stylesheet" href="../css/client.css" />
-        <!-- https://iconscout.com/unicons/explore/line -->
+        <!-- https://iconscout.com/unicons/explore/line | https://unicons.iconscout.com/release/v1.0.0/index.html -->
         <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap5.min.css" />
@@ -124,9 +124,13 @@
                     <div id="titleDS" class="title">
                         <i class="uil uil-tachometer-fast-alt"></i>
                         <span class="text">Dashboard</span>
+                        <div class="actions">
+                            <i id="hide-boxesDS" class="uil uil-angle-up"></i>
+                            <i id="show-boxesDS" class="uil uil-angle-down"></i>
+                        </div>
                     </div>
 
-                    <div id="boxesDS" class="boxes">
+                    <div id="boxesDS" class="boxes fadeIn">
                         <div id="boxP2P" class="box box1">
                             <i class="uil uil-thumbs-up"></i>
                             <a

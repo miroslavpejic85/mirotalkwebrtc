@@ -22,6 +22,9 @@ const search = document.getElementById('search');
 const dsDash = document.getElementById('dsDash');
 const dsRooms = document.getElementById('dsRooms');
 
+const hideBoxesDS = document.getElementById('hide-boxesDS');
+const showBoxesDS = document.getElementById('show-boxesDS');
+
 const boxesDS = document.getElementById('boxesDS');
 const titleDS = document.getElementById('titleDS');
 
@@ -141,6 +144,8 @@ function loadConfig() {
 }
 
 function toggleElements() {
+    elemDisplay(hideBoxesDS, true);
+    elemDisplay(showBoxesDS, false);
     elemDisplay(navP2P, config.MiroTalk.P2P.Visible);
     elemDisplay(navSFU, config.MiroTalk.SFU.Visible);
     elemDisplay(navC2C, config.MiroTalk.C2C.Visible);
@@ -199,6 +204,13 @@ navAcc.addEventListener('click', () => {
     getMyAccount();
 });
 
+hideBoxesDS.addEventListener('click', () => {
+    toggleBoxesDS(false);
+});
+showBoxesDS.addEventListener('click', () => {
+    toggleBoxesDS(true);
+});
+
 openAddBtn.addEventListener('click', () => {
     resetFormValues();
     toggleAddRows();
@@ -244,6 +256,18 @@ function navShow(elements = [], mode = 'none') {
 function searchRows() {
     const input = document.getElementById('myInput');
     dataTable.search(input.value).draw();
+}
+
+function toggleBoxesDS(show) {
+    if (show) {
+        elemDisplay(boxesDS, true);
+        elemDisplay(hideBoxesDS, true);
+        elemDisplay(showBoxesDS, false);
+    } else {
+        elemDisplay(boxesDS, false);
+        elemDisplay(hideBoxesDS, false);
+        elemDisplay(showBoxesDS, true);
+    }
 }
 
 function toggleAddRows() {

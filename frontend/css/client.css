@@ -406,6 +406,20 @@ iframe {
     background-color: var(--box3-color);
 }
 
+.dash-content .title .actions {
+    display: flex;
+    align-items: center;
+}
+
+.dash-content .title .actions i {
+    margin-left: 10px;
+    cursor: pointer;
+}
+.dash-content .title .actions i:hover {
+    color: var(--i-act-color-hover);
+    transition: var(--tran-03);
+}
+
 .dsRooms {
     display: block;
     overflow-x: auto;
