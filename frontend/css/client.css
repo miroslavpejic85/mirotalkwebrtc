@@ -440,6 +440,10 @@ iframe {
     transition: var(--tran-03);
 }
 
+#myTable td i {
+    font-size: 1.4rem;
+}
+
 .accountDiv,
 .addRowDiv {
     position: fixed;
