@@ -412,7 +412,6 @@ iframe {
 }
 
 .dash-content .title .actions i {
-    margin-left: 10px;
     cursor: pointer;
 }
 .dash-content .title .actions i:hover {
@@ -423,6 +422,9 @@ iframe {
 .dsRooms {
     display: block;
     overflow-x: auto;
+}
+.dsRooms .title .text {
+    margin-left: 5px;
 }
 .dsRooms .title .actions {
     display: flex;
@@ -797,7 +799,7 @@ tr:nth-child(even) {
     }
 }
 
-@media (max-width: 400px) {
+@media (max-width: 450px) {
     nav {
         width: 0px;
     }
