@@ -23,6 +23,14 @@
 
 ![mirotalk-webrtc-admin](./frontend/Images/mirotalk-webrtc-admin.png)
 
+<hr />
+
+<p align="center">
+    For questions, discussions, help & support, join with us on <a href="https://discord.gg/rgGYfeYW3N">discord</a>
+</p>
+
+<hr />
+
 <details open>
 <summary>Quick start</summary>
 
@@ -111,22 +119,18 @@ To self-hosting MiroTalk WEB, just follow [this steps](./docs/self-hosting.md).
 
 </details>
 
-<details>
-
-<summary>Discussions</summary>
-
-<br/>
-
-Join with us on [Discord](https://discord.gg/rgGYfeYW3N), ask questions and post answers without opening issues.
-
-</details>
-
 <details open>
 <summary>Support</summary>
 
 <br/>
 
-You can support MiroTalk's projects by [sponsoring](https://github.com/sponsors/miroslavpejic85) it. Thanks!
+You can show your support for MiroTalk's projects by considering sponsorship. By sponsoring MiroTalk on platforms like GitHub Sponsors, you can contribute to our ongoing work and help us continue to develop and improve the projects.
+
+To support MiroTalk's projects, you can visit the sponsorship page at https://github.com/sponsors/miroslavpejic85. There, you will find the different sponsorship tiers available. You can choose a sponsorship level that suits your budget and desired level of support.
+
+Sponsoring MiroTalk's projects not only helps us financially but also encourages our motivation and dedication to creating valuable software. Your sponsorship can enable us to allocate more time and resources towards the projects, leading to further enhancements, bug fixes, and new features.
+
+Thank you for considering supporting MiroTalk's projects. Your sponsorship can make a positive difference and contribute to the success of our endeavors.
 
 </details>
 
