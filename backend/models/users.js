@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
     role: { type: String, default: 'guest' },
+    allow: { type: Array, default: ['ALL'] },
     email: { type: String, index: { unique: true } },
     username: { type: String },
     password: { type: String },

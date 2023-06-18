@@ -19,6 +19,7 @@
     --box1-color: #f2f2f2;
     --box2-color: #f2f2f2;
     --box3-color: #f2f2f2;
+    --box4-color: #f2f2f2;
     --title-icon-color: #fff;
     --tran-05: all 0.5s ease;
     --tran-03: all 0.3s ease;
@@ -44,6 +45,7 @@ body.dark {
     --box1-color: #3a3b3c;
     --box2-color: #3a3b3c;
     --box3-color: #3a3b3c;
+    --box4-color: #3a3b3c;
     --title-icon-color: #ccc;
     --i-act-color-hover: #439fff;
     --input-color-schema: dark;
@@ -336,6 +338,10 @@ iframe {
     overflow: hidden;
 }
 
+/* #p2p, #sfu, #c2c, #bro {
+    display: none;
+} */
+
 .dash-content .title {
     display: flex;
     margin: 60px 0 30px 0;
@@ -373,7 +379,7 @@ iframe {
     padding: 15px 20px;
     display: flex;
     flex-direction: column;
-    width: calc(100% / 3 - 15px);
+    width: calc(100% / 4 - 15px);
     align-items: center;
     border-radius: 12px;
     background-color: var(--box1-color);
@@ -404,6 +410,10 @@ iframe {
 
 .boxes .box.box3 {
     background-color: var(--box3-color);
+}
+
+.boxes .box.box4 {
+    background-color: var(--box4-color);
 }
 
 .dash-content .title .actions {

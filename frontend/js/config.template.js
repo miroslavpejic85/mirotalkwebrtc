@@ -42,5 +42,17 @@ const config = {
                 Shields: 'https://img.shields.io/github/stars/miroslavpejic85/mirotalkc2c?style=flat',
             },
         },
+        BRO: {
+            Visible: true,
+            Home: 'https://bro.mirotalk.com',
+            Broadcast: 'https://bro.mirotalk.com/broadcast?id=',
+            Viewer: 'https://bro.mirotalk.com/viewer?id=',
+            GitHub: {
+                Visible: true,
+                Repo: 'https://github.com/miroslavpejic85/mirotalkbro',
+                Star: 'https://github.com/miroslavpejic85/mirotalkbro/stargazers',
+                Shields: 'https://img.shields.io/github/stars/miroslavpejic85/mirotalkbro?style=flat',
+            },
+        },
     },
 };

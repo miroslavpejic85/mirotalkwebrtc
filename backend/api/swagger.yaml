@@ -398,6 +398,9 @@ components:
                 updatedAt:
                     type: string
                     example: '2022-12-23T11:35:05.234Z'
+                allow:
+                    type: array
+                    example: '[P2P, SFU, C2C, BRO]'
 
         RoomReq:
             type: object

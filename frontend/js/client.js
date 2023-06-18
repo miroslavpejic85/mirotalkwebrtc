@@ -13,6 +13,7 @@ const navDash = document.getElementById('navDash');
 const navC2C = document.getElementById('navC2C');
 const navP2P = document.getElementById('navP2P');
 const navSFU = document.getElementById('navSFU');
+const navBRO = document.getElementById('navBRO');
 const navSup = document.getElementById('navSup');
 const navAcc = document.getElementById('navAcc');
 
@@ -43,13 +44,20 @@ const repoC2C = document.getElementById('repoC2C');
 const starC2C = document.getElementById('starC2C');
 const shieldsC2C = document.getElementById('shieldsC2C');
 
-const c2c = document.getElementById('c2c');
+const boxBRO = document.getElementById('boxBRO');
+const repoBRO = document.getElementById('repoBRO');
+const starBRO = document.getElementById('starBRO');
+const shieldsBRO = document.getElementById('shieldsBRO');
+
 const p2p = document.getElementById('p2p');
 const sfu = document.getElementById('sfu');
+const c2c = document.getElementById('c2c');
+const bro = document.getElementById('bro');
 
 const p2pIframe = document.getElementById('p2p-iframe');
 const sfuIframe = document.getElementById('sfu-iframe');
 const c2cIframe = document.getElementById('c2c-iframe');
+const broIframe = document.getElementById('bro-iframe');
 
 const accountDiv = document.getElementById('accountDiv');
 const accountClose = document.getElementById('account-close-btn');
@@ -125,6 +133,7 @@ $(document).ready(function () {
     loadConfig();
     toggleElements();
     showDataTable();
+    handleUserRoles();
 });
 
 function loadConfig() {
@@ -138,6 +147,9 @@ function loadConfig() {
     repoC2C.setAttribute('href', config.MiroTalk.C2C.GitHub.Repo);
     starC2C.setAttribute('href', config.MiroTalk.C2C.GitHub.Star);
     shieldsC2C.setAttribute('src', config.MiroTalk.C2C.GitHub.Shields);
+    repoBRO.setAttribute('href', config.MiroTalk.BRO.GitHub.Repo);
+    starBRO.setAttribute('href', config.MiroTalk.BRO.GitHub.Star);
+    shieldsBRO.setAttribute('src', config.MiroTalk.BRO.GitHub.Shields);
     p2pIframe.setAttribute('src', config.MiroTalk.P2P.Room);
     sfuIframe.setAttribute('src', config.MiroTalk.SFU.Room);
     c2cIframe.setAttribute('src', config.MiroTalk.C2C.Home);
@@ -149,10 +161,17 @@ function toggleElements() {
     elemDisplay(navP2P, config.MiroTalk.P2P.Visible);
     elemDisplay(navSFU, config.MiroTalk.SFU.Visible);
     elemDisplay(navC2C, config.MiroTalk.C2C.Visible);
+    elemDisplay(navBRO, config.MiroTalk.BRO.Visible);
     elemDisplay(boxP2P, config.MiroTalk.P2P.GitHub.Visible);
     elemDisplay(boxSFU, config.MiroTalk.SFU.GitHub.Visible);
     elemDisplay(boxC2C, config.MiroTalk.C2C.GitHub.Visible);
-    if (!config.MiroTalk.P2P.Visible && !config.MiroTalk.SFU.Visible && !config.MiroTalk.C2C.Visible) {
+    elemDisplay(boxBRO, config.MiroTalk.BRO.GitHub.Visible);
+    if (
+        !config.MiroTalk.P2P.Visible &&
+        !config.MiroTalk.SFU.Visible &&
+        !config.MiroTalk.C2C.Visible &&
+        !config.MiroTalk.BRO.Visible
+    ) {
         elemDisplay(openAddBtn, false);
         elemDisplay(delAllBtn, false);
         elemDisplay(refreshBtn, false);
@@ -160,7 +179,8 @@ function toggleElements() {
     if (
         !config.MiroTalk.P2P.GitHub.Visible &&
         !config.MiroTalk.SFU.GitHub.Visible &&
-        !config.MiroTalk.C2C.GitHub.Visible
+        !config.MiroTalk.C2C.GitHub.Visible &&
+        !config.MiroTalk.BRO.GitHub.Visible
     ) {
         elemDisplay(boxesDS, false);
         elemDisplay(titleDS, false);
@@ -169,6 +189,7 @@ function toggleElements() {
         if (addType.options[i].value == 'P2P' && !config.MiroTalk.P2P.Visible) addType.remove(i);
         if (addType.options[i].value == 'SFU' && !config.MiroTalk.SFU.Visible) addType.remove(i);
         if (addType.options[i].value == 'C2C' && !config.MiroTalk.C2C.Visible) addType.remove(i);
+        if (addType.options[i].value == 'BRO' && !config.MiroTalk.BRO.Visible) addType.remove(i);
     }
 }
 
@@ -197,6 +218,11 @@ navSFU.addEventListener('click', () => {
 navC2C.addEventListener('click', () => {
     navShow([c2c]);
 });
+
+navBRO.addEventListener('click', () => {
+    navShow([bro]);
+});
+
 navSup.addEventListener('click', () => {
     openURL(config.Author.Support, true);
 });
@@ -241,13 +267,14 @@ accountDelete.addEventListener('click', () => {
     delMyAccount();
 });
 
-function navShow(elements = [], mode = 'none') {
-    search.style.display = mode;
-    dsDash.style.display = mode;
-    dsRooms.style.display = mode;
-    c2c.style.display = mode;
-    p2p.style.display = mode;
-    sfu.style.display = mode;
+function navShow(elements = []) {
+    elemDisplay(search, false);
+    elemDisplay(dsDash, false);
+    elemDisplay(dsRooms, false);
+    elemDisplay(p2p, false);
+    elemDisplay(sfu, false);
+    elemDisplay(c2c, false);
+    elemDisplay(bro, false);
     elements.forEach((element, i) => {
         element.style.display = 'block';
     });
@@ -340,15 +367,23 @@ function addRow() {
 }
 
 function getRow(obj) {
-    if (!config.MiroTalk.P2P.Visible && !config.MiroTalk.SFU.Visible && !config.MiroTalk.C2C.Visible) return;
+    if (
+        !config.MiroTalk.P2P.Visible &&
+        !config.MiroTalk.SFU.Visible &&
+        !config.MiroTalk.C2C.Visible &&
+        !config.MiroTalk.BRO.Visible
+    )
+        return;
 
     const isP2P = obj.type == 'P2P' ? 'selected' : '';
     const isSFU = obj.type == 'SFU' ? 'selected' : '';
     const isC2C = obj.type == 'C2C' ? 'selected' : '';
+    const isBRO = obj.type == 'BRO' ? 'selected' : '';
 
     const optionP2P = config.MiroTalk.P2P.Visible ? `<option value="P2P" ${isP2P}>P2P</option>` : '';
     const optionSFU = config.MiroTalk.SFU.Visible ? `<option value="P2P" ${isSFU}>SFU</option>` : '';
     const optionC2C = config.MiroTalk.C2C.Visible ? `<option value="C2C" ${isC2C}>C2C</option>` : '';
+    const optionBRO = config.MiroTalk.BRO.Visible ? `<option value="BRO" ${isBRO}>BRO</option>` : '';
 
     const shareRoomIcon = isMobile
         ? `<i id="${obj._id}_share" onclick="shareRoom('${obj._id}')" class="uil uil-share-alt"></i>`
@@ -359,6 +394,7 @@ function getRow(obj) {
                 ${optionP2P}
                 ${optionSFU}
                 ${optionC2C}
+                ${optionBRO}
             </select>
         </td>`,
         `<td><input id="${obj._id}_tag" type="text" name="tag" value="${obj.tag}"/></td>`,
@@ -398,7 +434,7 @@ function copyRoom(id) {
 
 async function shareRoom(id) {
     const data = getRowValues(id);
-    const roomURL = getRoomURL(data);
+    const roomURL = getRoomURL(data, false);
     if (navigator.share) {
         try {
             await navigator.share({ url: roomURL });
@@ -413,7 +449,7 @@ async function shareRoom(id) {
 function sendEmail(id) {
     const newLine = '%0D%0A%0D%0A';
     const data = getRowValues(id);
-    const roomURL = getRoomURL(data);
+    const roomURL = getRoomURL(data, false);
     const emailSubject = `Please join our MiroTalk ${data.type} Video Chat Meeting`;
     const emailBody = `The meeting is scheduled at: ${newLine} Date: ${data.date} ${newLine} Time: ${data.time} ${newLine} Click to join: ${roomURL} ${newLine}`;
     document.location = 'mailto:' + data.email + '?subject=' + emailSubject + '&body=' + emailBody;
@@ -437,6 +473,12 @@ function joinRoom(id, external = false) {
             case 'C2C':
                 c2cIframe.setAttribute('src', roomURL);
                 navShow([c2c]);
+                break;
+            case 'BRO':
+                broIframe.setAttribute('src', roomURL);
+                navShow([bro]);
+                break;
+            default:
                 break;
         }
     }
@@ -528,6 +570,33 @@ function delAllRows() {
     });
 }
 
+function handleUserRoles() {
+    userGet(userId)
+        .then((res) => {
+            console.log('[API] - USER ROLES GET RESPONSE', res);
+            if (res.message) {
+                popupMessage('warning', `${res.message}`);
+            } else {
+                const { role, allow } = res;
+                if (role == 'admin' || allow.includes('ALL')) {
+                    elemDisplay(navP2P, true);
+                    elemDisplay(navSFU, true);
+                    elemDisplay(navC2C, true);
+                    elemDisplay(navBRO, true);
+                } else {
+                    elemDisplay(navP2P, allow.includes('P2P'));
+                    elemDisplay(navSFU, allow.includes('SFU'));
+                    elemDisplay(navC2C, allow.includes('C2C'));
+                    elemDisplay(navBRO, allow.includes('BRO'));
+                }
+            }
+        })
+        .catch((err) => {
+            console.error('[API] - USER ROLES GET ERROR', err);
+            popupMessage('error', `USER ROLES GET error: ${err.message}`);
+        });
+}
+
 function getMyAccount() {
     userGet(userId)
         .then((res) => {
@@ -596,7 +665,7 @@ function getUUID4() {
     );
 }
 
-function getRoomURL(data) {
+function getRoomURL(data, bro = true) {
     let roomURL;
     switch (data.type) {
         case 'P2P':
@@ -607,6 +676,13 @@ function getRoomURL(data) {
             break;
         case 'C2C':
             roomURL = `${config.MiroTalk.C2C.Room}${data.room}`;
+            break;
+        case 'BRO':
+            roomURL = bro
+                ? `${config.MiroTalk.BRO.Broadcast}${data.room}&name=Broadcast-${getRandomInt(99999)}`
+                : `${config.MiroTalk.BRO.Viewer}${data.room}%26name=Viewer-${getRandomInt(99999)}`;
+            break;
+        default:
             break;
     }
     return roomURL;
@@ -660,4 +736,8 @@ function animateCSS(element, animation, prefix = 'animate__') {
 
 function elemDisplay(elem, show) {
     elem.style.display = show ? 'flex' : 'none';
+}
+
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
 }

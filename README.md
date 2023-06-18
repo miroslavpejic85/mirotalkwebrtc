@@ -102,6 +102,15 @@ $ docker-compose up
 </details>
 
 <details>
+<summary>Migrations</summary>
+
+<br/>
+
+For MongoDB migrations follow [this README](./database/README.md).
+
+</details>
+
+<details>
 <summary>API</summary>
 
 <br/>
