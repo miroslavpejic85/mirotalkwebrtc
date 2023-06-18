@@ -67,6 +67,7 @@ const accountUsername = document.getElementById('account-username');
 const accountToken = document.getElementById('account-token');
 const accountCreatedAt = document.getElementById('account-created-at');
 const accountUpdatedAt = document.getElementById('account-updated-at');
+const accountServicesAllowed = document.getElementById('account-services-allowed');
 const accountDelete = document.getElementById('account-delete');
 
 const addRowDiv = document.getElementById('addRowDiv');
@@ -610,6 +611,7 @@ function getMyAccount() {
                 accountToken.value = res.token;
                 accountCreatedAt.value = res.createdAt;
                 accountUpdatedAt.value = res.updatedAt;
+                accountServicesAllowed.value = res.allow;
                 toggleAccount();
             }
         })
