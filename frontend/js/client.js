@@ -132,8 +132,6 @@ if (getStatus && getStatus === 'close') sidebar.classList.toggle('close');
 $(document).ready(function () {
     console.log('Config', config);
     loadConfig();
-    toggleElements();
-    showDataTable();
     handleUserRoles();
 });
 
@@ -154,6 +152,48 @@ function loadConfig() {
     p2pIframe.setAttribute('src', config.MiroTalk.P2P.Room);
     sfuIframe.setAttribute('src', config.MiroTalk.SFU.Room);
     c2cIframe.setAttribute('src', config.MiroTalk.C2C.Home);
+    broIframe.setAttribute('src', config.MiroTalk.BRO.Home);
+}
+
+function handleUserRoles() {
+    userGet(userId)
+        .then((res) => {
+            console.log('[API] - USER ROLES GET RESPONSE', res);
+            if (res.message) {
+                popupMessage('warning', `${res.message}`);
+            } else {
+                const { role, allow } = res;
+                const allowP2P = allow.includes('P2P');
+                const allowSFU = allow.includes('SFU');
+                const allowC2C = allow.includes('C2C');
+                const allowBRO = allow.includes('BRO');
+                if (role == 'admin' || allow.includes('ALL')) {
+                    elemDisplay(navP2P, true);
+                    elemDisplay(navSFU, true);
+                    elemDisplay(navC2C, true);
+                    elemDisplay(navBRO, true);
+                    config.MiroTalk.P2P.Visible = true;
+                    config.MiroTalk.SFU.Visible = true;
+                    config.MiroTalk.C2C.Visible = true;
+                    config.MiroTalk.BRO.Visible = true;
+                } else {
+                    elemDisplay(navP2P, allowP2P);
+                    elemDisplay(navSFU, allowSFU);
+                    elemDisplay(navC2C, allowC2C);
+                    elemDisplay(navBRO, allowBRO);
+                    config.MiroTalk.P2P.Visible = allowP2P;
+                    config.MiroTalk.SFU.Visible = allowSFU;
+                    config.MiroTalk.C2C.Visible = allowC2C;
+                    config.MiroTalk.BRO.Visible = allowBRO;
+                }
+            }
+            toggleElements();
+            showDataTable();
+        })
+        .catch((err) => {
+            console.error('[API] - USER ROLES GET ERROR', err);
+            popupMessage('error', `USER ROLES GET error: ${err.message}`);
+        });
 }
 
 function toggleElements() {
@@ -187,6 +227,7 @@ function toggleElements() {
         elemDisplay(titleDS, false);
     }
     for (var i = 0; i < addType.length; i++) {
+        console.log(addType.options[i].value);
         if (addType.options[i].value == 'P2P' && !config.MiroTalk.P2P.Visible) addType.remove(i);
         if (addType.options[i].value == 'SFU' && !config.MiroTalk.SFU.Visible) addType.remove(i);
         if (addType.options[i].value == 'C2C' && !config.MiroTalk.C2C.Visible) addType.remove(i);
@@ -569,33 +610,6 @@ function delAllRows() {
                 });
         }
     });
-}
-
-function handleUserRoles() {
-    userGet(userId)
-        .then((res) => {
-            console.log('[API] - USER ROLES GET RESPONSE', res);
-            if (res.message) {
-                popupMessage('warning', `${res.message}`);
-            } else {
-                const { role, allow } = res;
-                if (role == 'admin' || allow.includes('ALL')) {
-                    elemDisplay(navP2P, true);
-                    elemDisplay(navSFU, true);
-                    elemDisplay(navC2C, true);
-                    elemDisplay(navBRO, true);
-                } else {
-                    elemDisplay(navP2P, allow.includes('P2P'));
-                    elemDisplay(navSFU, allow.includes('SFU'));
-                    elemDisplay(navC2C, allow.includes('C2C'));
-                    elemDisplay(navBRO, allow.includes('BRO'));
-                }
-            }
-        })
-        .catch((err) => {
-            console.error('[API] - USER ROLES GET ERROR', err);
-            popupMessage('error', `USER ROLES GET error: ${err.message}`);
-        });
 }
 
 function getMyAccount() {
