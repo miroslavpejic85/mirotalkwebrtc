@@ -251,18 +251,22 @@ navDash.addEventListener('click', () => {
 
 navP2P.addEventListener('click', () => {
     navShow([p2p]);
+    //p2pIframe.setAttribute('src', config.MiroTalk.P2P.Room);
 });
 
 navSFU.addEventListener('click', () => {
     navShow([sfu]);
+    //sfuIframe.setAttribute('src', config.MiroTalk.SFU.Room);
 });
 
 navC2C.addEventListener('click', () => {
     navShow([c2c]);
+    //c2cIframe.setAttribute('src', config.MiroTalk.C2C.Home);
 });
 
 navBRO.addEventListener('click', () => {
     navShow([bro]);
+    //broIframe.setAttribute('src', config.MiroTalk.BRO.Home);
 });
 
 navSup.addEventListener('click', () => {
