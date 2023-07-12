@@ -545,7 +545,7 @@ function sendSmSInvitation(id) {
         allowOutsideClick: false,
         allowEscapeKey: false,
         showDenyButton: true,
-        imageUrl: '../images/sms.png',
+        imageUrl: '../Images/sms.png',
         title: 'SMS Invitation',
         position: 'center',
         input: 'text',
