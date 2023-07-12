@@ -55,4 +55,15 @@ const config = {
             },
         },
     },
+    BUTTONS: {
+        setRandomRoom: true,
+        copyRoom: true,
+        shareRoom: true,
+        sendEmail: true,
+        sendSmSInvitation: true,
+        joinInternal: true,
+        joinExternal: true,
+        updateRow: true,
+        delRow: true,
+    },
 };

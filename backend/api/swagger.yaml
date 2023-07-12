@@ -410,7 +410,7 @@ components:
                     example: '63a58459810c58b53246adde'
                 type:
                     type: string
-                    enum: ['P2P', 'SFU', 'C2C']
+                    enum: ['P2P', 'SFU', 'C2C', 'BRO']
                     example: 'P2P'
                 tag:
                     type: string
@@ -418,6 +418,9 @@ components:
                 email:
                     type: string
                     example: 'miroslav.pejic.85@gmail.com'
+                phone:
+                    type: string
+                    example: '+15734946078'
                 date:
                     type: string
                     example: '2022-12-31'
@@ -436,7 +439,7 @@ components:
                     example: '63a58459810c58b53246adde'
                 type:
                     type: string
-                    enum: ['P2P', 'SFU', 'C2C']
+                    enum: ['P2P', 'SFU', 'C2C', 'BRO']
                     example: 'P2P'
                 tag:
                     type: string
@@ -444,6 +447,9 @@ components:
                 email:
                     type: string
                     example: 'miroslav.pejic.85@gmail.com'
+                phone:
+                    type: string
+                    example: '+15734946078'
                 date:
                     type: string
                     example: '2022-12-31'

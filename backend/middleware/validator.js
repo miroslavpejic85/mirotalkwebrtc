@@ -4,12 +4,13 @@ const lowerCase = new RegExp('[a-z]');
 const upperCase = new RegExp('[A-Z]');
 const numbers = new RegExp('[0-9]');
 const specialCharacter = new RegExp('[!,%,&,@,#,$,^,*,?,_,~]');
-const validEmail = new RegExp(
+const validEmailReg = new RegExp(
     /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
 );
+const validNumberReg = new RegExp(/^\+?\d{1,3}[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/);
 
 const checkData = (req, res, next) => {
-    const { username, email, password } = req.body;
+    const { username, email, phone, password } = req.body;
     if (username) {
         const validUsername = isValidUsername(username);
         console.log('Validator', { username: validUsername });
@@ -22,6 +23,13 @@ const checkData = (req, res, next) => {
         console.log('Validator', { email: validMail });
         if (validMail != true) {
             return res.status(201).json({ message: validMail });
+        }
+    }
+    if (phone) {
+        const validPhone = isValidPhoneNumber(phone);
+        console.log('Validator', { phone: validPhone });
+        if (validPhone != true) {
+            return res.status(201).json({ message: validPhone });
         }
     }
     if (password) {
@@ -42,8 +50,15 @@ function isValidUsername(username) {
 }
 
 function isValidEmail(email) {
-    if (!email.match(validEmail)) {
+    if (!email.match(validEmailReg)) {
         return '⚠️ The Email field seems not valid!';
+    }
+    return true;
+}
+
+function isValidPhoneNumber(phone) {
+    if (!phone.match(validNumberReg)) {
+        return '⚠️ The Phone number field seems not valid! The number format must be [prefix][number] ex. 👉 +14845691464';
     }
     return true;
 }
@@ -61,7 +76,7 @@ function isValidPassword(password) {
         !password.match(numbers) ||
         !password.match(specialCharacter)
     ) {
-        return '⚠️ The password must contain lower/upper case, numbers and special character [!,%,&,@,#,$,^,*,?,_,~] es. 👉 Test@123';
+        return '⚠️ The password must contain lower/upper case, numbers and special character [!,%,&,@,#,$,^,*,?,_,~] ex. 👉 Test@123';
     }
     return true;
 }

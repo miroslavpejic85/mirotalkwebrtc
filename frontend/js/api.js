@@ -127,3 +127,14 @@ function roomDeleteALL() {
         headers: headers,
     }).then((response) => response.data);
 }
+
+// API SMS
+
+function smsSend(data) {
+    return axios({
+        method: 'POST',
+        url: `${apiPath}/sms`,
+        headers: headers,
+        data: data,
+    }).then((response) => response.data);
+}

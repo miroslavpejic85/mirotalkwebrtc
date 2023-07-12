@@ -4,12 +4,13 @@ const Room = require('../models/room');
 
 async function roomCreate(req, res) {
     try {
-        const { userId, type, tag, email, date, time, room } = req.body;
+        const { userId, type, tag, email, phone, date, time, room } = req.body;
         const data = new Room({
             userId: userId,
             type: type,
             tag: tag,
             email: email,
+            phone: phone,
             date: date,
             time: time,
             room: room,

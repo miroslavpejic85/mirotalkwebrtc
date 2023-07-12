@@ -9,6 +9,7 @@ const cors = require('cors');
 const compression = require('compression');
 const api = require('./routes/api');
 const room = require('./routes/room');
+const sms = require('./routes/sms');
 const users = require('./routes/users');
 const path = require('path');
 const sentry = require('@sentry/node');
@@ -80,6 +81,7 @@ mongoose
 
         app.use(apiPath, api);
         app.use(apiPath, room);
+        app.use(apiPath, sms);
         app.use(apiPath, users);
 
         app.get('/', (req, res) => {

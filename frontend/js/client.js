@@ -77,6 +77,7 @@ const closeAddBtn = document.getElementById('add-close-btn');
 const addType = document.getElementById('add-type');
 const addTag = document.getElementById('add-tag');
 const addEmail = document.getElementById('add-email');
+const addPhone = document.getElementById('add-phone');
 const addDate = document.getElementById('add-date');
 const addTime = document.getElementById('add-time');
 const addRoom = document.getElementById('add-room');
@@ -102,25 +103,26 @@ const dataTable = $('#myTable').DataTable({
         { width: '5%', targets: 0 },
         { width: '10%', targets: 1 },
         { width: '20%', targets: 2 },
-        { width: '15%', targets: 3 },
+        { width: '10%', targets: 3 },
         { width: '10%', targets: 4 },
-        { width: '30%', targets: 5 },
-        { width: '10%', targets: 6 },
+        { width: '10%', targets: 5 },
+        { width: '20%', targets: 6 },
+        { width: '10%', targets: 7 },
         {
-            targets: [0, 1, 2, 3, 4, 5],
+            targets: [0, 1, 2, 3, 4, 5, 6],
             type: 'string',
             searchable: true,
         },
         {
-            targets: [6],
+            targets: [7],
             orderable: false,
             searchable: false,
         },
         {
-            targets: [0, 1, 2, 3, 4, 5, 6],
+            targets: [0, 1, 2, 3, 4, 5, 6, 7],
             className: 'dt-body-justify',
         },
-    ], // [MiroTalk, Tag, Email, Date, Time, Room, Actions]
+    ], // [MiroTalk, Tag, Email, Phone, Date, Time, Room, Actions]
 });
 
 const getMode = window.localStorage.mode || 'dark';
@@ -227,7 +229,7 @@ function toggleElements() {
         elemDisplay(titleDS, false);
     }
     for (var i = 0; i < addType.length; i++) {
-        console.log(addType.options[i].value);
+        //console.log(addType.options[i].value);
         if (addType.options[i].value == 'P2P' && !config.MiroTalk.P2P.Visible) addType.remove(i);
         if (addType.options[i].value == 'SFU' && !config.MiroTalk.SFU.Visible) addType.remove(i);
         if (addType.options[i].value == 'C2C' && !config.MiroTalk.C2C.Visible) addType.remove(i);
@@ -431,9 +433,43 @@ function getRow(obj) {
     const optionC2C = config.MiroTalk.C2C.Visible ? `<option value="C2C" ${isC2C}>C2C</option>` : '';
     const optionBRO = config.MiroTalk.BRO.Visible ? `<option value="BRO" ${isBRO}>BRO</option>` : '';
 
-    const shareRoomIcon = isMobile
-        ? `<i id="${obj._id}_share" onclick="shareRoom('${obj._id}')" class="uil uil-share-alt"></i>`
+    const setRandomRoomIcon = config.BUTTONS.setRandomRoom
+        ? `<i id="${obj._id}_randomRoom" onclick="setRandomRoom('${obj._id}')" class="uil uil-refresh random"></i>`
         : '';
+
+    const copyRoomIcon = config.BUTTONS.copyRoom
+        ? `<i id="${obj._id}_copy" onclick="copyRoom('${obj._id}')" class='uil uil-copy'></i>`
+        : '';
+
+    const shareRoomIcon =
+        config.BUTTONS.shareRoom && isMobile
+            ? `<i id="${obj._id}_share" onclick="shareRoom('${obj._id}')" class="uil uil-share-alt"></i>`
+            : '';
+
+    const sendEmailIcon = config.BUTTONS.sendEmail
+        ? `<i id="${obj._id}_email" onclick="sendEmail('${obj._id}')" class="uil uil-envelope-upload"></i>`
+        : '';
+
+    const sendSmSInvitationIcon = config.BUTTONS.sendSmSInvitation
+        ? `<i id="${obj._id}_sms" onclick="sendSmSInvitation('${obj._id}')" class="uil-message"></i>`
+        : '';
+
+    const joinInternalIcon = config.BUTTONS.joinInternal
+        ? `<i id="${obj._id}_joinInternal" onclick="joinRoom('${obj._id}')" class="uil uil-estate"></i>`
+        : '';
+
+    const joinExternalIcon = config.BUTTONS.joinExternal
+        ? `<i id="${obj._id}_joinExternal" onclick="joinRoom('${obj._id}', true)" class="uil uil-external-link-alt"></i>`
+        : '';
+
+    const updateRowIcon = config.BUTTONS.updateRow
+        ? `<i id="${obj._id}_save" onclick="updateRow('${obj._id}')" class="uil uil-save"></i>`
+        : '';
+
+    const delRowIcon = config.BUTTONS.delRow
+        ? `<i id="${obj._id}_delete" onclick="delRow('${obj._id}')" class="uil uil-multiply"></i>`
+        : '';
+
     return [
         `<td>
             <select id="${obj._id}_type" class="select-options">    
@@ -445,18 +481,20 @@ function getRow(obj) {
         </td>`,
         `<td><input id="${obj._id}_tag" type="text" name="tag" value="${obj.tag}"/></td>`,
         `<td><input id="${obj._id}_email" type="email" name="email" value="${obj.email}"/></td>`,
+        `<td><input id="${obj._id}_phone" type="text" name="text" value="${obj.phone}"/></td>`,
         `<td><input id="${obj._id}_date" type="date" name="date" value="${obj.date}"/></td>`,
         `<td><input id="${obj._id}_time" type="time" name="time" value="${obj.time}"/></td>`,
         `<td><input id="${obj._id}_room" type="text" name="room" value="${obj.room}"/></td>`,
         `<td>
-            <i id="${obj._id}_randomRoom" onclick="setRandomRoom('${obj._id}')" class="uil uil-refresh random"></i>
-            <i id="${obj._id}_copy" onclick="copyRoom('${obj._id}')" class='uil uil-copy'></i>
+            ${setRandomRoomIcon}
+            ${copyRoomIcon}
             ${shareRoomIcon}
-            <i id="${obj._id}_email" onclick="sendEmail('${obj._id}')" class="uil uil-envelope-upload"></i>
-            <i id="${obj._id}_joinInternal" onclick="joinRoom('${obj._id}')" class="uil uil-estate"></i>
-            <i id="${obj._id}_joinExternal" onclick="joinRoom('${obj._id}', true)" class="uil uil-external-link-alt"></i>
-            <i id="${obj._id}_save" onclick="updateRow('${obj._id}')" class="uil uil-save"></i>
-            <i id="${obj._id}_delete" onclick="delRow('${obj._id}')" class="uil uil-multiply"></i>
+            ${sendEmailIcon}
+            ${sendSmSInvitationIcon}
+            ${joinInternalIcon}
+            ${joinExternalIcon}
+            ${updateRowIcon}
+            ${delRowIcon}
         </td>`,
     ];
 }
@@ -499,6 +537,47 @@ function sendEmail(id) {
     const emailSubject = `Please join our MiroTalk ${data.type} Video Chat Meeting`;
     const emailBody = `The meeting is scheduled at: ${newLine} Date: ${data.date} ${newLine} Time: ${data.time} ${newLine} Click to join: ${roomURL} ${newLine}`;
     document.location = 'mailto:' + data.email + '?subject=' + emailSubject + '&body=' + emailBody;
+}
+
+function sendSmSInvitation(id) {
+    const data = getRowValues(id);
+    Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showDenyButton: true,
+        imageUrl: '../images/sms.png',
+        title: 'SMS Invitation',
+        position: 'center',
+        input: 'text',
+        inputPlaceholder: 'Enter phone number: [Prefix][Number]',
+        inputValue: `${data.phone}`,
+        confirmButtonText: 'Send SMS',
+        denyButtonText: 'Exit',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        inputValidator: async (phoneNumber) => {
+            if (!phoneNumber) return 'Please enter phone number';
+            const data = getRowValues(id);
+            const roomURL = getRoomURL(data, false);
+            const dataSmS = {
+                message: `MiroTalk [${data.date}:${data.time}] ${roomURL}`,
+                toNumber: phoneNumber,
+            };
+            smsSend(dataSmS)
+                .then((res) => {
+                    console.log('[API] - SMS INVITATION RESPONSE', res);
+                    if (res.message) {
+                        popupMessage('warning', `${res.message}`);
+                    } else {
+                        popupMessage('success', `SMS Meeting Invitation Sent: ${res.sid}`);
+                    }
+                })
+                .catch((err) => {
+                    console.error('[API] - SMS INVITATION ERROR', err);
+                    popupMessage('error', `API SMS INVITATION error: ${err.message}`);
+                });
+        },
+    });
 }
 
 function joinRoom(id, external = false) {
@@ -715,6 +794,7 @@ function getRowValues(id) {
         type: select_type.options[select_type.selectedIndex].text,
         tag: document.getElementById(id + '_tag').value,
         email: document.getElementById(id + '_email').value.toLowerCase(),
+        phone: document.getElementById(id + '_phone').value,
         date: document.getElementById(id + '_date').value,
         time: document.getElementById(id + '_time').value,
         room: document.getElementById(id + '_room').value,
@@ -727,6 +807,7 @@ function getFormValues() {
         type: addType.options[addType.selectedIndex].text,
         tag: addTag.value,
         email: addEmail.value.toLowerCase(),
+        phone: addPhone.value,
         date: addDate.value,
         time: addTime.value,
         room: addRoom.value,
@@ -736,6 +817,7 @@ function getFormValues() {
 function resetFormValues() {
     addTag.value = '';
     addEmail.value = '';
+    addPhone.value = '';
     addDate.value = new Date().toISOString().substring(0, 10);
     addTime.value = new Date().toISOString().substring(11, 16);
     addRoom.value = getUUID4();
