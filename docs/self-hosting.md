@@ -36,7 +36,7 @@ $ cd mirotalkwebrtc
 # Copy .env.template to .env and edit it
 $ cp .env.template .env
 # Copy config.template.js to config.js and edit it
-$ cp frontend/js/config.template.js frontend/js/config.js
+$ cp backend/config.template.js backend/config.js
 ```
 
 Change the [MONGO](https://www.mongodb.com/) URL & DATABASE, with your own:
@@ -109,7 +109,7 @@ $ sudo apt install docker-compose
 # Copy env.template to .env and edit it
 $ cp .env.template .env
 # Copy config.template.js to config.js and edit it
-$ cp frontend/js/config.template.js frontend/js/config.js
+$ cp backend/config.template.js backend/config.js
 # Copy docker-compose.template.yml in docker-compose.yml and edit it if needed
 $ cp docker-compose.template.yml docker-compose.yml
 # Get official image from Docker Hub

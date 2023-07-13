@@ -138,3 +138,13 @@ function smsSend(data) {
         data: data,
     }).then((response) => response.data);
 }
+
+// API CONFIG
+
+function getConfig() {
+    return axios({
+        method: 'GET',
+        url: `/config`,
+        headers: headers,
+    }).then((response) => response.data);
+}

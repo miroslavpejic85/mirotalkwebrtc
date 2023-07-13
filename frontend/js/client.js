@@ -131,7 +131,10 @@ const getStatus = window.localStorage.status;
 if (getMode && getMode === 'dark') body.classList.toggle('dark');
 if (getStatus && getStatus === 'close') sidebar.classList.toggle('close');
 
-$(document).ready(function () {
+let config = {};
+
+$(document).ready(async function () {
+    config = await getConfig();
     console.log('Config', config);
     loadConfig();
     handleUserRoles();

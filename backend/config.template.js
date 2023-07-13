@@ -1,6 +1,6 @@
 'use-strict';
 
-const config = {
+module.exports = {
     Author: {
         Email: 'miroslav.pejic.85@gmail.com',
         Profile: 'https://www.linkedin.com/in/miroslav-pejic-976a07101/',
