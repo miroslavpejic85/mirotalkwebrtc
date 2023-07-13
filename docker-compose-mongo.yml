@@ -1,9 +1,9 @@
 version: '3'
 
 services:
-    mongodb:
+    mongodblocal:
         image: mongo:latest
-        container_name: mirotalkmongodb
+        container_name: mirotalkmongodblocal
         restart: unless-stopped
         environment:
             MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
@@ -12,9 +12,9 @@ services:
         ports:
             - '${MONGO_PORT}:${MONGO_PORT}'
         volumes:
-            - './.mongodb_data:/data/db'
+            - './.mongodb_data_local:/data/db'
         command: mongod --quiet --logpath /dev/null
 
 volumes:
-    mongodb_data:
+    mongodb_data_local:
         driver: local
