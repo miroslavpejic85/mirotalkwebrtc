@@ -165,28 +165,26 @@ function handleUserRoles() {
                 popupMessage('warning', `${res.message}`);
             } else {
                 const { role, allow } = res;
-                const allowP2P = allow.includes('P2P');
-                const allowSFU = allow.includes('SFU');
-                const allowC2C = allow.includes('C2C');
-                const allowBRO = allow.includes('BRO');
-                if (role == 'admin' || allow.includes('ALL')) {
+                if (role == 'admin') {
                     elemDisplay(navP2P, true);
                     elemDisplay(navSFU, true);
                     elemDisplay(navC2C, true);
                     elemDisplay(navBRO, true);
+
                     config.MiroTalk.P2P.Visible = true;
                     config.MiroTalk.SFU.Visible = true;
                     config.MiroTalk.C2C.Visible = true;
                     config.MiroTalk.BRO.Visible = true;
                 } else {
+                    const allowP2P = config.MiroTalk.P2P.Visible && (allow.includes('P2P') || allow.includes('ALL'));
+                    const allowSFU = config.MiroTalk.SFU.Visible && (allow.includes('SFU') || allow.includes('ALL'));
+                    const allowC2C = config.MiroTalk.C2C.Visible && (allow.includes('C2C') || allow.includes('ALL'));
+                    const allowBRO = config.MiroTalk.BRO.Visible && (allow.includes('BRO') || allow.includes('ALL'));
+
                     elemDisplay(navP2P, allowP2P);
                     elemDisplay(navSFU, allowSFU);
                     elemDisplay(navC2C, allowC2C);
                     elemDisplay(navBRO, allowBRO);
-                    config.MiroTalk.P2P.Visible = allowP2P;
-                    config.MiroTalk.SFU.Visible = allowSFU;
-                    config.MiroTalk.C2C.Visible = allowC2C;
-                    config.MiroTalk.BRO.Visible = allowBRO;
                 }
             }
             toggleElements();
