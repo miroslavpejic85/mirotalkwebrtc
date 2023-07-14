@@ -2,6 +2,7 @@
 
 const express = require('express');
 const auth = require('../middleware/auth');
+const admin = require('../middleware/admin');
 const validator = require('../middleware/validator');
 const router = express.Router();
 const controllersRooms = require('../controllers/rooms');
@@ -37,7 +38,7 @@ router.delete('/room/:id', auth, (req, res) => {
 });
 
 //DELETE: /api/v1/room/deleteALL
-router.delete('/room/deleteAll', auth, (req, res) => {
+router.delete('/room/deleteAll', admin, (req, res) => {
     controllersRooms.roomDeleteALL(req, res);
 });
 
