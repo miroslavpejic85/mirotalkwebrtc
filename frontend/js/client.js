@@ -561,7 +561,7 @@ function sendSmSInvitation(id) {
             const data = getRowValues(id);
             const roomURL = getRoomURL(data, false);
             const dataSmS = {
-                message: `MiroTalk [${data.date}:${data.time}] ${roomURL}`,
+                message: `[${data.date}|${data.time}] MiroTalk: ${roomURL}`,
                 toNumber: phoneNumber,
             };
             smsSend(dataSmS)

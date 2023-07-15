@@ -3,6 +3,7 @@
 const User = require('../models/users');
 const Room = require('../models/room');
 const nodemailer = require('../lib/nodemailer');
+const utils = require('../common/utils');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -12,7 +13,7 @@ const JWT_KEY = process.env.JWT_KEY;
 
 async function userCreate(req, res) {
     try {
-        const { username, email, password } = req.body;
+        const { email, username, password } = req.body;
         const userFindOne = await User.findOne({ email: email, username: username });
         console.log('No user found in the storage');
         if (Object.is(userFindOne, null) || Object.keys(userFindOne).length === 0) {
@@ -34,6 +35,7 @@ async function userCreate(req, res) {
                     email: email,
                     username: username,
                     password: encryptedPassword,
+                    role: utils.isAdmin(email, username, password) ? 'admin' : 'guest',
                     token: token,
                     active: true,
                     createdAt: new Date().toISOString(),
@@ -54,7 +56,7 @@ async function userCreate(req, res) {
 
 async function userLogin(req, res) {
     try {
-        const { username, email, password } = req.body;
+        const { email, username, password } = req.body;
         const dateNow = new Date().toISOString();
         const token = jwt.sign({ email: email, username: username, password: password }, JWT_KEY, {
             expiresIn: JWT_EXP,
@@ -102,6 +104,7 @@ async function userLogin(req, res) {
                     email: email,
                     username: username,
                     password: encryptedPassword,
+                    role: utils.isAdmin(email, username, password) ? 'admin' : 'guest',
                     token: token,
                     active: true,
                     createdAt: new Date().toISOString(),
@@ -135,6 +138,7 @@ async function userConfirmation(req, res) {
                 email: decoded.email,
                 username: decoded.username,
                 password: encryptedPassword,
+                role: utils.isAdmin(decoded.email, decoded.username, decoded.password) ? 'admin' : 'guest',
                 token: token,
                 active: true,
                 createdAt: new Date().toISOString(),
@@ -179,7 +183,10 @@ async function userUpdate(req, res) {
         const dateNow = new Date().toISOString();
         const encryptedPassword = await bcrypt.hash(updatedData.password, 10);
         updatedData.password = encryptedPassword;
-        updatedData.updatedAt = dateNow;
+        (updatedData.role = utils.isAdmin(updatedData.email, updatedData.username, updatedData.password)
+            ? 'admin'
+            : 'guest'),
+            (updatedData.updatedAt = dateNow);
         const result = await User.findByIdAndUpdate(id, updatedData, options);
         return res.send(result);
     } catch (error) {
