@@ -9,7 +9,10 @@ RUN apk add --no-cache \
 COPY package.json .
 COPY .env.template ./.env
 
-RUN npm install
+RUN \
+    npm install && \
+    npm cache clean --force && \
+    rm -rf /tmp/* /var/lib/apt/lists/* /var/tmp/* /usr/share/doc/*
 
 COPY backend backend
 COPY frontend frontend
