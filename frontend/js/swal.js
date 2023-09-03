@@ -13,12 +13,8 @@ function popupMessage(type, message, timer = 3000) {
                 icon: type,
                 title: type,
                 html: message,
-                showClass: {
-                    popup: 'animate__animated animate__fadeInDown',
-                },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOutUp',
-                },
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             });
             break;
         case 'toast':
@@ -33,6 +29,8 @@ function popupMessage(type, message, timer = 3000) {
             Toast.fire({
                 icon: 'info',
                 title: message,
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             });
             break;
         default:

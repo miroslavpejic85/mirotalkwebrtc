@@ -640,12 +640,8 @@ function delRow(id) {
         showDenyButton: true,
         confirmButtonText: `Yes`,
         denyButtonText: `No`,
-        showClass: {
-            popup: 'animate__animated animate__fadeInDown',
-        },
-        hideClass: {
-            popup: 'animate__animated animate__fadeOutUp',
-        },
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
         if (result.isConfirmed) {
             roomDelete(id)
@@ -675,12 +671,8 @@ function delAllRows() {
         showDenyButton: true,
         confirmButtonText: `Yes`,
         denyButtonText: `No`,
-        showClass: {
-            popup: 'animate__animated animate__fadeInDown',
-        },
-        hideClass: {
-            popup: 'animate__animated animate__fadeOutUp',
-        },
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
         if (result.isConfirmed) {
             roomDeleteFindBy(userId)
@@ -730,12 +722,8 @@ function delMyAccount() {
         showDenyButton: true,
         confirmButtonText: `Yes`,
         denyButtonText: `No`,
-        showClass: {
-            popup: 'animate__animated animate__fadeInDown',
-        },
-        hideClass: {
-            popup: 'animate__animated animate__fadeOutUp',
-        },
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
         if (result.isConfirmed) {
             userDelete(userId)
