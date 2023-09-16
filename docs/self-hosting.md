@@ -39,30 +39,29 @@ $ cp .env.template .env
 $ cp backend/config.template.js backend/config.js
 ```
 
-Change the [MONGO](https://www.mongodb.com/) URL & DATABASE, with your own:
+Customize `.env` according to your needs:
 
 ```bash
+# MongoDB Configuration (https://www.mongodb.com/)
 MONGO_URL=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}
 MONGO_DATABASE=mirotalk
-```
 
-Or if you have docker & docker-compose, and want only instantiate mongodb, run:
+# Email Configuration (https://support.google.com/mail/answer/185833?hl=en)
+# If you disable user email verification, set EMAIL_VERIFICATION to false
+EMAIL_VERIFICATION=true
 
-```bash
-$ npm run mongo:up
-# npm run mongo:down to stop container
-```
-
-> **Note**
-> if you disable the user email verification `EMAIL_VERIFICATION=false` skip this email setup and .env config.
-
-Setup your email and [app password](https://support.google.com/mail/answer/185833?hl=en):
-
-```bash
+# Email Server Settings (Skip if EMAIL_VERIFICATION is set to false)
 EMAIL_HOST=emailHost
 EMAIL_PORT=emailPort
 EMAIL_USERNAME=emailUsername
 EMAIL_PASSWORD=emailPassword
+```
+
+If you have Docker and Docker Compose installed and you only want to set up MongoDB, you can do the following:
+
+```bash
+$ npm run mongo:up
+# npm run mongo:down to stop container
 ```
 
 ```bash

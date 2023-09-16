@@ -22,7 +22,9 @@
 | ✨ [C2C](https://github.com/miroslavpejic85/mirotalkc2c) | `Cam to cam` (peer to peer) real-time video conferences, optimized for one to one. Unlimited time ,unlimited concurrent rooms each having 2 participants.                                  |
 | 📡 [BRO](https://github.com/miroslavpejic85/mirotalkbro) | `Live broadcast` (peer to peer) live video, audio and screen stream to all connected users (viewers). Unlimited time, unlimited concurrent rooms each having a broadcast and many viewers. |
 
-![mirotalk-webrtc-admin](./frontend/Images/mirotalk-webrtc-admin.png)
+<br>
+
+![mirotalk-webrtc-admin](./frontend/Images/mirotalk-web.png)
 
 <hr />
 
@@ -46,19 +48,18 @@ $ cp .env.template .env
 $ cp backend/config.template.js backend/config.js
 ```
 
-Change the [MONGO](https://www.mongodb.com/) `URL & DATABASE`, with your own:
+Customize `.env` according to your needs:
 
 ```bash
+# MongoDB Configuration (https://www.mongodb.com/)
 MONGO_URL=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}
 MONGO_DATABASE=mirotalk
-```
 
-> **Note**
-> if you disable the user email verification `EMAIL_VERIFICATION=false` skip this email setup and config.
+# Email Configuration (https://support.google.com/mail/answer/185833?hl=en)
+# If you disable user email verification, set EMAIL_VERIFICATION to false
+EMAIL_VERIFICATION=true
 
-Setup your email and [app password](https://support.google.com/mail/answer/185833?hl=en):
-
-```bash
+# Email Server Settings (Skip if EMAIL_VERIFICATION is set to false)
 EMAIL_HOST=emailHost
 EMAIL_PORT=emailPort
 EMAIL_USERNAME=emailUsername
