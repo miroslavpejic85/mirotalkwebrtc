@@ -37,27 +37,87 @@ function sendConfirmationEmail(name, email, confirmationCode) {
                 <h1>Email Confirmation</h1>
                 <h2>Hello ${name}</h2>
                 <p>Thank you for subscribing. Please confirm your email by clicking on the following link</p>
-                <a href=${SERVER_URL}/api/v1/user/confirmation/${confirmationCode}> Click here</a>
+                <a href=${SERVER_URL}/api/v1/user/confirmation/${confirmationCode}> Click here to confirm</a>
                 <p>If it wasn't you, please ignore this email.</p>
             `,
         })
         .catch((err) => console.error(err));
 }
 
-function sendConfirmationOkEmail(name, email, credential) {
+function sendConfirmationOkEmail(name, toEmail, credential) {
+    const credentialObj = JSON.parse(credential);
+    const { role, email, username, password, active, allow, createdAt, updatedAt } = credentialObj;
+    console.log('sendConfirmationOkEmail', credentialObj);
     transport
         .sendMail({
             from: EMAIL_USERNAME,
-            to: email,
+            to: toEmail,
             subject: 'MiroTalk WEB - Email confirmed',
             html: `
                 <h1>Email Confirmed</h1>
                 <h2>Hello ${name}</h2>
                 <p>Thank you for confirmation. Here your account info</p>
-                <pre>${credential}</pre>
+                <style>
+                    table {
+                        font-family: arial, sans-serif;
+                        border-collapse: collapse;
+                        width: 100%;
+                    }
+                    td {
+                        border: 1px solid #dddddd;
+                        text-align: left;
+                        padding: 8px;
+                    }
+                    tr:nth-child(even) {
+                        background-color: #dddddd;
+                    }
+                </style>
+                <table>
+                    <tr>
+                        <td>Role</td>
+                        <td>${role}</td>
+                    </tr>
+                    <tr>
+                        <td>Email</td>
+                        <td>${email}</td>
+                    </tr>
+                    <tr>
+                        <td>Username</td>
+                        <td>${username}</td>
+                    </tr>
+                    <tr>
+                        <td>Password</td>
+                        <td>${password}</td>
+                    </tr>
+                    <tr>
+                        <td>Active</td>
+                        <td>${active}</td>
+                    </tr>
+                    <tr>
+                        <td>Allowed services</td>
+                        <td>${allow}</td>
+                    </tr>
+                    <tr>
+                        <td>Created at</td>
+                        <td>${createdAt}</td>
+                    </tr>
+                    <tr>
+                        <td>Updated at</td>
+                        <td>${updatedAt}</td>
+                    </tr>
+                </table>
+                <br/>
                 <p>Home page</p>
                 <a href="${SERVER_URL}" target="_blank">${SERVER_URL}</a>
-                <br/><p>I am hoping you find the application useful. Making a small donation is a great way to let me know you like it and want me to keep working on it. Thank you!</p><a href="${SUPPORT}" target="_blanck">PayPal</a>
+                <br/>
+                <p>We sincerely hope you're finding our application incredibly useful! Your support means the world to us, and it's what keeps us motivated to continuously improve and expand its features.</p>
+                <p>If you've been enjoying your experience and want to see more great things coming your way, please consider making a small donation. Your contribution not only shows us that you appreciate our hard work but also helps us invest in making the application even better for you.</p>
+                <p>It's easy to make a difference. Just click the PayPal link below to contribute. Every dollar counts, and your generosity will fuel our dedication to providing you with an exceptional experience.</p>
+                <p>Thank you for being a valued part of our community. Your support is what keeps us going, and we can't wait to bring you more amazing updates in the future.</p>
+                <a href="${SUPPORT}" target="_blank">PayPal Donation Link</a>
+                <br/>
+                <p>With gratitude,</p>
+                <p>MiroTalk Team</p>
             `,
         })
         .catch((err) => console.error(err));

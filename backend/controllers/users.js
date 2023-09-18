@@ -114,9 +114,9 @@ async function userLogin(req, res) {
                 const userSaveData = await userData.save();
                 console.log('User create OK', userSaveData);
                 return res.status(201).send({
-                    message: `👍 Account created! <br/> Click on Login and enjoy! <br><br>
+                    message: `✅ Account created! <br/> Click on Login and enjoy! <br><br>
                     <p>I am hoping you find the application useful. Making a small donation is a great way to let me know you like it and want me to keep working on it. Thank you! ❤️</p>
-                    <a href="${nodemailer.SUPPORT}" target="_blanck" style="text-decoration:none;"><h1 style="color:lime;">👉 paypal.me 👈<h1></a>`,
+                    <a href="${nodemailer.SUPPORT}" target="_blank" style="text-decoration:none;"><h1 style="color:lime;">👉 paypal.me 👈<h1></a>`,
                 });
             }
         }
