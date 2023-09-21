@@ -12,34 +12,19 @@ const room = require('./routes/room');
 const sms = require('./routes/sms');
 const users = require('./routes/users');
 const config = require('./config');
+const ngrok = require('./common/ngrok');
+const sentry = require('./common/sentry');
 const path = require('path');
-const sentry = require('@sentry/node');
-const { CaptureConsole } = require('@sentry/integrations');
 
 const apiPath = '/api/v1';
+
+sentry.start(); // Start sentry (optional)
 
 const SERVER_HOST = process.env.SERVER_HOST;
 const SERVER_PORT = process.env.SERVER_PORT;
 const SERVER_URL = process.env.SERVER_URL;
 const MONGO_URL = process.env.MONGO_URL;
 const MONGO_DATABASE = process.env.MONGO_DATABASE;
-
-// Sentry monitoring (optional)
-
-const SENTRY_DSN = process.env.SENTRY_DSN;
-const SENTRY_TRACES_SAMPLE_RATE = process.env.SENTRY_TRACES_SAMPLE_RATE;
-
-if (SENTRY_DSN != '') {
-    sentry.init({
-        dsn: SENTRY_DSN,
-        integrations: [
-            new CaptureConsole({
-                levels: ['warn', 'error'],
-            }),
-        ],
-        tracesSampleRate: SENTRY_TRACES_SAMPLE_RATE,
-    });
-}
 
 // Mandatory params to make this server up and running
 
@@ -103,11 +88,15 @@ mongoose
         });
 
         app.listen(SERVER_PORT, null, () => {
-            console.debug('Server', {
-                home: home,
-                apiDocs: apiDocs,
-                nodeVersion: process.versions.node,
-            });
+            if (ngrok.enabled()) {
+                ngrok.start();
+            } else {
+                console.debug('Server', {
+                    home: home,
+                    apiDocs: apiDocs,
+                    nodeVersion: process.versions.node,
+                });
+            }
         });
     })
     .catch((err) => console.error('Mongoose init connection error: ' + err));
