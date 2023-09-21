@@ -4,15 +4,16 @@ const Room = require('../models/room');
 
 async function roomCreate(req, res) {
     try {
-        const { userId, type, tag, email, phone, date, time, room } = req.body;
+        // const { userId, type, tag, username, phone, date, time, room } = req.body;
+        const { userId, type, hostUserID, clientUserID, startDateTime,endDateTime,status, room } = req.body;
         const data = new Room({
             userId: userId,
             type: type,
-            tag: tag,
-            email: email,
-            phone: phone,
-            date: date,
-            time: time,
+            hostUserID: hostUserID,
+            clientUserID: clientUserID,
+            startDateTime:startDateTime,
+            endDateTime:endDateTime,
+            status:status,
             room: room,
         });
         const dataToSave = await data.save();
