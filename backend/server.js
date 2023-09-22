@@ -51,10 +51,10 @@ if (!SERVER_HOST || !SERVER_PORT || !SERVER_URL || !MONGO_URL || !MONGO_DATABASE
 const home = SERVER_URL;
 const apiDocs = home + apiPath + '/docs';
 
-const frontendDir = path.join(__dirname, '../', 'frontend');
+// const frontendDir = path.join(__dirname, '../', 'frontend');
 
-const login = path.join(__dirname, '../', 'frontend/html/home.html');
-const client = path.join(__dirname, '../', 'frontend/html/client.html');
+// const login = path.join(__dirname, '../', 'frontend/html/home.html');
+// const client = path.join(__dirname, '../', 'frontend/html/client.html');
 
 mongoose.set('strictQuery', true);
 
@@ -65,7 +65,7 @@ mongoose
 
         app.use(cors());
         app.use(compression());
-        app.use(express.static(frontendDir));
+        // app.use(express.static(frontendDir));
         app.use(express.urlencoded({ extended: true }));
         app.use(express.json());
 
@@ -85,13 +85,13 @@ mongoose
         app.use(apiPath, sms);
         app.use(apiPath, users);
 
-        app.get('/', (req, res) => {
-            res.sendFile(login);
-        });
+        // app.get('/', (req, res) => {
+        //     res.sendFile(login);
+        // });
 
-        app.get('/client', auth, (req, res) => {
-            res.sendFile(client);
-        });
+        // app.get('/client', auth, (req, res) => {
+        //     res.sendFile(client);
+        // });
 
         app.get('/config', auth, (req, res) => {
             console.log('Send config', config);
