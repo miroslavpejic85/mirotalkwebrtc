@@ -1,11 +1,18 @@
 'use strict';
 
+const crypto = require('crypto');
 const Room = require('../models/room');
+
+function getUUID4() {
+    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+        (c ^ (crypto.randomBytes(1)[0] & (15 >> (c / 4)))).toString(16)
+    );
+}
 
 async function roomCreate(req, res) {
     try {
         // const { userId, type, tag, username, phone, date, time, room } = req.body;
-        const { userId, type, hostUserID, clientUserID, startDateTime,endDateTime,status, room } = req.body;
+        const { userId, type, hostUserID, clientUserID, startDateTime,endDateTime,status } = req.body;
         const data = new Room({
             userId: userId,
             type: type,
@@ -14,7 +21,7 @@ async function roomCreate(req, res) {
             startDateTime:startDateTime,
             endDateTime:endDateTime,
             status:status,
-            room: room,
+            room: getUUID4()
         });
         const dataToSave = await data.save();
         res.status(200).json(dataToSave);
@@ -23,6 +30,41 @@ async function roomCreate(req, res) {
         res.status(400).json({ message: error.message });
     }
 }
+
+
+
+async function getUserRole(req, res) {
+    try {
+        const data = await Room.find({ room: req.params.room });
+        // res.json(req.params.userId );
+        if (data.length === 0){
+            console.error("Room Does Not Exist");
+            res.json(data);
+            res.status(404)
+        }
+        else
+        {
+            const room = data[0];
+            // res.json(data); 
+            if (room.hostUserID.includes(req.params.userId)) {
+                // user_id is part of host
+                res.json({ role: "host" });
+            } else if (room.clientUserID.includes(req.params.userId)) {
+                // user_id is part of client
+                res.json({ role: "client" });
+            } else {
+                // user_id isn't part of host or client
+                console.error('Not authorized to enter the meeting');
+                res.status(401).json({ message: 'Unauthorized' });
+            }   
+        }
+    } catch (error) {
+        console.error('Room findById error', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
+
 
 async function roomFindBy(req, res) {
     try {
@@ -101,4 +143,5 @@ module.exports = {
     roomUpdate,
     roomDelete,
     roomDeleteALL,
+    getUserRole
 };

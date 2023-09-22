@@ -7,6 +7,11 @@ const validator = require('../middleware/validator');
 const router = express.Router();
 const controllersRooms = require('../controllers/rooms');
 
+//GET: /api/v1/room/findRole
+router.get('/room/findRole/:room/:userId', auth, (req, res) => {
+    controllersRooms.getUserRole(req, res);
+});
+
 //CREATE: /api/v1/room
 router.post('/room', auth, validator, (req, res) => {
     controllersRooms.roomCreate(req, res);
