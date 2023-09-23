@@ -5,6 +5,7 @@
     "main": "server.js",
     "scripts": {
         "start": "node backend/server.js",
+        "start-dev": "nodemon backend/server.js",
         "env": "cp .env.template .env",
         "cfg": "cp backend/config.template.js backend/config.js",
         "mongo:up": "docker-compose -f docker-compose-mongo.yml up -d",
@@ -32,8 +33,8 @@
     "license": "AGPL-3.0",
     "homepage": "https://github.com/miroslavpejic85/mirotalkwebrtc",
     "dependencies": {
-        "@sentry/node": "^7.69.0",
-        "@sentry/integrations": "^7.69.0",
+        "@sentry/node": "^7.70.0",
+        "@sentry/integrations": "^7.70.0",
         "bcryptjs": "^2.4.3",
         "compression": "^1.7.4",
         "cors": "^2.8.5",
@@ -44,10 +45,11 @@
         "ngrok": "^4.3.3",
         "nodemailer": "^6.9.5",
         "swagger-ui-express": "^5.0.0",
-        "twilio": "^4.17.0",
+        "twilio": "^4.18.0",
         "yamljs": "^0.3.0"
     },
     "devDependencies": {
+        "nodemon": "^3.0.1",
         "prettier": "3.0.3"
     }
 }
