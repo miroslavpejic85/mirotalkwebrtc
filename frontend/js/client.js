@@ -131,12 +131,19 @@ const getStatus = window.localStorage.status;
 if (getMode && getMode === 'dark') body.classList.toggle('dark');
 if (getStatus && getStatus === 'close') sidebar.classList.toggle('close');
 
+const toolTips = [
+    { element: openAddBtn, text: 'Add new room', position: 'top' },
+    { element: delAllBtn, text: 'Delete all rooms', position: 'top' },
+    { element: refreshBtn, text: 'Refresh rooms', position: 'top' },
+];
+
 let config = {};
 
 $(document).ready(async function () {
     config = await getConfig();
     console.log('Config', config);
     loadConfig();
+    loadToolTip(toolTips);
     handleUserRoles();
 });
 
@@ -368,7 +375,7 @@ function toggleAccount() {
     }
 }
 
-function showDataTable() {
+async function showDataTable() {
     navDash.click();
 
     roomFindBy(userId)
@@ -377,9 +384,13 @@ function showDataTable() {
             if (res) {
                 res.forEach((obj) => {
                     const tableRow = getRow(obj);
-                    if (tableRow) dataTable.row.add(tableRow).node().id = obj._id;
+                    if (tableRow) {
+                        dataTable.row.add(tableRow).node().id = obj._id;
+                        dataTable.draw();
+                        addRowToolTips(obj._id);
+                    }
                 });
-                dataTable.draw();
+                //dataTable.draw();
             }
         })
         .catch((err) => {
@@ -405,6 +416,7 @@ function addRow() {
                 if (tableRow) {
                     dataTable.row.add(tableRow).node().id = res._id;
                     dataTable.draw();
+                    addRowToolTips(res._id);
                     toggleAddRows();
                 }
             }
@@ -448,11 +460,11 @@ function getRow(obj) {
             : '';
 
     const sendEmailIcon = config.BUTTONS.sendEmail
-        ? `<i id="${obj._id}_email" onclick="sendEmail('${obj._id}')" class="uil uil-envelope-upload"></i>`
+        ? `<i id="${obj._id}_send_email" onclick="sendEmail('${obj._id}')" class="uil uil-envelope-upload"></i>`
         : '';
 
     const sendSmSInvitationIcon = config.BUTTONS.sendSmSInvitation
-        ? `<i id="${obj._id}_sms" onclick="sendSmSInvitation('${obj._id}')" class="uil-message"></i>`
+        ? `<i id="${obj._id}_send_sms" onclick="sendSmSInvitation('${obj._id}')" class="uil-message"></i>`
         : '';
 
     const joinInternalIcon = config.BUTTONS.joinInternal
@@ -498,6 +510,20 @@ function getRow(obj) {
             ${delRowIcon}
         </td>`,
     ];
+}
+
+function addRowToolTips(id) {
+    const rowToolTips = [
+        { element: document.getElementById(`${id}_randomRoom`), text: 'Generate random room', position: 'top' },
+        { element: document.getElementById(`${id}_copy`), text: 'Copy room', position: 'top' },
+        { element: document.getElementById(`${id}_send_email`), text: 'Send email invitation', position: 'top' },
+        { element: document.getElementById(`${id}_send_sms`), text: 'Send sms invitation', position: 'top' },
+        { element: document.getElementById(`${id}_joinInternal`), text: 'Join room internal', position: 'top' },
+        { element: document.getElementById(`${id}_joinExternal`), text: 'Join room external', position: 'top' },
+        { element: document.getElementById(`${id}_save`), text: 'Update room', position: 'top' },
+        { element: document.getElementById(`${id}_delete`), text: 'Delete room', position: 'top' },
+    ];
+    loadToolTip(rowToolTips);
 }
 
 function setRandomRoom(id) {
@@ -831,4 +857,18 @@ function elemDisplay(elem, show) {
 
 function getRandomInt(max) {
     return Math.floor(Math.random() * max);
+}
+
+function loadToolTip(tt) {
+    tt.forEach(({ element, text, position }) => {
+        if (element) setTippy(element, text, position);
+    });
+}
+
+function setTippy(elem, content, placement) {
+    if (isMobile) return;
+    tippy(elem, {
+        content: content,
+        placement: placement,
+    });
 }
