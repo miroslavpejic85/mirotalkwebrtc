@@ -12,6 +12,7 @@ const registerDiv = document.getElementById('registerDiv');
 const loginDiv = document.getElementById('loginDiv');
 const registerNowBtn = document.getElementById('registerNowBtn');
 const loginNowBtn = document.getElementById('loginNowBtn');
+const supportBtn = document.getElementById('supportBtn');
 
 usernameIn.value = window.localStorage.name || '';
 emailIn.value = window.localStorage.email || '';
@@ -76,6 +77,10 @@ registerNowBtn.addEventListener('click', (e) => {
 loginNowBtn.addEventListener('click', (e) => {
     showRegisterDiv();
 });
+
+supportBtn.onclick = () => {
+    window.open('https://codecanyon.net/user/miroslavpejic85', '_blank');
+};
 
 function showLoginDiv() {
     loginBtn.innerText = 'Register';
