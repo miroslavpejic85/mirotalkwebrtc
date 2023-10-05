@@ -140,14 +140,21 @@ const toolTips = [
 let config = {};
 
 $(document).ready(async function () {
-    config = await getConfig();
-    console.log('Config', config);
-    loadConfig();
-    loadToolTip(toolTips);
-    handleUserRoles();
+    elemDisplay(showBoxesDS,false);
+    getConfig()
+        .then((cfg)=>{
+            loadConfig(cfg);
+            loadToolTip(toolTips);
+            handleUserRoles();
+        })
+        .catch((err)=>{
+            openURL('/');
+        });
 });
 
 function loadConfig() {
+    config=cfg;
+    console.log('Config',config);
     myProfile.setAttribute('href', config.Author.Profile);
     repoP2P.setAttribute('href', config.MiroTalk.P2P.GitHub.Repo);
     starP2P.setAttribute('href', config.MiroTalk.P2P.GitHub.Star);
