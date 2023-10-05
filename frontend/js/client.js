@@ -152,7 +152,7 @@ $(document).ready(async function () {
         });
 });
 
-function loadConfig() {
+function loadConfig(cfg) {
     config = cfg;
     console.log('Config', config);
     myProfile.setAttribute('href', config.Author.Profile);
