@@ -62,7 +62,7 @@ async function userLogin(req, res) {
         const token = jwt.sign({ email: email, username: username, password: password }, JWT_KEY, {
             expiresIn: JWT_EXP,
         });
-        const userFindOne = await User.findOne({ email: email, username: username });
+        const userFindOne = await User.findOne({ email: email });
 
         if (!Object.is(userFindOne, null) && userFindOne.active) {
             console.log('User found, but we going to check if the provided password exists');
@@ -72,6 +72,13 @@ async function userLogin(req, res) {
                     return res.status(400).json({ message: err });
                 }
                 if (result) {
+                    console.log('User found, but we going to check if the provided username is correct');
+                    if (userFindOne.username !== username) {
+                        console.log('User found, wrong username!');
+                        return res.status(201).send({
+                            message: '⚠️ Account already exists. <br/> The username seems wrong!',
+                        });
+                    }
                     console.log('User found, just refresh the token');
                     userFindOne.token = token;
                     userFindOne.updatedAt = dateNow;
