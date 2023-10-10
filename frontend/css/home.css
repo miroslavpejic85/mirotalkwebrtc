@@ -1,136 +1,106 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&display=swap');
-
-:root {
-    --primary-color: #202123;
-    --secondary-color: #45494c;
-    --text-color: #f5f5f5;
-}
-
 body {
+    background-color: #080710;
+    margin: 0;
+}
+.user-login-wrap {
+    height: 100vh;
     display: flex;
-    box-sizing: border-box;
-    min-height: 100vh;
-    justify-content: center;
     align-items: center;
-    background-color: var(--primary-color);
-    font-family: 'Poppins', sans-serif;
+    justify-content: center;
+    background-image: url('../Images/bg.jpg');
+    background-size: cover;
+    background-position: center;
 }
-
-.myForm {
-    width: 240px;
-    padding: 30px 50px 50px 25px;
-    border-radius: 1rem;
-    background-color: var(--secondary-color);
-    color: var(--text-color);
+.form {
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 0 auto;
+    border-radius: 10px;
+    backdrop-filter: blur(40px);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    padding: 20px 35px;
+    font-family: sans-serif;
+    color: black;
+    letter-spacing: 0.5px;
+    outline: none;
+    border: none;
+    max-width: 350px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin: 0 15px;
 }
-
-.myForm:focus-within {
-    position: relative;
+.form h3 {
+    text-align: center;
+    font-size: 35px;
+    font-weight: 900;
+    color: white;
+    line-height: 42px;
+    margin: 0;
 }
-
+span {
+    font-size: 45px;
+    font-weight: 900;
+    color: #0468ff;
+}
 label {
     display: block;
     margin-top: 20px;
-    font-size: 14px;
+    font-size: 16px;
+    font-weight: 700;
 }
-
 input {
-    margin-top: 10px;
-    width: 100%;
-    padding: 12px;
-    border: 0;
-    border-radius: 4px;
-    background-color: var(--primary-color);
-    color: var(--text-color);
-    font-size: 16px;
-    font-weight: bold;
-    outline: none;
-}
-
-input:focus {
-    outline: 2px solid #439fff;
-    outline-offset: -1px;
-}
-
-#loginBtn {
     display: block;
-    margin-top: 25px;
-    width: 50%;
-    padding: 12px;
-    border: 0;
-    border-radius: 4px;
-    background-color: var(--primary-color);
-    color: var(--text-color);
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
+    height: 50px;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    padding: 0 10px;
+    margin-top: 6px;
+    font-size: 14px;
+    font-weight: 300;
     outline: none;
+    border: none;
+    color: black;
+    box-sizing: border-box;
+    border-radius: 20px;
 }
-
+input::placeholder{
+    color: black;
+}
+input:hover{
+    scale: 1.02;
+}
+button {
+    margin-top: 30px;
+    width: 100%;
+    background-color: #ffffff;
+    color: #080710;
+    padding: 15px 0;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 20px;
+    cursor: pointer;
+    border: none;
+    box-shadow: 10px solid rgb(0, 0, 0);
+}
+#loginBtn {
+    background-color: green;
+    color: white;
+    box-shadow: 0 0 20px rgb(0, 255, 64);
+}
+#loginBtn:hover{
+    scale: 1.02;
+}
+#registerNowBtn,#loginNowBtn {
+    box-shadow: 0 0 20px rgb(125, 255, 255);
+}
 #repeatPasswordIdLabel,
 #repeatPasswordIdInput {
     display: none;
 }
-
-#loginBtn:hover {
-    outline: 2px solid #439fff;
-    outline-offset: -1px;
+#supportBtn{
+    box-shadow: 0 0 20px rgb(255, 110, 110);
 }
-
-#registerDiv {
-    margin-top: 40px;
-    display: block;
-}
-
 #loginDiv {
-    margin-top: 40px;
     display: none;
-}
-
-#registerNowBtn,
-#loginNowBtn,
-#supportBtn {
-    margin-top: 10px;
-    padding: 8px;
-    border: 0;
-    border-radius: 4px;
-    background-color: var(--primary-color);
-    color: var(--text-color);
-    cursor: pointer;
-    outline: none;
-}
-
-#registerNowBtn:hover,
-#loginNowBtn:hover {
-    color: #439fff;
-    outline-offset: -1px;
-}
-#supportBtn:hover {
-    color: red;
-}
-
-.supportDiv {
-    position: relative;
-    top: 20px;
-}
-
-#supportBtn i {
-    color: red;
-}
-
-.swal2-title,
-.swal2-content {
-    background-color: var(--primary-color) !important;
-    color: var(--text-color) !important;
-    text-align: center;
-}
-
-.swal2-html-container {
-    background-color: var(--primary-color) !important;
-    color: var(--text-color) !important;
-}
-
-.swal2-popup {
-    border: 1px solid var(--secondary-color) !important;
-    background-color: var(--primary-color) !important;
 }

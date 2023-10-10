@@ -29,26 +29,29 @@
         <script defer src="../js/home.js"></script>
     </head>
     <body>
-        <div class="myForm">
-            <label for="email">Email</label>
-            <input id="emailIdInput" type="email" name="email" required />
-            <label for="username">Username</label>
-            <input id="usernameInput" type="text" name="text" required />
-            <label for="password">Password</label>
-            <input id="passwordIdInput" type="password" name="password" required />
-            <label id="repeatPasswordIdLabel" for="passwordCheck">Repeat Password</label>
-            <input id="repeatPasswordIdInput" type="password" name="passwordCheck" required />
-            <button id="loginBtn">Login</button>
-            <div id="registerDiv">
-                <label for="registerNow">Do you not have an account?</label>
-                <button id="registerNowBtn">Register Now</button>
-            </div>
-            <div id="loginDiv">
-                <label for="loginNow">Do you already have an account?</label>
-                <button id="loginNowBtn">Login Now</button>
-            </div>
-            <div class="supportDiv">
-                <button id="supportBtn"><i class="fas fa-heart"></i> Support</button>
+        <div class="user-login-wrap">
+            <div class="form">
+                <h3><span>M</span>iro<span>T</span>alk</h3>
+                <label for="email">Email</label>
+                <input id="emailIdInput" type="email" name="email" placeholder="Email" required />
+                <label for="username">Username</label>
+                <input id="usernameInput" type="text" name="text" placeholder="Username" required />
+                <label for="password">Password</label>
+                <input id="passwordIdInput" type="password" name="password" placeholder="Password" required />
+                <label id="repeatPasswordIdLabel" for="passwordCheck">Repeat Password</label>
+                <input id="repeatPasswordIdInput" type="password" name="passwordCheck" placeholder="Repeat Password" required />
+                <button id="loginBtn">Login</button>
+                <div id="registerDiv">
+                    <label for="registerNow">Do you not have an account?</label>
+                    <button id="registerNowBtn">Register Now</button>
+                </div>
+                <div id="loginDiv">
+                    <label for="loginNow">Do you already have an account?</label>
+                    <button id="loginNowBtn">Login Now</button>
+                </div>
+                <div class="supportDiv">
+                    <button id="supportBtn">❤️ Support</button>
+                </div>
             </div>
         </div>
     </body>
