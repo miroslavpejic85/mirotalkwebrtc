@@ -3,8 +3,10 @@
 <hr />
 
 <p align="center">
-    <a href="https://webrtc.mirotalk.com">webrtc.mirotalk.com</a>
+    <a href="https://webrtc.mirotalk.com">Explore MiroTalk WEB</a>
 </p>
+
+---
 
 > **Note**
 > Enter a `valid email`, username and chosen password, `confirm the email` and enjoy!
@@ -29,7 +31,7 @@
 <hr />
 
 <p align="center">
-    For questions, discussions, help & support, join with us on <a href="https://discord.gg/rgGYfeYW3N">discord</a>
+    Join our community for questions, discussions, and support on <a href="https://discord.gg/rgGYfeYW3N">Discord</a>
 </p>
 
 <hr />
@@ -126,7 +128,7 @@ You can check the swagger document at http://localhost:9000/api/v1/docs, or live
 
 <br/>
 
-To self-hosting MiroTalk WEB, just follow [this steps](./docs/self-hosting.md).
+For `self-hosting MiroTalk WEB` on your own dedicated server, please refer to [this comprehensive guide](docs/self-hosting.md). It will provide you with all the necessary instructions to get your MiroTalk C2C instance up and running smoothly.
 
 </details>
 
@@ -152,10 +154,8 @@ Thank you for considering supporting MiroTalk's projects. Your sponsorship can m
 
 ![AGPLv3](./frontend/Images/AGPLv3.png)
 
-MiroTalk is free and can be modified and forked. But the conditions of the AGPLv3 (GNU Affero General Public License v3.0) need to be respected. In particular modifications need to be free as well and made available to the public. Get a quick overview of the license at [Choose an open source license](https://choosealicense.com/licenses/agpl-3.0/).
+MiroTalk WEB is free and open-source under the terms of AGPLv3 (GNU Affero General Public License v3.0). Please `respect the license conditions`, In particular `modifications need to be free as well and made available to the public`. Get a quick overview of the license at [Choose an open source license](https://choosealicense.com/licenses/agpl-3.0/).
 
-For a MiroTalk license under conditions other than AGPLv3, please contact us at license.mirotalk@gmail.com or [purchase directly via CodeCanyon](https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313).
-
-Thank you!
+To obtain a [MiroTalk WEB license](https://docs.mirotalk.com/license/licensing-options/) with terms different from the AGPLv3, you can conveniently make your [purchase on CodeCanyon](https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313). This allows you to tailor the licensing conditions to better suit your specific requirements.
 
 </details>
