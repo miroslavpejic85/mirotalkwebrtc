@@ -110,8 +110,11 @@ Open in browser: [http://localhost:9000](http://localhost:9000)
 <br>
 
 -   `MongoDB Migrations:` For MongoDB migrations follow [this README](./database/README.md).
+
 -   `Ngrok:` You can start MiroTalk WEB directly from your local PC and make it accessible from any device outside your network by following [these instructions](docs/ngrok.md).
+
 -   `Self-hosting:` For `self-hosting MiroTalk WEB` on your own dedicated server, please refer to [this comprehensive guide](https://docs.mirotalk.com/mirotalk-web/self-hosting/). It will provide you with all the necessary instructions to get your MiroTalk WEB instance up and running smoothly.
+
 -   `Rest API:` You can check the swagger document at http://localhost:9000/api/v1/docs, or live [here](https://webrtc.mirotalk.com/api/v1/docs).
 
 </details>
