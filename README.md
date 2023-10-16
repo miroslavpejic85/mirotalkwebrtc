@@ -12,10 +12,6 @@ MiroTalk WEB is a platform that allows for the management of an unlimited number
 
 <hr />
 
-<p align="center">Manage and scheduling all the MiroTalk's WebRTC rooms:</p>
-
-<br/>
-
 | `MiroTalk`                                               | Description                                                                                                                                                                                |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 🚀 [P2P](https://github.com/miroslavpejic85/mirotalk)    | `Peer to peer` real-time video conferences, optimized for small groups. Unlimited time, unlimited concurrent rooms each having 5-8 participants.                                           |
@@ -74,7 +70,7 @@ $ npm install
 $ npm start
 ```
 
-Open in browser: http://localhost:9000
+Open in browser: [http://localhost:9000](http://localhost:9000)
 
 </details>
 
@@ -84,6 +80,8 @@ Open in browser: http://localhost:9000
 <br/>
 
 ![docker](./frontend/Images/docker.png)
+
+Repository: [Docker hub](https://hub.docker.com/r/mirotalk/webrtc)
 
 Install [docker](https://docs.docker.com/engine/install/) and [docker-compose](https://docs.docker.com/compose/install/).
 
@@ -100,7 +98,7 @@ $ docker pull mirotalk/webrtc:latest
 $ docker-compose up
 ```
 
-[Docker official image](https://hub.docker.com/r/mirotalk/webrtc)
+Open in browser: [http://localhost:9000](http://localhost:9000)
 
 </details>
 
