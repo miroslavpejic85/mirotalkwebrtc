@@ -105,29 +105,14 @@ Open in browser: [http://localhost:9000](http://localhost:9000)
 </details>
 
 <details>
-<summary>Migrations</summary>
+<summary>Documentations</summary>
 
-<br/>
+<br>
 
-For MongoDB migrations follow [this README](./database/README.md).
-
-</details>
-
-<details>
-<summary>API</summary>
-
-<br/>
-
-You can check the swagger document at http://localhost:9000/api/v1/docs, or live [here](https://webrtc.mirotalk.com/api/v1/docs).
-
-</details>
-
-<details>
-<summary>Self hosting</summary>
-
-<br/>
-
-For `self-hosting MiroTalk WEB` on your own dedicated server, please refer to [this comprehensive guide](https://docs.mirotalk.com/mirotalk-web/self-hosting/). It will provide you with all the necessary instructions to get your MiroTalk WEB instance up and running smoothly.
+-   `MongoDB Migrations:` For MongoDB migrations follow [this README](./database/README.md).
+-   `Ngrok:` You can start MiroTalk WEB directly from your local PC and make it accessible from any device outside your network by following [these instructions](docs/ngrok.md).
+-   `Self-hosting:` For `self-hosting MiroTalk WEB` on your own dedicated server, please refer to [this comprehensive guide](https://docs.mirotalk.com/mirotalk-web/self-hosting/). It will provide you with all the necessary instructions to get your MiroTalk WEB instance up and running smoothly.
+-   `Rest API:` You can check the swagger document at http://localhost:9000/api/v1/docs, or live [here](https://webrtc.mirotalk.com/api/v1/docs).
 
 </details>
 
@@ -158,3 +143,5 @@ MiroTalk WEB is free and open-source under the terms of AGPLv3 (GNU Affero Gener
 To obtain a [MiroTalk WEB license](https://docs.mirotalk.com/license/licensing-options/) with terms different from the AGPLv3, you can conveniently make your [purchase on CodeCanyon](https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313). This allows you to tailor the licensing conditions to better suit your specific requirements.
 
 </details>
+
+---
