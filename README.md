@@ -1,15 +1,14 @@
-# <p align="center">MiroTalk WebRTC Admin</p>
+# <p align="center">MiroTalk WebRTC</p>
 
-<hr />
+<p align="center">
+MiroTalk WEB is a platform that allows for the management of an unlimited number of users. Each user must register with their email, username, and password, after which they gain access to their personal dashboard. Within the dashboard, users can manage their rooms and schedule meetings using the desired version of MiroTalk on a specified date and time. Invitations to these meetings can be sent via email, shared through the web browser, or sent via SMS.
+</p>
+
+<hr/>
 
 <p align="center">
     <a href="https://webrtc.mirotalk.com">Explore MiroTalk WEB</a>
 </p>
-
----
-
-> **Note**
-> Enter a `valid email`, username and chosen password, `confirm the email` and enjoy!
 
 <hr />
 
@@ -128,7 +127,7 @@ You can check the swagger document at http://localhost:9000/api/v1/docs, or live
 
 <br/>
 
-For `self-hosting MiroTalk WEB` on your own dedicated server, please refer to [this comprehensive guide](docs/self-hosting.md). It will provide you with all the necessary instructions to get your MiroTalk WEB instance up and running smoothly.
+For `self-hosting MiroTalk WEB` on your own dedicated server, please refer to [this comprehensive guide](https://docs.mirotalk.com/mirotalk-web/self-hosting/). It will provide you with all the necessary instructions to get your MiroTalk WEB instance up and running smoothly.
 
 </details>
 
