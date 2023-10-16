@@ -1,4 +1,6 @@
-# <p align="center">MiroTalk WebRTC</p>
+<h1 align="center">MiroTalk WebRTC</h1>
+
+<br />
 
 <p align="center">
 MiroTalk WEB is a platform that allows for the management of an unlimited number of users. Each user must register with their email, username, and password, after which they gain access to their personal dashboard. Within the dashboard, users can manage their rooms and schedule meetings using the desired version of MiroTalk on a specified date and time. Invitations to these meetings can be sent via email, shared through the web browser, or sent via SMS.
