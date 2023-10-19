@@ -92,6 +92,7 @@ input:focus {
 #supportBtn {
     margin-top: 10px;
     padding: 8px;
+    width: 50%;
     border: 0;
     border-radius: 4px;
     background-color: var(--primary-color);
@@ -102,9 +103,11 @@ input:focus {
 
 #registerNowBtn:hover,
 #loginNowBtn:hover {
+    width: 50%;
     color: #439fff;
     outline-offset: -1px;
 }
+
 #supportBtn:hover {
     color: red;
 }
