@@ -41,33 +41,65 @@ MiroTalk WEB is a platform that allows for the management of an unlimited number
 Install [NodeJs](https://nodejs.org/en/blog/release/v18.16.0).
 
 ```bash
-# Copy .env.template to .env and edit it
+# Clone the project repo
+$ git clone https://github.com/miroslavpejic85/mirotalkwebrtc.git
+
+# Go to project dir
+$ cd mirotalkwebrtc
+
+# Copy .env.template to .env and customize it according to your needs
 $ cp .env.template .env
-# Copy config.template.js to config.js and edit it
+
+# Copy config.template.js to config.js and customize it according to your needs
 $ cp backend/config.template.js backend/config.js
 ```
 
-Customize `.env` according to your needs:
+---
+
+### MongoDb
+
+![mongo-db](./frontend/Images/mongodb.png)
+
+`Local MongoDb` deployment using [docker-compose](https://docs.docker.com/compose/install/): If you prefer to run MongoDb locally using docker-compose, execute the following command::
+
+```bash
+$ npm run mongo:up
+# npm run mongo:down to stop container
+```
+
+`Cloud MongoDb` deployment (Optional): Alternatively, you have the option to deploy MongoDb in the cloud, specifically through [MongoDb Atlas](https://www.mongodb.com/). Please remember to update the credentials in the `.env` file accordingly.
 
 ```bash
 # MongoDB Configuration (https://www.mongodb.com/)
 MONGO_URL=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}
 MONGO_DATABASE=mirotalk
+```
 
+---
+
+### Email verification
+
+![email](./frontend/Images/email.png)
+
+`User email verification` (Optional): By default, user email verification is `enabled`. If you prefer to disable it, set `EMAIL_VERIFICATION` to `false` in the `.env` file. If you choose to keep enabled, configure the email settings as follows:
+
+```bash
 # Email Configuration (https://support.google.com/mail/answer/185833?hl=en)
-# If you disable user email verification, set EMAIL_VERIFICATION to false
 EMAIL_VERIFICATION=true
-
-# Email Server Settings (Skip if EMAIL_VERIFICATION is set to false)
 EMAIL_HOST=emailHost
 EMAIL_PORT=emailPort
 EMAIL_USERNAME=emailUsername
 EMAIL_PASSWORD=emailPassword
 ```
 
+---
+
+### Install dependencies and start the server
+
 ```bash
 # Install dependencies
 $ npm install
+
 # Start the server
 $ npm start
 ```
