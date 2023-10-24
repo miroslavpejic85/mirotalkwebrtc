@@ -64,10 +64,10 @@ input {
     box-sizing: border-box;
     border-radius: 20px;
 }
-input::placeholder{
+input::placeholder {
     color: black;
 }
-input:hover{
+input:hover {
     scale: 1.02;
 }
 button {
@@ -88,17 +88,18 @@ button {
     color: white;
     box-shadow: 0 0 20px rgb(0, 255, 64);
 }
-#loginBtn:hover{
+#loginBtn:hover {
     scale: 1.02;
 }
-#registerNowBtn,#loginNowBtn {
+#registerNowBtn,
+#loginNowBtn {
     box-shadow: 0 0 20px rgb(125, 255, 255);
 }
 #repeatPasswordIdLabel,
 #repeatPasswordIdInput {
     display: none;
 }
-#supportBtn{
+#supportBtn {
     box-shadow: 0 0 20px rgb(255, 110, 110);
 }
 #loginDiv {

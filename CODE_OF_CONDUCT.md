@@ -97,7 +97,7 @@ It includes adaptions and additions from [Go Community Code of Conduct][golang-c
 [CNCF Code of Conduct][cncf-coc], and [Microsoft Open Source Code of Conduct][microsoft-coc].
 
 For answers to common questions about this code of conduct, see the FAQ at
-[https://www.contributor-covenant.org/faq][FAQ]. Translations are available at
+[https://www.contributor-covenant.org/faq][faq]. Translations are available at
 [https://www.contributor-covenant.org/translations][translations].
 
 [contributor-covenant-home]: https://www.contributor-covenant.org
@@ -105,5 +105,5 @@ For answers to common questions about this code of conduct, see the FAQ at
 [golang-coc]: https://golang.org/conduct
 [cncf-coc]: https://github.com/cncf/foundation/blob/master/code-of-conduct.md
 [microsoft-coc]: https://opensource.microsoft.com/codeofconduct/
-[FAQ]: https://www.contributor-covenant.org/faq
+[faq]: https://www.contributor-covenant.org/faq
 [translations]: https://www.contributor-covenant.org/translations
