@@ -60,14 +60,27 @@ $ cp backend/config.template.js backend/config.js
 
 ![mongo-db](./frontend/Images/mongodb.png)
 
-`Local MongoDb` deployment using [docker-compose](https://docs.docker.com/compose/install/): If you prefer to run MongoDb locally using docker-compose, execute the following command::
+#### Local MongoDB Deployment
+
+To run MongoDB locally with [Docker Compose](https://docs.docker.com/compose/install/), you can use the following commands:
+
+Start the MongoDB container:
 
 ```bash
 $ npm run mongo:up
-# npm run mongo:down to stop container
 ```
 
-`Cloud MongoDb` deployment (Optional): Alternatively, you have the option to deploy MongoDb in the cloud, specifically through [MongoDb Atlas](https://www.mongodb.com/). Please remember to update the credentials in the `.env` file accordingly.
+Stop the MongoDB container:
+
+```bash
+$ npm run mongo:down
+```
+
+#### Cloud MongoDB Deployment (Optional)
+
+If you prefer to deploy MongoDB in the cloud, especially through [MongoDb Atlas](https://www.mongodb.com/).
+
+Please remember to update the credentials in the `.env` file accordingly.
 
 ```bash
 # MongoDB Configuration (https://www.mongodb.com/)
@@ -77,11 +90,11 @@ MONGO_DATABASE=mirotalk
 
 ---
 
-### Email verification
+### User Email Verification (Optional)
 
 ![email](./frontend/Images/email.png)
 
-`User email verification` (Optional): By default, user email verification is `enabled`. If you prefer to disable it, set `EMAIL_VERIFICATION` to `false` in the `.env` file. If you choose to keep enabled, configure the email settings as follows:
+By default, user email verification is enabled. If you wish to disable it, set `EMAIL_VERIFICATION` to `false` in the `.env` file. If you choose to keep email verification enabled, make sure to configure the email settings in the `.env` file accordingly.
 
 ```bash
 # Email Configuration (https://support.google.com/mail/answer/185833?hl=en)
