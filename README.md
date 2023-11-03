@@ -165,6 +165,31 @@ Open in browser: [http://localhost:9000](http://localhost:9000)
 </details>
 
 <details open>
+<summary>Hetzner & Contabo</summary>
+
+<br/>
+
+[![Hetzner](frontend/images/hetzner.png)](https://hetzner.cloud/?ref=XdRifCzCK3bn)
+
+This application is running for `demonstration purposes` on [Hetzner](https://www.hetzner.com/), one of `the best` [cloud providers](https://www.hetzner.com/cloud) and [dedicated root servers](https://www.hetzner.com/dedicated-rootserver).
+
+---
+
+Use [my personal link](https://hetzner.cloud/?ref=XdRifCzCK3bn) to receive `€⁠20 IN CLOUD CREDITS`.
+
+---
+
+[![Contabo](frontend/images/contabo.png)](https://www.dpbolvw.net/click-101027391-14462707)
+
+Experience also top-tier German web hosting – dedicated servers, VPS, and web hosting at `unbeatable prices`. Reliable, secure, and backed by 24/7 support. [Explore now here](https://www.dpbolvw.net/click-101027391-14462707)
+
+---
+
+To set up your own instance of `MiroTalk WEB` on a dedicated cloud server, please refer to our comprehensive [self-hosting documentation](https://docs.mirotalk.com/mirotalk-web/self-hosting/). This guide will walk you through the process step by step, ensuring a smooth and successful deployment.
+
+</details>
+
+<details open>
 <summary>Support</summary>
 
 <br/>
