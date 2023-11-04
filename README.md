@@ -169,7 +169,7 @@ Open in browser: [http://localhost:9000](http://localhost:9000)
 
 <br/>
 
-[![Hetzner](frontend/images/hetzner.png)](https://hetzner.cloud/?ref=XdRifCzCK3bn)
+[![Hetzner](frontend/Images/hetzner.png)](https://hetzner.cloud/?ref=XdRifCzCK3bn)
 
 This application is running for `demonstration purposes` on [Hetzner](https://www.hetzner.com/), one of `the best` [cloud providers](https://www.hetzner.com/cloud) and [dedicated root servers](https://www.hetzner.com/dedicated-rootserver).
 
@@ -179,7 +179,7 @@ Use [my personal link](https://hetzner.cloud/?ref=XdRifCzCK3bn) to receive `€�
 
 ---
 
-[![Contabo](frontend/images/contabo.png)](https://www.dpbolvw.net/click-101027391-14462707)
+[![Contabo](frontend/Images/contabo.png)](https://www.dpbolvw.net/click-101027391-14462707)
 
 Experience also top-tier German web hosting – dedicated servers, VPS, and web hosting at `unbeatable prices`. Reliable, secure, and backed by 24/7 support. [Explore now here](https://www.dpbolvw.net/click-101027391-14462707)
 
