@@ -15,6 +15,7 @@ const config = require('./config');
 const ngrok = require('./common/ngrok');
 const sentry = require('./common/sentry');
 const path = require('path');
+const packageJson = require('../package.json');
 
 const apiPath = '/api/v1';
 
@@ -95,6 +96,7 @@ mongoose
                     home: home,
                     apiDocs: apiDocs,
                     nodeVersion: process.versions.node,
+                    app_version: packageJson.version,
                 });
             }
         });
