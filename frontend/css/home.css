@@ -18,7 +18,7 @@ body {
 
 .myForm {
     width: 240px;
-    padding: 30px 50px 50px 25px;
+    padding: 10px 50px 50px 25px;
     border-radius: 1rem;
     background-color: var(--secondary-color);
     color: var(--text-color);
@@ -115,6 +115,11 @@ input:focus {
 .supportDiv {
     position: relative;
     top: 10px;
+}
+
+.supportDiv p {
+    font-size: small;
+    color: #bbbbbb;
 }
 
 #supportBtn i {
