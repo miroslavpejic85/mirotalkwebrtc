@@ -41,6 +41,10 @@ MiroTalk WEB is a platform that allows for the management of an unlimited number
 Install [NodeJs](https://nodejs.org/en/blog/release/v18.16.0).
 
 ```bash
+# The project requires node version = 18.16.0. So make sure to update the node version using nvm if you have multiple version installed.
+# After updating the node version, you can verify using
+$ node --version # v18.16.0
+
 # Clone the project repo
 $ git clone https://github.com/miroslavpejic85/mirotalkwebrtc.git
 
