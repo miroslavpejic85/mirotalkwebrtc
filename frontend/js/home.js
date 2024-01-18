@@ -12,10 +12,13 @@ const registerDiv = document.getElementById('registerDiv');
 const loginDiv = document.getElementById('loginDiv');
 const registerNowBtn = document.getElementById('registerNowBtn');
 const loginNowBtn = document.getElementById('loginNowBtn');
+const supportDiv = document.getElementById('supportDiv');
 const supportBtn = document.getElementById('supportBtn');
 
 usernameIn.value = window.localStorage.name || '';
 emailIn.value = window.localStorage.email || '';
+
+hideElements();
 
 loginBtn.addEventListener('click', (e) => {
     e.preventDefault();
@@ -96,6 +99,12 @@ function showRegisterDiv() {
     elementDisplay(repeatPasswordIdLabel, false);
     elementDisplay(repeatPasswordIdInput, false);
     elementDisplay(registerDiv, true);
+}
+
+function hideElements() {
+    return true;
+    elementDisplay(supportDiv, false);
+    //...
 }
 
 function elementDisplay(elem, display) {

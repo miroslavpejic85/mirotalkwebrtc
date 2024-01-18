@@ -205,6 +205,7 @@ function handleUserRoles() {
                 }
             }
             toggleElements();
+            hideElements();
             showDataTable();
         })
         .catch((err) => {
@@ -250,6 +251,16 @@ function toggleElements() {
         if (addType.options[i].value == 'C2C' && !config.MiroTalk.C2C.Visible) addType.remove(i);
         if (addType.options[i].value == 'BRO' && !config.MiroTalk.BRO.Visible) addType.remove(i);
     }
+}
+
+function hideElements() {
+    return true;
+    elemDisplay(hideBoxesDS, false);
+    elemDisplay(showBoxesDS, false);
+    elemDisplay(boxesDS, false);
+    elemDisplay(myProfile, false);
+    elemDisplay(navSup, false);
+    //...
 }
 
 modeToggle.addEventListener('click', () => {
