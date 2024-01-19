@@ -137,6 +137,13 @@ const toolTips = [
     { element: refreshBtn, text: 'Refresh rooms', position: 'top' },
 ];
 
+const html = {
+    support: true,
+    profile: true,
+    projects: true,
+    //...
+};
+
 let config = {};
 
 $(document).ready(async function () {
@@ -254,12 +261,13 @@ function toggleElements() {
 }
 
 function hideElements() {
-    return true;
-    elemDisplay(hideBoxesDS, false);
-    elemDisplay(showBoxesDS, false);
-    elemDisplay(boxesDS, false);
-    elemDisplay(myProfile, false);
-    elemDisplay(navSup, false);
+    if (!html.projects) {
+        elemDisplay(hideBoxesDS, false);
+        elemDisplay(showBoxesDS, false);
+        elemDisplay(boxesDS, false);
+    }
+    !html.profile && elemDisplay(myProfile, false);
+    !html.support && elemDisplay(navSup, false);
     //...
 }
 
@@ -870,6 +878,7 @@ function animateCSS(element, animation, prefix = 'animate__') {
 }
 
 function elemDisplay(elem, show) {
+    if (!elem) return;
     elem.style.display = show ? 'flex' : 'none';
 }
 

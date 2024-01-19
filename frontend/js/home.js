@@ -15,10 +15,14 @@ const loginNowBtn = document.getElementById('loginNowBtn');
 const supportDiv = document.getElementById('supportDiv');
 const supportBtn = document.getElementById('supportBtn');
 
+const config = {
+    support: true,
+    //...
+};
+!config.support && elementDisplay(supportDiv, false);
+
 usernameIn.value = window.localStorage.name || '';
 emailIn.value = window.localStorage.email || '';
-
-hideElements();
 
 loginBtn.addEventListener('click', (e) => {
     e.preventDefault();
@@ -101,12 +105,7 @@ function showRegisterDiv() {
     elementDisplay(registerDiv, true);
 }
 
-function hideElements() {
-    return true;
-    elementDisplay(supportDiv, false);
-    //...
-}
-
 function elementDisplay(elem, display) {
+    if (!elem) return;
     elem.style.display = display ? 'block' : 'none';
 }
