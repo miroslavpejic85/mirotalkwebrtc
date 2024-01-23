@@ -2,6 +2,9 @@
 
 const jwt = require('jsonwebtoken');
 const utils = require('../common/utils');
+const logs = require('../common/logs');
+
+const log = new logs('Admin');
 
 const JWT_KEY = process.env.JWT_KEY;
 
@@ -23,9 +26,9 @@ const admin = (req, res, next) => {
             if (/^Bearer$/i.test(scheme)) token = credentials;
         }
         const decoded = jwt.verify(token, JWT_KEY);
-        //console.log('Admin credential', { ADMIN_EMAIL:ADMIN_EMAIL, ADMIN_USERNAME:ADMIN_USERNAME, ADMIN_PASSWORD:ADMIN_PASSWORD });
+        //log.debug('Admin credential', { ADMIN_EMAIL:ADMIN_EMAIL, ADMIN_USERNAME:ADMIN_USERNAME, ADMIN_PASSWORD:ADMIN_PASSWORD });
         if (!utils.isAdmin(decoded.email, decoded.username, decoded.password)) {
-            console.log('NOT ADMIN', decoded);
+            log.debug('NOT ADMIN', decoded);
             return res.status(201).json({ message: "You don't have admin privileges for this request!" });
         }
         req.user = decoded;

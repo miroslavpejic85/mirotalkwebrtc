@@ -1,5 +1,8 @@
 'use-strict';
 
+const logs = require('../common/logs');
+const log = new logs('Validator');
+
 const lowerCase = new RegExp('[a-z]');
 const upperCase = new RegExp('[A-Z]');
 const numbers = new RegExp('[0-9]');
@@ -13,28 +16,28 @@ const checkData = (req, res, next) => {
     const { username, email, phone, password } = req.body;
     if (username) {
         const validUsername = isValidUsername(username);
-        console.log('Validator', { username: validUsername });
+        log.debug('Validator', { username: validUsername });
         if (validUsername != true) {
             return res.status(201).json({ message: validUsername });
         }
     }
     if (email) {
         const validMail = isValidEmail(email);
-        console.log('Validator', { email: validMail });
+        log.debug('Validator', { email: validMail });
         if (validMail != true) {
             return res.status(201).json({ message: validMail });
         }
     }
     if (phone) {
         const validPhone = isValidPhoneNumber(phone);
-        console.log('Validator', { phone: validPhone });
+        log.debug('Validator', { phone: validPhone });
         if (validPhone != true) {
             return res.status(201).json({ message: validPhone });
         }
     }
     if (password) {
         const validPassword = isValidPassword(password);
-        console.log('Validator', { password: validPassword });
+        log.debug('Validator', { password: validPassword });
         if (validPassword != true) {
             return res.status(201).json({ message: validPassword });
         }

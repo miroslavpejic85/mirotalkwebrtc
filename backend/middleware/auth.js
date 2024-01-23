@@ -1,6 +1,9 @@
 'use-strict';
 
 const jwt = require('jsonwebtoken');
+const logs = require('../common/logs');
+
+const log = new logs('Auth');
 
 const JWT_KEY = process.env.JWT_KEY;
 
@@ -22,7 +25,7 @@ const auth = (req, res, next) => {
             if (/^Bearer$/i.test(scheme)) token = credentials;
         }
         const decoded = jwt.verify(token, JWT_KEY);
-        //console.log('jwt auth decoded', decoded);
+        //log.debug('jwt auth decoded', decoded);
         req.user = decoded;
     } catch (err) {
         return res.status(401).json({ message: 'Token invalid or expired' });

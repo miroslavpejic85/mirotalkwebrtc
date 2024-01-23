@@ -1,6 +1,9 @@
 'use-strict';
 
+const logs = require('../common/logs');
 const nodemailer = require('nodemailer');
+
+const log = new logs('NodeMailer');
 
 const SERVER_URL = process.env.SERVER_URL;
 const EMAIL_HOST = process.env.EMAIL_HOST;
@@ -10,7 +13,7 @@ const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
 const EMAIL_VERIFICATION = process.env.EMAIL_VERIFICATION === 'true' || false;
 const SUPPORT = 'https://paypal.me/mirotalk?country.x=EN&locale.x=en_EN'; // Thank you!
 
-console.debug('Email', {
+log.info('Email', {
     verification: EMAIL_VERIFICATION,
     host: EMAIL_HOST,
     port: EMAIL_PORT,
@@ -41,13 +44,13 @@ function sendConfirmationEmail(name, email, confirmationCode) {
                 <p>If it wasn't you, please ignore this email.</p>
             `,
         })
-        .catch((err) => console.error(err));
+        .catch((err) => log.error(err));
 }
 
 function sendConfirmationOkEmail(name, toEmail, credential) {
     const credentialObj = JSON.parse(credential);
     const { role, email, username, password, active, allow, createdAt, updatedAt } = credentialObj;
-    console.log('sendConfirmationOkEmail', credentialObj);
+    log.debug('sendConfirmationOkEmail', credentialObj);
     transport
         .sendMail({
             from: EMAIL_USERNAME,
@@ -120,7 +123,7 @@ function sendConfirmationOkEmail(name, toEmail, credential) {
                 <p>MiroTalk Team</p>
             `,
         })
-        .catch((err) => console.error(err));
+        .catch((err) => log.error(err));
 }
 
 module.exports = {

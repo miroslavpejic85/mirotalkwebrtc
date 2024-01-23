@@ -1,5 +1,8 @@
 'use strict';
 
+const logs = require('../common/logs');
+const log = new logs('Controllers-sms');
+
 const smsEnabled = process.env.TWILIO_SMS == 'true';
 const phoneNumber = process.env.TWILIO_PHONE_NUMBER;
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -23,16 +26,16 @@ async function smsSend(req, res) {
                 to: toNumber,
             })
             .then((data) => {
-                console.log('SMS Meeting Invitation sent successfully!', data);
+                log.debug('SMS Meeting Invitation sent successfully!', data);
                 return res.status(200).json(data);
             })
             .catch((error) => {
                 const errMsg = `Failed to send SMS Meeting Invitation: ${error.message}`;
-                console.error(errMsg);
+                log.error(errMsg);
                 return res.status(201).json({ message: errMsg });
             });
     } catch (error) {
-        console.error('SmS error', error);
+        log.error('SmS error', error);
         return res.status(400).json({ message: error.message });
     }
 }

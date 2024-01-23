@@ -14,8 +14,11 @@ const users = require('./routes/users');
 const config = require('./config');
 const ngrok = require('./common/ngrok');
 const sentry = require('./common/sentry');
+const logs = require('./common/logs');
 const path = require('path');
 const packageJson = require('../package.json');
+
+const log = new logs('Server');
 
 const apiPath = '/api/v1';
 
@@ -30,7 +33,7 @@ const MONGO_DATABASE = process.env.MONGO_DATABASE;
 // Mandatory params to make this server up and running
 
 if (!SERVER_HOST || !SERVER_PORT || !SERVER_URL || !MONGO_URL || !MONGO_DATABASE) {
-    console.error('Invalid or missing .env file');
+    log.error('Invalid or missing .env file');
     process.exit(1);
 }
 
@@ -57,7 +60,7 @@ mongoose
 
         // Logs requests
         app.use((req, res, next) => {
-            console.log('[ ' + new Date().toISOString() + ' ] - New request:', {
+            log.debug('New request:', {
                 headers: req.headers,
                 body: req.body,
                 method: req.method,
@@ -80,7 +83,7 @@ mongoose
         });
 
         app.get('/config', auth, (req, res) => {
-            console.log('Send config', config);
+            log.debug('Send config', config);
             res.status(200).json(config);
         });
 
@@ -92,7 +95,7 @@ mongoose
             if (ngrok.enabled()) {
                 ngrok.start();
             } else {
-                console.debug('Server', {
+                log.info('Server', {
                     home: home,
                     apiDocs: apiDocs,
                     nodeVersion: process.versions.node,
@@ -101,29 +104,29 @@ mongoose
             }
         });
     })
-    .catch((err) => console.error('Mongoose init connection error: ' + err));
+    .catch((err) => log.error('Mongoose init connection error: ' + err));
 
 mongoose.connection.on('connected', () => {
-    console.log('Mongoose connection open to:', { url: MONGO_URL, db: MONGO_DATABASE });
+    log.debug('Mongoose connection open to:', { url: MONGO_URL, db: MONGO_DATABASE });
 });
 
 mongoose.connection.on('error', (err) => {
-    console.log('Mongoose connection error:', { error: err, url: MONGO_URL, db: MONGO_DATABASE });
+    log.error('Mongoose connection error:', { error: err, url: MONGO_URL, db: MONGO_DATABASE });
 });
 
 mongoose.connection.on('disconnected', () => {
-    console.log('Mongoose connection disconnected');
+    log.debug('Mongoose connection disconnected');
 });
 
 process.on('SIGINT', () => {
     mongoose.connection
         .close()
         .then(() => {
-            console.log('Mongoose connection disconnected through app termination');
+            log.debug('Mongoose connection disconnected through app termination');
             process.exit(0);
         })
         .catch((error) => {
-            console.error('Error closing MongoDB connection:', error);
+            log.error('Error closing MongoDB connection:', error);
             process.exit(0);
         });
 });
