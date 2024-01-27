@@ -1,111 +1,141 @@
 'use strict';
 
-console.log('Location', window.location);
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Location', window.location);
 
-const usernameIn = document.getElementById('usernameInput');
-const emailIn = document.getElementById('emailIdInput');
-const passwordIdIn = document.getElementById('passwordIdInput');
-const repeatPasswordIdLabel = document.getElementById('repeatPasswordIdLabel');
-const repeatPasswordIdInput = document.getElementById('repeatPasswordIdInput');
-const loginBtn = document.getElementById('loginBtn');
-const registerDiv = document.getElementById('registerDiv');
-const loginDiv = document.getElementById('loginDiv');
-const registerNowBtn = document.getElementById('registerNowBtn');
-const loginNowBtn = document.getElementById('loginNowBtn');
-const supportDiv = document.getElementById('supportDiv');
-const supportBtn = document.getElementById('supportBtn');
+    // storage
+    const storageUsername = window.localStorage.name || '';
+    const storageEmail = window.localStorage.email || '';
 
-const config = {
-    support: true,
-    //...
-};
-!config.support && elementDisplay(supportDiv, false);
+    // signup
+    const signupUsernameInput = document.getElementById('signupUsernameInput');
+    const signupEmailIdInput = document.getElementById('signupEmailIdInput');
+    const signupPasswordIdInput = document.getElementById('signupPasswordIdInput');
+    const signupRepeatPasswordIdInput = document.getElementById('signupRepeatPasswordIdInput');
+    const signupBtn = document.getElementById('signupBtn');
 
-usernameIn.value = window.localStorage.name || '';
-emailIn.value = window.localStorage.email || '';
+    // login
+    const loginUsernameInput = document.getElementById('loginUsernameInput');
+    const loginEmailIdInput = document.getElementById('loginEmailIdInput');
+    const loginPasswordIdInput = document.getElementById('loginPasswordIdInput');
+    const loginBtn = document.getElementById('loginBtn');
 
-loginBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (usernameIn.value == '') {
-        popupMessage('warning', '⚠️ Username field empty!');
-        return false;
-    }
-    if (emailIn.value == '') {
-        popupMessage('warning', '⚠️ Email field empty!');
-        return false;
-    }
-    if (passwordIdIn.value == '') {
-        popupMessage('warning', '⚠️ Password field empty!');
-        return false;
-    }
-    if (
-        loginBtn.innerText == 'Register' &&
-        (passwordIdIn.value == '' ||
-            repeatPasswordIdInput.value == '' ||
-            passwordIdIn.value != repeatPasswordIdInput.value)
-    ) {
-        popupMessage('warning', '⚠️ Repeat password field not match!');
-        return false;
-    }
+    // support
+    const supportBtn = document.getElementById('supportBtn');
 
-    window.localStorage.name = usernameIn.value.trim();
-    window.localStorage.email = emailIn.value.toLowerCase().trim();
+    const config = {
+        support: true,
+        //...
+    };
+    !config.support && elementDisplay(supportBtn, false);
 
-    const data = {
-        username: usernameIn.value.trim(),
-        email: emailIn.value.toLowerCase().trim(),
-        password: passwordIdIn.value.trim(),
+    // Login/Signup
+    const chk = document.getElementById('chk');
+    const login = document.querySelector('.login');
+    const loginLabel = document.querySelector('.login label');
+    const signupLabel = document.querySelector('.signup label');
+
+    signupUsernameInput.value = storageUsername;
+    signupEmailIdInput.value = storageEmail;
+    loginUsernameInput.value = storageUsername;
+    loginEmailIdInput.value = storageEmail;
+
+    showLogin();
+
+    chk.addEventListener('change', () => {
+        chk.checked ? showSignUp() : showLogin();
+    });
+
+    loginBtn.addEventListener('click', handleLogin);
+
+    signupBtn.addEventListener('click', handleSignup);
+
+    supportBtn.onclick = () => {
+        window.open('https://codecanyon.net/user/miroslavpejic85', '_blank');
     };
 
-    userLogin(data)
-        .then((res) => {
-            console.log('[API] - USER LOGIN RESPONSE', res);
-            if (res.message) {
-                popupMessage('warning', res.message);
-                if (!res.message.includes('Pending')) {
-                    showRegisterDiv();
-                }
-            } else {
-                window.sessionStorage.userId = res._id;
-                window.sessionStorage.userToken = res.token;
-                window.location.href = `/client/?token=${res.token}`;
+    function handleLogin(e) {
+        e.preventDefault();
+        const validationError = validateInput(loginUsernameInput, loginEmailIdInput, loginPasswordIdInput);
+        if (validationError) {
+            popupMessage('warning', validationError);
+            return false;
+        }
+        const data = gatherInputData(loginUsernameInput, loginEmailIdInput, loginPasswordIdInput);
+        signupOrLogin(data);
+    }
+
+    function handleSignup(e) {
+        e.preventDefault();
+        const validationError = validateInput(
+            signupUsernameInput,
+            signupEmailIdInput,
+            signupPasswordIdInput,
+            signupRepeatPasswordIdInput,
+        );
+        if (validationError) {
+            popupMessage('warning', validationError);
+            return false;
+        }
+        const data = gatherInputData(signupUsernameInput, signupEmailIdInput, signupPasswordIdInput);
+        signupOrLogin(data);
+    }
+
+    function gatherInputData(usernameInput, emailInput, passwordInput) {
+        return {
+            username: usernameInput.value.trim(),
+            email: emailInput.value.toLowerCase().trim(),
+            password: passwordInput.value.trim(),
+        };
+    }
+
+    function validateInput(...inputs) {
+        for (const input of inputs) {
+            if (input.value.trim() === '') {
+                return `⚠️ ${input.name} field empty!`;
             }
-        })
-        .catch((err) => {
-            console.error('[API] - USER LOGIN ERROR', err);
-            popupMessage('error', `⚠️ API USER LOGIN error: ${err.message}`);
-        });
+        }
+        if (signupRepeatPasswordIdInput && signupPasswordIdInput.value !== signupRepeatPasswordIdInput.value) {
+            return '⚠️ Repeat password field does not match!';
+        }
+        return null;
+    }
+
+    function signupOrLogin(data) {
+        window.localStorage.name = data.username;
+        window.localStorage.email = data.email;
+        userLogin(data)
+            .then((res) => {
+                console.log('[API] - USER LOGIN RESPONSE', res);
+                if (res.message) {
+                    popupMessage('warning', res.message);
+                    res.message.includes('Pending') ? showLogin() : showSignUp();
+                } else {
+                    window.sessionStorage.userId = res._id;
+                    window.sessionStorage.userToken = res.token;
+                    window.location.href = `/client/?token=${res.token}`;
+                }
+            })
+            .catch((err) => {
+                console.error('[API] - USER LOGIN ERROR', err);
+                popupMessage('error', `⚠️ API USER LOGIN error: ${err.message}`);
+            });
+    }
+
+    function elementDisplay(elem, display) {
+        if (!elem) return;
+        elem.style.display = display ? 'block' : 'none';
+    }
+
+    function showSignUp() {
+        login.style.transform = 'translateY(-180px)';
+        loginLabel.style.transform = 'scale(0.6)';
+        signupLabel.style.transform = 'scale(1)';
+    }
+
+    function showLogin() {
+        login.style.transform = 'translateY(-550px)';
+        loginLabel.style.transform = 'scale(1)';
+        signupLabel.style.transform = 'scale(0.6)';
+    }
 });
-
-registerNowBtn.addEventListener('click', (e) => {
-    showLoginDiv();
-});
-
-loginNowBtn.addEventListener('click', (e) => {
-    showRegisterDiv();
-});
-
-supportBtn.onclick = () => {
-    window.open('https://codecanyon.net/user/miroslavpejic85', '_blank');
-};
-
-function showLoginDiv() {
-    loginBtn.innerText = 'Register';
-    elementDisplay(registerDiv, false);
-    elementDisplay(repeatPasswordIdLabel, true);
-    elementDisplay(repeatPasswordIdInput, true);
-    elementDisplay(loginDiv, true);
-}
-
-function showRegisterDiv() {
-    loginBtn.innerText = 'Login';
-    elementDisplay(loginDiv, false);
-    elementDisplay(repeatPasswordIdLabel, false);
-    elementDisplay(repeatPasswordIdInput, false);
-    elementDisplay(registerDiv, true);
-}
-
-function elementDisplay(elem, display) {
-    if (!elem) return;
-    elem.style.display = display ? 'block' : 'none';
-}

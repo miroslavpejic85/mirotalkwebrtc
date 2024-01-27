@@ -29,7 +29,7 @@ async function userCreate(req, res) {
                 nodemailer.sendConfirmationEmail(username, email, confirmationCode);
                 log.debug('New user, sent email confirmation');
                 return res.status(201).send({
-                    message: '⚠️ Pending account. <br/> Please verify your email to confirm!',
+                    message: '⚠️ Pending account. <br/> Please verify your email to confirm then Log in!',
                 });
             } else {
                 log.debug('New user, no email verification needed, going to add it the storage');
@@ -106,7 +106,7 @@ async function userLogin(req, res) {
                 nodemailer.sendConfirmationEmail(username, email, confirmationCode);
                 log.debug('User login, sent email confirmation');
                 return res.status(201).send({
-                    message: '⚠️ Pending account. <br/> Please verify your email to confirm!',
+                    message: '⚠️ Pending account. <br/> Please verify your email to confirm then Log in!',
                 });
             } else {
                 log.debug('No email verification, add user to storage...');

@@ -30,27 +30,29 @@
         <script defer src="../js/home.js"></script>
     </head>
     <body>
-        <div class="myForm">
-            <label for="email">Email</label>
-            <input id="emailIdInput" type="email" name="email" required />
-            <label for="username">Username</label>
-            <input id="usernameInput" type="text" name="text" required />
-            <label for="password">Password</label>
-            <input id="passwordIdInput" type="password" name="password" required />
-            <label id="repeatPasswordIdLabel" for="passwordCheck">Repeat Password</label>
-            <input id="repeatPasswordIdInput" type="password" name="passwordCheck" required />
-            <button id="loginBtn">Login</button>
-            <div id="registerDiv">
-                <label for="registerNow">Do you not have an account?</label>
-                <button id="registerNowBtn">Register Now</button>
+        <div class="main">
+            <input type="checkbox" id="chk" aria-hidden="true" />
+            <div class="signup">
+                <label for="chk" aria-hidden="true">Sign up</label>
+                <input id="signupUsernameInput" type="text" name="User name" placeholder="User name" required />
+                <input id="signupEmailIdInput" type="email" name="Email" placeholder="Email" required />
+                <input id="signupPasswordIdInput" type="password" name="Password" placeholder="Password" required />
+                <input
+                    id="signupRepeatPasswordIdInput"
+                    type="password"
+                    name="Confirm password"
+                    placeholder="Confirm password"
+                    required
+                />
+                <button id="signupBtn">Sign up</button>
             </div>
-            <div id="loginDiv">
-                <label for="loginNow">Do you already have an account?</label>
-                <button id="loginNowBtn">Login Now</button>
-            </div>
-            <div id="supportDiv" class="supportDiv">
-                <button id="supportBtn"><i class="fas fa-heart"></i> Support us</button>
-                <p>Empower MiroTalk: Your Support Makes the Difference!</p>
+            <div class="login">
+                <label for="chk" aria-hidden="true">Login</label>
+                <input id="loginUsernameInput" type="text" name="User name" placeholder="User name" required />
+                <input id="loginEmailIdInput" type="email" name="Email" placeholder="Email" required />
+                <input id="loginPasswordIdInput" type="password" name="Password" placeholder="Password" required />
+                <button id="loginBtn">Login</button>
+                <p id="supportBtn">© 2024 MiroTalk, all rights reserved</p>
             </div>
         </div>
     </body>
