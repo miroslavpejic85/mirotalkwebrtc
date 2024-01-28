@@ -109,18 +109,17 @@ button:hover {
 }
 
 #loginBtn {
-    background: #439fff;
+    background-color: var(--secondary-color) !important;
     cursor: pointer;
 }
 #loginBtn:hover {
-    background: var(--primary-color);
+    background-color: #439fff !important;
 }
-
 #supportBtn {
     width: 65%;
     margin: 10px auto;
     color: var(--text-color);
-    background: #316fb2;
+    background-color: transparent !important;
     font-size: 0.8em;
     font-weight: bold;
     text-align: left;
@@ -130,8 +129,7 @@ button:hover {
     cursor: pointer;
 }
 #supportBtn:hover {
-    background: #316fb2;
-    transform: scale(1.1);
+    transform: scale(0.9);
 }
 
 .swal2-title,
