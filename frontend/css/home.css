@@ -148,3 +148,7 @@ button:hover {
     border: 1px solid var(--secondary-color) !important;
     background-color: var(--primary-color) !important;
 }
+
+.swal2-confirm {
+    width: 100%;
+}
