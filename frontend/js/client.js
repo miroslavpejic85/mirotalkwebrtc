@@ -133,7 +133,6 @@ if (getMode && getMode === 'dark') body.classList.toggle('dark');
 if (getStatus && getStatus === 'close') sidebar.classList.toggle('close');
 
 const toolTips = [
-    { element: openAddBtn, text: 'Add new room', position: 'top' },
     { element: delAllBtn, text: 'Delete all rooms', position: 'top' },
     { element: refreshBtn, text: 'Refresh rooms', position: 'top' },
 ];

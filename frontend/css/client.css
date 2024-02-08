@@ -424,19 +424,6 @@ iframe {
     background-color: var(--box4-color);
 }
 
-.dash-content .title .actions {
-    display: flex;
-    align-items: center;
-}
-
-.dash-content .title .actions i {
-    cursor: pointer;
-}
-.dash-content .title .actions i:hover {
-    color: var(--i-act-color-hover);
-    transition: var(--tran-03);
-}
-
 .dsRooms {
     display: block;
     overflow-x: auto;
@@ -542,6 +529,26 @@ iframe {
     background-color: var(--color-hover);
     color: #fff;
     transition: var(--tran-05);
+}
+
+.custom-button {
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    color: #fff;
+    background: var(--primary-color);
+    cursor: pointer;
+}
+
+.custom-button:hover {
+    background: var(--color-hover);
+    transition: var(--tran-05);
+}
+
+#addRoomDiv {
+    position: absolute; 
+    float: right; 
+    right: 15px;
 }
 
 .add-row-select-options {
