@@ -36,8 +36,12 @@ const signupLabel = document.querySelector('.signup label');
 
 signupUsernameInput.value = storageUsername;
 signupEmailIdInput.value = storageEmail;
+signupPasswordIdInput.value = '';
+signupRepeatPasswordIdInput.value = '';
+
 loginUsernameInput.value = storageUsername;
 loginEmailIdInput.value = storageEmail;
+loginPasswordIdInput.value = '';
 
 showLogin();
 
