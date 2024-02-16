@@ -18,10 +18,8 @@ async function start() {
         await NGROK.authtoken(NGROK_AUTH_TOKEN);
         await NGROK.connect(SERVER_PORT);
         const api = NGROK.getApi();
-        const data = await api.listTunnels();
-        const pu0 = data.tunnels[0].public_url;
-        const pu1 = data.tunnels[1].public_url;
-        const tunnelHttps = pu0.startsWith('https') ? pu0 : pu1;
+        const list = await api.listTunnels();
+        const tunnelHttps = list.tunnels[0].public_url;
         log.info('Server', {
             home: tunnelHttps,
             apiDocs: `${tunnelHttps}/api/v1/docs`,
