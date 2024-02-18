@@ -5,6 +5,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const express = require('express');
 const auth = require('./middleware/auth');
+const corsOptions = require('./config/cors');
 const cors = require('cors');
 const compression = require('compression');
 const api = require('./routes/api');
@@ -52,7 +53,7 @@ mongoose
     .then(() => {
         const app = express();
 
-        app.use(cors());
+        app.use(cors(corsOptions()));
         app.use(compression());
         app.use(express.static(frontendDir));
         app.use(express.urlencoded({ extended: true }));
@@ -96,6 +97,7 @@ mongoose
                 ngrok.start();
             } else {
                 log.info('Server', {
+                    cors: corsOptions(),
                     home: home,
                     apiDocs: apiDocs,
                     nodeVersion: process.versions.node,
