@@ -72,6 +72,30 @@ paths:
                 '400':
                     description: Bad request
 
+    /user/isAuth:
+        post:
+            tags:
+                - user
+            summary: Check if user authenticated
+            description: Check if user authenticated
+            operationId: userIsAuth
+            requestBody:
+                description: Check if user authenticate
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UserIsAuthReq'
+                required: true
+            responses:
+                '201':
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UserIsAuthRes'
+                '400':
+                    description: Bad request
+
     /user/confirmation/{token}:
         get:
             security:
@@ -367,6 +391,18 @@ components:
                 password:
                     type: string
                     example: 'Test@123'
+        UserIsAuthReq:
+            type: object
+            properties:
+                email:
+                    type: string
+                    example: 'miroslav.pejic.85@gmail.com'
+                password:
+                    type: string
+                    example: 'Test@123'
+                api_secret_key:
+                    type: string
+                    example: '91bbfac3-5e39-4583-9123-883b72be505c'
         UserRes:
             type: object
             properties:
@@ -401,7 +437,13 @@ components:
                 allow:
                     type: array
                     example: '[P2P, SFU, C2C, BRO]'
-
+        UserIsAuthRes:
+            type: object
+            properties:
+                message:
+                    type: boolean
+                    enum: [true, false]
+                    example: true
         RoomReq:
             type: object
             properties:

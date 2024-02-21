@@ -3,6 +3,7 @@
 const express = require('express');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
+const api = require('../middleware/api');
 const validator = require('../middleware/validator');
 const router = express.Router();
 const controllersUsers = require('../controllers/users');
@@ -17,7 +18,12 @@ router.post('/user/login', validator, (req, res) => {
     controllersUsers.userLogin(req, res);
 });
 
-//POST: /api/v1/user/confirmation/?token=<token>
+//POST: /api/v1/user/isAuth/
+router.post('/user/isAuth', api, (req, res) => {
+    controllersUsers.userIsAuth(req, res);
+});
+
+//GET: /api/v1/user/confirmation/?token=<token>
 router.get('/user/confirmation', auth, (req, res) => {
     controllersUsers.userConfirmation(req, res);
 });

@@ -136,6 +136,36 @@ async function userLogin(req, res) {
     }
 }
 
+async function userIsAuth(req, res) {
+    try {
+        log.debug('userIsAuth query', req.body);
+
+        const { email, password } = req.body;
+
+        // Check by email as uuid and indexed
+        const userFindOne = await User.findOne({ email: email });
+
+        if (Object.is(userFindOne, null) || !userFindOne.active) {
+            log.debug('user not found!', email);
+            return res.status(201).json({ message: false });
+        }
+
+        bcrypt
+            .compare(password, userFindOne.password)
+            .then((isPasswordValid) => {
+                log.debug('bcrypt compare isPasswordValid', isPasswordValid);
+                return res.status(201).json({ message: isPasswordValid });
+            })
+            .catch((error) => {
+                log.error('bcrypt compare error', error);
+                return res.status(400).json({ message: error.message });
+            });
+    } catch (error) {
+        log.error('userIsAuth', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
 async function userConfirmation(req, res) {
     try {
         log.debug('userConfirmation query', req.query);
@@ -242,6 +272,7 @@ async function userDeleteALL(req, res) {
 module.exports = {
     userCreate,
     userLogin,
+    userIsAuth,
     userConfirmation,
     userGet,
     userUpdate,
