@@ -22,6 +22,10 @@ module.exports = class logs {
         this.timeStart = Date.now();
         this.timeEnd = null;
         this.timeElapsedMs = null;
+        this.tzOptions = {
+            timeZone: process.env.TZ || 'UTC',
+            hour12: false,
+        };
     }
 
     debug(msg, op = '') {
@@ -63,10 +67,9 @@ module.exports = class logs {
     }
 
     getDateTime() {
-        const options = {
-            timeZone: process.env.TZ || 'UTC',
-        };
-        return colors.cyan(new Date().toLocaleString('en-US', options));
+        const currentTime = new Date().toLocaleString('en-US', this.tzOptions);
+        const milliseconds = String(new Date().getMilliseconds()).padStart(3, '0');
+        return colors.cyan(`${currentTime}:${milliseconds}`);
     }
 
     getFormatTime(ms) {
