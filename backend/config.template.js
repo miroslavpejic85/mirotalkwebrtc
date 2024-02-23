@@ -21,6 +21,8 @@ module.exports = {
         },
         SFU: {
             Visible: true,
+            Protected: false, // host_protected or user_auth enabled
+            TokenEndpoint: '/api/v1/token',
             Home: 'https://sfu.mirotalk.com',
             Room: 'https://sfu.mirotalk.com/newroom',
             Join: 'https://sfu.mirotalk.com/join/',

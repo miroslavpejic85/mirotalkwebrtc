@@ -402,7 +402,7 @@ components:
                     example: 'Test@123'
                 api_secret_key:
                     type: string
-                    example: '91bbfac3-5e39-4583-9123-883b72be505c'
+                    example: 'mirotalkweb_default_secret'
         UserRes:
             type: object
             properties:

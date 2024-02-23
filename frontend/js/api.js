@@ -148,3 +148,13 @@ function getConfig() {
         headers: headers,
     }).then((response) => response.data);
 }
+
+// API MiroTalk SFU
+
+function getTokenSFU() {
+    return axios({
+        method: 'GET',
+        url: `${apiPath}/token/SFU/${userToken}`,
+        headers: headers,
+    }).then((response) => response.data);
+}

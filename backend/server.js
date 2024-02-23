@@ -11,6 +11,7 @@ const compression = require('compression');
 const api = require('./routes/api');
 const room = require('./routes/room');
 const sms = require('./routes/sms');
+const token = require('./routes/token');
 const users = require('./routes/users');
 const config = require('./config');
 const ngrok = require('./common/ngrok');
@@ -73,6 +74,7 @@ mongoose
         app.use(apiPath, api);
         app.use(apiPath, room);
         app.use(apiPath, sms);
+        app.use(apiPath, token);
         app.use(apiPath, users);
 
         app.get('/', (req, res) => {

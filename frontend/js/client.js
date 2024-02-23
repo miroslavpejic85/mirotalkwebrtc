@@ -144,6 +144,12 @@ const html = {
     //...
 };
 
+const tokens = {
+    sfu: '',
+    p2p: '',
+    //...
+};
+
 let config = {};
 
 $(document).ready(async function () {
@@ -152,6 +158,7 @@ $(document).ready(async function () {
         .then((cfg) => {
             loadConfig(cfg);
             loadToolTip(toolTips);
+            handleTokens(cfg);
             handleUserRoles();
         })
         .catch((err) => {
@@ -179,6 +186,19 @@ function loadConfig(cfg) {
     sfuIframe.setAttribute('src', config.MiroTalk.SFU.Room);
     c2cIframe.setAttribute('src', config.MiroTalk.C2C.Home);
     broIframe.setAttribute('src', config.MiroTalk.BRO.Home);
+}
+
+function handleTokens(cfg) {
+    if (cfg.MiroTalk.SFU.Protected) {
+        getTokenSFU()
+            .then((token) => {
+                tokens.sfu = token;
+            })
+            .catch((err) => {
+                console.error('Token SFU error', err.message);
+            });
+    }
+    //...
 }
 
 function handleUserRoles() {
@@ -812,7 +832,10 @@ function getRoomURL(data, bro = true) {
             roomURL = `${config.MiroTalk.P2P.Join}${data.room}`;
             break;
         case 'SFU':
-            roomURL = `${config.MiroTalk.SFU.Join}${data.room}`;
+            roomURL =
+                tokens.sfu !== ''
+                    ? `${config.MiroTalk.SFU.Join}?room=${data.room}&name=${data.email}&token=${tokens.sfu}`
+                    : `${config.MiroTalk.SFU.Join}${data.room}`;
             break;
         case 'C2C':
             roomURL = `${config.MiroTalk.C2C.Room}${data.room}`;
