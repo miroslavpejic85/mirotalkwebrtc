@@ -16,6 +16,8 @@ const HEADERS = {
     SFU: { authorization: MIROTALK_SFU_API_KEY_SECRET || '' },
 };
 
+const tokenEndpoint = '/api/v1/token';
+
 async function tokenSFU(req, res) {
     try {
         const { token } = req.params;
@@ -31,7 +33,6 @@ async function tokenSFU(req, res) {
         // Call MiroTalk SFU endpoint for token
         const { email, password } = decoded;
         const SFUHome = config.MiroTalk.SFU.Home;
-        const SFUTokenEndpoint = config.MiroTalk.SFU.TokenEndpoint;
 
         const SFUTokenData = {
             username: email,
@@ -40,7 +41,7 @@ async function tokenSFU(req, res) {
             expire: JWT_EXP,
         };
 
-        const response = await axios.post(`${SFUHome}${SFUTokenEndpoint}`, SFUTokenData, {
+        const response = await axios.post(`${SFUHome}${tokenEndpoint}`, SFUTokenData, {
             headers: HEADERS.SFU,
         });
 
