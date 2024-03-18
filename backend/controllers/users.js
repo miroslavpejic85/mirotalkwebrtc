@@ -6,13 +6,10 @@ const nodemailer = require('../lib/nodemailer');
 const utils = require('../common/utils');
 const logs = require('../common/logs');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 
 const log = new logs('Controllers-users');
 
 const USER_REGISTRATION_MODE = process.env.USER_REGISTRATION_MODE == 'true';
-const JWT_EXP = process.env.JWT_EXP;
-const JWT_KEY = process.env.JWT_KEY;
 
 async function userCreate(req, res) {
     try {
@@ -20,9 +17,9 @@ async function userCreate(req, res) {
         const userFindOne = await User.findOne({ email: email, username: username });
         log.debug('No user found in the storage');
         if (Object.is(userFindOne, null) || Object.keys(userFindOne).length === 0) {
-            const token = jwt.sign({ username: username, email: email, password: password }, JWT_KEY, {
-                expiresIn: JWT_EXP,
-            });
+            const payload = { username: username, email: email, password: password };
+            const token = utils.tokenEncode(payload);
+
             if (nodemailer.EMAIL_VERIFICATION) {
                 log.debug('New user, send email confirmation');
                 const confirmationCode = `?token=${token}`;
@@ -62,9 +59,10 @@ async function userLogin(req, res) {
     try {
         const { email, username, password } = req.body;
         const dateNow = new Date().toISOString();
-        const token = jwt.sign({ email: email, username: username, password: password }, JWT_KEY, {
-            expiresIn: JWT_EXP,
-        });
+
+        const payload = { username: username, email: email, password: password };
+        const token = utils.tokenEncode(payload);
+
         const userFindOne = await User.findOne({ email: email });
 
         if (!Object.is(userFindOne, null) && userFindOne.active) {
@@ -170,7 +168,7 @@ async function userConfirmation(req, res) {
     try {
         log.debug('userConfirmation query', req.query);
         const { token } = req.query;
-        const decoded = jwt.verify(token, JWT_KEY);
+        const decoded = utils.tokenDecode(token);
         log.debug('User confirmation token decoded', decoded);
         const userFindOne = await User.findOne({ email: decoded.email, username: decoded.username });
         if (!userFindOne || Object.keys(userFindOne).length === 0) {

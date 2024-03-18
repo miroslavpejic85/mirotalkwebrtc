@@ -1,11 +1,9 @@
 'use-strict';
 
-const jwt = require('jsonwebtoken');
+const utils = require('../common/utils');
 const logs = require('../common/logs');
 
 const log = new logs('Auth');
-
-const JWT_KEY = process.env.JWT_KEY;
 
 const auth = (req, res, next) => {
     let token =
@@ -24,7 +22,9 @@ const auth = (req, res, next) => {
             const credentials = parts[1];
             if (/^Bearer$/i.test(scheme)) token = credentials;
         }
-        const decoded = jwt.verify(token, JWT_KEY);
+
+        const decoded = utils.tokenDecode(token);
+
         //log.debug('jwt auth decoded', decoded);
         req.user = decoded;
     } catch (err) {

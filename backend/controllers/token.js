@@ -1,14 +1,13 @@
 'use strict';
 
 const axios = require('axios');
-const jwt = require('jsonwebtoken');
+const utils = require('../common/utils');
 
 const config = require('../config');
 const logs = require('../common/logs');
 
 const log = new logs('Controllers-token');
 
-const JWT_KEY = process.env.JWT_KEY;
 const JWT_EXP = process.env.JWT_EXP;
 const MIROTALK_SFU_API_KEY_SECRET = process.env.MIROTALK_SFU_API_KEY_SECRET;
 
@@ -27,7 +26,7 @@ async function tokenSFU(req, res) {
             throw new Error('Token is required');
         }
 
-        const decoded = jwt.verify(token, JWT_KEY);
+        const decoded = utils.tokenDecode(token);
         log.debug('User data for Token SFU decoded', decoded);
 
         // Call MiroTalk SFU endpoint for token
