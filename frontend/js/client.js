@@ -917,8 +917,12 @@ function loadToolTip(tt) {
 
 function setTippy(elem, content, placement) {
     if (isMobile) return;
-    tippy(elem, {
-        content: content,
-        placement: placement,
-    });
+    try {
+        tippy(elem, {
+            content: content,
+            placement: placement,
+        });
+    } catch (err) {
+        console.error('setTippy error', err.message);
+    }
 }
