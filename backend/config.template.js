@@ -56,6 +56,12 @@ module.exports = {
             },
         },
     },
+    HTML: {
+        support: true,
+        profile: true,
+        projects: true,
+        //...
+    },
     BUTTONS: {
         setRandomRoom: true,
         copyRoom: true,

@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.0.76
+ * @version 1.0.77
  */
 
 
@@ -149,7 +149,7 @@ const toolTips = [
     { element: refreshBtn, text: 'Refresh rooms', position: 'top' },
 ];
 
-const html = {
+let html = {
     support: true,
     profile: true,
     projects: true,
@@ -180,6 +180,7 @@ $(document).ready(async function () {
 
 function loadConfig(cfg) {
     config = cfg;
+    html = cfg.HTML ? cfg.HTML : html;
     console.log('Config', config);
     myProfile.setAttribute('href', config.Author.Profile);
     repoP2P.setAttribute('href', config.MiroTalk.P2P.GitHub.Repo);
@@ -298,7 +299,10 @@ function hideElements() {
         elemDisplay(showBoxesDS, false);
         elemDisplay(boxesDS, false);
     }
-    !html.profile && elemDisplay(myProfile, false);
+    if (!html.profile) { 
+        elemDisplay(myProfile, false);
+        search.style.margin = '0px 5px 0px 10px'; // top right bottom left
+    }
     !html.support && elemDisplay(navSup, false);
     //...
 }
