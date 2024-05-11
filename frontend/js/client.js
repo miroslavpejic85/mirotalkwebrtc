@@ -1,6 +1,18 @@
 'use-strict';
 
-//
+/**
+ * MiroTalk WebRTC - Client component
+ *
+ * @link    GitHub: https://github.com/miroslavpejic85/mirotalkwebrtc
+ * @link    Live demo: https://webrtc.mirotalk.com
+ * @license For open source under AGPL-3.0
+ * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
+ * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
+ * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
+ * @version 1.0.76
+ */
+
+
 const isMobile = !!/Android|webOS|iPhone|iPad|iPod|BB10|BlackBerry|IEMobile|Opera Mini|Mobile|mobile/i.test(
     navigator.userAgent.toLowerCase() || '',
 );

@@ -125,7 +125,7 @@
             <div class="top">
                 <i class="uil uil-bars sidebar-toggle"></i>
 
-                <div id="search" class="search-box" style="display: block">
+                <div id="search" class="search-box">
                     <i class="uil uil-search"></i>
                     <input id="myInput" type="text" placeholder="Search..." onkeyup="searchRows()" />
                 </div>
@@ -141,7 +141,7 @@
             </div>
 
             <div class="dash-content">
-                <div id="dsDash" class="fadeIn" style="display: block">
+                <div id="dsDash" class="dash-div fadeIn">
                     <div id="boxesDS" class="boxes fadeIn">
                         <div id="boxP2P" class="box box1">
                             <i class="uil uil-thumbs-up"></i>
@@ -239,7 +239,7 @@
                             <button id="del-all-btn" class="custom-button uil uil-multiply"></button>
                         </div>
                     </div>
-                    <table id="myTable" class="fadeIn" style="width: 100%">
+                    <table id="myTable" class="fadeIn">
                         <thead>
                             <tr>
                                 <th>MiroTalk</th>
@@ -257,7 +257,7 @@
                 </div>
 
                 <form id="addRowDiv" class="addRowDiv hidden" onsubmit="return false">
-                    <i id="add-close-btn" class="uil uil-multiply" style="cursor: pointer"></i>
+                    <i id="add-close-btn" class="uil uil-multiply"></i>
                     <label for="mirotalk">MiroTalk</label>
                     <select id="add-type" class="add-row-select-options" required>
                         <option value="P2P">P2P</option>
@@ -285,7 +285,7 @@
                 </form>
 
                 <div id="accountDiv" class="accountDiv hidden">
-                    <i id="account-close-btn" class="uil uil-multiply" style="cursor: pointer"></i>
+                    <i id="account-close-btn" class="uil uil-multiply"></i>
                     <label for="account-id">Id</label>
                     <input id="account-id" type="text" name="text" readonly />
                     <label for="email">Email</label>

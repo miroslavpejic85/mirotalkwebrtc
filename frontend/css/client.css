@@ -296,6 +296,7 @@ nav.close ~ .dashboard .top {
     max-width: 600px;
     width: 100%;
     margin: 0 30px;
+    display: block;
 }
 
 .top .search-box input {
@@ -329,6 +330,10 @@ nav.close ~ .dashboard .top {
 
 .dashboard .dash-content {
     padding-top: 50px;
+}
+
+.dash-content .dash-div {
+    display: block;
 }
 
 .dash-content .dash-iframe {
@@ -445,6 +450,9 @@ iframe {
     transition: var(--tran-03);
 }
 
+#mytable {
+    width: 100%;
+}
 #myTable td i {
     font-size: 1.4rem;
 }
@@ -498,6 +506,11 @@ iframe {
 }
 .addRowDiv .date-time input {
     width: auto;
+}
+
+.accountDiv i,
+.addRowDiv i {
+    cursor: pointer;
 }
 
 .accountDiv i:hover,
