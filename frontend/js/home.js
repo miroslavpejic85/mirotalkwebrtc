@@ -111,9 +111,7 @@ function signupOrLogin(data) {
         .then((res) => {
             console.log('[API] - USER LOGIN RESPONSE', res);
             if (res.message) {
-                res.success 
-                    ? popupMessage('success', res.message)
-                    : popupMessage('warning', res.message);
+                res.success ? popupMessage('success', res.message) : popupMessage('warning', res.message);
                 res.message.includes('Pending') ? showLogin() : showSignUp();
             } else {
                 window.sessionStorage.userId = res._id;

@@ -11,6 +11,13 @@ const log = new logs('Controllers-users');
 
 const USER_REGISTRATION_MODE = process.env.USER_REGISTRATION_MODE == 'true';
 
+const USER_DEMO = {
+    enabled: process.env.USER_DEMO_MODE == 'true',
+    username: process.env.USER_DEMO_USERNAME,
+    password: process.env.USER_DEMO_PASSWORD,
+    email: process.env.USER_DEMO_EMAIL,
+};
+
 async function userCreate(req, res) {
     try {
         const { email, username, password } = req.body;
@@ -60,6 +67,12 @@ async function userLogin(req, res) {
         const { email, username, password } = req.body;
         const dateNow = new Date().toISOString();
 
+        const isUserDemo =
+            USER_DEMO.enabled &&
+            email === USER_DEMO.email &&
+            username === USER_DEMO.username &&
+            password === USER_DEMO.password;
+
         const payload = { username: username, email: email, password: password };
         const token = utils.tokenEncode(payload);
 
@@ -98,7 +111,8 @@ async function userLogin(req, res) {
                 log.error('USER REGISTRATION MODE DISABLED, user not found!');
                 return res.status(201).json({ message: 'User not found!' });
             }
-            if (nodemailer.EMAIL_VERIFICATION) {
+            log.debug(`User demo: ${isUserDemo}`);
+            if (!isUserDemo && nodemailer.EMAIL_VERIFICATION) {
                 log.debug('New user, send email confirmation');
                 const confirmationCode = `?token=${token}`;
                 nodemailer.sendConfirmationEmail(username, email, confirmationCode);
