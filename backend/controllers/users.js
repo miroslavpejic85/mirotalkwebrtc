@@ -122,9 +122,43 @@ async function userLogin(req, res) {
                 const userSaveData = await userData.save();
                 log.debug('User create OK', userSaveData);
                 return res.status(201).send({
-                    message: `✅ Account created! <br/> Click on Login and enjoy! <br><br>
-                    <p>I am hoping you find the application useful. Making a small donation is a great way to let me know you like it and want me to keep working on it. Thank you! ❤️</p>
-                    <a href="${nodemailer.SUPPORT}" target="_blank" style="text-decoration:none;"><h1 style="color:lime;">👉 paypal.me 👈<h1></a>`,
+                    message: `<style>
+                    .container {
+                        text-align: center;
+                        background-color: var(--primary-color);
+                        border-radius: 10px;
+                        padding: 20px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                    }
+                    h1 {
+                        color: #4CAF50;
+                        margin-bottom: 10px;
+                    }
+                    p {
+                        color: var(--text-color);
+                        margin-bottom: 20px;
+                    }
+                    a {
+                        text-decoration: none;
+                        color: #4CAF50;
+                        font-weight: bold;
+                        border: 2px solid #4CAF50;
+                        border-radius: 5px;
+                        padding: 10px 20px;
+                        display: inline-block;
+                        transition: background-color 0.3s, color 0.3s;
+                    }
+                    a:hover {
+                        background-color: #4CAF50;
+                        color: #fff;
+                    }
+                    </style>
+                    <div class="container">
+                        <h1>Account created!</h1>
+                        <p>Click on Login and enjoy!</p>
+                        <p>I am hoping you find the application useful. Making a small donation is a great way to let me know you like it and want me to keep working on it. Thank you! ❤️</p>
+                        <a href="${nodemailer.SUPPORT}" target="_blank">Donate via PayPal</a>
+                    </div>`,
                 });
             }
         }
