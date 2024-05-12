@@ -298,6 +298,11 @@ nav.close ~ .dashboard .top {
     display: block;
 }
 
+.dashboard #myProfile:hover {
+    background-color: var(--color-hover);
+    border-radius: 50px;
+}
+
 .top .search-box input {
     position: absolute;
     height: 100%;
