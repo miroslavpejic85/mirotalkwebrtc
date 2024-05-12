@@ -122,6 +122,7 @@ async function userLogin(req, res) {
                 const userSaveData = await userData.save();
                 log.debug('User create OK', userSaveData);
                 return res.status(201).send({
+                    success: true,
                     message: `<style>
                     .container {
                         text-align: center;
