@@ -298,9 +298,14 @@ nav.close ~ .dashboard .top {
     display: block;
 }
 
+.dashboard #myProfile {
+    width: 40px;
+    border-radius: 50px;
+}
+
 .dashboard #myProfile:hover {
     background-color: var(--color-hover);
-    border-radius: 50px;
+    transition: var(--tran-05);
 }
 
 .top .search-box input {
