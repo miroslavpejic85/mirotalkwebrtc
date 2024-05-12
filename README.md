@@ -12,7 +12,15 @@ MiroTalk WEB is a platform that allows for the management of an unlimited number
     <a href="https://webrtc.mirotalk.com">Explore MiroTalk WEB</a>
 </p>
 
-<hr />
+---
+
+For demonstration purposes, below the credentials:
+
+-   `Username`: demo
+-   `Email`: demo@gmail.com
+-   `Password`: Demo@123
+
+---
 
 | `MiroTalk`                                               | Description                                                                                                                                                                                |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
