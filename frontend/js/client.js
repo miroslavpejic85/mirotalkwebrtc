@@ -299,10 +299,7 @@ function hideElements() {
         elemDisplay(showBoxesDS, false);
         elemDisplay(boxesDS, false);
     }
-    if (!html.profile) { 
-        elemDisplay(myProfile, false);
-        search.style.margin = '0px 5px 0px 10px'; // top right bottom left
-    }
+    !html.profile && elemDisplay(myProfile, false);
     !html.support && elemDisplay(navSup, false);
     //...
 }

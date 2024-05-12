@@ -293,9 +293,8 @@ nav.close ~ .dashboard .top {
 .dashboard .top .search-box {
     position: relative;
     height: 45px;
-    max-width: 600px;
     width: 100%;
-    margin: 0 30px;
+    margin: 0px 30px 0px 30px; /* top right bottom left */
     display: block;
 }
 
