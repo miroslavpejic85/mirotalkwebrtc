@@ -744,6 +744,16 @@ tr:nth-child(even) {
     -moz-transform: translate(-50%, -50%);
 }
 
+.txt-green {
+    color:rgb(8, 189, 89);
+}
+
+.txt-qr {
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--text-color); 
+    background: transparent; 
+}
+
 .fadeIn {
     -webkit-animation: fadeIn ease-in 1;
     -moz-animation: fadeIn ease-in 1;
