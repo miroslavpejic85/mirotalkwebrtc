@@ -604,7 +604,9 @@ function copyRoom(id) {
                 </div>
                 <br/>
                 <p class="txt-green">Join from your mobile device</p>
+                <br/>
                 <p class="txt-qr">No need for apps, simply capture the QR code with your mobile camera Or Invite someone else to join by sending them the following URL</p>
+                <br/>
                 <p class="txt-green">${roomURL}</p>`,
             );
             makeRoomQR(roomURL);

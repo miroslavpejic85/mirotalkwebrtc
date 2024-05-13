@@ -745,13 +745,13 @@ tr:nth-child(even) {
 }
 
 .txt-green {
-    color:rgb(8, 189, 89);
+    color: rgb(8, 189, 89);
 }
 
 .txt-qr {
     font-family: Arial, Helvetica, sans-serif;
-    color: var(--text-color); 
-    background: transparent; 
+    color: var(--text-color);
+    background: transparent;
 }
 
 .fadeIn {
