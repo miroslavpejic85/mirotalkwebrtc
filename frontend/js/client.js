@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.0.79
+ * @version 1.0.80
  */
 
 const isMobile = !!/Android|webOS|iPhone|iPad|iPod|BB10|BlackBerry|IEMobile|Opera Mini|Mobile|mobile/i.test(
@@ -590,15 +590,39 @@ function setRandomRoom(id) {
 }
 
 function copyRoom(id) {
-    const room = document.getElementById(id + '_room').value;
-    navigator.clipboard.writeText(room).then(
+    const data = getRowValues(id);
+    const roomURL = getRoomURL(data);
+
+    navigator.clipboard.writeText(roomURL).then(
         () => {
-            popupMessage('toast', `The room: ${room} \n has been successfully copied to the clipboard 👍`);
+            console.log(`The roomURL: ${roomURL} \n has been successfully copied to the clipboard 👍`);
+            popupMessage(
+                'copyRoom',
+                `<br/>
+                <div id="qrRoomContainer">
+                    <canvas id="qrRoom"></canvas>
+                </div>
+                <br/>
+                <p style="color:rgb(8, 189, 89);">Join from your mobile device</p>
+                <p style="background:transparent; color:white; font-family: Arial, Helvetica, sans-serif;">No need for apps, simply capture the QR code with your mobile camera Or Invite someone else to join by sending them the following URL</p>
+                <p style="color:rgb(8, 189, 89);">${roomURL}</p>`,
+            );
+            makeRoomQR(roomURL);
         },
         (err) => {
             console.error('Could not copy text: ', err);
         },
     );
+}
+
+function makeRoomQR(room) {
+    const qr = new QRious({
+        element: document.getElementById('qrRoom'),
+        value: room,
+    });
+    qr.set({
+        size: 256,
+    });
 }
 
 async function shareRoom(id) {
