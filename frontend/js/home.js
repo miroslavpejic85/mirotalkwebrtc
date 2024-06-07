@@ -134,10 +134,22 @@ function showSignUp() {
     login.style.transform = 'translateY(-180px)';
     loginLabel.style.transform = 'scale(0.6)';
     signupLabel.style.transform = 'scale(1)';
+    cleanLoginInput();
 }
 
 function showLogin() {
     login.style.transform = 'translateY(-550px)';
     loginLabel.style.transform = 'scale(1)';
     signupLabel.style.transform = 'scale(0.6)';
+    cleanSignUpInput();
+}
+
+function cleanLoginInput() {
+    loginUsernameInput.value = '';
+    loginEmailIdInput.value = '';
+}
+
+function cleanSignUpInput() {
+    signupUsernameInput.value = '';
+    signupEmailIdInput.value = '';
 }
