@@ -13,9 +13,10 @@ const validEmailReg = new RegExp(
 const validNumberReg = new RegExp(/^\+?\d{1,3}[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/);
 const pathTraversal = new RegExp(/(\.\.(\/|\\))+/);
 const alphanumeric = new RegExp(/^[A-Za-z0-9-_]+$/);
+const miroTalkType = new RegExp(/^(SFU|P2P|C2C|BRO)$/);
 
 const checkData = (req, res, next) => {
-    const { username, email, phone, password, room, tag } = req.body;
+    const { username, email, phone, password, room, tag, type } = req.body;
     if (username) {
         const validUsername = isValidUsername(username);
         log.debug('Validator', { username: validUsername });
@@ -56,6 +57,13 @@ const checkData = (req, res, next) => {
         log.debug('Validator', { tag: validTag });
         if (validTag != true) {
             return res.status(201).json({ message: validTag });
+        }
+    }
+    if (type) {
+        const validType = isValidType(type);
+        log.debug('Validator', { type: validType });
+        if (validType != true) {
+            return res.status(201).json({ message: validType });
         }
     }
     return next();
@@ -100,17 +108,24 @@ function isValidPassword(password) {
     return true;
 }
 
-function isValidRoom(room){
+function isValidRoom(room) {
     if (room.match(pathTraversal)) {
         return '⚠️ The room name is not valid!';
-    };
+    }
     return true;
 }
 
-function isValidTag(tag){
+function isValidTag(tag) {
     if (!tag.match(alphanumeric)) {
         return '⚠️ The Tag must be alphanumeric!';
-    };
+    }
+    return true;
+}
+
+function isValidType(type) {
+    if (!type.match(miroTalkType)) {
+        return '⚠️ Type must be one of SFU/P2P/C2C/BRO!';
+    }
     return true;
 }
 

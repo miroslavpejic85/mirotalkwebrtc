@@ -799,7 +799,7 @@ function delAllRows() {
     });
 }
 
-function removeRow(id){
+function removeRow(id) {
     dataTable.row(`#${id}`).remove().draw();
 }
 
