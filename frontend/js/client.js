@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.0.83
+ * @version 1.0.84
  */
 
 const isMobile = !!/Android|webOS|iPhone|iPad|iPod|BB10|BlackBerry|IEMobile|Opera Mini|Mobile|mobile/i.test(
@@ -469,6 +469,7 @@ function addRow() {
             console.log('[API] - ROOM CREATE RESPONSE', res);
             if (res.message) {
                 popupMessage('warning', `${res.message}`);
+                removeLastRow();
             } else {
                 const tableRow = getRow(res);
                 if (tableRow) {
@@ -796,6 +797,17 @@ function delAllRows() {
                 });
         }
     });
+}
+
+function removeRow(id){
+    dataTable.row(`#${id}`).remove().draw();
+}
+
+function removeLastRow() {
+    const lastRowIndex = dataTable.rows().count() - 1;
+    if (lastRowIndex >= 0) {
+        dataTable.row(lastRowIndex).remove().draw();
+    }
 }
 
 function getMyAccount() {

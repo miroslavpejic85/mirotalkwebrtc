@@ -11,9 +11,11 @@ const validEmailReg = new RegExp(
     /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
 );
 const validNumberReg = new RegExp(/^\+?\d{1,3}[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/);
+const pathTraversal = new RegExp(/(\.\.(\/|\\))+/);
+const alphanumeric = new RegExp(/^[A-Za-z0-9-_]+$/);
 
 const checkData = (req, res, next) => {
-    const { username, email, phone, password } = req.body;
+    const { username, email, phone, password, room, tag } = req.body;
     if (username) {
         const validUsername = isValidUsername(username);
         log.debug('Validator', { username: validUsername });
@@ -40,6 +42,20 @@ const checkData = (req, res, next) => {
         log.debug('Validator', { password: validPassword });
         if (validPassword != true) {
             return res.status(201).json({ message: validPassword });
+        }
+    }
+    if (room) {
+        const validRoom = isValidRoom(room);
+        log.debug('Validator', { room: validRoom });
+        if (validRoom != true) {
+            return res.status(201).json({ message: validRoom });
+        }
+    }
+    if (tag) {
+        const validTag = isValidTag(tag);
+        log.debug('Validator', { tag: validTag });
+        if (validTag != true) {
+            return res.status(201).json({ message: validTag });
         }
     }
     return next();
@@ -81,6 +97,20 @@ function isValidPassword(password) {
     ) {
         return '⚠️ The password must contain lower/upper case, numbers and special character [!,%,&,@,#,$,^,*,?,_,~] ex. 👉 Test@123';
     }
+    return true;
+}
+
+function isValidRoom(room){
+    if (room.match(pathTraversal)) {
+        return '⚠️ The room name is not valid!';
+    };
+    return true;
+}
+
+function isValidTag(tag){
+    if (!tag.match(alphanumeric)) {
+        return '⚠️ The Tag must be alphanumeric!';
+    };
     return true;
 }
 
