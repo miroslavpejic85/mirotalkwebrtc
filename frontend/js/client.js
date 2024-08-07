@@ -924,7 +924,7 @@ function getFormValues() {
         phone: addPhone.value,
         date: addDate.value,
         time: addTime.value,
-        room: addRoom.value,
+        room: addRoom.value.trim().replace(/\s+/g, '-'),
     };
 }
 
