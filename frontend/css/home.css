@@ -120,7 +120,7 @@ button:hover {
     margin: 10px auto;
     color: var(--text-color);
     background-color: transparent !important;
-    font-size: 0.8em;
+    font-size: 0.6em;
     font-weight: bold;
     text-align: left;
     margin-top: 50px;
