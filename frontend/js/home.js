@@ -147,9 +147,12 @@ function showLogin() {
 function cleanLoginInput() {
     loginUsernameInput.value = '';
     loginEmailIdInput.value = '';
+    loginPasswordIdInput.value = '';
 }
 
 function cleanSignUpInput() {
     signupUsernameInput.value = '';
     signupEmailIdInput.value = '';
+    signupPasswordIdInput.value = '';
+    signupRepeatPasswordIdInput.value = '';
 }
