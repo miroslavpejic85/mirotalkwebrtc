@@ -11,7 +11,8 @@ const EMAIL_PORT = process.env.EMAIL_PORT;
 const EMAIL_USERNAME = process.env.EMAIL_USERNAME;
 const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
 const EMAIL_VERIFICATION = process.env.EMAIL_VERIFICATION === 'true' || false;
-const SUPPORT = 'https://paypal.me/mirotalk?country.x=EN&locale.x=en_EN'; // Thank you!
+const SUPPORT =
+    'https://codecanyon.net/item/mirotalk-webrtc-ultimate-bundle-for-seamless-live-smart-communication/47976343'; // Thank you!
 
 log.info('Email', {
     verification: EMAIL_VERIFICATION,
@@ -112,14 +113,13 @@ function sendConfirmationOkEmail(name, toEmail, credential) {
                 <br/>
                 <p>Home page</p>
                 <a href="${SERVER_URL}" target="_blank">${SERVER_URL}</a>
-                <br/>
-                <p>We sincerely hope you're finding our application incredibly useful! Your support means the world to us, and it's what keeps us motivated to continuously improve and expand its features.</p>
-                <p>If you've been enjoying your experience and want to see more great things coming your way, please consider making a small donation. Your contribution not only shows us that you appreciate our hard work but also helps us invest in making the application even better for you.</p>
-                <p>It's easy to make a difference. Just click the PayPal link below to contribute. Every dollar counts, and your generosity will fuel our dedication to providing you with an exceptional experience.</p>
-                <p>Thank you for being a valued part of our community. Your support is what keeps us going, and we can't wait to bring you more amazing updates in the future.</p>
-                <a href="${SUPPORT}" target="_blank">PayPal Donation Link</a>
-                <br/>
-                <p>With gratitude,</p>
+                <br/> 
+                <p>Enjoying our app? Unlock its full potential with a MiroTalk purchase on CodeCanyon.</p> 
+                <p>Get <strong>License</strong>, <strong>Full Source Code</strong>, and <strong>Priority Support</strong>, plus access to all updates. Your purchase fuels future improvements!</p> 
+                <p>Ready to upgrade? Click below to choose your MiroTalk package.</p> 
+                <a href="${SUPPORT}" target="_blank">Purchase from CodeCanyon</a> 
+                <br/> 
+                <p>Thank you for your support!</p> 
                 <p>MiroTalk Team</p>
             `,
         })
