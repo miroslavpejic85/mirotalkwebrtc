@@ -5,14 +5,7 @@ info:
     description: 'API description for external applications that integrates with MiroTalk WebRTC admin.'
     contact:
         email: miroslav.pejic.85@gmail.com
-    license:
-        name: AGPLv3
-        url: https://choosealicense.com/licenses/agpl-3.0/
     version: 1.0.0
-
-externalDocs:
-    description: GitHub
-    url: https://github.com/miroslavpejic85
 
 servers:
     - url: /api/v1
