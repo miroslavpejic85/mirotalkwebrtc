@@ -390,6 +390,9 @@ components:
                 email:
                     type: string
                     example: 'miroslav.pejic.85@gmail.com'
+                username:
+                    type: string
+                    example: 'Miroslav Pejic'
                 password:
                     type: string
                     example: 'Test@123'

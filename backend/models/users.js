@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
     role: { type: String, default: 'guest' },
     allow: { type: Array, default: ['ALL'] },
     email: { type: String, index: { unique: true } },
-    username: { type: String },
+    username: { type: String, index: { unique: false } },
     password: { type: String },
     token: { type: String },
     active: { type: Boolean, enum: [true, false], default: false },

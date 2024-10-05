@@ -76,7 +76,13 @@ async function userLogin(req, res) {
         const payload = { username: username, email: email, password: password };
         const token = utils.tokenEncode(payload);
 
-        const userFindOne = await User.findOne({ email: email });
+        //const userFindOne = await User.findOne({ email: email });
+        const userFindOne = await User.findOne({
+            $or: [
+                { email: email },
+                { username: username }
+            ]
+        });
 
         if (!Object.is(userFindOne, null) && userFindOne.active) {
             log.debug('User found, but we going to check if the provided password exists');
@@ -187,10 +193,15 @@ async function userIsAuth(req, res) {
     try {
         log.debug('userIsAuth query', req.body);
 
-        const { email, password } = req.body;
+        const { email, username, password } = req.body;
 
-        // Check by email as uuid and indexed
-        const userFindOne = await User.findOne({ email: email });
+        // Check by email (uuid) or username as indexed
+        const userFindOne = await User.findOne({
+            $or: [
+                { email: email },
+                { username: username ? username : email }
+            ]
+        });
 
         if (Object.is(userFindOne, null) || !userFindOne.active) {
             log.debug('user not found!', email);
