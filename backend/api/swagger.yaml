@@ -89,6 +89,30 @@ paths:
                 '400':
                     description: Bad request
 
+    /user/isRoomAllowed:
+        post:
+            tags:
+                - user
+            summary: Check if room allowed for user
+            description: Check if room allowed
+            operationId: isRoomAllowed
+            requestBody:
+                description: Check if user authenticate
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UserIsRoomAllowedReq'
+                required: true
+            responses:
+                '201':
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IsRoomAllowedRes'
+                '400':
+                    description: Bad request
+
     /user/confirmation/{token}:
         get:
             security:
@@ -399,6 +423,23 @@ components:
                 api_secret_key:
                     type: string
                     example: 'mirotalkweb_default_secret'
+
+        UserIsRoomAllowedReq:
+            type: object
+            properties:
+                email:
+                    type: string
+                    example: 'miroslav.pejic.85@gmail.com'
+                username:
+                    type: string
+                    example: 'Miroslav Pejic'
+                room:
+                    type: string
+                    example: 'Room1'
+                api_secret_key:
+                    type: string
+                    example: 'mirotalkweb_default_secret'
+
         UserRes:
             type: object
             properties:
@@ -433,7 +474,17 @@ components:
                 allow:
                     type: array
                     example: '[P2P, SFU, C2C, BRO]'
+                allowed_rooms:
+                    type: array
+                    example: '[*]'
         UserIsAuthRes:
+            type: object
+            properties:
+                message:
+                    type: boolean
+                    enum: [true, false]
+                    example: true
+        UserIsRoomAllowedRes:
             type: object
             properties:
                 message:

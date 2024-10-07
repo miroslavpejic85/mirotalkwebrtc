@@ -50,7 +50,7 @@ function sendConfirmationEmail(name, email, confirmationCode) {
 
 function sendConfirmationOkEmail(name, toEmail, credential) {
     const credentialObj = JSON.parse(credential);
-    const { role, email, username, password, active, allow, createdAt, updatedAt } = credentialObj;
+    const { role, email, username, password, active, allow, allowedRooms, createdAt, updatedAt } = credentialObj;
     log.debug('sendConfirmationOkEmail', credentialObj);
     transport
         .sendMail({
@@ -100,6 +100,10 @@ function sendConfirmationOkEmail(name, toEmail, credential) {
                     <tr>
                         <td>Allowed services</td>
                         <td>${allow}</td>
+                    </tr>
+                    <tr>
+                        <td>Allowed rooms</td>
+                        <td>${allowedRooms}</td>
                     </tr>
                     <tr>
                         <td>Created at</td>

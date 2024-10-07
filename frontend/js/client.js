@@ -80,6 +80,7 @@ const accountToken = document.getElementById('account-token');
 const accountCreatedAt = document.getElementById('account-created-at');
 const accountUpdatedAt = document.getElementById('account-updated-at');
 const accountServicesAllowed = document.getElementById('account-services-allowed');
+const accountRoomsAllowed = document.getElementById('account-rooms-allowed');
 const accountDelete = document.getElementById('account-delete');
 
 const addRowDiv = document.getElementById('addRowDiv');
@@ -94,6 +95,7 @@ const addDate = document.getElementById('add-date');
 const addTime = document.getElementById('add-time');
 const addRoom = document.getElementById('add-room');
 const genRoom = document.getElementById('gen-room');
+const selRoom = document.getElementById('sel-room');
 const addRowBtn = document.getElementById('add-row-btn');
 
 const refreshBtn = document.getElementById('refresh-page-btn');
@@ -163,6 +165,11 @@ const tokens = {
 
 let config = {};
 
+let user = {
+    allowedRooms: ['*'],
+    allowedRoomsALL: true,
+};
+
 $(document).ready(async function () {
     elemDisplay(showBoxesDS, false);
     getConfig()
@@ -220,7 +227,20 @@ function handleUserRoles() {
             if (res.message) {
                 popupMessage('warning', `${res.message}`);
             } else {
-                const { role, allow } = res;
+                const { role, allow, allowedRooms } = res;
+                user.allowedRooms = allowedRooms;
+                user.allowedRoomsALL = allowedRooms.includes('*');
+                elemDisplay(addRoom, user.allowedRoomsALL);
+                elemDisplay(genRoom, user.allowedRoomsALL);
+                elemDisplay(selRoom, !user.allowedRoomsALL);
+                if (!user.allowedRoomsALL) {
+                    user.allowedRooms.forEach((room) => {
+                        const option = document.createElement('option');
+                        option.value = room;
+                        option.textContent = room;
+                        selRoom.appendChild(option);
+                    });
+                }
                 if (role == 'admin') {
                     elemDisplay(navP2P, true);
                     elemDisplay(navSFU, true);
@@ -505,9 +525,10 @@ function getRow(obj) {
     const optionC2C = config.MiroTalk.C2C.Visible ? `<option value="C2C" ${isC2C}>C2C</option>` : '';
     const optionBRO = config.MiroTalk.BRO.Visible ? `<option value="BRO" ${isBRO}>BRO</option>` : '';
 
-    const setRandomRoomIcon = config.BUTTONS.setRandomRoom
-        ? `<i id="${obj._id}_randomRoom" onclick="setRandomRoom('${obj._id}')" class="uil uil-refresh random"></i>`
-        : '';
+    const setRandomRoomIcon =
+        config.BUTTONS.setRandomRoom && user.allowedRoomsALL
+            ? `<i id="${obj._id}_randomRoom" onclick="setRandomRoom('${obj._id}')" class="uil uil-refresh random"></i>`
+            : '';
 
     const copyRoomIcon = config.BUTTONS.copyRoom
         ? `<i id="${obj._id}_copy" onclick="copyRoom('${obj._id}')" class='uil uil-copy'></i>`
@@ -542,6 +563,19 @@ function getRow(obj) {
         ? `<i id="${obj._id}_delete" onclick="delRow('${obj._id}')" class="uil uil-multiply"></i>`
         : '';
 
+    let rooms = `<td><input id="${obj._id}_room" type="text" name="room" value="${obj.room}"/></td>`;
+
+    if (!user.allowedRoomsALL) {
+        rooms = `<select id="${obj._id}_room" class="select-options">`;
+
+        user.allowedRooms.forEach((room) => {
+            const selected = obj.room === room ? 'selected' : '';
+            rooms += `<option value="${room}" ${selected}>${room}</option>`;
+        });
+
+        rooms += `</select>`;
+    }
+
     return [
         `<td>
             <select id="${obj._id}_type" class="select-options">    
@@ -556,7 +590,7 @@ function getRow(obj) {
         `<td><input id="${obj._id}_phone" type="text" name="text" value="${obj.phone}"/></td>`,
         `<td><input id="${obj._id}_date" type="date" name="date" value="${obj.date}"/></td>`,
         `<td><input id="${obj._id}_time" type="time" name="time" value="${obj.time}"/></td>`,
-        `<td><input id="${obj._id}_room" type="text" name="room" value="${obj.room}"/></td>`,
+        `<td>${rooms}</td>`,
         `<td>
             ${setRandomRoomIcon}
             ${copyRoomIcon}
@@ -824,6 +858,7 @@ function getMyAccount() {
                 accountCreatedAt.value = res.createdAt;
                 accountUpdatedAt.value = res.updatedAt;
                 accountServicesAllowed.value = res.allow;
+                accountRoomsAllowed.value = res.allowedRooms;
                 toggleAccount();
             }
         })
@@ -882,10 +917,11 @@ function getRoomURL(data, bro = true) {
             roomURL = `${config.MiroTalk.P2P.Join}${data.room}`;
             break;
         case 'SFU':
+            const name = window.localStorage.name || data.email;
             roomURL =
                 tokens.sfu !== ''
-                    ? `${config.MiroTalk.SFU.Join}?room=${data.room}&name=${data.email}&token=${tokens.sfu}`
-                    : `${config.MiroTalk.SFU.Join}${data.room}`;
+                    ? `${config.MiroTalk.SFU.Join}?room=${data.room}&name=${name}&token=${tokens.sfu}`
+                    : `${config.MiroTalk.SFU.Join}?room=${data.room}&name=${name}`;
             break;
         case 'C2C':
             roomURL = `${config.MiroTalk.C2C.Room}${data.room}`;
@@ -916,6 +952,9 @@ function getRowValues(id) {
 }
 
 function getFormValues() {
+    const roomValue = user.allowedRoomsALL
+        ? addRoom.value.trim().replace(/\s+/g, '-')
+        : selRoom.value.trim().replace(/\s+/g, '-');
     return {
         userId: userId,
         type: addType.options[addType.selectedIndex].text,
@@ -924,7 +963,7 @@ function getFormValues() {
         phone: addPhone.value,
         date: addDate.value,
         time: addTime.value,
-        room: addRoom.value.trim().replace(/\s+/g, '-'),
+        room: roomValue,
     };
 }
 

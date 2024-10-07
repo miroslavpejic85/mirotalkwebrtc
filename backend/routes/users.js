@@ -23,6 +23,11 @@ router.post('/user/isAuth', api, (req, res) => {
     controllersUsers.userIsAuth(req, res);
 });
 
+//POST: /api/v1/user/isRoomAllowed/
+router.post('/user/isRoomAllowed', api, (req, res) => {
+    controllersUsers.userIsRoomAllowed(req, res);
+});
+
 //GET: /api/v1/user/confirmation/?token=<token>
 router.get('/user/confirmation', auth, (req, res) => {
     controllersUsers.userConfirmation(req, res);

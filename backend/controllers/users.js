@@ -78,10 +78,7 @@ async function userLogin(req, res) {
 
         //const userFindOne = await User.findOne({ email: email });
         const userFindOne = await User.findOne({
-            $or: [
-                { email: email },
-                { username: username }
-            ]
+            $or: [{ email: email }, { username: username }],
         });
 
         if (!Object.is(userFindOne, null) && userFindOne.active) {
@@ -197,10 +194,7 @@ async function userIsAuth(req, res) {
 
         // Check by email (uuid) or username as indexed
         const userFindOne = await User.findOne({
-            $or: [
-                { email: email },
-                { username: username ? username : email }
-            ]
+            $or: [{ email: email }, { username: username ? username : email }],
         });
 
         if (Object.is(userFindOne, null) || !userFindOne.active) {
@@ -220,6 +214,35 @@ async function userIsAuth(req, res) {
             });
     } catch (error) {
         log.error('userIsAuth', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
+async function userIsRoomAllowed(req, res) {
+    try {
+        log.debug('userIsRoomAllowed query', req.body);
+
+        const { email, username, room } = req.body;
+
+        // Check by email (uuid) or username as indexed
+        const userFindOne = await User.findOne({
+            $or: [{ email: email }, { username: username ? username : email }],
+        });
+
+        if (Object.is(userFindOne, null) || !userFindOne.active) {
+            log.debug('user not found!', email);
+            return res.status(201).json({ message: false });
+        }
+
+        const roomAllowedForUser = userFindOne.allowedRooms.includes('*') || userFindOne.allowedRooms.includes(room);
+
+        log.debug('userIsRoomAllowed', roomAllowedForUser);
+
+        return roomAllowedForUser
+            ? res.status(201).json({ message: roomAllowedForUser })
+            : res.status(400).json({ message: false });
+    } catch (error) {
+        log.error('userIsRoomAllowed', error);
         res.status(400).json({ message: error.message });
     }
 }
@@ -287,6 +310,7 @@ async function userUpdate(req, res) {
         updatedData.role = isUserAdmin ? 'admin' : 'guest';
         updatedData.password = encryptedPassword;
         updatedData.updatedAt = dateNow;
+        log.debug('Going to update user data');
         const result = await User.findByIdAndUpdate(id, updatedData, options);
         return res.send(result);
     } catch (error) {
@@ -331,6 +355,7 @@ module.exports = {
     userCreate,
     userLogin,
     userIsAuth,
+    userIsRoomAllowed,
     userConfirmation,
     userGet,
     userUpdate,
