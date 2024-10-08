@@ -153,6 +153,10 @@ Repository: [Docker hub](https://hub.docker.com/r/mirotalk/webrtc)
 Install [docker](https://docs.docker.com/engine/install/) and [docker-compose](https://docs.docker.com/compose/install/).
 
 ```bash
+# Clone the project repo
+$ git clone https://github.com/miroslavpejic85/mirotalkwebrtc.git
+# Go to project dir
+$ cd mirotalkwebrtc
 # Copy .env.template to .env and edit it
 $ cp .env.template .env
 # Copy config.template.js to config.js and edit it
