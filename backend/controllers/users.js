@@ -247,6 +247,33 @@ async function userIsRoomAllowed(req, res) {
     }
 }
 
+async function userRoomsAllowed(req, res) {
+    try {
+        log.debug('userRoomsAllowed query', req.body);
+
+        const { email, username } = req.body;
+
+        // Check by email (uuid) or username as indexed
+        const userFindOne = await User.findOne({
+            $or: [{ email: email }, { username: username ? username : email }],
+        });
+
+        if (Object.is(userFindOne, null) || !userFindOne.active) {
+            log.debug('user not found!', email);
+            return res.status(201).json({ message: false });
+        }
+
+        const roomsAllowedForUser = userFindOne.allowedRooms;
+
+        log.debug('userRoomsAllowed', roomsAllowedForUser);
+
+        res.status(201).json({ message: roomsAllowedForUser })
+    } catch (error) {
+        log.error('userRoomsAllowed', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
 async function userConfirmation(req, res) {
     try {
         log.debug('userConfirmation query', req.query);
@@ -355,6 +382,7 @@ module.exports = {
     userCreate,
     userLogin,
     userIsAuth,
+    userRoomsAllowed,
     userIsRoomAllowed,
     userConfirmation,
     userGet,

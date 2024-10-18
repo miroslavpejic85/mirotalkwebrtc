@@ -97,7 +97,7 @@ paths:
             description: Check if room allowed
             operationId: isRoomAllowed
             requestBody:
-                description: Check if user authenticate
+                description: Check if room allowed
                 content:
                     application/json:
                         schema:
@@ -109,7 +109,31 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/IsRoomAllowedRes'
+                                $ref: '#/components/schemas/UserIsRoomAllowedRes'
+                '400':
+                    description: Bad request
+
+    /user/roomsAllowed:
+        post:
+            tags:
+                - user
+            summary: Check the allowed rooms for user
+            description: Check the rooms allowed for user
+            operationId: roomsAllowed
+            requestBody:
+                description: Check rooms allowed
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UserRoomsAllowedReq'
+                required: true
+            responses:
+                '201':
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UserRoomsAllowedRes'
                 '400':
                     description: Bad request
 
@@ -440,6 +464,19 @@ components:
                     type: string
                     example: 'mirotalkweb_default_secret'
 
+        UserRoomsAllowedReq:
+            type: object
+            properties:
+                email:
+                    type: string
+                    example: 'miroslav.pejic.85@gmail.com'
+                username:
+                    type: string
+                    example: 'Miroslav Pejic'
+                api_secret_key:
+                    type: string
+                    example: 'mirotalkweb_default_secret'
+
         UserRes:
             type: object
             properties:
@@ -491,6 +528,12 @@ components:
                     type: boolean
                     enum: [true, false]
                     example: true
+        UserRoomsAllowedRes:
+            type: object
+            properties:
+                message:
+                    type: array
+                    example: ['Room1', 'Room2']
         RoomReq:
             type: object
             properties:
