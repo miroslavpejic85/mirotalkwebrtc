@@ -26,6 +26,24 @@ async function roomCreate(req, res) {
     }
 }
 
+async function roomExists(req, res) {
+    try {
+        const { room } = req.body;
+
+        const roomFindOne = await Room.findOne({ room: room });
+
+        if (Object.is(roomFindOne, null) || !roomFindOne) {
+            log.debug('Room not found!', room);
+            return res.status(201).json({ message: false });
+        }
+
+        res.status(201).json({ message: true })
+    } catch (error) {
+        log.error('Room exists error', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
 async function roomFindBy(req, res) {
     try {
         const data = await Room.find({ userId: req.params.userId });
@@ -97,6 +115,7 @@ async function roomDeleteALL(req, res) {
 
 module.exports = {
     roomCreate,
+    roomExists,
     roomFindBy,
     roomDeleteFindBy,
     roomGet,

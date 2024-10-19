@@ -68,7 +68,7 @@ paths:
     /user/isAuth:
         post:
             tags:
-                - user
+                - api
             summary: Check if user authenticated
             description: Check if user authenticated
             operationId: userIsAuth
@@ -92,7 +92,7 @@ paths:
     /user/isRoomAllowed:
         post:
             tags:
-                - user
+                - api
             summary: Check if room allowed for user
             description: Check if room allowed
             operationId: isRoomAllowed
@@ -116,9 +116,9 @@ paths:
     /user/roomsAllowed:
         post:
             tags:
-                - user
-            summary: Check the allowed rooms for user
-            description: Check the rooms allowed for user
+                - api
+            summary: User allowed rooms
+            description: User allowed rooms
             operationId: roomsAllowed
             requestBody:
                 description: Check rooms allowed
@@ -278,6 +278,30 @@ paths:
                     description: Bad request
                 '403':
                     description: Forbidden
+
+    /room/exists:
+        post:
+            tags:
+                - api
+            summary: Check if room exists
+            description: Check if room exists
+            operationId: roomExists
+            requestBody:
+                description: Room exists
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/RoomExistsReq'
+                required: true
+            responses:
+                '201':
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RoomExistsRes'
+                '400':
+                    description: Bad request
 
     /room/findBy/{userId}:
         get:
@@ -560,6 +584,16 @@ components:
                     type: string
                     example: '00:00'
 
+        RoomExistsReq:
+            type: object
+            properties:
+                room:
+                    type: string
+                    example: 'Room1'
+                api_secret_key:
+                    type: string
+                    example: 'mirotalkweb_default_secret'
+
         RoomRes:
             type: object
             properties:
@@ -588,7 +622,13 @@ components:
                 time:
                     type: string
                     example: '00:00'
-
+        RoomExistsRes:
+            type: object
+            properties:
+                message:
+                    type: boolean
+                    enum: [true, false]
+                    example: true
     securitySchemes:
         authorization:
             type: http

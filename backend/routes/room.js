@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express');
+const api = require('../middleware/api');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const validator = require('../middleware/validator');
@@ -10,6 +11,11 @@ const controllersRooms = require('../controllers/rooms');
 //CREATE: /api/v1/room
 router.post('/room', auth, validator, (req, res) => {
     controllersRooms.roomCreate(req, res);
+});
+
+//EXISTS: /api/v1/room/exists
+router.post('/room/exists', api, (req, res) => {
+    controllersRooms.roomExists(req, res);
 });
 
 //GET: /api/v1/room/findBy/userId
