@@ -589,7 +589,7 @@ iframe {
 
 .select-options {
     width: 100%;
-    padding: 5px;
+    padding: 10px;
     border-radius: 5px;
     border: 1px solid var(--border-color);
     background-color: transparent;
