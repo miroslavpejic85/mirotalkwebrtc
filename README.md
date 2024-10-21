@@ -96,11 +96,12 @@ Stop the MongoDB container:
 $ npm run mongo:down
 ```
 
-#### Cloud MongoDB Deployment (Optional)
+<details>
+<summary>Cloud MongoDB Deployment (Optional)</summary>
 
-If you prefer to deploy MongoDB in the cloud, especially through [MongoDb Atlas](https://www.mongodb.com/).
+<br />
 
-Please remember to update the credentials in the `.env` file accordingly.
+For cloud MongoDB deployments, such as with <a href="https://www.mongodb.com/">MongoDB Atlas</a>, make sure to update the credentials in the `.env` file accordingly.
 
 ```bash
 # MongoDB Configuration (https://www.mongodb.com/)
@@ -108,13 +109,16 @@ MONGO_URL=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PO
 MONGO_DATABASE=mirotalk
 ```
 
----
+</details>
 
-### User Email Verification (Optional)
+<details>
+<summary>User Email Verification (Optional)</summary>
+
+<br />
 
 ![email](./frontend/Images/email.png)
 
-By default, user email verification is enabled. If you wish to disable it, set `EMAIL_VERIFICATION` to `false` in the `.env` file. If you choose to keep email verification enabled, make sure to configure the email settings in the `.env` file accordingly.
+By default, email verification is disabled. To enable it, set `EMAIL_VERIFICATION` to `true` in the `.env` file, and ensure the email settings are properly configured.
 
 ```bash
 # Email Configuration (https://support.google.com/mail/answer/185833?hl=en)
@@ -125,7 +129,7 @@ EMAIL_USERNAME=emailUsername
 EMAIL_PASSWORD=emailPassword
 ```
 
----
+</details>
 
 ### Install dependencies and start the server
 
@@ -213,7 +217,7 @@ To set up your own instance of `MiroTalk WEB` on a dedicated cloud server, pleas
 
 </details>
 
-<details open>
+<details>
 <summary>Support</summary>
 
 <br/>
