@@ -112,7 +112,9 @@ function signupOrLogin(data) {
             console.log('[API] - USER LOGIN RESPONSE', res);
             if (res.message) {
                 res.success ? popupMessage('success', res.message) : popupMessage('warning', res.message);
-                res.message.includes('Pending') ? showLogin() : showSignUp();
+                if (res.message.includes('Pending')) {
+                    showLogin();
+                }
             } else {
                 window.sessionStorage.userId = res._id;
                 window.sessionStorage.userToken = res.token;
@@ -138,7 +140,7 @@ function showSignUp() {
 }
 
 function showLogin() {
-    login.style.transform = 'translateY(-550px)';
+    login.style.transform = 'translateY(-580px)';
     loginLabel.style.transform = 'scale(1)';
     signupLabel.style.transform = 'scale(0.6)';
     cleanSignUpInput();

@@ -3,8 +3,10 @@
 :root {
     --primary-color: #202123;
     --secondary-color: #45494c;
+    --accent-color: #316fb2;
+    --hover-color: #439fff;
     --text-color: #f5f5f5;
-    --box-shadow: 0px 8px 16px 0px rgb(0 0 0);
+    --box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.7);
 }
 
 body {
@@ -16,21 +18,18 @@ body {
     justify-content: center;
     align-items: center;
     background: var(--primary-color);
-    font-family: 'Montserrat';
+    font-family: 'Montserrat', sans-serif;
 }
 
 .main {
-    width: 350px;
-    height: 550px;
-    overflow: hidden;
+    width: 380px;
+    height: 580px;
     background: var(--secondary-color);
     color: var(--text-color);
-    border-radius: 10px;
+    border-radius: 12px;
     box-shadow: var(--box-shadow);
-}
-
-#chk {
-    display: none;
+    position: relative;
+    overflow: hidden;
 }
 
 .signup {
@@ -53,15 +52,21 @@ label {
 input {
     width: 60%;
     height: 20px;
-    background-color: var(--primary-color);
-    color: var(--text-color);
     justify-content: center;
     display: flex;
     margin: 20px auto;
-    padding: 10px;
-    border: none;
+    padding: 12px;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border: 2px solid var(--accent-color);
+    border-radius: 6px;
     outline: none;
-    border-radius: 5px;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+}
+
+input:focus {
+    border-color: var(--hover-color);
 }
 
 button {
@@ -83,12 +88,12 @@ button {
 }
 
 button:hover {
-    background: #439fff;
+    background-color: var(--hover-color);
 }
 
 .login {
-    height: 550px;
-    background: #316fb2;
+    height: 580px;
+    background: var(--accent-color);
     border-radius: 60% / 10%;
     transform: translateY(-180px);
     transition: 0.8s ease-in-out;
@@ -98,8 +103,11 @@ button:hover {
     transform: scale(0.6);
 }
 
+#chk {
+    display: none;
+}
 #chk:checked ~ .login {
-    transform: translateY(-550px);
+    transform: translateY(-580px);
 }
 #chk:checked ~ .login label {
     transform: scale(1);
@@ -116,20 +124,17 @@ button:hover {
     background-color: #439fff !important;
 }
 #supportBtn {
-    width: 65%;
-    margin: 10px auto;
+    margin-top: 30px;
     color: var(--text-color);
-    background-color: transparent !important;
-    font-size: 0.6em;
+    font-size: 0.8em;
     font-weight: bold;
-    text-align: left;
-    margin-top: 50px;
-    border-radius: 5px;
-    transition: 0.2s ease-in;
+    text-align: center;
     cursor: pointer;
+    transition: transform 0.3s ease;
 }
+
 #supportBtn:hover {
-    transform: scale(0.9);
+    transform: scale(0.95);
 }
 
 .swal2-title,

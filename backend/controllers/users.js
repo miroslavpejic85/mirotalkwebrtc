@@ -267,7 +267,7 @@ async function userRoomsAllowed(req, res) {
 
         log.debug('userRoomsAllowed', roomsAllowedForUser);
 
-        res.status(201).json({ message: roomsAllowedForUser })
+        res.status(201).json({ message: roomsAllowedForUser });
     } catch (error) {
         log.error('userRoomsAllowed', error);
         res.status(400).json({ message: error.message });

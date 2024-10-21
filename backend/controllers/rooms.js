@@ -37,7 +37,7 @@ async function roomExists(req, res) {
             return res.status(201).json({ message: false });
         }
 
-        res.status(201).json({ message: true })
+        res.status(201).json({ message: true });
     } catch (error) {
         log.error('Room exists error', error);
         res.status(400).json({ message: error.message });
