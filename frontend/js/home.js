@@ -112,7 +112,7 @@ function signupOrLogin(data) {
             console.log('[API] - USER LOGIN RESPONSE', res);
             if (res.message) {
                 res.success ? popupMessage('success', res.message) : popupMessage('warning', res.message);
-                if (res.message.includes('Pending')) {
+                if (res.message.includes('Pending') || res.message.includes('CodeCanyon')) {
                     showLogin();
                 }
             } else {
