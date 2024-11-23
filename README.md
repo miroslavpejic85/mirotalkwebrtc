@@ -52,7 +52,7 @@ For demonstration purposes, below the credentials:
 <details open>
 <summary>Quick start</summary>
 
-![nodejs](frontend/images/nodejs.png)
+![nodejs](frontend/Images/nodejs.png)
 
 Install [NodeJs](https://nodejs.org/en/blog/release/v18.16.0).
 
