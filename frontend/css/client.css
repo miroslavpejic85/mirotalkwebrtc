@@ -568,11 +568,12 @@ iframe {
 }
 
 #addRoomDiv {
+    z-index: 10;
     display: flex;
     position: absolute;
     float: right;
     right: 15px;
-    gap: 5px;
+    gap: 10px;
 }
 
 .add-row-select-options {
