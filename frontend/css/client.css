@@ -568,9 +568,11 @@ iframe {
 }
 
 #addRoomDiv {
+    display: flex;
     position: absolute;
     float: right;
     right: 15px;
+    gap: 5px;
 }
 
 .add-row-select-options {
@@ -841,6 +843,9 @@ tr:nth-child(even) {
         left: 250px;
         width: calc(100% - 250px);
     }
+    .dash-content .boxes {
+        display: flex;
+    }
 }
 
 @media (max-width: 780px) {
@@ -854,11 +859,17 @@ tr:nth-child(even) {
     .accountDiv {
         width: 100%;
     }
+    .dash-content .boxes {
+        display: flex;
+    }
 }
 
 @media (max-width: 560px) {
     .dash-content .boxes .box {
         width: 100%;
+    }
+    .dash-content .boxes {
+        display: none;
     }
 }
 
