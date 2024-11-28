@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.1.19
+ * @version 1.1.20
  */
 
 const isMobile = !!/Android|webOS|iPhone|iPad|iPod|BB10|BlackBerry|IEMobile|Opera Mini|Mobile|mobile/i.test(
@@ -563,7 +563,7 @@ function getRow(obj) {
         ? `<i id="${obj._id}_delete" onclick="delRow('${obj._id}')" class="uil uil-multiply"></i>`
         : '';
 
-    let rooms = `<td><input id="${obj._id}_room" type="text" name="room" value="${obj.room}"/></td>`;
+    let rooms = `<td><input id="${obj._id}_room" type="text" placeholder="Room name" name="room" value="${obj.room}"/></td>`;
 
     if (!user.allowedRoomsALL) {
         rooms = `<select id="${obj._id}_room" class="select-options">`;
@@ -585,11 +585,11 @@ function getRow(obj) {
                 ${optionBRO}
             </select>
         </td>`,
-        `<td><input id="${obj._id}_tag" type="text" name="tag" value="${obj.tag}"/></td>`,
-        `<td><input id="${obj._id}_email" type="email" name="email" value="${obj.email}"/></td>`,
-        `<td><input id="${obj._id}_phone" type="text" name="text" value="${obj.phone}"/></td>`,
-        `<td><input id="${obj._id}_date" type="date" name="date" value="${obj.date}"/></td>`,
-        `<td><input id="${obj._id}_time" type="time" name="time" value="${obj.time}"/></td>`,
+        `<td><input id="${obj._id}_tag" type="text" name="tag" placeholder="Tag" value="${obj.tag}"/></td>`,
+        `<td><input id="${obj._id}_email" type="email" name="email" placeholder="Email address" value="${obj.email}"/></td>`,
+        `<td><input id="${obj._id}_phone" type="text" name="text" placeholder="Phone number" value="${obj.phone}"/></td>`,
+        `<td><input id="${obj._id}_date" type="date" name="date" placeholder="Date" value="${obj.date}"/></td>`,
+        `<td><input id="${obj._id}_time" type="time" name="time" placeholder="Time" value="${obj.time}"/></td>`,
         `<td>${rooms}</td>`,
         `<td>
             ${setRandomRoomIcon}

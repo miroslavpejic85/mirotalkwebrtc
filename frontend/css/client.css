@@ -458,11 +458,88 @@ iframe {
     transition: var(--tran-03);
 }
 
-#mytable {
+/* Base table styling for larger screens */
+#myTable {
     width: 100%;
+    border-collapse: collapse;
+    background-color: var(--panel-color);
+    color: var(--text-color);
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
-#myTable td i {
+
+#myTable th,
+#myTable td {
+    padding: 12px 16px;
+    border: 1px solid var(--border-color);
+    text-align: left;
     font-size: 1.4rem;
+    word-wrap: break-word;
+}
+
+#myTable th {
+    background-color: var(--box1-color);
+    color: var(--white-color);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+#myTable tr:nth-child(even) {
+    background-color: var(--panel-light-color);
+}
+
+#myTable tr:hover {
+    background-color: var(--hover-color);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Responsive table card styling for mobile */
+@media (max-width: 560px) {
+    #myTable {
+        display: block;
+        width: 100%;
+        border: none;
+    }
+
+    #myTable tr {
+        display: block;
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    #myTable th,
+    #myTable td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        text-align: left;
+    }
+
+    #myTable th {
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+        padding: 8px 12px;
+        background-color: var(--box1-color);
+        color: var(--white-color);
+    }
+
+    #myTable td {
+        width: 93vw;
+        font-size: 2rem;
+        padding: 10px 12px;
+        color: var(--text-color);
+        position: relative;
+        border-top: 1px solid var(--border-color);
+    }
+}
+
+@media (max-width: 360px) {
+    #myTable td {
+        font-size: 1.5rem;
+    }
 }
 
 .accountDiv,
