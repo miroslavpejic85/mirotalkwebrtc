@@ -365,7 +365,7 @@ iframe {
 
 .dash-content .title {
     display: flex;
-    margin: 60px 0 30px 0;
+    padding: 50px 0 50px 0; /* top, right, bottom, left */
     align-items: center;
 }
 
@@ -391,7 +391,6 @@ iframe {
 
 .dash-content .boxes {
     display: flex;
-    margin-top: 20px;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
