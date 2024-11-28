@@ -528,7 +528,7 @@ iframe {
 
     #myTable td {
         width: 93vw;
-        font-size: 2rem;
+        font-size: 1.6rem;
         padding: 10px 12px;
         color: var(--text-color);
         position: relative;
