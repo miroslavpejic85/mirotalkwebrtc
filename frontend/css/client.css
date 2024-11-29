@@ -465,14 +465,12 @@ iframe {
     background-color: var(--panel-color);
     color: var(--text-color);
     overflow: hidden;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 #myTable th,
 #myTable td {
     padding: 12px 16px;
-    border: 1px solid var(--border-color);
+    border: 0.1px solid var(--border-color);
     text-align: left;
     font-size: 1.4rem;
     word-wrap: break-word;
@@ -532,7 +530,7 @@ iframe {
         padding: 10px 12px;
         color: var(--text-color);
         position: relative;
-        border-top: 1px solid var(--border-color);
+        border-top: 0.1px solid var(--border-color);
     }
 }
 
