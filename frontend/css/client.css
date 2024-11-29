@@ -655,8 +655,8 @@ iframe {
     width: 100%;
     padding: 12px;
     border-radius: 5px;
-    border: 1px solid var(--border-color);
-    background-color: transparent;
+    border: 0.1px solid var(--border-color);
+    background: var(--body-color);
     color: var(--text-color);
     color-scheme: var(--input-color-schema);
     font-size: 16px;
@@ -668,8 +668,8 @@ iframe {
     width: 100%;
     padding: 10px;
     border-radius: 5px;
-    border: 1px solid var(--border-color);
-    background-color: transparent;
+    border: 0.1px solid var(--border-color);
+    background: var(--body-color);
     color: var(--text-color);
     color-scheme: var(--input-color-schema);
     font-size: 16px;
