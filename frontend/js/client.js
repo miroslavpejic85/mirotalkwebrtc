@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.1.21
+ * @version 1.1.22
  */
 
 const isMobile = !!/Android|webOS|iPhone|iPad|iPod|BB10|BlackBerry|IEMobile|Opera Mini|Mobile|mobile/i.test(
@@ -28,6 +28,7 @@ const navSFU = document.getElementById('navSFU');
 const navBRO = document.getElementById('navBRO');
 const navSup = document.getElementById('navSup');
 const navAcc = document.getElementById('navAcc');
+const navSet = document.getElementById('navSet');
 
 const myProfile = document.getElementById('myProfile');
 
@@ -82,6 +83,9 @@ const accountUpdatedAt = document.getElementById('account-updated-at');
 const accountServicesAllowed = document.getElementById('account-services-allowed');
 const accountRoomsAllowed = document.getElementById('account-rooms-allowed');
 const accountDelete = document.getElementById('account-delete');
+
+const settingsDiv = document.getElementById('settingsDiv');
+const settingsClose = document.getElementById('settings-close-btn');
 
 const addRowDiv = document.getElementById('addRowDiv');
 const openAddBtn = document.getElementById('open-add-btn');
@@ -360,8 +364,13 @@ navBRO.addEventListener('click', () => {
 navSup.addEventListener('click', () => {
     openURL(config.Author.Support, true);
 });
+
 navAcc.addEventListener('click', () => {
     getMyAccount();
+});
+
+navSet.addEventListener('click', () => {
+    toggleSettings();
 });
 
 hideBoxesDS.addEventListener('click', () => {
@@ -399,6 +408,10 @@ accountClose.addEventListener('click', () => {
 });
 accountDelete.addEventListener('click', () => {
     delMyAccount();
+});
+
+settingsClose.addEventListener('click', () => {
+    toggleSettings();
 });
 
 function navShow(elements = []) {
@@ -450,6 +463,17 @@ function toggleAccount() {
     } else {
         accountDiv.classList.toggle('show');
         animateCSS(accountDiv, 'fadeInRight');
+    }
+}
+
+function toggleSettings() {
+    if (settingsDiv.classList.contains('show')) {
+        animateCSS(settingsDiv, 'fadeOutRight').then((ok) => {
+            settingsDiv.classList.toggle('show');
+        });
+    } else {
+        settingsDiv.classList.toggle('show');
+        animateCSS(settingsDiv, 'fadeInRight');
     }
 }
 

@@ -540,6 +540,7 @@ iframe {
     }
 }
 
+.settingsDiv,
 .accountDiv,
 .addRowDiv {
     position: fixed;
@@ -555,12 +556,27 @@ iframe {
     color: var(--text-color);
 }
 
+.settingsDiv label,
 .accountDiv label,
 .addRowDiv label {
     display: block;
     margin-top: 20px;
     font-weight: bold;
     font-size: 16px;
+}
+
+.settingsDiv select {
+    margin-top: 10px !important;
+    width: 100%;
+    padding: 12px;
+    border-radius: 5px;
+    border: 0.1px solid var(--border-color);
+    background: var(--body-color);
+    color: var(--text-color);
+    color-scheme: var(--input-color-schema);
+    font-size: 16px;
+    outline: none;
+    cursor: pointer;
 }
 
 .accountDiv input,
@@ -591,11 +607,13 @@ iframe {
     width: auto;
 }
 
+.settingsDiv i,
 .accountDiv i,
 .addRowDiv i {
     cursor: pointer;
 }
 
+.settingsDiv i:hover,
 .accountDiv i:hover,
 .addRowDiv i:hover {
     color: var(--color-hover);
@@ -831,6 +849,19 @@ tr:nth-child(even) {
     background: transparent;
 }
 
+/* google translate */
+.skiptranslate iframe,
+.goog-te-banner-frame.skiptranslate {
+    display: none !important;
+    position: absolute !important;
+    top: -10000px !important;
+}
+
+#google_translate_element select {
+    background: var(--secondary-color) !important;
+    color: var(--text-color) !important;
+}
+
 .fadeIn {
     -webkit-animation: fadeIn ease-in 1;
     -moz-animation: fadeIn ease-in 1;
@@ -932,6 +963,9 @@ tr:nth-child(even) {
         width: 100%;
     }
     .accountDiv {
+        width: 100%;
+    }
+    .settingsDiv {
         width: 100%;
     }
     .dash-content .boxes {

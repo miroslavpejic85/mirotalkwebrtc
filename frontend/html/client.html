@@ -46,6 +46,7 @@
         <script defer src="../js/swal.js"></script>
         <script defer src="../js/api.js"></script>
         <script defer src="../js/client.js"></script>
+        <script defer src="../js/translate.js"></script>
     </head>
 
     <body>
@@ -108,6 +109,12 @@
                         <a id="navAcc" href="javascript:void(0)">
                             <i class="uil uil-user"></i>
                             <span class="link-name">Account</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a id="navSet" href="javascript:void(0)">
+                            <i class="uil uil-setting"></i>
+                            <span class="link-name">Settings</span>
                         </a>
                     </li>
                     <li class="mode">
@@ -305,6 +312,12 @@
                     <label for="services-allowed">Rooms allowed</label>
                     <input id="account-rooms-allowed" type="text" name="text" readonly />
                     <button id="account-delete">Delete</button>
+                </div>
+
+                <div id="settingsDiv" class="settingsDiv hidden">
+                    <i id="settings-close-btn" class="uil uil-multiply"></i>
+                    <label for="google_translate_element">Language</label>
+                    <div id="google_translate_element"></div>
                 </div>
 
                 <div id="p2p" class="dash-iframe fadeIn">
