@@ -579,6 +579,46 @@ iframe {
     cursor: pointer;
 }
 
+.settings-ul {
+    margin-top: 20px;
+    padding: 0;
+    list-style-type: none;
+}
+
+.settings-ul .mode {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: var(--panel-color);
+    border: 0.1px solid var(--border-color);
+    border-radius: 5px;
+    margin: 10px 0;
+    transition: background-color 0.3s ease;
+}
+
+.settings-ul .mode a {
+    text-decoration: none;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: default;
+}
+
+.settings-ul .mode i {
+    font-size: 20px;
+}
+
+.settings-ul .mode .link-name {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.settings-ul .mode .mode-toggle {
+    cursor: pointer;
+}
+
 .accountDiv input,
 .addRowDiv input {
     padding: 12px;
