@@ -1,17 +1,12 @@
-version: '3'
-
 services:
     mirotalkwebrtc:
         image: mirotalk/webrtc:latest
-        build:
-            context: .
-            dockerfile: Dockerfile
         container_name: mirotalkwebrtc
         hostname: mirotalkwebrtc
         volumes:
             - .env:/src/.env:ro
             - ./backend/config.js:/src/backend/config.js:ro
-            # These volumes are not mandatory, uncomment if you want to use it
+            # Optional volumes for real-time updates:
             # - ./backend/:/src/backend/:ro
             # - ./frontend/:/src/frontend/:ro
         restart: unless-stopped
