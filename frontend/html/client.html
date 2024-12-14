@@ -53,9 +53,9 @@
         <nav>
             <div class="logo-name">
                 <div class="logo-image">
-                    <img src="../Images/logo.png" alt="miroslav-pejic" />
+                    <img id="navLogoImage" src="../Images/logo.png" alt="miroslav-pejic" />
                 </div>
-                <span class="logo_name">MiroTalk</span>
+                <span id="navLogoLabel" class="logo_name">MiroTalk</span>
             </div>
 
             <div class="menu-items">
@@ -69,25 +69,25 @@
                     <li>
                         <a id="navP2P" href="javascript:void(0)">
                             <i class="uil uil-rocket"></i>
-                            <span class="link-name">MiroTalk P2P</span>
+                            <span id="navP2PLabel" class="link-name">MiroTalk P2P</span>
                         </a>
                     </li>
                     <li>
                         <a id="navSFU" href="javascript:void(0)">
                             <i class="uil uil-trophy"></i>
-                            <span class="link-name">MiroTalk SFU</span>
+                            <span id="navSFULabel" class="link-name">MiroTalk SFU</span>
                         </a>
                     </li>
                     <li>
                         <a id="navC2C" href="javascript:void(0)">
                             <i class="uil uil-star"></i>
-                            <span class="link-name">MiroTalk C2C</span>
+                            <span id="navC2CLabel" class="link-name">MiroTalk C2C</span>
                         </a>
                     </li>
                     <li>
                         <a id="navBRO" href="javascript:void(0)">
                             <i class="uil uil-wifi"></i>
-                            <span class="link-name">MiroTalk BRO</span>
+                            <span id="navBROLabel" class="link-name">MiroTalk BRO</span>
                         </a>
                     </li>
                     <li>
@@ -241,7 +241,7 @@
                     <table id="myTable" class="fadeIn">
                         <thead>
                             <tr>
-                                <th>MiroTalk</th>
+                                <th id="tableAppName">MiroTalk</th>
                                 <th>Tag</th>
                                 <th>Email</th>
                                 <th>Phone</th>
@@ -257,7 +257,7 @@
 
                 <form id="addRowDiv" class="addRowDiv hidden" onsubmit="return false">
                     <i id="add-close-btn" class="uil uil-multiply"></i>
-                    <label for="mirotalk">MiroTalk</label>
+                    <label id="rowAppName" for="mirotalk">MiroTalk</label>
                     <select id="add-type" class="add-row-select-options" required>
                         <option value="P2P">P2P</option>
                         <option value="SFU">SFU</option>

@@ -1,6 +1,10 @@
 'use-strict';
 
 module.exports = {
+    App: {
+        Name: 'MiroTalk test',
+        Logo: '../Images/logo.png',
+    },
     Author: {
         Email: 'miroslav.pejic.85@gmail.com',
         Profile: 'https://www.linkedin.com/in/miroslav-pejic-976a07101/',
@@ -9,6 +13,7 @@ module.exports = {
     MiroTalk: {
         P2P: {
             Visible: true,
+            Label: 'MiroTalk P2P',
             Home: 'https://p2p.mirotalk.com',
             Room: 'https://p2p.mirotalk.com/newcall',
             Join: 'https://p2p.mirotalk.com/join/',
@@ -22,6 +27,7 @@ module.exports = {
         SFU: {
             Visible: true,
             Protected: false, // host_protected or user_auth enabled
+            Label: 'MiroTalk SFU',
             Home: 'https://sfu.mirotalk.com',
             Room: 'https://sfu.mirotalk.com/newroom',
             Join: 'https://sfu.mirotalk.com/join/',
@@ -34,6 +40,7 @@ module.exports = {
         },
         C2C: {
             Visible: true,
+            Label: 'MiroTalk C2C',
             Home: 'https://c2c.mirotalk.com',
             Room: 'https://c2c.mirotalk.com/?room=',
             GitHub: {
@@ -45,6 +52,7 @@ module.exports = {
         },
         BRO: {
             Visible: true,
+            Label: 'MiroTalk BRO',
             Home: 'https://bro.mirotalk.com',
             Broadcast: 'https://bro.mirotalk.com/broadcast?id=',
             Viewer: 'https://bro.mirotalk.com/viewer?id=',

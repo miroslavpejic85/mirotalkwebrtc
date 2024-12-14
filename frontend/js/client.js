@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.1.26
+ * @version 1.1.27
  */
 
 const isMobile = !!/Android|webOS|iPhone|iPad|iPod|BB10|BlackBerry|IEMobile|Opera Mini|Mobile|mobile/i.test(
@@ -29,6 +29,17 @@ const navBRO = document.getElementById('navBRO');
 const navSup = document.getElementById('navSup');
 const navAcc = document.getElementById('navAcc');
 const navSet = document.getElementById('navSet');
+
+const navLogoImage = document.getElementById('navLogoImage');
+const navLogoLabel = document.getElementById('navLogoLabel');
+
+const navP2PLabel = document.getElementById('navP2PLabel');
+const navSFULabel = document.getElementById('navSFULabel');
+const navC2CLabel = document.getElementById('navC2CLabel');
+const navBROLabel = document.getElementById('navBROLabel');
+
+const tableAppName = document.getElementById('tableAppName');
+const rowAppName = document.getElementById('rowAppName');
 
 const myProfile = document.getElementById('myProfile');
 
@@ -192,6 +203,8 @@ function loadConfig(cfg) {
     config = cfg;
     html = cfg.HTML ? cfg.HTML : html;
     console.log('Config', config);
+    const appName = config?.App?.Name || 'MiroTalk';
+    const appLogo = config?.App?.Logo || '../Images/logo.png';
     myProfile.setAttribute('href', config.Author.Profile);
     repoP2P.setAttribute('href', config.MiroTalk.P2P.GitHub.Repo);
     starP2P.setAttribute('href', config.MiroTalk.P2P.GitHub.Star);
@@ -209,6 +222,14 @@ function loadConfig(cfg) {
     sfuIframe.setAttribute('src', config.MiroTalk.SFU.Room);
     c2cIframe.setAttribute('src', config.MiroTalk.C2C.Home);
     broIframe.setAttribute('src', config.MiroTalk.BRO.Home);
+    navLogoImage.setAttribute('src', appLogo);
+    navLogoLabel.textContent = appName;
+    navP2PLabel.textContent = config.MiroTalk.P2P.Label || 'MiroTalk P2P';
+    navSFULabel.textContent = config.MiroTalk.SFU.Label || 'MiroTalk SFU';
+    navC2CLabel.textContent = config.MiroTalk.C2C.Label || 'MiroTalk C2C';
+    navBROLabel.textContent = config.MiroTalk.BRO.Label || 'MiroTalk BRO';
+    tableAppName.textContent = appName;
+    rowAppName.textContent = appName;
 }
 
 function handleTokens(cfg) {
