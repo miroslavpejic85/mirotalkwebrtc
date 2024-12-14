@@ -2,7 +2,7 @@
 
 module.exports = {
     App: {
-        Name: 'MiroTalk test',
+        Name: 'MiroTalk',
         Logo: '../Images/logo.png',
     },
     Author: {
