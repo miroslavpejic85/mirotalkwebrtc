@@ -1,4 +1,4 @@
-'use-strict';
+'use strict';
 
 const utils = require('../common/utils');
 const logs = require('../common/logs');

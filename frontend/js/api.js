@@ -1,4 +1,4 @@
-'use-strict';
+'use strict';
 
 const apiPath = '/api/v1';
 const userEmail = window.localStorage.email;

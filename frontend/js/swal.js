@@ -1,4 +1,4 @@
-'use-strict';
+'use strict';
 
 function popupMessage(type, message, timer = 3000) {
     switch (type) {

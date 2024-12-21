@@ -1,4 +1,4 @@
-'use-strict';
+'use strict';
 
 const logs = require('../common/logs');
 const log = new logs('Validator');

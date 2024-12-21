@@ -1,4 +1,4 @@
-'use-strict';
+'use strict';
 
 const CryptoJS = require('crypto-js');
 const jwt = require('jsonwebtoken');
