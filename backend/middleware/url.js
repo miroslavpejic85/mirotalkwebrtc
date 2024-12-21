@@ -1,19 +1,19 @@
 'use strict';
 
-const utils = require('../common/utils');
 const logs = require('../common/logs');
-
 const log = new logs('URL');
 
-const url = (err, req, res, next) => {
-    if (err instanceof URIError) {
-        log.error('Malformed URL', req.url);
-        res.status(400).send('Bad Request: Malformed URL');
-    } else {
+const url = (req, res, next) => {
+    try {
+        decodeURIComponent(req.path);
+        next();
+    } catch (err) {
+        if (err instanceof URIError) {
+            log.error('Malformed URL', req.url);
+            return res.status(400).json({ error: 'Bad Request: Malformed URL' });
+        }
         next(err);
     }
-
-    return next();
 };
 
 module.exports = url;

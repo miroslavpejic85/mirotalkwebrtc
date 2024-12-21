@@ -5,6 +5,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const express = require('express');
 const auth = require('./middleware/auth');
+const url = require('./middleware/url');
 const corsOptions = require('./config/cors');
 const cors = require('cors');
 const compression = require('compression');
@@ -61,7 +62,7 @@ mongoose
         app.use(express.json());
 
         // Logs requests
-        app.use((req, res, next) => {
+        app.use(url, (req, res, next) => {
             log.debug('New request:', {
                 headers: req.headers,
                 body: req.body,
