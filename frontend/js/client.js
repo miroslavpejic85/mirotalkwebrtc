@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.1.28
+ * @version 1.1.29
  */
 
 const isMobile = !!/Android|webOS|iPhone|iPad|iPod|BB10|BlackBerry|IEMobile|Opera Mini|Mobile|mobile/i.test(
@@ -153,6 +153,7 @@ const dataTable = $('#myTable').DataTable({
         },
     ], // [MiroTalk, Tag, Email, Phone, Date, Time, Room, Actions]
 });
+$('#myTable').css('width', '100%');
 
 const getMode = window.localStorage.mode || 'dark';
 const getStatus = window.localStorage.status;
