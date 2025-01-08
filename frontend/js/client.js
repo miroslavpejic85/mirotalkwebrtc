@@ -9,12 +9,16 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.1.30
+ * @version 1.1.31
  */
 
-const isMobile = !!/Android|webOS|iPhone|iPad|iPod|BB10|BlackBerry|IEMobile|Opera Mini|Mobile|mobile/i.test(
-    navigator.userAgent.toLowerCase() || '',
-);
+const userAgent = navigator.userAgent;
+const parser = new UAParser(userAgent);
+const result = parser.getResult();
+const deviceType = result.device.type || 'desktop';
+const isMobile = deviceType === 'mobile';
+
+console.log('INFO', result);
 
 const body = document.querySelector('body');
 const modeToggle = body.querySelector('.mode-toggle');
