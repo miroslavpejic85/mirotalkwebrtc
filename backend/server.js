@@ -9,6 +9,7 @@ const url = require('./middleware/url');
 const corsOptions = require('./config/cors');
 const cors = require('cors');
 const compression = require('compression');
+const helmet = require('helmet');
 const api = require('./routes/api');
 const room = require('./routes/room');
 const sms = require('./routes/sms');
@@ -55,6 +56,8 @@ mongoose
     .then(() => {
         const app = express();
 
+        app.use(helmet.xssFilter());    // Enable XSS protection
+        app.use(helmet.noSniff());      // Enable content type sniffing prevention
         app.use(cors(corsOptions()));
         app.use(compression());
         app.use(express.static(frontendDir));
