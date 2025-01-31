@@ -889,23 +889,6 @@ tr:nth-child(even) {
     background: transparent;
 }
 
-/* google translate */
-.skiptranslate iframe,
-.goog-te-banner-frame.skiptranslate,
-.VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
-.VIpgJd-ZVi9od-aZ2wEe-OiiCO,
-#goog-gt-tt,
-#goog-gt-tt *,
-#goog-gt-vt,
-#goog-gt-vt * {
-    display: none !important;
-}
-
-#google_translate_element select {
-    background: var(--secondary-color) !important;
-    color: var(--text-color) !important;
-}
-
 .fadeIn {
     -webkit-animation: fadeIn ease-in 1;
     -moz-animation: fadeIn ease-in 1;

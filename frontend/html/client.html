@@ -2,6 +2,8 @@
 <html lang="en">
     <head>
         <title>MiroTalk WebRTC admin</title>
+        <link rel="apple-touch-icon" href="../Images/apple-touch-icon.png" />
+        <link rel="icon" type="image/x-icon" href="../Images/favicon.ico" />
 
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -9,17 +11,17 @@
 
         <meta name="description" content="MiroTalk WebRTC admin panel, for rooms scheduling." />
 
-        <meta property="og:type" content="app-mirotalk" />
-        <meta property="og:site_name" content="MiroTalk WebRTC" />
-        <meta property="og:title" content="Click the link to open the dashboard" />
-        <meta property="og:description" content="MiroTalk WebRTC rooms scheduler" />
+        <!-- https://ogp.me -->
 
-        <link rel="apple-touch-icon" href="../Images/apple-touch-icon.png" />
-        <link rel="icon" type="image/x-icon" href="../Images/favicon.ico" />
+        <meta property="og:type" content="{{OG_TYPE}}" />
+        <meta property="og:site_name" content="{{OG_SITE_NAME}}" />
+        <meta property="og:title" content="{{OG_TITLE}}" />
+        <meta property="og:description" content="{{OG_DESCRIPTION}}" />
+        <meta property="og:image" content="{{OG_IMAGE}}" />
+        <meta property="og:url" content="{{OG_URL}}" />
 
         <link rel="stylesheet" href="../css/client.css" />
         <link rel="stylesheet" href="../css/common.css" />
-        <!-- https://iconscout.com/unicons/explore/line | https://unicons.iconscout.com/release/v1.0.0/index.html -->
         <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap5.min.css" />
@@ -31,8 +33,6 @@
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
 
-        <!-- <script type="text/javascript" src="https://unpkg.com/@popperjs/core@2"></script>
-        <script type="text/javascript" src="https://unpkg.com/tippy.js@6"></script> -->
         <script
             type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"
@@ -138,7 +138,7 @@
                 </div>
 
                 <a id="myProfile" href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" target="_blank">
-                    <img src="../Images/profile.png" alt="miroslav-pejic" />
+                    <img src="../Images/profile.png" />
                 </a>
             </div>
 
@@ -261,10 +261,10 @@
                     <i id="add-close-btn" class="uil uil-multiply"></i>
                     <label id="rowAppName" for="mirotalk">MiroTalk</label>
                     <select id="add-type" class="add-row-select-options" required>
-                        <option value="P2P">P2P</option>
-                        <option value="SFU">SFU</option>
-                        <option value="C2C">C2C</option>
-                        <option value="BRO">BRO</option>
+                        <option translate="no" value="P2P">P2P</option>
+                        <option translate="no" value="SFU">SFU</option>
+                        <option translate="no" value="C2C">C2C</option>
+                        <option translate="no" value="BRO">BRO</option>
                     </select>
                     <label for="tag">Tag</label>
                     <input id="add-tag" type="text" placeholder="Tag" name="tag" required />
@@ -309,8 +309,6 @@
 
                 <div id="settingsDiv" class="settingsDiv hidden">
                     <i id="settings-close-btn" class="uil uil-multiply"></i>
-                    <label for="google_translate_element">Language</label>
-                    <div id="google_translate_element"></div>
                     <ul class="settings-ul">
                         <li class="mode">
                             <a href="javascript:void(0)">
@@ -320,6 +318,10 @@
                             <div class="mode-toggle">
                                 <span class="switch"></span>
                             </div>
+                        </li>
+                        <li>
+                            <label for="google_translate_element">Language</label>
+                            <div id="google_translate_element"></div>
                         </li>
                     </ul>
                 </div>

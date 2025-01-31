@@ -9,6 +9,7 @@ const url = require('./middleware/url');
 const corsOptions = require('./config/cors');
 const cors = require('cors');
 const compression = require('compression');
+const HtmlInjector = require('./utils/HtmlInjector');
 const helmet = require('helmet');
 const api = require('./routes/api');
 const room = require('./routes/room');
@@ -49,6 +50,10 @@ const frontendDir = path.join(__dirname, '../', 'frontend');
 const login = path.join(__dirname, '../', 'frontend/html/home.html');
 const client = path.join(__dirname, '../', 'frontend/html/client.html');
 
+// File to cache and inject custom HTML data like OG tags and any other elements.
+const filesPath = [login, client];
+const htmlInjector = new HtmlInjector(filesPath, config || null);
+
 mongoose.set('strictQuery', true);
 
 mongoose
@@ -56,8 +61,8 @@ mongoose
     .then(() => {
         const app = express();
 
-        app.use(helmet.xssFilter());    // Enable XSS protection
-        app.use(helmet.noSniff());      // Enable content type sniffing prevention
+        app.use(helmet.xssFilter()); // Enable XSS protection
+        app.use(helmet.noSniff()); // Enable content type sniffing prevention
         app.use(cors(corsOptions()));
         app.use(compression());
         app.use(express.static(frontendDir));
@@ -82,11 +87,11 @@ mongoose
         app.use(apiPath, users);
 
         app.get('/', (req, res) => {
-            res.sendFile(login);
+            htmlInjector.injectHtml(login, res);
         });
 
         app.get('/client', auth, (req, res) => {
-            res.sendFile(client);
+            htmlInjector.injectHtml(client, res);
         });
 
         app.get('/config', auth, (req, res) => {

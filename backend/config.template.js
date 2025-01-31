@@ -1,9 +1,18 @@
 'use strict';
 
 module.exports = {
+    Language: 'en', // https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes
     App: {
         Name: 'MiroTalk',
         Logo: '../Images/logo.png',
+    },
+    OG: {
+        type: 'app-webrtc',
+        siteName: 'MiroTalk WebRTC',
+        title: 'Click the link to schedule the Meeting',
+        description: 'MiroTalk WEB Easy Room Scheduler for Meetings & Video Conferencing.',
+        image: 'https://webrtc.mirotalk.com/Images/mirotalk-bro.png',
+        url: 'https://webrtc.mirotalk.com',
     },
     Author: {
         Email: 'miroslav.pejic.85@gmail.com',

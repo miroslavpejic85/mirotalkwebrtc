@@ -2,19 +2,22 @@
 <html lang="en">
     <head>
         <title>MiroTalk WebRTC admin login</title>
+        <link rel="apple-touch-icon" href="../Images/apple-touch-icon.png" />
+        <link rel="icon" type="image/x-icon" href="../Images/favicon.ico" />
 
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="description" content="MiroTalk WebRTC admin panel, for rooms scheduling." />
 
-        <meta property="og:type" content="app-mirotalk" />
-        <meta property="og:site_name" content="MiroTalk WebRTC" />
-        <meta property="og:title" content="Click the link to login" />
-        <meta property="og:description" content="MiroTalk WebRTC rooms scheduler" />
+        <!-- https://ogp.me -->
 
-        <link rel="apple-touch-icon" href="../Images/apple-touch-icon.png" />
-        <link rel="icon" type="image/x-icon" href="../Images/favicon.ico" />
+        <meta property="og:type" content="{{OG_TYPE}}" />
+        <meta property="og:site_name" content="{{OG_SITE_NAME}}" />
+        <meta property="og:title" content="{{OG_TITLE}}" />
+        <meta property="og:description" content="{{OG_DESCRIPTION}}" />
+        <meta property="og:image" content="{{OG_IMAGE}}" />
+        <meta property="og:url" content="{{OG_URL}}" />
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
@@ -28,6 +31,7 @@
         <script defer src="../js/swal.js"></script>
         <script defer src="../js/api.js"></script>
         <script defer src="../js/home.js"></script>
+        <script defer src="../js/translate.js"></script>
     </head>
     <body>
         <div class="main">

@@ -1,10 +1,44 @@
 'use strict';
 
-const trScript = document.createElement('script');
-trScript.setAttribute('async', '');
-trScript.setAttribute('src', 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit');
-document.head.appendChild(trScript);
+function loadScript(src) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
 
 function googleTranslateElementInit() {
-    new google.translate.TranslateElement({ pageLanguage: 'en' }, 'google_translate_element');
+    new google.translate.TranslateElement(
+        {
+            pageLanguage: 'en',
+            autoDisplay: false,
+        },
+        'google_translate_element',
+    );
+
+    const language = config?.Language || 'en';
+    if (language === 'en') return; // No need to switch if default is 'en'
+
+    const observer = new MutationObserver(() => {
+        const select = document.querySelector('.goog-te-combo');
+        if (select) {
+            select.value = language;
+            select.dispatchEvent(new Event('change'));
+            observer.disconnect();
+        }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
 }
+
+(async function initGoogleTranslate() {
+    try {
+        await loadScript('https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit');
+    } catch (error) {
+        console.error('Failed to load Google Translate script:', error);
+    }
+})();

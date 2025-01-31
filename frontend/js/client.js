@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.1.36
+ * @version 1.1.40
  */
 
 const userAgent = navigator.userAgent;
@@ -570,10 +570,10 @@ function getRow(obj) {
     const isC2C = obj.type == 'C2C' ? 'selected' : '';
     const isBRO = obj.type == 'BRO' ? 'selected' : '';
 
-    const optionP2P = config.MiroTalk.P2P.Visible ? `<option value="P2P" ${isP2P}>P2P</option>` : '';
-    const optionSFU = config.MiroTalk.SFU.Visible ? `<option value="P2P" ${isSFU}>SFU</option>` : '';
-    const optionC2C = config.MiroTalk.C2C.Visible ? `<option value="C2C" ${isC2C}>C2C</option>` : '';
-    const optionBRO = config.MiroTalk.BRO.Visible ? `<option value="BRO" ${isBRO}>BRO</option>` : '';
+    const optionP2P = config.MiroTalk.P2P.Visible ? `<option translate="no" value="P2P" ${isP2P}>P2P</option>` : '';
+    const optionSFU = config.MiroTalk.SFU.Visible ? `<option translate="no" value="P2P" ${isSFU}>SFU</option>` : '';
+    const optionC2C = config.MiroTalk.C2C.Visible ? `<option translate="no" value="C2C" ${isC2C}>C2C</option>` : '';
+    const optionBRO = config.MiroTalk.BRO.Visible ? `<option translate="no" value="BRO" ${isBRO}>BRO</option>` : '';
 
     const setRandomRoomIcon =
         config.BUTTONS.setRandomRoom && user.allowedRoomsALL
@@ -616,11 +616,11 @@ function getRow(obj) {
     let rooms = `<td><input id="${obj._id}_room" type="text" placeholder="Room name" name="room" value="${obj.room}"/></td>`;
 
     if (!user.allowedRoomsALL) {
-        rooms = `<select id="${obj._id}_room" class="select-options">`;
+        rooms = `<select translate="no" id="${obj._id}_room" class="select-options">`;
 
         user.allowedRooms.forEach((room) => {
             const selected = obj.room === room ? 'selected' : '';
-            rooms += `<option value="${room}" ${selected}>${room}</option>`;
+            rooms += `<option translate="no" value="${room}" ${selected}>${room}</option>`;
         });
 
         rooms += `</select>`;
