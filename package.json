@@ -1,6 +1,6 @@
 {
     "name": "mirotalkwebrtc",
-    "version": "1.1.40",
+    "version": "1.1.41",
     "description": "MiroTalk WebRTC admin",
     "main": "server.js",
     "scripts": {
@@ -45,7 +45,7 @@
         "helmet": "^8.0.0",
         "jsonwebtoken": "^9.0.2",
         "js-yaml": "^4.1.0",
-        "mongoose": "^8.9.5",
+        "mongoose": "^8.9.6",
         "ngrok": "^5.0.0-beta.2",
         "nodemailer": "^6.10.0",
         "swagger-ui-express": "^5.0.1",
