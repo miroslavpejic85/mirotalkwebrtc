@@ -61,7 +61,6 @@ mongoose
     .then(() => {
         const app = express();
 
-        app.use(helmet.xssFilter()); // Enable XSS protection
         app.use(helmet.noSniff()); // Enable content type sniffing prevention
         app.use(cors(corsOptions()));
         app.use(compression());
