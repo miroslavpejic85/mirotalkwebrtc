@@ -33,7 +33,7 @@
     "license": "AGPL-3.0",
     "homepage": "https://github.com/miroslavpejic85/mirotalkwebrtc",
     "dependencies": {
-        "@sentry/node": "^8.54.0",
+        "@sentry/node": "^9.0.0",
         "axios": "^1.7.9",
         "bcryptjs": "^2.4.3",
         "colors": "1.4.0",
@@ -53,6 +53,6 @@
     },
     "devDependencies": {
         "nodemon": "^3.1.9",
-        "prettier": "3.4.2"
+        "prettier": "3.5.0"
     }
 }
