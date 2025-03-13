@@ -114,6 +114,8 @@ function handleSignupTerms() {
         cancelButtonColor: '#dc3545',
         focusCancel: true,
         allowOutsideClick: false,
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
         if (result.isConfirmed) {
             elementDisplay(signupBtn, true);
