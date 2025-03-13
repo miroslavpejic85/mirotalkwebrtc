@@ -137,6 +137,24 @@ button:hover {
     transform: scale(0.95);
 }
 
+.terms-conditions {
+    text-align: left;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.terms-conditions h3 {
+    margin-bottom: 10px;
+}
+
+.terms-conditions p {
+    margin-bottom: 15px;
+}
+
 .swal2-title,
 .swal2-content {
     background-color: var(--primary-color) !important;
@@ -156,4 +174,9 @@ button:hover {
 
 .swal2-confirm {
     width: 100%;
+}
+
+.swal2-cancel,
+.swal2-confirm {
+    width: 120px;
 }
