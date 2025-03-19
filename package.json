@@ -1,6 +1,6 @@
 {
     "name": "mirotalkwebrtc",
-    "version": "1.1.45",
+    "version": "1.1.46",
     "description": "MiroTalk WebRTC admin",
     "main": "server.js",
     "scripts": {
@@ -33,7 +33,7 @@
     "license": "AGPL-3.0",
     "homepage": "https://github.com/miroslavpejic85/mirotalkwebrtc",
     "dependencies": {
-        "@sentry/node": "^9.5.0",
+        "@sentry/node": "^9.6.1",
         "axios": "^1.8.3",
         "bcryptjs": "^3.0.2",
         "colors": "1.4.0",
@@ -42,7 +42,7 @@
         "crypto-js": "^4.2.0",
         "dotenv": "^16.4.7",
         "express": "^4.21.2",
-        "helmet": "^8.0.0",
+        "helmet": "^8.1.0",
         "jsonwebtoken": "^9.0.2",
         "js-yaml": "^4.1.0",
         "mongoose": "^8.12.1",
