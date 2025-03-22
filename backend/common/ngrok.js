@@ -12,14 +12,14 @@ function enabled() {
 }
 
 async function start() {
+    if (!enabled()) return;
+
+    const NGROK = require('@ngrok/ngrok');
+
     try {
-        if (!enabled()) return;
-        const NGROK = require('ngrok');
         await NGROK.authtoken(NGROK_AUTH_TOKEN);
-        await NGROK.connect(SERVER_PORT);
-        const api = NGROK.getApi();
-        const list = await api.listTunnels();
-        const tunnelHttps = list.tunnels[0].public_url;
+        const listener = await NGROK.forward({ addr: SERVER_PORT });
+        const tunnelHttps = listener.url();
         log.info('Server', {
             home: tunnelHttps,
             apiDocs: `${tunnelHttps}/api/v1/docs`,
@@ -27,6 +27,7 @@ async function start() {
         });
     } catch (err) {
         log.warn('[Error] ngrokStart', err);
+        await NGROK.kill();
         process.exit(1);
     }
 }
