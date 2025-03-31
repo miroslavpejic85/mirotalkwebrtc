@@ -98,7 +98,7 @@ mongoose
             res.status(200).json(config);
         });
 
-        app.use('*', (req, res) => {
+        app.use((req, res) => {
             res.status(404).json({ message: 'Page not found' });
         });
 
