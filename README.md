@@ -174,7 +174,7 @@ $ cp docker-compose.template.yml docker-compose.yml
 # Get official image from Docker Hub
 $ docker pull mirotalk/webrtc:latest
 # Create and start containers (-d as daemon)
-$ docker-compose up
+$ docker compose up
 ```
 
 Open in browser: [http://localhost:9000](http://localhost:9000)
