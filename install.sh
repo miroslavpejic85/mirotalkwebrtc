@@ -115,7 +115,7 @@ if [ "$answer" != "${answer#[Yy]}" ] ;then
     else
         log "Build image from source"
 
-        docker compose build
+        docker-compose build
 
         log "Remove old and unused docker images"
 
@@ -124,9 +124,9 @@ if [ "$answer" != "${answer#[Yy]}" ] ;then
 
     log "Start containers"
 
-    docker compose -f docker-compose.yml down
+    docker-compose -f docker-compose.yml down
 
-    docker compose -f docker-compose.yml up #-d
+    docker-compose -f docker-compose.yml up #-d
 else
     log "Install dependencies"
 
@@ -139,9 +139,9 @@ else
 
         installDocker
 
-        docker compose -f docker-compose-mongo.yml down
+        docker-compose -f docker-compose-mongo.yml down
 
-        docker compose -f docker-compose-mongo.yml up -d && log "Start the server" && npm start
+        docker-compose -f docker-compose-mongo.yml up -d && log "Start the server" && npm start
     else            
         log "Start the server"
 
