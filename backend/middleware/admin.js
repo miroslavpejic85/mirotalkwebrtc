@@ -7,14 +7,16 @@ const log = new logs('Admin');
 
 const admin = (req, res, next) => {
     let token =
-        req.body.token ||
-        req.query.token ||
-        req.headers['x-access-token'] ||
-        req.headers['authorization'] ||
-        req.headers['Authorization'];
+        req?.body?.token ||
+        req?.query?.token ||
+        req?.headers['x-access-token'] ||
+        req?.headers['authorization'] ||
+        req?.headers['Authorization'];
+
     if (!token) {
         return res.status(404).json({ message: 'Token not found' });
     }
+
     try {
         const parts = token.split(' ');
         if (parts.length === 2) {
