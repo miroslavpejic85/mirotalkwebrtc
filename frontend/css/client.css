@@ -26,6 +26,9 @@
     --i-act-color-hover: #efff;
     --input-color-schema: light;
     --tr-child-color: #f2f2f2;
+    --accent-color: #376df9;
+    --danger-color: #ff4d4d;
+    --success-color: #4caf50;
 }
 
 body {
