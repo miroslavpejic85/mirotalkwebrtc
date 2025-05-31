@@ -303,7 +303,7 @@ async function userConfirmation(req, res) {
                 nodemailer.sendConfirmationOkEmail(
                     userSaveData.username,
                     userSaveData.email,
-                    JSON.stringify(userSaveData, null, 4),
+                    JSON.stringify(userSaveData, null, 4)
                 );
             }
         } else {
@@ -353,7 +353,7 @@ async function userDelete(req, res) {
         if (dataUser && dataUser._id == id) {
             const deleteRooms = await Room.deleteMany({ userId: dataUser._id });
             log.debug(
-                `Going to delete User with id ${dataUser._id} and all associated rooms (${deleteRooms.deletedCount})`,
+                `Going to delete User with id ${dataUser._id} and all associated rooms (${deleteRooms.deletedCount})`
             );
             return res.json({
                 message: `The User with id ${dataUser._id} and all associated rooms (${deleteRooms.deletedCount}) has been deleted`,

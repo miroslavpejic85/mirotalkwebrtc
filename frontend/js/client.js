@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.1.55
+ * @version 1.1.56
  */
 
 const userAgent = navigator.userAgent;
@@ -692,13 +692,13 @@ function copyRoom(id) {
                 <br/>
                 <p class="txt-qr">No need for apps, simply capture the QR code with your mobile camera Or Invite someone else to join by sending them the following URL</p>
                 <br/>
-                <p class="txt-green">${roomURL}</p>`,
+                <p class="txt-green">${roomURL}</p>`
             );
             makeRoomQR(roomURL);
         },
         (err) => {
             console.error('Could not copy text: ', err);
-        },
+        }
     );
 }
 
@@ -956,7 +956,7 @@ function openURL(url, blank = false) {
 
 function getUUID4() {
     return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
-        (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16),
+        (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
     );
 }
 

@@ -130,7 +130,7 @@ function handleSignup(e) {
         signupUsernameInput,
         signupEmailIdInput,
         signupPasswordIdInput,
-        signupRepeatPasswordIdInput,
+        signupRepeatPasswordIdInput
     );
     if (validationError) {
         popupMessage('warning', validationError);
