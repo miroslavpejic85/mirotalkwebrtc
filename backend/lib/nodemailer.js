@@ -7,9 +7,10 @@ const log = new logs('NodeMailer');
 
 const SERVER_URL = process.env.SERVER_URL;
 const EMAIL_HOST = process.env.EMAIL_HOST;
-const EMAIL_PORT = process.env.EMAIL_PORT;
+const EMAIL_PORT = Number(process.env.EMAIL_PORT) || 587;
 const EMAIL_USERNAME = process.env.EMAIL_USERNAME;
 const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
+const EMAIL_FROM = process.env.EMAIL_FROM || EMAIL_USERNAME;
 const EMAIL_VERIFICATION = process.env.EMAIL_VERIFICATION === 'true' || false;
 const SUPPORT =
     'https://codecanyon.net/item/mirotalk-webrtc-ultimate-bundle-for-seamless-live-smart-communication/47976343'; // Thank you!
@@ -20,11 +21,14 @@ log.info('Email', {
     port: EMAIL_PORT,
     username: EMAIL_USERNAME,
     password: EMAIL_PASSWORD,
+    from: EMAIL_FROM,
 });
 
+const IS_TLS_PORT = EMAIL_PORT === 465;
 const transport = nodemailer.createTransport({
     host: EMAIL_HOST,
     port: EMAIL_PORT,
+    secure: IS_TLS_PORT,
     auth: {
         user: EMAIL_USERNAME,
         pass: EMAIL_PASSWORD,
@@ -54,7 +58,7 @@ function sendConfirmationOkEmail(name, toEmail, credential) {
     log.debug('sendConfirmationOkEmail', credentialObj);
     transport
         .sendMail({
-            from: EMAIL_USERNAME,
+            from: EMAIL_FROM,
             to: toEmail,
             subject: 'MiroTalk WEB - Email confirmed',
             html: `
