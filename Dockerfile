@@ -4,15 +4,18 @@ FROM node:22-alpine
 # Set working directory
 WORKDIR /src
 
-# Copy package.json and .env dependencies
-COPY package.json .
+# Set environment variables
+ENV NODE_ENV="production"
+
+# Copy package*.json and .env dependencies
+COPY package*.json ./
 COPY .env.template ./.env
 
 # Install necessary system packages and dependencies
 RUN apk add --no-cache \
     bash \
     vim \
-    && npm install \
+    && npm ci --only=production --silent \
     && npm cache clean --force \
     && rm -rf /tmp/* /var/tmp/* /usr/share/doc/*
 
