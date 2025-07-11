@@ -8,7 +8,7 @@ const log = new logs('API');
 const API_SECRET_KEY = process.env.API_SECRET_KEY;
 
 const api = (req, res, next) => {
-    const { api_secret_key } = req.body;
+    const api_secret_key = req.body && req.body.api_secret_key;
 
     if (!api_secret_key) {
         return res.status(404).json({ message: 'API Secret not found' });
