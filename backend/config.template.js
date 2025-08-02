@@ -11,7 +11,7 @@ module.exports = {
         siteName: 'MiroTalk WebRTC',
         title: 'Click the link to schedule the Meeting',
         description: 'MiroTalk WEB Easy Room Scheduler for Meetings & Video Conferencing.',
-        image: 'https://webrtc.mirotalk.com/Images/mirotalk-bro.png',
+        image: 'https://webrtc.mirotalk.com/Images/mirotalk-web.png',
         url: 'https://webrtc.mirotalk.com',
     },
     Author: {
