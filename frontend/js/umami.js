@@ -11,5 +11,5 @@ if (!uamami) {
 const script = document.createElement('script');
 script.setAttribute('async', '');
 script.setAttribute('src', 'https://stats.mirotalk.com/script.js');
-script.setAttribute('data-website-id', 'a6a58a3f-b605-4de7-96b5-c9a073f6b0e2');
+script.setAttribute('data-website-id', 'fbaf621d-b2da-4b33-a2f2-43f8f0037663');
 document.head.appendChild(script);
