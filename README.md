@@ -201,7 +201,7 @@ Open in browser: [http://localhost:9000](http://localhost:9000)
 
 <br/>
 
-[![Hetzner](frontend/images/hetzner.png)](https://hetzner.cloud/?ref=XdRifCzCK3bn)
+[![Hetzner](frontend/Images/hetzner.png)](https://hetzner.cloud/?ref=XdRifCzCK3bn)
 
 This application is running for `demonstration purposes` on [Hetzner](https://www.hetzner.com/), one of `the best` [cloud providers](https://www.hetzner.com/cloud) and [dedicated root servers](https://www.hetzner.com/dedicated-rootserver).
 
@@ -211,7 +211,7 @@ This application is running for `demonstration purposes` on [Hetzner](https://ww
 
 ---
 
-[![Netcup](frontend/images/netcup.png)](https://www.netcup.com/en/?ref=309627)
+[![Netcup](frontend/Images/netcup.png)](https://www.netcup.com/en/?ref=309627)
 
 Unlock `enterprise-grade performance` at a price you won’t believe.
 Scalable, reliable, and built for businesses that demand more.
@@ -220,7 +220,7 @@ Scalable, reliable, and built for businesses that demand more.
 
 ---
 
-[![Hostinger](frontend/images/hostinger.png)](https://hostinger.com/?REFERRALCODE=MIROTALK)
+[![Hostinger](frontend/Images/hostinger.png)](https://hostinger.com/?REFERRALCODE=MIROTALK)
 
 Fast, reliable hosting with 24/7 support and great performance. Start today!
 
@@ -228,7 +228,7 @@ Fast, reliable hosting with 24/7 support and great performance. Start today!
 
 ---
 
-[![Contabo](frontend/images/contabo.png)](https://www.dpbolvw.net/click-101027391-14462707)
+[![Contabo](frontend/Images/contabo.png)](https://www.dpbolvw.net/click-101027391-14462707)
 
 Experience also top-tier German web hosting – dedicated servers, VPS, and web hosting at `unbeatable prices`.
 
