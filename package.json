@@ -1,6 +1,6 @@
 {
     "name": "mirotalkwebrtc",
-    "version": "1.1.74",
+    "version": "1.1.75",
     "description": "MiroTalk WebRTC admin",
     "main": "server.js",
     "scripts": {
@@ -34,7 +34,7 @@
     "homepage": "https://github.com/miroslavpejic85/mirotalkwebrtc",
     "dependencies": {
         "@ngrok/ngrok": "1.5.2",
-        "@sentry/node": "^10.17.0",
+        "@sentry/node": "^10.20.0",
         "axios": "^1.12.2",
         "bcryptjs": "^3.0.2",
         "colors": "1.4.0",
@@ -46,10 +46,10 @@
         "helmet": "^8.1.0",
         "jsonwebtoken": "^9.0.2",
         "js-yaml": "^4.1.0",
-        "mongoose": "^8.19.0",
-        "nodemailer": "^7.0.7",
+        "mongoose": "^8.19.1",
+        "nodemailer": "^7.0.9",
         "swagger-ui-express": "^5.0.1",
-        "twilio": "^5.10.2"
+        "twilio": "^5.10.3"
     },
     "devDependencies": {
         "nodemon": "^3.1.10",
