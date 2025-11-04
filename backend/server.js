@@ -102,6 +102,24 @@ mongoose
             res.status(404).json({ message: 'Page not found' });
         });
 
+        // Global error handler for URIError and other errors
+        app.use((err, req, res, next) => {
+            if (err instanceof URIError) {
+                log.warn('Malformed URI detected', {
+                    url: req.url,
+                    error: err.message,
+                });
+                return res.status(400).send({ status: 400, message: 'Invalid URL encoding' });
+            }
+            // Handle other errors
+            log.error('Unhandled error', {
+                url: req.url,
+                error: err.message,
+                stack: err.stack,
+            });
+            res.status(500).send({ status: 500, message: 'Internal server error' });
+        });
+
         app.listen(SERVER_PORT, null, () => {
             if (ngrok.enabled()) {
                 ngrok.start();

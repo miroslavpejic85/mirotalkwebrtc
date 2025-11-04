@@ -1,6 +1,6 @@
 {
     "name": "mirotalkwebrtc",
-    "version": "1.1.76",
+    "version": "1.1.77",
     "description": "MiroTalk WebRTC admin",
     "main": "server.js",
     "scripts": {
@@ -35,8 +35,8 @@
     "dependencies": {
         "@ngrok/ngrok": "1.5.2",
         "@sentry/node": "^10.22.0",
-        "axios": "^1.13.1",
-        "bcryptjs": "^3.0.2",
+        "axios": "^1.13.2",
+        "bcryptjs": "^3.0.3",
         "colors": "1.4.0",
         "compression": "^1.8.1",
         "cors": "^2.8.5",
@@ -46,7 +46,7 @@
         "helmet": "^8.1.0",
         "jsonwebtoken": "^9.0.2",
         "js-yaml": "^4.1.0",
-        "mongoose": "^8.19.2",
+        "mongoose": "^8.19.3",
         "nodemailer": "^7.0.10",
         "swagger-ui-express": "^5.0.1",
         "twilio": "^5.10.4"
