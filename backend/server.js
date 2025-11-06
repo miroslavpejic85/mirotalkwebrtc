@@ -34,6 +34,7 @@ const SERVER_PORT = process.env.SERVER_PORT;
 const SERVER_URL = process.env.SERVER_URL;
 const MONGO_URL = process.env.MONGO_URL;
 const MONGO_DATABASE = process.env.MONGO_DATABASE;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Mandatory params to make this server up and running
 
@@ -128,6 +129,7 @@ mongoose
                     cors: corsOptions(),
                     home: home,
                     apiDocs: apiDocs,
+                    environment: NODE_ENV,
                     nodeVersion: process.versions.node,
                     app_version: packageJson.version,
                 });
