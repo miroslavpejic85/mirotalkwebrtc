@@ -16,6 +16,7 @@ const room = require('./routes/room');
 const sms = require('./routes/sms');
 const token = require('./routes/token');
 const users = require('./routes/users');
+const password = require('./routes/password');
 const config = require('./config');
 const ngrok = require('./common/ngrok');
 const sentry = require('./common/sentry');
@@ -50,9 +51,11 @@ const frontendDir = path.join(__dirname, '../', 'frontend');
 
 const login = path.join(__dirname, '../', 'frontend/html/home.html');
 const client = path.join(__dirname, '../', 'frontend/html/client.html');
+const forgotPassword = path.join(__dirname, '../', 'frontend/html/forgot-password.html');
+const resetPassword = path.join(__dirname, '../', 'frontend/html/reset-password.html');
 
 // File to cache and inject custom HTML data like OG tags and any other elements.
-const filesPath = [login, client];
+const filesPath = [login, client, forgotPassword, resetPassword];
 const htmlInjector = new HtmlInjector(filesPath, config || null);
 
 mongoose.set('strictQuery', true);
@@ -85,6 +88,7 @@ mongoose
         app.use(apiPath, sms);
         app.use(apiPath, token);
         app.use(apiPath, users);
+        app.use(apiPath, password);
 
         app.get('/', (req, res) => {
             htmlInjector.injectHtml(login, res);
@@ -92,6 +96,14 @@ mongoose
 
         app.get('/client', auth, (req, res) => {
             htmlInjector.injectHtml(client, res);
+        });
+
+        app.get('/forgot-password', (req, res) => {
+            htmlInjector.injectHtml(forgotPassword, res);
+        });
+
+        app.get('/reset-password', (req, res) => {
+            htmlInjector.injectHtml(resetPassword, res);
         });
 
         app.get('/config', auth, (req, res) => {
