@@ -22,15 +22,15 @@ document.getElementById('forgotPasswordForm').addEventListener('submit', async (
         const data = await response.json();
 
         if (response.ok) {
-            await popupMessage('success', data.message);
+            popupMessage('success', data.message);
             setTimeout(() => {
                 window.location.href = '/';
             }, 2000);
         } else {
-            await popupMessage('error', data.message);
+            popupMessage('warning', data.message);
         }
     } catch (error) {
         console.error('Forgot password error:', error);
-        await popupMessage('error', 'An error occurred. Please try again.');
+        popupMessage('error', 'An error occurred. Please try again.');
     }
 });

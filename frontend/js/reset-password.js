@@ -43,12 +43,12 @@ document.getElementById('resetPasswordForm').addEventListener('submit', async (e
     }
 
     if (password !== confirmPassword) {
-        popupMessage('error', 'Passwords do not match');
+        popupMessage('warning', 'Passwords do not match');
         return;
     }
 
-    if (password.length < 8) {
-        popupMessage('error', 'Password must be at least 8 characters');
+    if (password.length < 6) {
+        popupMessage('warning', 'Password must be at least 6 characters');
         return;
     }
 
@@ -64,15 +64,15 @@ document.getElementById('resetPasswordForm').addEventListener('submit', async (e
         const data = await response.json();
 
         if (response.ok) {
-            await popupMessage('success', 'Your password has been reset successfully');
+            popupMessage('success', 'Your password has been reset successfully');
             setTimeout(() => {
                 window.location.href = '/';
             }, 2000);
         } else {
-            await popupMessage('error', data.message);
+            popupMessage('warning', data.message);
         }
     } catch (error) {
         console.error('Password reset error:', error);
-        await popupMessage('error', 'An error occurred. Please try again.');
+        popupMessage('error', 'An error occurred. Please try again.');
     }
 });

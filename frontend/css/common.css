@@ -39,3 +39,15 @@
     background: var(--secondary-color) !important;
     color: var(--text-color) !important;
 }
+
+/*--------------------------------------------------------------
+# Others
+--------------------------------------------------------------*/
+
+.back-login {
+    text-align: center;
+    display: block;
+    margin-top: 20px;
+    color: var(--text-color);
+    text-decoration: none;
+}

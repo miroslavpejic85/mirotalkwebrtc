@@ -123,6 +123,15 @@ button:hover {
 #loginBtn:hover {
     background-color: #439fff !important;
 }
+#forgotPasswordLink {
+    text-align: center;
+    display: block;
+    margin-top: 15px;
+    color: var(--text-color);
+    font-size: 0.9em;
+    text-decoration: none;
+}
+
 #supportBtn {
     margin-top: 30px;
     color: var(--text-color);

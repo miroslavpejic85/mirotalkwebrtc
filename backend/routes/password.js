@@ -8,7 +8,12 @@ const bcrypt = require('bcryptjs');
 const logs = require('../common/logs');
 const { sendPasswordResetEmail, sendPasswordChangeConfirmation } = require('../lib/nodemailer');
 
+const utils = require('../common/utils');
+const { isValidEmail, isValidPassword } = utils;
+
 const log = new logs('PasswordReset');
+
+const SERVER_URL = process.env.SERVER_URL;
 
 // Request password reset
 router.post('/password/reset/request', async (req, res) => {
@@ -17,6 +22,11 @@ router.post('/password/reset/request', async (req, res) => {
 
         if (!email) {
             return res.status(400).json({ message: 'Email is required' });
+        }
+
+        const validMail = isValidEmail(email);
+        if (validMail !== true) {
+            return res.status(400).json({ message: validMail });
         }
 
         const user = await User.findOne({ email: email.toLowerCase() });
@@ -39,7 +49,7 @@ router.post('/password/reset/request', async (req, res) => {
         await user.save();
 
         // Create reset URL
-        const resetUrl = `${process.env.SERVER_URL}/reset-password?token=${resetToken}`;
+        const resetUrl = `${SERVER_URL}/reset-password?token=${resetToken}`;
 
         // Send email
         try {
@@ -97,8 +107,9 @@ router.post('/password/reset/confirm', async (req, res) => {
             return res.status(400).json({ message: 'Token and password are required' });
         }
 
-        if (password.length < 8) {
-            return res.status(400).json({ message: 'Password must be at least 8 characters' });
+        const validPassword = isValidPassword(password);
+        if (validPassword !== true) {
+            return res.status(400).json({ message: validPassword });
         }
 
         const resetTokenHash = crypto.createHash('sha256').update(token).digest('hex');
