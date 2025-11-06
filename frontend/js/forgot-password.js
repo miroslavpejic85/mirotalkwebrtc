@@ -11,26 +11,17 @@ document.getElementById('forgotPasswordForm').addEventListener('submit', async (
     }
 
     try {
-        const response = await fetch('/api/v1/password/reset/request', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email }),
-        });
+        const response = await passwordResetRequest(email);
 
-        const data = await response.json();
-
-        if (response.ok) {
-            popupMessage('success', data.message);
+        if (response.message) {
+            popupMessage('success', response.message);
             setTimeout(() => {
                 window.location.href = '/';
             }, 2000);
-        } else {
-            popupMessage('warning', data.message);
         }
-    } catch (error) {
-        console.error('Forgot password error:', error);
-        popupMessage('error', 'An error occurred. Please try again.');
+    } catch (err) {
+        console.error('Forgot password error:', err);
+        const errorMessage = err.response?.data?.message || err.message || 'An error occurred. Please try again.';
+        popupMessage('warning', errorMessage);
     }
 });

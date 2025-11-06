@@ -13,18 +13,18 @@ if (!token) {
 // Verify token on page load
 (async () => {
     try {
-        const response = await fetch(`/api/v1/password/reset/verify/${token}`);
-        const data = await response.json();
+        const response = await passwordResetVerify(token);
 
-        if (!response.ok || !data.valid) {
-            await popupMessage('error', 'This password reset link is invalid or has expired');
+        if (!response.valid) {
+            popupMessage('error', 'This password reset link is invalid or has expired');
             setTimeout(() => {
                 window.location.href = '/';
             }, 2000);
         }
-    } catch (error) {
-        console.error('Token verification error:', error);
-        await popupMessage('error', 'An error occurred. Please try again.');
+    } catch (err) {
+        console.error('Token verification error:', err);
+        const errorMessage = err.response?.data?.message || 'This password reset link is invalid or has expired';
+        popupMessage('error', errorMessage);
         setTimeout(() => {
             window.location.href = '/';
         }, 2000);
@@ -53,26 +53,17 @@ document.getElementById('resetPasswordForm').addEventListener('submit', async (e
     }
 
     try {
-        const response = await fetch('/api/v1/password/reset/confirm', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ token, password }),
-        });
+        const response = await passwordResetConfirm({ token, password });
 
-        const data = await response.json();
-
-        if (response.ok) {
+        if (response.message) {
             popupMessage('success', 'Your password has been reset successfully');
             setTimeout(() => {
                 window.location.href = '/';
             }, 2000);
-        } else {
-            popupMessage('warning', data.message);
         }
-    } catch (error) {
-        console.error('Password reset error:', error);
-        popupMessage('error', 'An error occurred. Please try again.');
+    } catch (err) {
+        console.error('Password reset error:', err);
+        const errorMessage = err.response?.data?.message || err.message || 'An error occurred. Please try again.';
+        popupMessage('warning', errorMessage);
     }
 });

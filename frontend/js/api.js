@@ -158,3 +158,28 @@ function getTokenSFU() {
         headers: headers,
     }).then((response) => response.data);
 }
+
+// API RESET PASSWORD
+
+function passwordResetRequest(email) {
+    return axios({
+        method: 'POST',
+        url: `${apiPath}/password/reset/request`,
+        data: { email },
+    }).then((response) => response.data);
+}
+
+function passwordResetVerify(token) {
+    return axios({
+        method: 'GET',
+        url: `${apiPath}/password/reset/verify/${token}`,
+    }).then((response) => response.data);
+}
+
+function passwordResetConfirm(data) {
+    return axios({
+        method: 'POST',
+        url: `${apiPath}/password/reset/confirm`,
+        data: data,
+    }).then((response) => response.data);
+}
