@@ -14,6 +14,7 @@ const { isValidEmail, isValidPassword } = utils;
 const log = new logs('PasswordReset');
 
 const SERVER_URL = process.env.SERVER_URL;
+const USER_DEMO_EMAIL = process.env.USER_DEMO_EMAIL;
 
 // Request password reset
 router.post('/password/reset/request', async (req, res) => {
@@ -27,6 +28,10 @@ router.post('/password/reset/request', async (req, res) => {
         const validMail = isValidEmail(email);
         if (validMail !== true) {
             return res.status(400).json({ message: validMail });
+        }
+
+        if (email === USER_DEMO_EMAIL) {
+            return res.status(400).json({ message: 'Password reset is not allowed for demo account' });
         }
 
         const user = await User.findOne({ email: email.toLowerCase() });
