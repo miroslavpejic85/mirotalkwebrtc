@@ -51,11 +51,11 @@ const frontendDir = path.join(__dirname, '../', 'frontend');
 
 const login = path.join(__dirname, '../', 'frontend/html/home.html');
 const client = path.join(__dirname, '../', 'frontend/html/client.html');
-const forgotPassword = path.join(__dirname, '../', 'frontend/html/forgot-password.html');
-const resetPassword = path.join(__dirname, '../', 'frontend/html/reset-password.html');
+const passwordForgot = path.join(__dirname, '../', 'frontend/html/password-forgot.html');
+const passwordReset = path.join(__dirname, '../', 'frontend/html/password-reset.html');
 
 // File to cache and inject custom HTML data like OG tags and any other elements.
-const filesPath = [login, client, forgotPassword, resetPassword];
+const filesPath = [login, client, passwordForgot, passwordReset];
 const htmlInjector = new HtmlInjector(filesPath, config || null);
 
 mongoose.set('strictQuery', true);
@@ -98,12 +98,12 @@ mongoose
             htmlInjector.injectHtml(client, res);
         });
 
-        app.get('/forgot-password', (req, res) => {
-            htmlInjector.injectHtml(forgotPassword, res);
+        app.get('/password-forgot', (req, res) => {
+            htmlInjector.injectHtml(passwordForgot, res);
         });
 
-        app.get('/reset-password', (req, res) => {
-            htmlInjector.injectHtml(resetPassword, res);
+        app.get('/password-reset', (req, res) => {
+            htmlInjector.injectHtml(passwordReset, res);
         });
 
         app.get('/config', auth, (req, res) => {

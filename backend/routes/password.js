@@ -49,7 +49,7 @@ router.post('/password/reset/request', async (req, res) => {
         await user.save();
 
         // Create reset URL
-        const resetUrl = `${SERVER_URL}/reset-password?token=${resetToken}`;
+        const resetUrl = `${SERVER_URL}/password-reset?token=${resetToken}`;
 
         // Send email
         try {
