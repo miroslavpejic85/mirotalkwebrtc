@@ -65,6 +65,7 @@ supportBtn.onclick = () => {
 
 function handleLogin(e) {
     e.preventDefault();
+    cleanSignUpInput();
     const validationError = validateInput(loginUsernameInput, loginEmailIdInput, loginPasswordIdInput);
     if (validationError) {
         popupMessage('warning', validationError);
@@ -126,6 +127,7 @@ function handleSignupTerms() {
 
 function handleSignup(e) {
     e.preventDefault();
+    cleanLoginInput();
     const validationError = validateInput(
         signupUsernameInput,
         signupEmailIdInput,
