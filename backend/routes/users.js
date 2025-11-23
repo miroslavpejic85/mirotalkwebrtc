@@ -5,6 +5,8 @@ const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const api = require('../middleware/api');
 const validator = require('../middleware/validator');
+const { loginLimiter } = require('../middleware/rateLimiter');
+
 const router = express.Router();
 const controllersUsers = require('../controllers/users');
 
@@ -14,7 +16,7 @@ router.post('/user', validator, (req, res) => {
 });
 
 //LOGIN: /api/v1/user/login
-router.post('/user/login', validator, (req, res) => {
+router.post('/user/login', loginLimiter, validator, (req, res) => {
     controllersUsers.userLogin(req, res);
 });
 
