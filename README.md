@@ -269,3 +269,5 @@ To obtain a [MiroTalk WEB license](https://docs.mirotalk.com/license/licensing-o
 </details>
 
 ---
+
+![Star History Chart](https://app.repohistory.com/api/svg?repo=miroslavpejic85/mirotalkwebrtc&type=Date&background=0D1117&color=62C3F8)
