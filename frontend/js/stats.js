@@ -2,10 +2,11 @@
 
 // https://github.com/mikecao/umami
 
-const uamami = true;
+const umami = true;
 
-if (!uamami) {
+if (!umami) {
     console.warn('Umami is disabled');
+    return;
 }
 
 const script = document.createElement('script');
