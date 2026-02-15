@@ -330,7 +330,7 @@ async function userUpdate(req, res) {
     try {
         const id = req.params.id;
         const updatedData = req.body;
-        const options = { new: true };
+        const options = { returnDocument: 'after' };
         const dateNow = new Date().toISOString();
         const encryptedPassword = await bcrypt.hash(updatedData.password, 10);
         const isUserAdmin = utils.isAdmin(updatedData.email, updatedData.username, updatedData.password);

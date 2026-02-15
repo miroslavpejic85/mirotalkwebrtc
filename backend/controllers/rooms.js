@@ -81,7 +81,7 @@ async function roomUpdate(req, res) {
     try {
         const id = req.params.id;
         const updatedData = req.body;
-        const options = { new: true };
+        const options = { returnDocument: 'after' };
         const result = await Room.findByIdAndUpdate(id, updatedData, options);
         res.send(result);
     } catch (error) {
