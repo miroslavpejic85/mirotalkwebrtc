@@ -133,7 +133,7 @@ mongoose
             res.status(500).send({ status: 500, message: 'Internal server error' });
         });
 
-        app.listen(SERVER_PORT, null, () => {
+        const server = app.listen(SERVER_PORT, null, () => {
             if (ngrok.enabled()) {
                 ngrok.start();
             } else {
@@ -145,6 +145,16 @@ mongoose
                     nodeVersion: process.versions.node,
                     app_version: packageJson.version,
                 });
+            }
+        });
+
+        // Handle client errors (malformed/incomplete HTTP requests) gracefully
+        server.on('clientError', (err, socket) => {
+            err.code === 'HPE_HEADER_OVERFLOW' || err.message === 'Parse Error'
+                ? log.warn('Client HTTP parse error', { error: err.message, code: err.code })
+                : log.warn('Client connection error', { error: err.message, code: err.code });
+            if (socket && !socket.destroyed && socket.writable) {
+                socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
             }
         });
     })
