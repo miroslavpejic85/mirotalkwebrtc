@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.2.08
+ * @version 1.3.00
  */
 
 const userAgent = navigator.userAgent;
@@ -25,6 +25,7 @@ const modeToggle = body.querySelector('.mode-toggle');
 const sidebar = body.querySelector('nav');
 const sidebarToggle = body.querySelector('.sidebar-toggle');
 
+const navOverview = document.getElementById('navOverview');
 const navDash = document.getElementById('navDash');
 const navC2C = document.getElementById('navC2C');
 const navP2P = document.getElementById('navP2P');
@@ -48,14 +49,40 @@ const rowAppName = document.getElementById('rowAppName');
 const myProfile = document.getElementById('myProfile');
 
 const search = document.getElementById('search');
-const dsDash = document.getElementById('dsDash');
+const dsOverview = document.getElementById('dsOverview');
 const dsRooms = document.getElementById('dsRooms');
 
-const hideBoxesDS = document.getElementById('hide-boxesDS');
-const showBoxesDS = document.getElementById('show-boxesDS');
+const dsDashStats = document.getElementById('dsDashStats');
+const statsUsersSection = document.getElementById('statsUsersSection');
+const statsRoomsSectionTitle = document.getElementById('statsRoomsSectionTitle');
+const statsTypesSectionTitle = document.getElementById('statsTypesSectionTitle');
+const statTotalUsers = document.getElementById('statTotalUsers');
+const statActiveUsers = document.getElementById('statActiveUsers');
+const statInactiveUsers = document.getElementById('statInactiveUsers');
+const statAdmins = document.getElementById('statAdmins');
+const statGuests = document.getElementById('statGuests');
+const statLatestUser = document.getElementById('statLatestUser');
+const statTotalRoomsVal = document.getElementById('statTotalRoomsVal');
+const statTotalRoomsLabel = document.getElementById('statTotalRoomsLabel');
+const statTodayVal = document.getElementById('statTodayVal');
+const statTodayLabel = document.getElementById('statTodayLabel');
+const statUpcomingVal = document.getElementById('statUpcomingVal');
+const statUpcomingLabel = document.getElementById('statUpcomingLabel');
+const statMemberSince = document.getElementById('statMemberSince');
+const statMemberSinceVal = document.getElementById('statMemberSinceVal');
+const statTotalUsersVal = document.getElementById('statTotalUsersVal');
+const statActiveUsersVal = document.getElementById('statActiveUsersVal');
+const statInactiveUsersVal = document.getElementById('statInactiveUsersVal');
+const statAdminsVal = document.getElementById('statAdminsVal');
+const statGuestsVal = document.getElementById('statGuestsVal');
+const statLatestUserVal = document.getElementById('statLatestUserVal');
+const statP2PVal = document.getElementById('statP2PVal');
+const statSFUVal = document.getElementById('statSFUVal');
+const statC2CVal = document.getElementById('statC2CVal');
+const statBROVal = document.getElementById('statBROVal');
 
 const boxesDS = document.getElementById('boxesDS');
-const titleDS = document.getElementById('titleDS');
+const statsProjectsSection = document.getElementById('statsProjectsSection');
 
 const boxP2P = document.getElementById('boxP2P');
 const repoP2P = document.getElementById('repoP2P');
@@ -119,6 +146,7 @@ const addRowBtn = document.getElementById('add-row-btn');
 
 const refreshBtn = document.getElementById('refresh-page-btn');
 const delAllBtn = document.getElementById('del-all-btn');
+const btnRefreshStats = document.getElementById('btnRefreshStats');
 
 const myTable = document.getElementById('myTable');
 const myTableBody = document.getElementById('myTableBody');
@@ -132,6 +160,7 @@ const dataTable = $('#myTable').DataTable({
     info: false,
     responsive: true,
     scrollX: true,
+    order: [[4, 'asc']],
     columnDefs: [
         { width: '10%', targets: 0 },
         { width: '10%', targets: 1 },
@@ -158,6 +187,11 @@ const dataTable = $('#myTable').DataTable({
     ], // [MiroTalk, Tag, Email, Phone, Date, Time, Room, Actions]
 });
 $('#myTable').css('width', '100%');
+
+dataTable.on('draw', function () {
+    initVisibleRowsFlatpickr();
+    initVisibleRowsToolTips();
+});
 
 const getMode = window.localStorage.mode || 'dark';
 const getStatus = window.localStorage.status;
@@ -191,13 +225,14 @@ let user = {
 };
 
 $(document).ready(async function () {
-    elemDisplay(showBoxesDS, false);
     getConfig()
         .then((cfg) => {
             loadConfig(cfg);
             loadToolTip(toolTips);
             handleTokens(cfg);
             handleUserRoles();
+            loadDashboardStats();
+            initFlatpickr();
         })
         .catch((err) => {
             openURL('/');
@@ -304,8 +339,6 @@ function handleUserRoles() {
 }
 
 function toggleElements() {
-    elemDisplay(hideBoxesDS, !isMobile);
-    elemDisplay(showBoxesDS, isMobile);
     elemDisplay(navP2P, config.MiroTalk.P2P.Visible);
     elemDisplay(navSFU, config.MiroTalk.SFU.Visible);
     elemDisplay(navC2C, config.MiroTalk.C2C.Visible);
@@ -331,7 +364,7 @@ function toggleElements() {
         !config.MiroTalk.BRO.GitHub.Visible
     ) {
         elemDisplay(boxesDS, false);
-        elemDisplay(titleDS, false);
+        elemDisplay(statsProjectsSection, false);
     }
     for (var i = 0; i < addType.length; i++) {
         //console.log(addType.options[i].value);
@@ -344,9 +377,8 @@ function toggleElements() {
 
 function hideElements() {
     if (!html.projects) {
-        elemDisplay(hideBoxesDS, false);
-        elemDisplay(showBoxesDS, false);
         elemDisplay(boxesDS, false);
+        elemDisplay(statsProjectsSection, false);
     }
     !html.profile && elemDisplay(myProfile, false);
     !html.support && elemDisplay(navSup, false);
@@ -356,6 +388,7 @@ function hideElements() {
 modeToggle.addEventListener('click', () => {
     body.classList.toggle('dark');
     window.localStorage.mode = body.classList.contains('dark') ? 'dark' : 'light';
+    updateFlatpickrTheme();
 });
 
 sidebarToggle.addEventListener('click', () => {
@@ -363,27 +396,31 @@ sidebarToggle.addEventListener('click', () => {
     window.localStorage.status = sidebar.classList.contains('close') ? 'close' : 'open';
 });
 
+navOverview.addEventListener('click', () => {
+    navShow([dsOverview], navOverview);
+});
+
 navDash.addEventListener('click', () => {
-    navShow([search, dsDash, dsRooms]);
+    navShow([search, dsRooms], navDash);
 });
 
 navP2P.addEventListener('click', () => {
-    navShow([p2p]);
+    navShow([p2p], navP2P);
     //p2pIframe.setAttribute('src', config.MiroTalk.P2P.Room);
 });
 
 navSFU.addEventListener('click', () => {
-    navShow([sfu]);
+    navShow([sfu], navSFU);
     //sfuIframe.setAttribute('src', config.MiroTalk.SFU.Room);
 });
 
 navC2C.addEventListener('click', () => {
-    navShow([c2c]);
+    navShow([c2c], navC2C);
     //c2cIframe.setAttribute('src', config.MiroTalk.C2C.Home);
 });
 
 navBRO.addEventListener('click', () => {
-    navShow([bro]);
+    navShow([bro], navBRO);
     //broIframe.setAttribute('src', config.MiroTalk.BRO.Home);
 });
 
@@ -397,13 +434,6 @@ navAcc.addEventListener('click', () => {
 
 navSet.addEventListener('click', () => {
     toggleSettings();
-});
-
-hideBoxesDS.addEventListener('click', () => {
-    toggleBoxesDS(false);
-});
-showBoxesDS.addEventListener('click', () => {
-    toggleBoxesDS(true);
 });
 
 openAddBtn.addEventListener('click', () => {
@@ -425,6 +455,12 @@ refreshBtn.addEventListener('click', () => {
     refreshPage();
 });
 
+btnRefreshStats.addEventListener('click', () => {
+    btnRefreshStats.classList.add('spinning');
+    loadDashboardStats();
+    setTimeout(() => btnRefreshStats.classList.remove('spinning'), 600);
+});
+
 delAllBtn.addEventListener('click', () => {
     delAllRows();
 });
@@ -440,9 +476,9 @@ settingsClose.addEventListener('click', () => {
     toggleSettings();
 });
 
-function navShow(elements = []) {
+function navShow(elements = [], activeNav = null) {
+    elemDisplay(dsOverview, false);
     elemDisplay(search, false);
-    elemDisplay(dsDash, false);
     elemDisplay(dsRooms, false);
     elemDisplay(p2p, false);
     elemDisplay(sfu, false);
@@ -451,23 +487,13 @@ function navShow(elements = []) {
     elements.forEach((element, i) => {
         element.style.display = 'block';
     });
+    document.querySelectorAll('.nav-links li a').forEach((a) => a.classList.remove('active'));
+    if (activeNav) activeNav.classList.add('active');
 }
 
 function searchRows() {
     const input = document.getElementById('myInput');
     dataTable.search(input.value).draw();
-}
-
-function toggleBoxesDS(show) {
-    if (show) {
-        elemDisplay(boxesDS, true);
-        elemDisplay(hideBoxesDS, true);
-        elemDisplay(showBoxesDS, false);
-    } else {
-        elemDisplay(boxesDS, false);
-        elemDisplay(hideBoxesDS, false);
-        elemDisplay(showBoxesDS, true);
-    }
 }
 
 function toggleAddRows() {
@@ -506,19 +532,27 @@ function toggleSettings() {
 async function showDataTable() {
     navDash.click();
 
+    const emptyState = document.getElementById('emptyState');
+
     roomFindBy(userId)
         .then((res) => {
             console.log('[API] - GET ALL ROOMS RESPONSE', res);
-            if (res) {
+            if (res && res.length > 0) {
+                const today = new Date().toISOString().split('T')[0];
                 res.forEach((obj) => {
                     const tableRow = getRow(obj);
                     if (tableRow) {
-                        dataTable.row.add(tableRow).node().id = obj._id;
-                        dataTable.draw();
-                        addRowToolTips(obj._id);
+                        const rowNode = dataTable.row.add(tableRow).node();
+                        rowNode.id = obj._id;
+                        if (obj.date < today) rowNode.classList.add('room-past');
+                        else if (obj.date === today) rowNode.classList.add('room-today');
                     }
                 });
-                //dataTable.draw();
+                dataTable.draw();
+                initVisibleRowsFlatpickr();
+                if (emptyState) elemDisplay(emptyState, false);
+            } else {
+                if (emptyState) elemDisplay(emptyState, true);
             }
         })
         .catch((err) => {
@@ -546,7 +580,9 @@ function addRow() {
                     dataTable.row.add(tableRow).node().id = res._id;
                     dataTable.draw();
                     addRowToolTips(res._id);
+                    initVisibleRowsFlatpickr();
                     toggleAddRows();
+                    debouncedLoadStats();
                 }
             }
         })
@@ -577,40 +613,40 @@ function getRow(obj) {
 
     const setRandomRoomIcon =
         config.BUTTONS.setRandomRoom && user.allowedRoomsALL
-            ? `<i id="${obj._id}_randomRoom" onclick="setRandomRoom('${obj._id}')" class="uil uil-refresh random"></i>`
+            ? `<i id="${obj._id}_randomRoom" onclick="setRandomRoom('${obj._id}')" class="fas fa-redo random"></i>`
             : '';
 
     const copyRoomIcon = config.BUTTONS.copyRoom
-        ? `<i id="${obj._id}_copy" onclick="copyRoom('${obj._id}')" class='uil uil-copy'></i>`
+        ? `<i id="${obj._id}_copy" onclick="copyRoom('${obj._id}')" class='fas fa-copy'></i>`
         : '';
 
     const shareRoomIcon =
         config.BUTTONS.shareRoom && isMobile
-            ? `<i id="${obj._id}_share" onclick="shareRoom('${obj._id}')" class="uil uil-share-alt"></i>`
+            ? `<i id="${obj._id}_share" onclick="shareRoom('${obj._id}')" class="fas fa-share-alt"></i>`
             : '';
 
     const sendEmailIcon = config.BUTTONS.sendEmail
-        ? `<i id="${obj._id}_send_email" onclick="sendEmail('${obj._id}')" class="uil uil-envelope-upload"></i>`
+        ? `<i id="${obj._id}_send_email" onclick="sendEmail('${obj._id}')" class="fas fa-envelope-open-text"></i>`
         : '';
 
     const sendSmSInvitationIcon = config.BUTTONS.sendSmSInvitation
-        ? `<i id="${obj._id}_send_sms" onclick="sendSmSInvitation('${obj._id}')" class="uil-message"></i>`
+        ? `<i id="${obj._id}_send_sms" onclick="sendSmSInvitation('${obj._id}')" class="fas fa-sms"></i>`
         : '';
 
     const joinInternalIcon = config.BUTTONS.joinInternal
-        ? `<i id="${obj._id}_joinInternal" onclick="joinRoom('${obj._id}')" class="uil uil-estate"></i>`
+        ? `<i id="${obj._id}_joinInternal" onclick="joinRoom('${obj._id}')" class="fas fa-home"></i>`
         : '';
 
     const joinExternalIcon = config.BUTTONS.joinExternal
-        ? `<i id="${obj._id}_joinExternal" onclick="joinRoom('${obj._id}', true)" class="uil uil-external-link-alt"></i>`
+        ? `<i id="${obj._id}_joinExternal" onclick="joinRoom('${obj._id}', true)" class="fas fa-external-link-alt"></i>`
         : '';
 
     const updateRowIcon = config.BUTTONS.updateRow
-        ? `<i id="${obj._id}_save" onclick="updateRow('${obj._id}')" class="uil uil-save"></i>`
+        ? `<i id="${obj._id}_save" onclick="updateRow('${obj._id}')" class="fas fa-save"></i>`
         : '';
 
     const delRowIcon = config.BUTTONS.delRow
-        ? `<i id="${obj._id}_delete" onclick="delRow('${obj._id}')" class="uil uil-multiply"></i>`
+        ? `<i id="${obj._id}_delete" onclick="delRow('${obj._id}')" class="fas fa-times"></i>`
         : '';
 
     let rooms = `<td><input id="${obj._id}_room" type="text" placeholder="Room name" name="room" value="${obj.room}"/></td>`;
@@ -638,19 +674,27 @@ function getRow(obj) {
         `<td><input id="${obj._id}_tag" type="text" name="tag" placeholder="Tag" value="${obj.tag}"/></td>`,
         `<td><input id="${obj._id}_email" type="email" name="email" placeholder="Email address" value="${obj.email}"/></td>`,
         `<td><input id="${obj._id}_phone" type="text" name="text" placeholder="Phone number" value="${obj.phone}"/></td>`,
-        `<td><input id="${obj._id}_date" type="date" name="date" placeholder="Date" value="${obj.date}"/></td>`,
-        `<td><input id="${obj._id}_time" type="time" name="time" placeholder="Time" value="${obj.time}"/></td>`,
+        `<td><input id="${obj._id}_date" type="text" name="date" placeholder="Date" value="${obj.date}" class="flatpickr-date"/></td>`,
+        `<td><input id="${obj._id}_time" type="text" name="time" placeholder="Time" value="${obj.time}" class="flatpickr-time"/></td>`,
         `<td>${rooms}</td>`,
         `<td>
-            ${setRandomRoomIcon}
-            ${copyRoomIcon}
-            ${shareRoomIcon}
-            ${sendEmailIcon}
-            ${sendSmSInvitationIcon}
-            ${joinInternalIcon}
-            ${joinExternalIcon}
-            ${updateRowIcon}
-            ${delRowIcon}
+            <span class="action-group">
+                ${setRandomRoomIcon}
+                ${copyRoomIcon}
+                ${shareRoomIcon}
+                ${sendEmailIcon}
+                ${sendSmSInvitationIcon}
+            </span>
+            <span class="action-separator"></span>
+            <span class="action-group">
+                ${joinInternalIcon}
+                ${joinExternalIcon}
+            </span>
+            <span class="action-separator"></span>
+            <span class="action-group">
+                ${updateRowIcon}
+                ${delRowIcon}
+            </span>
         </td>`,
     ];
 }
@@ -659,6 +703,7 @@ function addRowToolTips(id) {
     const rowToolTips = [
         { element: document.getElementById(`${id}_randomRoom`), text: 'Generate random room', position: 'top' },
         { element: document.getElementById(`${id}_copy`), text: 'Copy room', position: 'top' },
+        { element: document.getElementById(`${id}_share`), text: 'Share room', position: 'top' },
         { element: document.getElementById(`${id}_send_email`), text: 'Send email invitation', position: 'top' },
         { element: document.getElementById(`${id}_send_sms`), text: 'Send sms invitation', position: 'top' },
         { element: document.getElementById(`${id}_joinInternal`), text: 'Join room internal', position: 'top' },
@@ -667,6 +712,13 @@ function addRowToolTips(id) {
         { element: document.getElementById(`${id}_delete`), text: 'Delete room', position: 'top' },
     ];
     loadToolTip(rowToolTips);
+}
+
+function initVisibleRowsToolTips() {
+    dataTable.rows({ page: 'current' }).every(function () {
+        const id = this.node().id;
+        if (id) addRowToolTips(id);
+    });
 }
 
 function setRandomRoom(id) {
@@ -811,9 +863,20 @@ function updateRow(id) {
     roomUpdate(id, data)
         .then((res) => {
             console.log('[API] - UPDATE ROW RESPONSE', res);
-            res.message
-                ? popupMessage('warning', `${res.message}`)
-                : popupMessage('toast', 'Data saved successfully 👍');
+            if (res.message) {
+                popupMessage('warning', `${res.message}`);
+            } else {
+                popupMessage('toast', 'Data saved successfully 👍');
+                debouncedLoadStats();
+                const row = document.getElementById(id);
+                if (row) {
+                    row.style.transition = 'background-color 0.3s';
+                    row.style.backgroundColor = 'rgba(76, 175, 80, 0.15)';
+                    setTimeout(() => {
+                        row.style.backgroundColor = '';
+                    }, 1500);
+                }
+            }
         })
         .catch((err) => {
             console.log('[API] - UPDATE ROW ERROR', err);
@@ -844,6 +907,7 @@ function delRow(id) {
                     console.log('[API] - DELETE ROW RESPONSE', res);
                     dataTable.row(`#${id}`).remove().draw();
                     dataTableTR.classList.remove('selected');
+                    debouncedLoadStats();
                 })
                 .catch((err) => {
                     console.log('[API] - DELETE ROW ERROR', err);
@@ -874,6 +938,7 @@ function delAllRows() {
                 .then((res) => {
                     console.log('[API] - DELETE ALL ROWS RESPONSE', res);
                     dataTable.clear().draw();
+                    debouncedLoadStats();
                 })
                 .catch((err) => {
                     console.log('[API] - DELETE ALL ROWS ERROR', err);
@@ -947,7 +1012,62 @@ function delMyAccount() {
 }
 
 function refreshPage() {
-    document.location.reload(true);
+    dataTable.clear().draw();
+    showDataTable();
+    loadDashboardStats();
+    popupMessage('toast', 'Data refreshed 🔄');
+}
+
+function loadDashboardStats() {
+    getDashboardStats()
+        .then((data) => {
+            console.log('[API] - DASHBOARD STATS RESPONSE', data);
+            renderDashboardStats(data);
+        })
+        .catch((err) => {
+            console.error('[API] - DASHBOARD STATS ERROR', err);
+        });
+}
+
+function renderDashboardStats(data) {
+    if (data.isAdmin) {
+        elemDisplay(statsUsersSection, true);
+        elemDisplay(statMemberSince, false);
+        statTotalUsersVal.textContent = data.totalUsers;
+        statActiveUsersVal.textContent = data.activeUsers;
+        statInactiveUsersVal.textContent = data.inactiveUsers;
+        statAdminsVal.textContent = data.adminCount;
+        statGuestsVal.textContent = data.guestCount;
+        statLatestUserVal.textContent = data.latestUser;
+        statTotalRoomsVal.textContent = data.totalRooms;
+        statTotalRoomsLabel.textContent = 'Total Rooms';
+        statTodayVal.textContent = data.todayRooms;
+        statTodayLabel.textContent = 'Today';
+        statUpcomingVal.textContent = data.upcomingRooms;
+        statUpcomingLabel.textContent = 'Upcoming';
+        statsRoomsSectionTitle.textContent = 'Rooms';
+        statsTypesSectionTitle.textContent = 'Room Types';
+        statP2PVal.textContent = data.roomsByType.P2P;
+        statSFUVal.textContent = data.roomsByType.SFU;
+        statC2CVal.textContent = data.roomsByType.C2C;
+        statBROVal.textContent = data.roomsByType.BRO;
+    } else {
+        elemDisplay(statsUsersSection, false);
+        elemDisplay(statMemberSince, true);
+        statMemberSinceVal.textContent = data.memberSince ? new Date(data.memberSince).toLocaleDateString() : '-';
+        statTotalRoomsVal.textContent = data.myRooms;
+        statTotalRoomsLabel.textContent = 'My Rooms';
+        statTodayVal.textContent = data.myTodayRooms;
+        statTodayLabel.textContent = 'Today';
+        statUpcomingVal.textContent = data.myUpcomingRooms;
+        statUpcomingLabel.textContent = 'Upcoming';
+        statsRoomsSectionTitle.textContent = 'My Rooms';
+        statsTypesSectionTitle.textContent = 'My Room Types';
+        statP2PVal.textContent = data.myRoomsByType.P2P;
+        statSFUVal.textContent = data.myRoomsByType.SFU;
+        statC2CVal.textContent = data.myRoomsByType.C2C;
+        statBROVal.textContent = data.myRoomsByType.BRO;
+    }
 }
 
 function openURL(url, blank = false) {
@@ -1024,6 +1144,89 @@ function resetFormValues() {
     addDate.value = new Date().toISOString().substring(0, 10);
     addTime.value = new Date().toISOString().substring(11, 16);
     addRoom.value = getUUID4();
+    if (addDate._flatpickr) addDate._flatpickr.setDate(addDate.value, false);
+    if (addTime._flatpickr) addTime._flatpickr.setDate(addTime.value, false);
+}
+
+function getFlatpickrOnReady() {
+    const isDark = document.body.classList.contains('dark');
+    return function (selectedDates, dateStr, instance) {
+        if (isDark) instance.calendarContainer.classList.add('dark');
+    };
+}
+
+function initFlatpickr() {
+    const onReady = getFlatpickrOnReady();
+
+    flatpickr(addDate, {
+        dateFormat: 'Y-m-d',
+        defaultDate: new Date().toISOString().substring(0, 10),
+        allowInput: true,
+        onReady,
+    });
+
+    flatpickr(addTime, {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: 'H:i',
+        time_24hr: true,
+        defaultDate: new Date().toISOString().substring(11, 16),
+        allowInput: true,
+        onReady,
+    });
+}
+
+function initRowFlatpickr(rowId) {
+    const dateEl = document.getElementById(rowId + '_date');
+    const timeEl = document.getElementById(rowId + '_time');
+    const onReady = getFlatpickrOnReady();
+    if (dateEl && !dateEl._flatpickr) {
+        flatpickr(dateEl, {
+            dateFormat: 'Y-m-d',
+            allowInput: true,
+            onReady,
+        });
+    }
+    if (timeEl && !timeEl._flatpickr) {
+        flatpickr(timeEl, {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: 'H:i',
+            time_24hr: true,
+            allowInput: true,
+            onReady,
+        });
+    }
+}
+
+function initVisibleRowsFlatpickr() {
+    const onReady = getFlatpickrOnReady();
+    document.querySelectorAll('#myTableBody .flatpickr-date, #myTableBody .flatpickr-time').forEach((el) => {
+        if (el._flatpickr) return;
+        if (el.classList.contains('flatpickr-date')) {
+            flatpickr(el, { dateFormat: 'Y-m-d', allowInput: true, onReady });
+        } else {
+            flatpickr(el, {
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: 'H:i',
+                time_24hr: true,
+                allowInput: true,
+                onReady,
+            });
+        }
+    });
+}
+
+function updateFlatpickrTheme() {
+    const isDark = document.body.classList.contains('dark');
+    document.querySelectorAll('.flatpickr-calendar').forEach((cal) => {
+        if (isDark) {
+            cal.classList.add('dark');
+        } else {
+            cal.classList.remove('dark');
+        }
+    });
 }
 
 function animateCSS(element, animation, prefix = 'animate__') {
@@ -1065,3 +1268,38 @@ function setTippy(elem, content, placement) {
         console.error('setTippy error', err.message);
     }
 }
+
+// Debounced dashboard stats refresh
+let statsTimeout;
+function debouncedLoadStats() {
+    clearTimeout(statsTimeout);
+    statsTimeout = setTimeout(loadDashboardStats, 500);
+}
+
+// Filter chips for rooms table
+document.querySelectorAll('.filter-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach((c) => c.classList.remove('active'));
+        chip.classList.add('active');
+        const filter = chip.dataset.filter;
+        const today = new Date().toISOString().split('T')[0];
+
+        // Remove any previously pushed custom filter
+        $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter((fn) => !fn._isRoomFilter);
+
+        if (filter !== 'all') {
+            const filterFn = function (settings, data, dataIndex) {
+                const row = dataTable.row(dataIndex).node();
+                const dateInput = row ? row.querySelector('.flatpickr-date') : null;
+                const rowDate = dateInput ? dateInput.value : '';
+                if (filter === 'today') return rowDate === today;
+                if (filter === 'upcoming') return rowDate >= today;
+                if (filter === 'past') return rowDate < today;
+                return true;
+            };
+            filterFn._isRoomFilter = true;
+            $.fn.dataTable.ext.search.push(filterFn);
+        }
+        dataTable.draw();
+    });
+});

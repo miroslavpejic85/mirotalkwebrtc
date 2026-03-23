@@ -45,9 +45,25 @@
 --------------------------------------------------------------*/
 
 .back-login {
-    text-align: center;
-    display: block;
-    margin-top: 20px;
-    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: fit-content;
+    margin: 20px auto 0;
+    padding: 8px 16px;
+    color: rgba(255, 255, 255, 0.75);
     text-decoration: none;
+    font-size: 0.88em;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.back-login:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.back-login i {
+    font-size: 0.85em;
 }

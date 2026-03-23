@@ -20,6 +20,12 @@ const loginEmailIdInput = document.getElementById('loginEmailIdInput');
 const loginPasswordIdInput = document.getElementById('loginPasswordIdInput');
 const loginBtn = document.getElementById('loginBtn');
 
+// tabs
+const tabLogin = document.getElementById('tabLogin');
+const tabSignup = document.getElementById('tabSignup');
+const loginPanel = document.getElementById('loginPanel');
+const signupPanel = document.getElementById('signupPanel');
+
 // support
 const supportBtn = document.getElementById('supportBtn');
 
@@ -28,12 +34,6 @@ const config = {
     //...
 };
 !config.support && elementDisplay(supportBtn, false);
-
-// Login/Signup
-const chk = document.getElementById('chk');
-const login = document.querySelector('.login');
-const loginLabel = document.querySelector('.login label');
-const signupLabel = document.querySelector('.signup label');
 
 signupUsernameInput.value = storageUsername;
 signupEmailIdInput.value = storageEmail;
@@ -47,11 +47,25 @@ loginPasswordIdInput.value = '';
 elementDisplay(signupBtn, false);
 elementDisplay(signupTermsBtn, true);
 
-showLogin();
+// Tab switching
+tabLogin.addEventListener('click', () => switchTab('login'));
+tabSignup.addEventListener('click', () => switchTab('signup'));
 
-chk.addEventListener('change', () => {
-    chk.checked ? showSignUp() : showLogin();
-});
+function switchTab(tab) {
+    if (tab === 'login') {
+        tabLogin.classList.add('active');
+        tabSignup.classList.remove('active');
+        loginPanel.classList.add('active');
+        signupPanel.classList.remove('active');
+        cleanSignUpInput();
+    } else {
+        tabSignup.classList.add('active');
+        tabLogin.classList.remove('active');
+        signupPanel.classList.add('active');
+        loginPanel.classList.remove('active');
+        cleanLoginInput();
+    }
+}
 
 loginBtn.addEventListener('click', handleLogin);
 
@@ -171,7 +185,7 @@ function signupOrLogin(data) {
             if (res.message) {
                 res.success ? popupMessage('success', res.message) : popupMessage('warning', res.message);
                 if (res.message.includes('Pending') || res.message.includes('CodeCanyon')) {
-                    showLogin();
+                    switchTab('login');
                 }
             } else {
                 window.sessionStorage.userId = res._id;
@@ -190,20 +204,6 @@ function elementDisplay(elem, display) {
     elem.style.display = display ? 'block' : 'none';
 }
 
-function showSignUp() {
-    login.style.transform = 'translateY(-180px)';
-    loginLabel.style.transform = 'scale(0.6)';
-    signupLabel.style.transform = 'scale(1)';
-    cleanLoginInput();
-}
-
-function showLogin() {
-    login.style.transform = 'translateY(-580px)';
-    loginLabel.style.transform = 'scale(1)';
-    signupLabel.style.transform = 'scale(0.6)';
-    cleanSignUpInput();
-}
-
 function cleanLoginInput() {
     loginUsernameInput.value = '';
     loginEmailIdInput.value = '';
@@ -216,3 +216,18 @@ function cleanSignUpInput() {
     signupPasswordIdInput.value = '';
     signupRepeatPasswordIdInput.value = '';
 }
+
+// Password visibility toggle
+document.querySelectorAll('.password-toggle').forEach((btn) => {
+    btn.addEventListener('click', function () {
+        const input = this.parentElement.querySelector('input');
+        const icon = this.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    });
+});

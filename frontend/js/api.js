@@ -139,6 +139,16 @@ function smsSend(data) {
     }).then((response) => response.data);
 }
 
+// API DASHBOARD
+
+function getDashboardStats() {
+    return axios({
+        method: 'GET',
+        url: `${apiPath}/dashboard/stats`,
+        headers: headers,
+    }).then((response) => response.data);
+}
+
 // API CONFIG
 
 function getConfig() {

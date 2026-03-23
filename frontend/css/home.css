@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
 
 :root {
     --primary-color: #202123;
@@ -6,7 +6,9 @@
     --accent-color: #316fb2;
     --hover-color: #439fff;
     --text-color: #f5f5f5;
-    --box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.7);
+    --box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    --input-bg: rgba(32, 33, 35, 0.8);
+    --border-radius: 10px;
 }
 
 body {
@@ -22,129 +24,330 @@ body {
 }
 
 .main {
-    width: 380px;
-    height: 580px;
+    width: 400px;
     background: var(--secondary-color);
     color: var(--text-color);
-    border-radius: 12px;
+    border-radius: 16px;
     box-shadow: var(--box-shadow);
-    position: relative;
     overflow: hidden;
 }
 
-.signup {
-    position: relative;
-    width: 100%;
-    height: 100%;
+/*--------------------------------------------------------------
+# Tab Header
+--------------------------------------------------------------*/
+
+.tab-header {
+    display: flex;
+    background: rgba(0, 0, 0, 0.15);
 }
 
-label {
-    color: var(--text-color);
-    font-size: 2.3em;
-    justify-content: center;
+.tab-btn {
+    flex: 1;
+    height: 52px;
     display: flex;
-    margin: 60px;
-    font-weight: bold;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.95em;
+    font-weight: 600;
+    border: none;
+    border-bottom: 3px solid transparent;
     cursor: pointer;
-    transition: 0.5s ease-in-out;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    letter-spacing: 0.5px;
+    margin: 0;
+    padding: 0;
+    width: auto;
+    border-radius: 0;
 }
 
-input {
-    width: 60%;
-    height: 20px;
-    justify-content: center;
+.tab-btn:hover {
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.05);
+    transform: none;
+    box-shadow: none;
+}
+
+.tab-btn.active {
+    color: #fff;
+    border-bottom-color: var(--hover-color);
+    background: transparent;
+}
+
+/*--------------------------------------------------------------
+# Tab Content
+--------------------------------------------------------------*/
+
+.tab-content {
+    position: relative;
+    padding: 28px 0 8px;
+}
+
+.tab-panel {
+    display: none;
+    animation: tabFadeIn 0.3s ease;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+@keyframes tabFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/*--------------------------------------------------------------
+# Input Group
+--------------------------------------------------------------*/
+
+.input-group {
+    width: 72%;
+    margin: 10px auto;
     display: flex;
-    margin: 20px auto;
-    padding: 12px;
-    background-color: var(--primary-color);
-    color: var(--text-color);
-    border: 2px solid var(--accent-color);
-    border-radius: 6px;
-    outline: none;
-    font-size: 1em;
-    transition: border-color 0.3s ease;
+    align-items: center;
+    background: var(--input-bg);
+    border: 2px solid transparent;
+    border-radius: var(--border-radius);
+    transition:
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
 }
 
-input:focus {
+.input-group:focus-within {
     border-color: var(--hover-color);
+    box-shadow: 0 0 0 3px rgba(67, 159, 255, 0.12);
 }
+
+.input-group > i {
+    padding: 0 0 0 14px;
+    color: #888;
+    font-size: 0.95em;
+    min-width: 20px;
+    text-align: center;
+    transition: color 0.3s ease;
+}
+
+.input-group:focus-within > i {
+    color: var(--hover-color);
+}
+
+.input-group input {
+    flex: 1;
+    height: auto;
+    margin: 0;
+    padding: 13px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    display: block;
+    font-size: 0.88em;
+    color: var(--text-color);
+    outline: none;
+    font-family: inherit;
+}
+
+.input-group input::placeholder {
+    color: #999;
+}
+
+/*--------------------------------------------------------------
+# Password Toggle
+--------------------------------------------------------------*/
+
+.password-toggle {
+    all: unset !important;
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    color: #888;
+    cursor: pointer;
+    font-size: 0.9em;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    box-sizing: border-box !important;
+    transition: color 0.3s ease !important;
+}
+
+.password-toggle i {
+    display: block;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.password-toggle:hover {
+    color: var(--hover-color) !important;
+    background: transparent !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/*--------------------------------------------------------------
+# Buttons
+--------------------------------------------------------------*/
 
 button {
-    width: 65%;
-    height: 40px;
+    width: 72%;
+    height: 44px;
     margin: 10px auto;
     justify-content: center;
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     color: var(--text-color);
-    background: #316fb2;
-    font-size: 1em;
-    font-weight: bold;
-    margin-top: 20px;
+    background: var(--accent-color);
+    font-size: 0.95em;
+    font-weight: 600;
+    margin-top: 18px;
     outline: none;
     border: none;
-    border-radius: 5px;
-    transition: 0.2s ease-in;
+    border-radius: var(--border-radius);
+    transition: all 0.2s ease;
     cursor: pointer;
+    letter-spacing: 0.3px;
+    font-family: inherit;
 }
 
 button:hover {
     background-color: var(--hover-color);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(67, 159, 255, 0.3);
 }
 
-.login {
-    height: 580px;
-    background: var(--accent-color);
-    border-radius: 60% / 10%;
-    transform: translateY(-180px);
-    transition: 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-.login label {
-    color: var(--text-color);
-    transform: scale(0.6);
-}
-
-#chk {
-    display: none;
-}
-#chk:checked ~ .login {
-    transform: translateY(-580px);
-}
-#chk:checked ~ .login label {
-    transform: scale(1);
-}
-#chk:checked ~ .signup label {
-    transform: scale(0.6);
+button:active {
+    transform: translateY(0);
 }
 
 #loginBtn {
-    background-color: var(--secondary-color) !important;
-    cursor: pointer;
+    background-color: var(--accent-color);
 }
+
 #loginBtn:hover {
-    background-color: #439fff !important;
+    background-color: #439fff;
+    box-shadow: 0 4px 12px rgba(67, 159, 255, 0.3);
 }
+
+#signupTermsBtn {
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.65) !important;
+    font-size: 0.8em !important;
+    font-weight: 500 !important;
+    margin-top: 6px !important;
+    text-decoration: underline;
+    height: auto !important;
+    padding: 6px !important;
+}
+
+#signupTermsBtn:hover {
+    color: #fff !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/*--------------------------------------------------------------
+# Links & Footer
+--------------------------------------------------------------*/
+
 #forgotPasswordLink {
     text-align: center;
     display: block;
-    margin-top: 15px;
-    color: var(--text-color);
-    font-size: 0.9em;
+    margin-top: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85em;
     text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+#forgotPasswordLink:hover {
+    color: #fff;
+    text-decoration: underline;
 }
 
 #supportBtn {
-    margin-top: 30px;
-    color: var(--text-color);
-    font-size: 0.8em;
-    font-weight: bold;
+    margin: 16px 0;
+    padding: 12px 0;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.72em;
+    font-weight: 500;
     text-align: center;
     cursor: pointer;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 #supportBtn:hover {
-    transform: scale(0.95);
+    color: #fff;
 }
+
+/*--------------------------------------------------------------
+# Single Form Pages (forgot / reset password)
+--------------------------------------------------------------*/
+
+.main.single-form {
+    height: auto;
+    padding: 40px 0;
+}
+
+.main.single-form .signup {
+    height: auto;
+}
+
+.main.single-form .signup form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.main.single-form label {
+    font-size: 1.6em;
+    margin: 16px 40px 8px;
+    cursor: default;
+}
+
+.form-icon-circle {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(67, 159, 255, 0.15);
+    border-radius: 50%;
+    font-size: 1.6em;
+    color: var(--hover-color);
+}
+
+.form-desc {
+    text-align: center;
+    color: #bbb;
+    font-size: 0.85em;
+    line-height: 1.5;
+    margin: 0 40px 20px;
+}
+
+/*--------------------------------------------------------------
+# Terms & Conditions (SweetAlert)
+--------------------------------------------------------------*/
 
 .terms-conditions {
     text-align: left;
@@ -167,6 +370,10 @@ button:hover {
     line-height: 1.6;
     color: var(--text-color);
 }
+
+/*--------------------------------------------------------------
+# SweetAlert2 Overrides
+--------------------------------------------------------------*/
 
 .swal2-title,
 .swal2-content {
@@ -192,4 +399,15 @@ button:hover {
 .swal2-cancel,
 .swal2-confirm {
     width: 120px;
+}
+
+/*--------------------------------------------------------------
+# Responsive
+--------------------------------------------------------------*/
+
+@media screen and (max-width: 480px) {
+    .main {
+        width: 92vw;
+        min-width: 300px;
+    }
 }

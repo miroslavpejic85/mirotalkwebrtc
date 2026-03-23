@@ -17,6 +17,7 @@ const sms = require('./routes/sms');
 const token = require('./routes/token');
 const users = require('./routes/users');
 const password = require('./routes/password');
+const dashboard = require('./routes/dashboard');
 const config = require('./config');
 const ngrok = require('./common/ngrok');
 const sentry = require('./common/sentry');
@@ -89,6 +90,7 @@ mongoose
         app.use(apiPath, token);
         app.use(apiPath, users);
         app.use(apiPath, password);
+        app.use(apiPath, dashboard);
 
         app.get('/', (req, res) => {
             htmlInjector.injectHtml(login, res);
