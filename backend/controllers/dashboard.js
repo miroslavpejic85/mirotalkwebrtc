@@ -10,7 +10,7 @@ const log = new logs('Controllers-dashboard');
 async function getDashboardStats(req, res) {
     try {
         const { email, username, password } = req.user;
-        const isAdmin = utils.isAdmin(email, username, password);
+        const isAdmin = await utils.isAdmin(email, username, password);
         const today = new Date().toISOString().split('T')[0];
 
         if (isAdmin) {

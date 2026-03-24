@@ -1,6 +1,5 @@
 'use strict';
 
-const User = require('../models/users');
 const utils = require('../common/utils');
 const logs = require('../common/logs');
 
@@ -28,14 +27,7 @@ const admin = async (req, res, next) => {
 
         const decoded = utils.tokenDecode(token);
 
-        // Check env var admin credentials or database role
-        if (utils.isAdmin(decoded.email, decoded.username, decoded.password)) {
-            req.user = decoded;
-            return next();
-        }
-
-        const user = await User.findOne({ email: decoded.email, username: decoded.username });
-        if (user && user.role === 'admin') {
+        if (await utils.isAdmin(decoded.email, decoded.username, decoded.password)) {
             req.user = decoded;
             return next();
         }

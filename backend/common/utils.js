@@ -2,6 +2,7 @@
 
 const CryptoJS = require('crypto-js');
 const jwt = require('jsonwebtoken');
+const User = require('../models/users');
 
 const JWT_KEY = process.env.JWT_KEY;
 const JWT_EXP = process.env.JWT_EXP;
@@ -22,8 +23,12 @@ const pathTraversal = new RegExp(/(\.\.(\/|\\))+/);
 const alphanumeric = new RegExp(/^[A-Za-z0-9-_]+$/);
 const miroTalkType = new RegExp(/^(SFU|P2P|C2C|BRO)$/);
 
-function isAdmin(email, username, password) {
-    return email == ADMIN_EMAIL && username == ADMIN_USERNAME && password == ADMIN_PASSWORD;
+async function isAdmin(email, username, password) {
+    if (email == ADMIN_EMAIL && username == ADMIN_USERNAME && password == ADMIN_PASSWORD) {
+        return true;
+    }
+    const user = await User.findOne({ email, username }).select('role').lean();
+    return user?.role === 'admin';
 }
 
 function tokenEncode(token) {

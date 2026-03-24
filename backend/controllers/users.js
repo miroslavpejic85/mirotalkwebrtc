@@ -37,7 +37,7 @@ async function userCreate(req, res) {
                 });
             } else {
                 log.debug('New user, no email verification needed, going to add it the storage');
-                const isUserAdmin = utils.isAdmin(email, username, password);
+                const isUserAdmin = await utils.isAdmin(email, username, password);
                 const encryptedPassword = await bcrypt.hash(password, 10);
                 const userData = new User({
                     email: email,
@@ -97,7 +97,7 @@ async function userLogin(req, res) {
                         });
                     }
                     log.debug('User found, just refresh the token');
-                    if (utils.isAdmin(email, username, password) && userFindOne.role !== 'admin') {
+                    if ((await utils.isAdmin(email, username, password)) && userFindOne.role !== 'admin') {
                         userFindOne.role = 'admin';
                     }
                     userFindOne.token = token;
@@ -135,7 +135,7 @@ async function userLogin(req, res) {
                 });
             } else {
                 log.debug('No email verification, add user to storage...');
-                const isUserAdmin = utils.isAdmin(email, username, password);
+                const isUserAdmin = await utils.isAdmin(email, username, password);
                 const encryptedPassword = await bcrypt.hash(password, 10);
                 const userData = new User({
                     email: email,
@@ -293,7 +293,7 @@ async function userConfirmation(req, res) {
         const userFindOne = await User.findOne({ email: decoded.email, username: decoded.username });
         if (!userFindOne || Object.keys(userFindOne).length === 0) {
             log.debug('User confirmed by email, going to add it the storage');
-            const isUserAdmin = utils.isAdmin(decoded.email, decoded.username, decoded.password);
+            const isUserAdmin = await utils.isAdmin(decoded.email, decoded.username, decoded.password);
             const encryptedPassword = await bcrypt.hash(decoded.password, 10);
             const userData = new User({
                 email: decoded.email,
@@ -356,7 +356,7 @@ async function userUpdate(req, res) {
         const options = { returnDocument: 'after' };
         const dateNow = new Date().toISOString();
 
-        const isAdmin = utils.isAdmin(req.user.email, req.user.username, req.user.password);
+        const isAdmin = await utils.isAdmin(req.user.email, req.user.username, req.user.password);
 
         if (!isAdmin) {
             const targetUser = await User.findById(id).select('email').lean();
@@ -372,7 +372,7 @@ async function userUpdate(req, res) {
 
         if (updatedData.password) {
             const encryptedPassword = await bcrypt.hash(updatedData.password, 10);
-            const isUserAdmin = utils.isAdmin(updatedData.email, updatedData.username, updatedData.password);
+            const isUserAdmin = await utils.isAdmin(updatedData.email, updatedData.username, updatedData.password);
             updatedData.role = isUserAdmin ? 'admin' : 'guest';
             updatedData.password = encryptedPassword;
         }
@@ -390,7 +390,7 @@ async function userDelete(req, res) {
     try {
         const id = req.params.id;
 
-        const isAdmin = utils.isAdmin(req.user.email, req.user.username, req.user.password);
+        const isAdmin = await utils.isAdmin(req.user.email, req.user.username, req.user.password);
 
         if (!isAdmin) {
             const targetUser = await User.findById(id).select('email').lean();
