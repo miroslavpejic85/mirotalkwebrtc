@@ -1,11 +1,12 @@
 'use strict';
 
+const User = require('../models/users');
 const utils = require('../common/utils');
 const logs = require('../common/logs');
 
 const log = new logs('Admin');
 
-const admin = (req, res, next) => {
+const admin = async (req, res, next) => {
     let token =
         req?.body?.token ||
         req?.query?.token ||
@@ -27,16 +28,23 @@ const admin = (req, res, next) => {
 
         const decoded = utils.tokenDecode(token);
 
-        //log.debug('Admin credential', { ADMIN_EMAIL:ADMIN_EMAIL, ADMIN_USERNAME:ADMIN_USERNAME, ADMIN_PASSWORD:ADMIN_PASSWORD });
-        if (!utils.isAdmin(decoded.email, decoded.username, decoded.password)) {
-            log.debug('NOT ADMIN', decoded);
-            return res.status(201).json({ message: "You don't have admin privileges for this request!" });
+        // Check env var admin credentials or database role
+        if (utils.isAdmin(decoded.email, decoded.username, decoded.password)) {
+            req.user = decoded;
+            return next();
         }
-        req.user = decoded;
+
+        const user = await User.findOne({ email: decoded.email, username: decoded.username });
+        if (user && user.role === 'admin') {
+            req.user = decoded;
+            return next();
+        }
+
+        log.debug('NOT ADMIN', decoded);
+        return res.status(201).json({ message: "You don't have admin privileges for this request!" });
     } catch (err) {
         return res.status(401).json({ message: 'Token invalid or expired' });
     }
-    return next();
 };
 
 module.exports = admin;
