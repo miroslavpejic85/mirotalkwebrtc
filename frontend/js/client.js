@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.04
+ * @version 1.3.10
  */
 
 const userAgent = navigator.userAgent;
@@ -27,6 +27,7 @@ const sidebarToggle = body.querySelector('.sidebar-toggle');
 
 const navOverview = document.getElementById('navOverview');
 const navDash = document.getElementById('navDash');
+const navUsers = document.getElementById('navUsers');
 const navC2C = document.getElementById('navC2C');
 const navP2P = document.getElementById('navP2P');
 const navSFU = document.getElementById('navSFU');
@@ -48,9 +49,9 @@ const rowAppName = document.getElementById('rowAppName');
 
 const myProfile = document.getElementById('myProfile');
 
-const search = document.getElementById('search');
 const dsOverview = document.getElementById('dsOverview');
 const dsRooms = document.getElementById('dsRooms');
+const dsUsers = document.getElementById('dsUsers');
 
 const dsDashStats = document.getElementById('dsDashStats');
 const statsUsersSection = document.getElementById('statsUsersSection');
@@ -149,6 +150,16 @@ const refreshBtn = document.getElementById('refresh-page-btn');
 const delAllBtn = document.getElementById('del-all-btn');
 const btnRefreshStats = document.getElementById('btnRefreshStats');
 
+const addUserDiv = document.getElementById('addUserDiv');
+const openAddUserBtn = document.getElementById('open-add-user-btn');
+const closeAddUserBtn = document.getElementById('add-user-close-btn');
+const addUserUsername = document.getElementById('add-user-username');
+const addUserEmail = document.getElementById('add-user-email');
+const addUserPassword = document.getElementById('add-user-password');
+const addUserRooms = document.getElementById('add-user-rooms');
+const addUserBtn = document.getElementById('add-user-btn');
+const refreshUsersBtn = document.getElementById('refresh-users-btn');
+
 const myTable = document.getElementById('myTable');
 const myTableBody = document.getElementById('myTableBody');
 
@@ -193,6 +204,43 @@ dataTable.on('draw', function () {
     initVisibleRowsFlatpickr();
     initVisibleRowsToolTips();
 });
+
+const usersDataTable = $('#usersTable').DataTable({
+    searching: true,
+    paging: true,
+    pageLength: 10,
+    lengthChange: false,
+    pagingType: 'simple_numbers',
+    info: false,
+    responsive: true,
+    scrollX: true,
+    order: [[6, 'desc']],
+    columnDefs: [
+        { width: '12%', targets: 0 },
+        { width: '16%', targets: 1 },
+        { width: '10%', targets: 2 },
+        { width: '18%', targets: 3 },
+        { width: '12%', targets: 4 },
+        { width: '8%', targets: 5 },
+        { width: '12%', targets: 6 },
+        { width: '12%', targets: 7 },
+        {
+            targets: [0, 1, 2, 3, 4, 6],
+            type: 'string',
+            searchable: true,
+        },
+        {
+            targets: [5, 7],
+            orderable: false,
+            searchable: false,
+        },
+        {
+            targets: [0, 1, 2, 3, 4, 5, 6, 7],
+            className: 'dt-body-justify',
+        },
+    ],
+});
+$('#usersTable').css('width', '100%');
 
 const getMode = window.localStorage.mode || 'dark';
 const getStatus = window.localStorage.status;
@@ -308,6 +356,7 @@ function handleUserRoles() {
                     });
                 }
                 if (role == 'admin') {
+                    elemDisplay(navUsers, true);
                     elemDisplay(navP2P, true);
                     elemDisplay(navSFU, true);
                     elemDisplay(navC2C, true);
@@ -430,7 +479,12 @@ navOverview.addEventListener('click', () => {
 });
 
 navDash.addEventListener('click', () => {
-    navShow([search, dsRooms], navDash);
+    navShow([dsRooms], navDash);
+});
+
+navUsers.addEventListener('click', () => {
+    navShow([dsUsers], navUsers);
+    loadUsers();
 });
 
 navP2P.addEventListener('click', () => {
@@ -505,10 +559,51 @@ settingsClose.addEventListener('click', () => {
     toggleSettings();
 });
 
+openAddUserBtn.addEventListener('click', () => {
+    resetAddUserForm();
+    toggleAddUserPanel();
+});
+closeAddUserBtn.addEventListener('click', () => {
+    toggleAddUserPanel();
+});
+addUserBtn.addEventListener('click', () => {
+    createUser();
+});
+refreshUsersBtn.addEventListener('click', () => {
+    loadUsers();
+    popupMessage('toast', 'Users refreshed');
+});
+
+document.getElementById('usersSearchInput').addEventListener('keyup', function () {
+    usersDataTable.search(this.value).draw();
+});
+
+const svcAllCheckbox = document.getElementById('add-user-svc-all');
+const svcIndividual = ['add-user-svc-p2p', 'add-user-svc-sfu', 'add-user-svc-c2c', 'add-user-svc-bro'].map((id) =>
+    document.getElementById(id)
+);
+
+svcAllCheckbox.addEventListener('change', () => {
+    if (svcAllCheckbox.checked) {
+        svcIndividual.forEach((cb) => (cb.checked = false));
+    }
+});
+
+svcIndividual.forEach((cb) => {
+    cb.addEventListener('change', () => {
+        if (cb.checked) {
+            svcAllCheckbox.checked = false;
+        }
+        if (!svcIndividual.some((c) => c.checked)) {
+            svcAllCheckbox.checked = true;
+        }
+    });
+});
+
 function navShow(elements = [], activeNav = null) {
     elemDisplay(dsOverview, false);
-    elemDisplay(search, false);
     elemDisplay(dsRooms, false);
+    elemDisplay(dsUsers, false);
     elemDisplay(p2p, false);
     elemDisplay(sfu, false);
     elemDisplay(c2c, false);
@@ -520,10 +615,9 @@ function navShow(elements = [], activeNav = null) {
     if (activeNav) activeNav.classList.add('active');
 }
 
-function searchRows() {
-    const input = document.getElementById('myInput');
-    dataTable.search(input.value).draw();
-}
+document.getElementById('myInput').addEventListener('keyup', function () {
+    dataTable.search(this.value).draw();
+});
 
 function toggleAddRows() {
     if (addRowDiv.classList.contains('show')) {
@@ -556,6 +650,233 @@ function toggleSettings() {
         settingsDiv.classList.toggle('show');
         animateCSS(settingsDiv, 'fadeInRight');
     }
+}
+
+function toggleAddUserPanel() {
+    if (addUserDiv.classList.contains('show')) {
+        animateCSS(addUserDiv, 'fadeOutRight').then((ok) => {
+            addUserDiv.classList.toggle('show');
+        });
+    } else {
+        addUserDiv.classList.toggle('show');
+        animateCSS(addUserDiv, 'fadeInRight');
+    }
+}
+
+function resetAddUserForm() {
+    addUserUsername.value = '';
+    addUserEmail.value = '';
+    addUserPassword.value = '';
+    addUserRooms.value = '*';
+    document.getElementById('add-user-svc-all').checked = true;
+    document.getElementById('add-user-svc-p2p').checked = false;
+    document.getElementById('add-user-svc-sfu').checked = false;
+    document.getElementById('add-user-svc-c2c').checked = false;
+    document.getElementById('add-user-svc-bro').checked = false;
+}
+
+function loadUsers() {
+    userGetAll()
+        .then((users) => {
+            console.log('[API] - USER GET ALL RESPONSE', users);
+            usersDataTable.clear();
+            if (users && users.length > 0) {
+                users.forEach((u) => {
+                    const row = getUserRow(u);
+                    const rowNode = usersDataTable.row.add(row).node();
+                    rowNode.id = 'user_' + u._id;
+                });
+                usersDataTable.columns.adjust().draw();
+                toggleUsersList(true);
+                initUsersToolTips(users);
+            } else {
+                usersDataTable.columns.adjust().draw();
+                toggleUsersList(false);
+            }
+        })
+        .catch((err) => {
+            console.error('[API] - USER GET ALL ERROR', err);
+            popupMessage('error', `Failed to load users: ${err.message}`);
+        });
+}
+
+function toggleUsersList(hasData) {
+    const emptyState = document.getElementById('usersEmptyState');
+    const tableWrapper = document.getElementById('usersTable_wrapper');
+    elemDisplay(emptyState, !hasData);
+    if (tableWrapper) tableWrapper.style.display = hasData ? '' : 'none';
+}
+
+function getUserRow(u) {
+    const isSelf = u._id === userId;
+    const activeChecked = u.active ? 'checked' : '';
+    const selfDisabled = isSelf ? 'disabled' : '';
+    const userAllow = Array.isArray(u.allow) ? u.allow : ['ALL'];
+    const roomsStr = Array.isArray(u.allowedRooms) ? u.allowedRooms.join(', ') : '*';
+    const createdDate = u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-';
+
+    const saveIcon = `<i id="usave_${u._id}" onclick="saveUser('${u._id}')" class="uil uil-save"></i>`;
+    const deleteIcon = isSelf
+        ? ''
+        : `<i id="udel_${u._id}" onclick="deleteUser('${u._id}')" class="uil uil-times"></i>`;
+
+    const services = ['ALL', 'P2P', 'SFU', 'C2C', 'BRO'];
+    const allowOptions = services
+        .map((s) => `<option value="${s}" ${userAllow.includes(s) ? 'selected' : ''}>${s}</option>`)
+        .join('');
+
+    return [
+        `<input id="uname_${u._id}" type="text" value="${escapeHtml(u.username)}" readonly />`,
+        `<input id="uemail_${u._id}" type="email" value="${escapeHtml(u.email)}" readonly />`,
+        `<select id="urole_${u._id}" ${selfDisabled}>
+            <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin</option>
+            <option value="guest" ${u.role === 'guest' ? 'selected' : ''}>guest</option>
+        </select>`,
+        `<select id="uallow_${u._id}">${allowOptions}</select>`,
+        `<input id="urooms_${u._id}" type="text" value="${escapeHtml(roomsStr)}" />`,
+        `<label class="user-active-badge ${u.active ? 'active' : 'inactive'}">
+            <input id="uactive_${u._id}" type="checkbox" ${activeChecked} ${selfDisabled} onchange="this.parentElement.className='user-active-badge '+(this.checked?'active':'inactive');this.parentElement.querySelector('span').textContent=this.checked?'Active':'Inactive'" />
+            <span>${u.active ? 'Active' : 'Inactive'}</span>
+        </label>`,
+        createdDate,
+        `<span class="user-actions">${saveIcon} ${deleteIcon}</span>`,
+    ];
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function initUsersToolTips(users) {
+    users.forEach((u) => {
+        const tt = [
+            { element: document.getElementById(`usave_${u._id}`), text: 'Save user', position: 'top' },
+            { element: document.getElementById(`udel_${u._id}`), text: 'Delete user', position: 'top' },
+        ];
+        loadToolTip(tt);
+    });
+}
+
+function saveUser(id) {
+    const role = document.getElementById(`urole_${id}`).value;
+    const roomsRaw = document.getElementById(`urooms_${id}`).value.trim();
+    const active = document.getElementById(`uactive_${id}`).checked;
+
+    const allow = [document.getElementById(`uallow_${id}`).value];
+    const allowedRooms = roomsRaw
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+    const data = { role, allow, allowedRooms, active };
+
+    userUpdate(id, data)
+        .then((res) => {
+            console.log('[API] - USER UPDATE RESPONSE', res);
+            if (res && res.message) {
+                popupMessage('warning', res.message);
+            } else {
+                popupMessage('toast', 'User updated successfully');
+                loadUsers();
+                loadDashboardStats();
+            }
+        })
+        .catch((err) => {
+            console.error('[API] - USER UPDATE ERROR', err);
+            popupMessage('error', `Failed to update user: ${err.message}`);
+        });
+}
+
+function deleteUser(id) {
+    if (id === userId) {
+        popupMessage('warning', 'You cannot delete your own account from here. Use Account settings.');
+        return;
+    }
+    Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        position: 'center',
+        icon: 'warning',
+        title: 'Delete user',
+        text: 'Are you sure you want to delete this user and all their associated data?',
+        showDenyButton: true,
+        confirmButtonText: 'Yes',
+        denyButtonText: 'No',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            userDelete(id)
+                .then((res) => {
+                    console.log('[API] - USER DELETE RESPONSE', res);
+                    popupMessage('toast', 'User deleted successfully');
+                    loadUsers();
+                    loadDashboardStats();
+                })
+                .catch((err) => {
+                    console.error('[API] - USER DELETE ERROR', err);
+                    popupMessage('error', `Failed to delete user: ${err.message}`);
+                });
+        }
+    });
+}
+
+function createUser() {
+    const username = addUserUsername.value.trim();
+    const email = addUserEmail.value.trim().toLowerCase();
+    const password = addUserPassword.value;
+    const roomsRaw = addUserRooms.value.trim();
+
+    if (!username || !email || !password) {
+        popupMessage('warning', 'Username, email, and password are required');
+        return;
+    }
+
+    const allow = [];
+    if (document.getElementById('add-user-svc-all').checked) allow.push('ALL');
+    if (document.getElementById('add-user-svc-p2p').checked) allow.push('P2P');
+    if (document.getElementById('add-user-svc-sfu').checked) allow.push('SFU');
+    if (document.getElementById('add-user-svc-c2c').checked) allow.push('C2C');
+    if (document.getElementById('add-user-svc-bro').checked) allow.push('BRO');
+    if (allow.length === 0) allow.push('ALL');
+
+    const allowedRooms = roomsRaw
+        ? roomsRaw
+              .split(',')
+              .map((s) => s.trim())
+              .filter(Boolean)
+        : ['*'];
+
+    const data = { username, email, password };
+
+    userCreate(data)
+        .then((res) => {
+            console.log('[API] - USER CREATE RESPONSE', res);
+            if (res && res.message && !res._id) {
+                popupMessage('info', res.message);
+            } else if (res && res._id) {
+                // Update the user with allow and allowedRooms
+                userUpdate(res._id, { username, allow, allowedRooms })
+                    .then(() => {
+                        popupMessage('toast', 'User created successfully');
+                        toggleAddUserPanel();
+                        loadUsers();
+                        loadDashboardStats();
+                    })
+                    .catch((err) => {
+                        console.error('[API] - USER UPDATE AFTER CREATE ERROR', err);
+                        popupMessage('warning', 'User created but permissions update failed');
+                        toggleAddUserPanel();
+                        loadUsers();
+                    });
+            }
+        })
+        .catch((err) => {
+            console.error('[API] - USER CREATE ERROR', err);
+            const msg = err.response?.data?.message || err.message;
+            popupMessage('error', `Failed to create user: ${msg}`);
+        });
 }
 
 async function showDataTable() {

@@ -97,6 +97,8 @@ async function userLogin(req, res) {
                         });
                     }
                     log.debug('User found, just refresh the token');
+                    const isUserAdmin = utils.isAdmin(email, username, password);
+                    userFindOne.role = isUserAdmin ? 'admin' : 'guest';
                     userFindOne.token = token;
                     userFindOne.updatedAt = dateNow;
                     const saveUserFindOne = await userFindOne.save();
@@ -110,6 +112,13 @@ async function userLogin(req, res) {
                 }
             });
         } else {
+            if (!Object.is(userFindOne, null) && !userFindOne.active) {
+                log.debug('User found but account is deactivated');
+                return res.status(201).send({
+                    message:
+                        '⚠️ Your account has been deactivated by the administrator. <br/> Please contact the admin for assistance.',
+                });
+            }
             if (USER_REGISTRATION_MODE != true) {
                 log.error('USER REGISTRATION MODE DISABLED, user not found!');
                 return res.status(201).json({ message: 'User not found!' });
@@ -316,6 +325,19 @@ async function userConfirmation(req, res) {
     }
 }
 
+async function userGetAll(req, res) {
+    try {
+        const users = await User.find()
+            .select('_id email username role allow allowedRooms active createdAt updatedAt')
+            .sort({ createdAt: -1 })
+            .lean();
+        res.json(users);
+    } catch (error) {
+        log.error('getAllUsers', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
 async function userGet(req, res) {
     try {
         const data = await User.findById(req.params.id);
@@ -332,10 +354,27 @@ async function userUpdate(req, res) {
         const updatedData = req.body;
         const options = { returnDocument: 'after' };
         const dateNow = new Date().toISOString();
-        const encryptedPassword = await bcrypt.hash(updatedData.password, 10);
-        const isUserAdmin = utils.isAdmin(updatedData.email, updatedData.username, updatedData.password);
-        updatedData.role = isUserAdmin ? 'admin' : 'guest';
-        updatedData.password = encryptedPassword;
+
+        const isAdmin = utils.isAdmin(req.user.email, req.user.username, req.user.password);
+
+        if (!isAdmin) {
+            const targetUser = await User.findById(id).select('email').lean();
+            if (!targetUser || targetUser.email !== req.user.email) {
+                return res.status(403).json({ message: 'You can only update your own account' });
+            }
+            // Non-admin users cannot change sensitive fields
+            delete updatedData.role;
+            delete updatedData.active;
+            delete updatedData.allow;
+            delete updatedData.allowedRooms;
+        }
+
+        if (updatedData.password) {
+            const encryptedPassword = await bcrypt.hash(updatedData.password, 10);
+            const isUserAdmin = utils.isAdmin(updatedData.email, updatedData.username, updatedData.password);
+            updatedData.role = isUserAdmin ? 'admin' : 'guest';
+            updatedData.password = encryptedPassword;
+        }
         updatedData.updatedAt = dateNow;
         log.debug('Going to update user data');
         const result = await User.findByIdAndUpdate(id, updatedData, options);
@@ -349,6 +388,16 @@ async function userUpdate(req, res) {
 async function userDelete(req, res) {
     try {
         const id = req.params.id;
+
+        const isAdmin = utils.isAdmin(req.user.email, req.user.username, req.user.password);
+
+        if (!isAdmin) {
+            const targetUser = await User.findById(id).select('email').lean();
+            if (!targetUser || targetUser.email !== req.user.email) {
+                return res.status(403).json({ message: 'You can only delete your own account' });
+            }
+        }
+
         const dataUser = await User.findByIdAndDelete(id);
         if (dataUser && dataUser._id == id) {
             const deleteRooms = await Room.deleteMany({ userId: dataUser._id });
@@ -385,6 +434,7 @@ module.exports = {
     userRoomsAllowed,
     userIsRoomAllowed,
     userConfirmation,
+    userGetAll,
     userGet,
     userUpdate,
     userDelete,

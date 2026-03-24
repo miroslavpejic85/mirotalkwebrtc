@@ -286,14 +286,6 @@ nav.close ~ .dashboard .top {
     color: var(--color-hover);
 }
 
-.dashboard .top .search-box {
-    position: relative;
-    height: 45px;
-    width: 100%;
-    margin: 0px 30px 0px 30px; /* top right bottom left */
-    display: block;
-}
-
 .dashboard #myProfile {
     width: 40px;
     border-radius: 50%;
@@ -341,30 +333,6 @@ nav.close ~ .dashboard .top {
     font-size: 18px;
 }
 
-.top .search-box input {
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    padding: 0 25px 0 50px;
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    background-color: var(--panel-color);
-    color: var(--text-color);
-    font-size: 15px;
-    font-weight: 400;
-    outline: none;
-}
-
-.top .search-box i {
-    position: absolute;
-    z-index: 10;
-    left: 15px;
-    top: 50%;
-    color: var(--black-light-color);
-    font-size: 22px;
-    transform: translateY(-50%);
-}
-
 .top img {
     width: 40px;
     border-radius: 50%;
@@ -402,7 +370,7 @@ iframe {
     align-items: center;
 }
 
-.dash-content .title i:not(.custom-button i) {
+.dash-content .title i:not(.custom-button i):not(.users-search-box i):not(.rooms-search-box i) {
     position: relative;
     height: 35px;
     width: 35px;
@@ -424,6 +392,8 @@ iframe {
 
 /* Dashboard Stats */
 .stats-section {
+    display: flex;
+    flex-direction: column;
     margin-bottom: 25px;
 }
 
@@ -1509,12 +1479,45 @@ body.dark .dash-content .boxes .box:hover {
     transition: var(--tran-05);
 }
 
-#addRoomDiv {
-    z-index: 10;
+#roomsBtnDiv {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+}
+
+.rooms-search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.rooms-search-box i {
     position: absolute;
-    float: right;
-    right: 15px;
+    left: 10px;
+    font-size: 16px;
+    color: var(--text-color);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+#myInput {
+    height: 36px;
+    padding: 0 12px 0 32px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--panel-color);
+    color: var(--text-color);
+    font-size: 14px;
+    outline: none;
+    min-width: 200px;
+}
+
+.rooms-btn-group {
+    display: flex;
+    align-items: center;
     gap: 10px;
 }
 
@@ -1916,6 +1919,13 @@ tr.room-today {
     border-color: var(--danger-color);
 }
 
+#navUsers,
+#emptyState,
+#dsUsers,
+#usersEmptyState {
+    display: none;
+}
+
 /* Empty state */
 .empty-state {
     display: flex;
@@ -2082,4 +2092,252 @@ td .action-separator {
 .flatpickr-calendar.dark .flatpickr-months .flatpickr-prev-month svg,
 .flatpickr-calendar.dark .flatpickr-months .flatpickr-next-month svg {
     fill: var(--text-color);
+}
+
+/* ==================== Users Management ==================== */
+
+.dsUsers {
+    overflow-x: auto;
+}
+
+#usersBtnDiv {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+}
+
+.users-search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.users-search-box i {
+    position: absolute;
+    left: 10px;
+    font-size: 16px;
+    color: var(--text-color);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+#usersSearchInput {
+    height: 36px;
+    padding: 0 12px 0 32px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--panel-color);
+    color: var(--text-color);
+    font-size: 14px;
+    outline: none;
+    min-width: 200px;
+}
+
+.users-btn-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#usersTable {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--panel-color);
+    color: var(--text-color);
+    overflow: hidden;
+}
+
+#usersTable th,
+#usersTable td {
+    padding: 8px 10px;
+    border: 0.1px solid var(--border-color);
+    text-align: left;
+    font-size: 1.2rem;
+    word-wrap: break-word;
+}
+
+#usersTable th {
+    background-color: var(--box1-color);
+    color: var(--white-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 1.1rem;
+}
+
+#usersTable tr:nth-child(even) {
+    background-color: var(--panel-light-color);
+}
+
+#usersTable tr:hover {
+    background-color: var(--hover-color);
+    cursor: default;
+    transition: background-color 0.3s ease;
+}
+
+#usersTable td input,
+#usersTable td select {
+    width: 100%;
+    padding: 4px 6px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    background-color: transparent;
+    color: var(--text-color);
+    color-scheme: var(--input-color-schema);
+    font-size: 1.2rem;
+    outline: none;
+}
+
+#usersTable td select[multiple] {
+    height: auto;
+    min-height: 28px;
+    padding: 2px;
+}
+
+#usersTable td select[multiple] option {
+    padding: 2px 6px;
+    font-size: 1.1rem;
+}
+
+.svc-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+}
+
+.svc-chip {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    background: transparent;
+    transition: all 0.15s ease;
+    line-height: 1.4;
+}
+
+.svc-chip:hover {
+    border-color: var(--primary-color);
+}
+
+.svc-chip.selected {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+
+#usersTable td .user-active-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+#usersTable td .user-active-badge input[type='checkbox'] {
+    display: none;
+}
+
+#usersTable td .user-active-badge.active {
+    background-color: rgba(76, 175, 80, 0.15);
+    color: #4caf50;
+}
+
+#usersTable td .user-active-badge.inactive {
+    background-color: rgba(244, 67, 54, 0.15);
+    color: #f44336;
+}
+
+#usersTable td .user-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+#usersTable td .user-actions i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: var(--text-color);
+    transition: color 0.2s ease;
+    vertical-align: middle;
+}
+
+#usersTable td .user-actions i:hover {
+    color: var(--accent-color);
+}
+
+.user-services-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.user-services-checkboxes label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.user-services-checkboxes input[type='checkbox'] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+@media (max-width: 560px) {
+    #usersTable {
+        display: block;
+        width: 100%;
+        border: none;
+    }
+
+    #usersTable tr {
+        display: block;
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    #usersTable th,
+    #usersTable td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        text-align: left;
+    }
+
+    #usersTable th {
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+        padding: 8px 12px;
+        background-color: var(--box1-color);
+        color: var(--white-color);
+    }
+
+    #usersTable td {
+        width: 93vw;
+        font-size: 1.6rem;
+        padding: 10px 12px;
+        color: var(--text-color);
+        position: relative;
+        border-top: 0.1px solid var(--border-color);
+    }
 }

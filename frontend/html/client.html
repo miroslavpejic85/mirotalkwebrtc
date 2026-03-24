@@ -77,6 +77,12 @@
                         </a>
                     </li>
                     <li>
+                        <a id="navUsers" href="javascript:void(0)">
+                            <i class="uil uil-users-alt"></i>
+                            <span class="link-name">Users</span>
+                        </a>
+                    </li>
+                    <li>
                         <a id="navP2P" href="javascript:void(0)">
                             <i class="uil uil-rocket"></i>
                             <span id="navP2PLabel" class="link-name">MiroTalk P2P</span>
@@ -128,11 +134,6 @@
         <section class="dashboard">
             <div class="top">
                 <i class="uil uil-bars sidebar-toggle"></i>
-
-                <div id="search" class="search-box">
-                    <i class="uil uil-search"></i>
-                    <input id="myInput" type="text" placeholder="Search..." onkeyup="searchRows()" />
-                </div>
 
                 <div class="top-right-actions">
                     <a id="myProfile" href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" target="_blank">
@@ -350,24 +351,30 @@
 
                 <div id="dsRooms" class="dsRooms">
                     <div class="title">
-                        <div id="addRoomDiv">
-                            <button id="open-add-btn" class="custom-button">
-                                <i class="uil uil-plus-circle"></i> Add New Room
-                            </button>
-                            <button
-                                id="refresh-page-btn"
-                                class="custom-button custom-button-icon"
-                                aria-label="Refresh rooms"
-                            >
-                                <i class="uil uil-sync"></i>
-                            </button>
-                            <button
-                                id="del-all-btn"
-                                class="custom-button custom-button-icon"
-                                aria-label="Delete all rooms"
-                            >
-                                <i class="uil uil-trash-alt"></i>
-                            </button>
+                        <div id="roomsBtnDiv">
+                            <div class="rooms-search-box">
+                                <i class="uil uil-search"></i>
+                                <input id="myInput" type="text" placeholder="Search rooms..." />
+                            </div>
+                            <div class="rooms-btn-group">
+                                <button id="open-add-btn" class="custom-button">
+                                    <i class="uil uil-plus-circle"></i> Add New Room
+                                </button>
+                                <button
+                                    id="refresh-page-btn"
+                                    class="custom-button custom-button-icon"
+                                    aria-label="Refresh rooms"
+                                >
+                                    <i class="uil uil-sync"></i>
+                                </button>
+                                <button
+                                    id="del-all-btn"
+                                    class="custom-button custom-button-icon"
+                                    aria-label="Delete all rooms"
+                                >
+                                    <i class="uil uil-trash-alt"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -378,7 +385,7 @@
                         <button class="filter-chip" data-filter="past">Past</button>
                     </div>
 
-                    <div id="emptyState" class="empty-state" style="display: none">
+                    <div id="emptyState" class="empty-state">
                         <i class="uil uil-calendar-alt"></i>
                         <h3>No rooms scheduled</h3>
                         <p>Click "Add New Room" to create your first room.</p>
@@ -501,6 +508,137 @@
                     </div>
 
                     <button id="add-row-btn" class="addrow-submit-btn"><i class="uil uil-plus"></i> Create Room</button>
+                </form>
+
+                <div id="dsUsers" class="dsUsers">
+                    <div class="title">
+                        <div id="usersBtnDiv">
+                            <div class="users-search-box">
+                                <i class="uil uil-search"></i>
+                                <input id="usersSearchInput" type="text" placeholder="Search users..." />
+                            </div>
+                            <div class="users-btn-group">
+                                <button id="open-add-user-btn" class="custom-button">
+                                    <i class="uil uil-user-plus"></i> Add New User
+                                </button>
+                                <button
+                                    id="refresh-users-btn"
+                                    class="custom-button custom-button-icon"
+                                    aria-label="Refresh users"
+                                >
+                                    <i class="uil uil-sync"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="usersEmptyState" class="empty-state">
+                        <i class="uil uil-users-alt"></i>
+                        <h3>No users found</h3>
+                        <p>Click "Add New User" to create a new user.</p>
+                    </div>
+
+                    <table id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Services</th>
+                                <th>Rooms</th>
+                                <th>Active</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+
+                <form id="addUserDiv" class="addRowDiv hidden" onsubmit="return false;">
+                    <div class="addrow-header">
+                        <h2 class="addrow-title"><i class="uil uil-user-plus"></i> New User</h2>
+                        <i id="add-user-close-btn" class="uil uil-times addrow-close"></i>
+                    </div>
+
+                    <div class="addrow-section">
+                        <span class="addrow-section-label">Credentials</span>
+                        <div class="addrow-field">
+                            <div class="addrow-field-icon"><i class="uil uil-user"></i></div>
+                            <div class="addrow-field-content">
+                                <span class="addrow-field-label">Username</span>
+                                <input
+                                    id="add-user-username"
+                                    type="text"
+                                    placeholder="e.g. john_doe"
+                                    name="username"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div class="addrow-field">
+                            <div class="addrow-field-icon"><i class="uil uil-envelope"></i></div>
+                            <div class="addrow-field-content">
+                                <span class="addrow-field-label">Email</span>
+                                <input
+                                    id="add-user-email"
+                                    type="email"
+                                    placeholder="e.g. john@email.com"
+                                    name="email"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div class="addrow-field">
+                            <div class="addrow-field-icon"><i class="uil uil-lock"></i></div>
+                            <div class="addrow-field-content">
+                                <span class="addrow-field-label">Password</span>
+                                <input
+                                    id="add-user-password"
+                                    type="password"
+                                    placeholder="Enter password"
+                                    name="password"
+                                    required
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="addrow-section">
+                        <span class="addrow-section-label">Permissions</span>
+                        <div class="addrow-field">
+                            <div class="addrow-field-icon"><i class="uil uil-apps"></i></div>
+                            <div class="addrow-field-content">
+                                <span class="addrow-field-label">Services Allowed</span>
+                                <div class="user-services-checkboxes">
+                                    <label
+                                        ><input type="checkbox" id="add-user-svc-all" value="ALL" checked /> ALL</label
+                                    >
+                                    <label><input type="checkbox" id="add-user-svc-p2p" value="P2P" /> P2P</label>
+                                    <label><input type="checkbox" id="add-user-svc-sfu" value="SFU" /> SFU</label>
+                                    <label><input type="checkbox" id="add-user-svc-c2c" value="C2C" /> C2C</label>
+                                    <label><input type="checkbox" id="add-user-svc-bro" value="BRO" /> BRO</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="addrow-field">
+                            <div class="addrow-field-icon"><i class="uil uil-lock-open-alt"></i></div>
+                            <div class="addrow-field-content">
+                                <span class="addrow-field-label">Allowed Rooms</span>
+                                <input
+                                    id="add-user-rooms"
+                                    type="text"
+                                    placeholder="* for all, or comma-separated room names"
+                                    name="rooms"
+                                    value="*"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="add-user-btn" class="addrow-submit-btn">
+                        <i class="uil uil-user-plus"></i> Create User
+                    </button>
                 </form>
 
                 <div id="accountDiv" class="accountDiv hidden">

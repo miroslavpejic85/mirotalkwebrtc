@@ -35,6 +35,14 @@ function userConfirmation(token) {
     }).then((response) => response.data);
 }
 
+function userGetAll() {
+    return axios({
+        method: 'GET',
+        url: `${apiPath}/user/all`,
+        headers: headers,
+    }).then((response) => response.data);
+}
+
 function userGet(id) {
     return axios({
         method: 'GET',
