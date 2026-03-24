@@ -504,7 +504,14 @@
                                 </div>
                             </div>
                         </div>
-                        <select class="addrow-select" id="sel-room"></select>
+                        <div id="sel-room-dropdown" class="custom-dropdown hidden" data-dropdown-id="sel-room">
+                            <div class="custom-dropdown-trigger" tabindex="0">
+                                <span class="custom-dropdown-value"></span>
+                                <i class="uil uil-angle-down custom-dropdown-arrow"></i>
+                            </div>
+                            <div class="custom-dropdown-options"></div>
+                            <input type="hidden" id="sel-room" value="" />
+                        </div>
                     </div>
 
                     <button id="add-row-btn" class="addrow-submit-btn"><i class="uil uil-plus"></i> Create Room</button>

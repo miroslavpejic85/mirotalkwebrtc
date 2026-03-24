@@ -719,7 +719,6 @@ body.dark .dash-content .boxes .box:hover {
     border-collapse: collapse;
     background-color: var(--panel-color);
     color: var(--text-color);
-    overflow: hidden;
 }
 
 #myTable th,
@@ -1099,22 +1098,6 @@ body.dark .dash-content .boxes .box:hover {
     outline: none !important;
 }
 
-.addrow-select {
-    margin-top: 4px;
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    background: var(--body-color);
-    color: var(--text-color);
-    color-scheme: var(--input-color-schema);
-    font-size: 15px;
-    line-height: 1.4;
-    font-family: 'Montserrat';
-    outline: none;
-    cursor: pointer;
-}
-
 /* Custom dropdown */
 .custom-dropdown {
     position: relative;
@@ -1153,15 +1136,13 @@ body.dark .dash-content .boxes .box:hover {
 
 .custom-dropdown-options {
     display: none;
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    right: 0;
+    position: fixed;
     border-radius: 6px;
     border: 1px solid var(--border-color);
     background: var(--body-color);
-    z-index: 100;
-    overflow: hidden;
+    z-index: 9999;
+    max-height: 200px;
+    overflow-y: auto;
 }
 
 .custom-dropdown.open .custom-dropdown-options {
@@ -1184,6 +1165,11 @@ body.dark .dash-content .boxes .box:hover {
 .custom-dropdown-option.selected {
     background: var(--primary-color);
     color: #fff;
+}
+
+.custom-dropdown.cd-disabled {
+    opacity: 0.6;
+    pointer-events: none;
 }
 
 .addrow-field-row {
@@ -1521,31 +1507,24 @@ body.dark .dash-content .boxes .box:hover {
     gap: 10px;
 }
 
-.add-row-select-options {
-    margin-top: 10px;
-    width: 100%;
-    padding: 12px;
-    border-radius: 5px;
-    border: 0.1px solid var(--border-color);
-    background: var(--body-color);
-    color: var(--text-color);
-    color-scheme: var(--input-color-schema);
-    font-size: 16px;
-    outline: none;
-    cursor: pointer;
+td {
+    position: relative;
+    overflow: visible;
 }
 
-.select-options {
-    width: 100%;
-    padding: 10px;
-    border-radius: 5px;
-    border: 0.1px solid var(--border-color);
-    background: var(--body-color);
-    color: var(--text-color);
-    color-scheme: var(--input-color-schema);
-    font-size: 16px;
-    outline: none;
-    cursor: pointer;
+td .custom-dropdown {
+    margin-top: 0;
+    min-width: 80px;
+}
+
+td .custom-dropdown-trigger {
+    padding: 6px 10px;
+    font-size: 14px;
+}
+
+td .custom-dropdown-option {
+    padding: 6px 10px;
+    font-size: 14px;
 }
 
 .data .join {
@@ -1900,7 +1879,7 @@ tr.room-past td {
     opacity: 0.5;
 }
 tr.room-past td input,
-tr.room-past td select {
+tr.room-past td .custom-dropdown {
     opacity: 0.7;
 }
 tr.room-today {
@@ -2147,7 +2126,6 @@ td .action-separator {
     border-collapse: collapse;
     background-color: var(--panel-color);
     color: var(--text-color);
-    overflow: hidden;
 }
 
 #usersTable th,
@@ -2177,8 +2155,7 @@ td .action-separator {
     transition: background-color 0.3s ease;
 }
 
-#usersTable td input,
-#usersTable td select {
+#usersTable td input {
     width: 100%;
     padding: 4px 6px;
     border-radius: 5px;
@@ -2190,15 +2167,19 @@ td .action-separator {
     outline: none;
 }
 
-#usersTable td select[multiple] {
-    height: auto;
-    min-height: 28px;
-    padding: 2px;
+#usersTable td .custom-dropdown {
+    margin-top: 0;
 }
 
-#usersTable td select[multiple] option {
-    padding: 2px 6px;
-    font-size: 1.1rem;
+#usersTable td .custom-dropdown-trigger {
+    padding: 4px 6px;
+    font-size: 1.2rem;
+    background-color: transparent;
+}
+
+#usersTable td .custom-dropdown-option {
+    padding: 6px 10px;
+    font-size: 1.2rem;
 }
 
 .svc-chips {

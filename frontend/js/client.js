@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.11
+ * @version 1.3.12
  */
 
 const userAgent = navigator.userAgent;
@@ -144,6 +144,7 @@ const addTime = document.getElementById('add-time');
 const addRoom = document.getElementById('add-room');
 const genRoom = document.getElementById('gen-room');
 const selRoom = document.getElementById('sel-room');
+const selRoomDropdown = document.getElementById('sel-room-dropdown');
 const addRowBtn = document.getElementById('add-row-btn');
 
 const refreshBtn = document.getElementById('refresh-page-btn');
@@ -203,6 +204,7 @@ $('#myTable').css('width', '100%');
 dataTable.on('draw', function () {
     initVisibleRowsFlatpickr();
     initVisibleRowsToolTips();
+    initCustomDropdowns(myTable);
 });
 
 const usersDataTable = $('#usersTable').DataTable({
@@ -241,6 +243,10 @@ const usersDataTable = $('#usersTable').DataTable({
     ],
 });
 $('#usersTable').css('width', '100%');
+
+usersDataTable.on('draw', function () {
+    initCustomDropdowns(document.getElementById('usersTable'));
+});
 
 const getMode = window.localStorage.mode || 'dark';
 const getStatus = window.localStorage.status;
@@ -346,14 +352,23 @@ function handleUserRoles() {
                 user.allowedRoomsALL = allowedRooms.includes('*');
                 elemDisplay(addRoom, user.allowedRoomsALL);
                 elemDisplay(genRoom, user.allowedRoomsALL);
-                elemDisplay(selRoom, !user.allowedRoomsALL);
+                elemDisplay(selRoomDropdown, !user.allowedRoomsALL);
                 if (!user.allowedRoomsALL) {
-                    user.allowedRooms.forEach((room) => {
-                        const option = document.createElement('option');
-                        option.value = room;
-                        option.textContent = room;
-                        selRoom.appendChild(option);
+                    const optionsContainer = selRoomDropdown.querySelector('.custom-dropdown-options');
+                    optionsContainer.innerHTML = '';
+                    user.allowedRooms.forEach((room, i) => {
+                        const div = document.createElement('div');
+                        div.className = 'custom-dropdown-option' + (i === 0 ? ' selected' : '');
+                        div.dataset.value = room;
+                        div.textContent = room;
+                        optionsContainer.appendChild(div);
                     });
+                    if (user.allowedRooms.length > 0) {
+                        selRoom.value = user.allowedRooms[0];
+                        selRoomDropdown.querySelector('.custom-dropdown-value').textContent = user.allowedRooms[0];
+                    }
+                    selRoomDropdown.classList.remove('cd-ready');
+                    initCustomDropdowns(selRoomDropdown.parentElement);
                 }
                 if (role == 'admin') {
                     elemDisplay(navUsers, true);
@@ -453,26 +468,74 @@ sidebarToggle.addEventListener('click', () => {
     window.localStorage.status = sidebar.classList.contains('close') ? 'close' : 'open';
 });
 
-// Custom dropdown for service select
-addTypeDropdown.querySelector('.custom-dropdown-trigger').addEventListener('click', () => {
-    addTypeDropdown.classList.toggle('open');
-});
+// Custom dropdown helpers
+function buildCustomDropdownHTML(id, options, selectedValue, translate, disabled) {
+    const noTranslate = translate === false ? ' translate="no"' : '';
+    const disabledClass = disabled ? ' cd-disabled' : '';
+    const selectedLabel = (options.find((o) => o.value === selectedValue) || options[0] || { label: '' }).label;
+    let optionsHTML = '';
+    options.forEach((o) => {
+        const sel = o.value === selectedValue ? ' selected' : '';
+        optionsHTML += `<div class="custom-dropdown-option${sel}" data-value="${o.value}"${noTranslate}>${o.label}</div>`;
+    });
+    return (
+        `<div class="custom-dropdown${disabledClass}" data-dropdown-id="${id}">` +
+        `<div class="custom-dropdown-trigger" tabindex="0">` +
+        `<span class="custom-dropdown-value"${noTranslate}>${selectedLabel}</span>` +
+        `<i class="uil uil-angle-down custom-dropdown-arrow"></i>` +
+        `</div>` +
+        `<div class="custom-dropdown-options">${optionsHTML}</div>` +
+        `<input type="hidden" id="${id}" value="${selectedValue}" />` +
+        `</div>`
+    );
+}
 
-addTypeDropdown.querySelectorAll('.custom-dropdown-option').forEach((opt) => {
-    opt.addEventListener('click', () => {
-        addTypeDropdown.querySelectorAll('.custom-dropdown-option').forEach((o) => o.classList.remove('selected'));
-        opt.classList.add('selected');
-        addType.value = opt.dataset.value;
-        addTypeDropdown.querySelector('.custom-dropdown-value').textContent = opt.textContent;
-        addTypeDropdown.classList.remove('open');
+function positionDropdownOptions(dd) {
+    const trigger = dd.querySelector('.custom-dropdown-trigger');
+    const opts = dd.querySelector('.custom-dropdown-options');
+    const rect = trigger.getBoundingClientRect();
+    opts.style.left = rect.left + 'px';
+    opts.style.width = rect.width + 'px';
+    const spaceBelow = window.innerHeight - rect.bottom;
+    if (spaceBelow < 210) {
+        opts.style.top = '';
+        opts.style.bottom = window.innerHeight - rect.top + 4 + 'px';
+    } else {
+        opts.style.top = rect.bottom + 4 + 'px';
+        opts.style.bottom = '';
+    }
+}
+
+function initCustomDropdowns(container) {
+    const root = container || document;
+    root.querySelectorAll('.custom-dropdown:not(.cd-ready)').forEach((dd) => {
+        dd.classList.add('cd-ready');
+        if (dd.classList.contains('cd-disabled')) return;
+        const trigger = dd.querySelector('.custom-dropdown-trigger');
+        trigger.addEventListener('click', () => {
+            dd.classList.toggle('open');
+            if (dd.classList.contains('open')) positionDropdownOptions(dd);
+        });
+        dd.querySelectorAll('.custom-dropdown-option').forEach((opt) => {
+            opt.addEventListener('click', () => {
+                dd.querySelectorAll('.custom-dropdown-option').forEach((o) => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                const hidden = dd.querySelector('input[type="hidden"]');
+                if (hidden) hidden.value = opt.dataset.value;
+                dd.querySelector('.custom-dropdown-value').textContent = opt.textContent;
+                dd.classList.remove('open');
+            });
+        });
+    });
+}
+
+document.addEventListener('click', (e) => {
+    document.querySelectorAll('.custom-dropdown.open').forEach((dd) => {
+        if (!dd.contains(e.target)) dd.classList.remove('open');
     });
 });
 
-document.addEventListener('click', (e) => {
-    if (!addTypeDropdown.contains(e.target)) {
-        addTypeDropdown.classList.remove('open');
-    }
-});
+initCustomDropdowns();
 
 navOverview.addEventListener('click', () => {
     navShow([dsOverview], navOverview);
@@ -689,6 +752,7 @@ function loadUsers() {
                 usersDataTable.columns.adjust().draw();
                 toggleUsersList(true);
                 initUsersToolTips(users);
+                initCustomDropdowns(document.getElementById('usersTable'));
             } else {
                 usersDataTable.columns.adjust().draw();
                 toggleUsersList(false);
@@ -721,18 +785,19 @@ function getUserRow(u) {
         : `<i id="udel_${u._id}" onclick="deleteUser('${u._id}')" class="uil uil-times"></i>`;
 
     const services = ['ALL', 'P2P', 'SFU', 'C2C', 'BRO'];
-    const allowOptions = services
-        .map((s) => `<option value="${s}" ${userAllow.includes(s) ? 'selected' : ''}>${s}</option>`)
-        .join('');
+
+    const roleOptions = [
+        { value: 'admin', label: 'admin' },
+        { value: 'guest', label: 'guest' },
+    ];
+    const allowDropdownOptions = services.map((s) => ({ value: s, label: s }));
+    const selectedAllow = userAllow[0] || 'ALL';
 
     return [
         `<input id="uname_${u._id}" type="text" value="${escapeHtml(u.username)}" readonly />`,
         `<input id="uemail_${u._id}" type="email" value="${escapeHtml(u.email)}" readonly />`,
-        `<select id="urole_${u._id}" ${selfDisabled}>
-            <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin</option>
-            <option value="guest" ${u.role === 'guest' ? 'selected' : ''}>guest</option>
-        </select>`,
-        `<select id="uallow_${u._id}">${allowOptions}</select>`,
+        buildCustomDropdownHTML('urole_' + u._id, roleOptions, u.role, true, isSelf),
+        buildCustomDropdownHTML('uallow_' + u._id, allowDropdownOptions, selectedAllow),
         `<input id="urooms_${u._id}" type="text" value="${escapeHtml(roomsStr)}" />`,
         `<label class="user-active-badge ${u.active ? 'active' : 'inactive'}">
             <input id="uactive_${u._id}" type="checkbox" ${activeChecked} ${selfDisabled} onchange="this.parentElement.className='user-active-badge '+(this.checked?'active':'inactive');this.parentElement.querySelector('span').textContent=this.checked?'Active':'Inactive'" />
@@ -972,16 +1037,6 @@ function getRow(obj) {
     )
         return;
 
-    const isP2P = obj.type == 'P2P' ? 'selected' : '';
-    const isSFU = obj.type == 'SFU' ? 'selected' : '';
-    const isC2C = obj.type == 'C2C' ? 'selected' : '';
-    const isBRO = obj.type == 'BRO' ? 'selected' : '';
-
-    const optionP2P = config.MiroTalk.P2P.Visible ? `<option translate="no" value="P2P" ${isP2P}>P2P</option>` : '';
-    const optionSFU = config.MiroTalk.SFU.Visible ? `<option translate="no" value="P2P" ${isSFU}>SFU</option>` : '';
-    const optionC2C = config.MiroTalk.C2C.Visible ? `<option translate="no" value="C2C" ${isC2C}>C2C</option>` : '';
-    const optionBRO = config.MiroTalk.BRO.Visible ? `<option translate="no" value="BRO" ${isBRO}>BRO</option>` : '';
-
     const setRandomRoomIcon =
         config.BUTTONS.setRandomRoom && user.allowedRoomsALL
             ? `<i id="${obj._id}_randomRoom" onclick="setRandomRoom('${obj._id}')" class="uil uil-redo random"></i>`
@@ -1020,28 +1075,22 @@ function getRow(obj) {
         ? `<i id="${obj._id}_delete" onclick="delRow('${obj._id}')" class="uil uil-times"></i>`
         : '';
 
-    let rooms = `<td><input id="${obj._id}_room" type="text" placeholder="Room name" name="room" value="${obj.room}"/></td>`;
+    let rooms = `<input id="${obj._id}_room" type="text" placeholder="Room name" name="room" value="${obj.room}"/>`;
 
     if (!user.allowedRoomsALL) {
-        rooms = `<select translate="no" id="${obj._id}_room" class="select-options">`;
-
-        user.allowedRooms.forEach((room) => {
-            const selected = obj.room === room ? 'selected' : '';
-            rooms += `<option translate="no" value="${room}" ${selected}>${room}</option>`;
-        });
-
-        rooms += `</select>`;
+        const roomOptions = user.allowedRooms.map((room) => ({ value: room, label: room }));
+        rooms = buildCustomDropdownHTML(obj._id + '_room', roomOptions, obj.room, false);
     }
 
+    const typeOptions = [
+        config.MiroTalk.P2P.Visible && { value: 'P2P', label: 'P2P' },
+        config.MiroTalk.SFU.Visible && { value: 'SFU', label: 'SFU' },
+        config.MiroTalk.C2C.Visible && { value: 'C2C', label: 'C2C' },
+        config.MiroTalk.BRO.Visible && { value: 'BRO', label: 'BRO' },
+    ].filter(Boolean);
+
     return [
-        `<td>
-            <select id="${obj._id}_type" class="select-options">    
-                ${optionP2P}
-                ${optionSFU}
-                ${optionC2C}
-                ${optionBRO}
-            </select>
-        </td>`,
+        `<td>${buildCustomDropdownHTML(obj._id + '_type', typeOptions, obj.type, false)}</td>`,
         `<td><input id="${obj._id}_tag" type="text" name="tag" placeholder="Tag" value="${obj.tag}"/></td>`,
         `<td><input id="${obj._id}_email" type="email" name="email" placeholder="Email address" value="${obj.email}"/></td>`,
         `<td><input id="${obj._id}_phone" type="text" name="text" placeholder="Phone number" value="${obj.phone}"/></td>`,
@@ -1522,10 +1571,9 @@ function getRoomURL(data, bro = true) {
 }
 
 function getRowValues(id) {
-    const select_type = document.getElementById(id + '_type');
     return {
         userId: userId,
-        type: select_type.options[select_type.selectedIndex].text,
+        type: document.getElementById(id + '_type').value,
         tag: document.getElementById(id + '_tag').value,
         email: document.getElementById(id + '_email').value.toLowerCase(),
         phone: document.getElementById(id + '_phone').value,
