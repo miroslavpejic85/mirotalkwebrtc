@@ -413,12 +413,21 @@
                             <div class="addrow-field-icon"><i class="uil uil-rocket"></i></div>
                             <div class="addrow-field-content">
                                 <span id="rowAppName" class="addrow-field-label">MiroTalk</span>
-                                <select id="add-type" class="addrow-select" required>
-                                    <option translate="no" value="P2P">P2P</option>
-                                    <option translate="no" value="SFU">SFU</option>
-                                    <option translate="no" value="C2C">C2C</option>
-                                    <option translate="no" value="BRO">BRO</option>
-                                </select>
+                                <div id="add-type-dropdown" class="custom-dropdown">
+                                    <div class="custom-dropdown-trigger" tabindex="0">
+                                        <span class="custom-dropdown-value">P2P</span>
+                                        <i class="uil uil-angle-down custom-dropdown-arrow"></i>
+                                    </div>
+                                    <div class="custom-dropdown-options">
+                                        <div class="custom-dropdown-option selected" data-value="P2P" translate="no">
+                                            P2P
+                                        </div>
+                                        <div class="custom-dropdown-option" data-value="SFU" translate="no">SFU</div>
+                                        <div class="custom-dropdown-option" data-value="C2C" translate="no">C2C</div>
+                                        <div class="custom-dropdown-option" data-value="BRO" translate="no">BRO</div>
+                                    </div>
+                                    <input type="hidden" id="add-type" value="P2P" />
+                                </div>
                             </div>
                         </div>
                     </div>

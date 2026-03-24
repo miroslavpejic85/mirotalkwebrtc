@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.03
+ * @version 1.3.04
  */
 
 const userAgent = navigator.userAgent;
@@ -134,6 +134,7 @@ const openAddBtn = document.getElementById('open-add-btn');
 const closeAddBtn = document.getElementById('add-close-btn');
 
 const addType = document.getElementById('add-type');
+const addTypeDropdown = document.getElementById('add-type-dropdown');
 const addTag = document.getElementById('add-tag');
 const addEmail = document.getElementById('add-email');
 const addPhone = document.getElementById('add-phone');
@@ -366,12 +367,19 @@ function toggleElements() {
         elemDisplay(boxesDS, false);
         elemDisplay(statsProjectsSection, false);
     }
-    for (var i = 0; i < addType.length; i++) {
-        //console.log(addType.options[i].value);
-        if (addType.options[i].value == 'P2P' && !config.MiroTalk.P2P.Visible) addType.remove(i);
-        if (addType.options[i].value == 'SFU' && !config.MiroTalk.SFU.Visible) addType.remove(i);
-        if (addType.options[i].value == 'C2C' && !config.MiroTalk.C2C.Visible) addType.remove(i);
-        if (addType.options[i].value == 'BRO' && !config.MiroTalk.BRO.Visible) addType.remove(i);
+    const dropdownOptions = addTypeDropdown.querySelectorAll('.custom-dropdown-option');
+    dropdownOptions.forEach((opt) => {
+        const val = opt.dataset.value;
+        if (val === 'P2P' && !config.MiroTalk.P2P.Visible) opt.remove();
+        else if (val === 'SFU' && !config.MiroTalk.SFU.Visible) opt.remove();
+        else if (val === 'C2C' && !config.MiroTalk.C2C.Visible) opt.remove();
+        else if (val === 'BRO' && !config.MiroTalk.BRO.Visible) opt.remove();
+    });
+    const firstOpt = addTypeDropdown.querySelector('.custom-dropdown-option');
+    if (firstOpt) {
+        firstOpt.classList.add('selected');
+        addType.value = firstOpt.dataset.value;
+        addTypeDropdown.querySelector('.custom-dropdown-value').textContent = firstOpt.textContent;
     }
 }
 
@@ -394,6 +402,27 @@ modeToggle.addEventListener('click', () => {
 sidebarToggle.addEventListener('click', () => {
     sidebar.classList.toggle('close');
     window.localStorage.status = sidebar.classList.contains('close') ? 'close' : 'open';
+});
+
+// Custom dropdown for service select
+addTypeDropdown.querySelector('.custom-dropdown-trigger').addEventListener('click', () => {
+    addTypeDropdown.classList.toggle('open');
+});
+
+addTypeDropdown.querySelectorAll('.custom-dropdown-option').forEach((opt) => {
+    opt.addEventListener('click', () => {
+        addTypeDropdown.querySelectorAll('.custom-dropdown-option').forEach((o) => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        addType.value = opt.dataset.value;
+        addTypeDropdown.querySelector('.custom-dropdown-value').textContent = opt.textContent;
+        addTypeDropdown.classList.remove('open');
+    });
+});
+
+document.addEventListener('click', (e) => {
+    if (!addTypeDropdown.contains(e.target)) {
+        addTypeDropdown.classList.remove('open');
+    }
 });
 
 navOverview.addEventListener('click', () => {
@@ -1169,7 +1198,7 @@ function getFormValues() {
         : selRoom.value.trim().replace(/\s+/g, '-');
     return {
         userId: userId,
-        type: addType.options[addType.selectedIndex].text,
+        type: addType.value,
         tag: addTag.value,
         email: addEmail.value.toLowerCase(),
         phone: addPhone.value,
