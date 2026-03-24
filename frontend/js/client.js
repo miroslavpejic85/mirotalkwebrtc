@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.00
+ * @version 1.3.01
  */
 
 const userAgent = navigator.userAgent;
@@ -1162,6 +1162,7 @@ function initFlatpickr() {
         dateFormat: 'Y-m-d',
         defaultDate: new Date().toISOString().substring(0, 10),
         allowInput: true,
+        disableMobile: true,
         onReady,
     });
 
@@ -1172,6 +1173,7 @@ function initFlatpickr() {
         time_24hr: true,
         defaultDate: new Date().toISOString().substring(11, 16),
         allowInput: true,
+        disableMobile: true,
         onReady,
     });
 }
@@ -1184,6 +1186,7 @@ function initRowFlatpickr(rowId) {
         flatpickr(dateEl, {
             dateFormat: 'Y-m-d',
             allowInput: true,
+            disableMobile: true,
             onReady,
         });
     }
@@ -1194,6 +1197,7 @@ function initRowFlatpickr(rowId) {
             dateFormat: 'H:i',
             time_24hr: true,
             allowInput: true,
+            disableMobile: true,
             onReady,
         });
     }
@@ -1204,7 +1208,7 @@ function initVisibleRowsFlatpickr() {
     document.querySelectorAll('#myTableBody .flatpickr-date, #myTableBody .flatpickr-time').forEach((el) => {
         if (el._flatpickr) return;
         if (el.classList.contains('flatpickr-date')) {
-            flatpickr(el, { dateFormat: 'Y-m-d', allowInput: true, onReady });
+            flatpickr(el, { dateFormat: 'Y-m-d', allowInput: true, disableMobile: true, onReady });
         } else {
             flatpickr(el, {
                 enableTime: true,
@@ -1212,6 +1216,7 @@ function initVisibleRowsFlatpickr() {
                 dateFormat: 'H:i',
                 time_24hr: true,
                 allowInput: true,
+                disableMobile: true,
                 onReady,
             });
         }
