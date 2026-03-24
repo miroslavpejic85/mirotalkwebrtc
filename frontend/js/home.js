@@ -224,10 +224,10 @@ document.querySelectorAll('.password-toggle').forEach((btn) => {
         const icon = this.querySelector('i');
         if (input.type === 'password') {
             input.type = 'text';
-            icon.classList.replace('fa-eye', 'fa-eye-slash');
+            icon.classList.replace('uil-eye', 'uil-eye-slash');
         } else {
             input.type = 'password';
-            icon.classList.replace('fa-eye-slash', 'fa-eye');
+            icon.classList.replace('uil-eye-slash', 'uil-eye');
         }
     });
 });

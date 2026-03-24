@@ -1896,6 +1896,15 @@ td .action-group {
     align-items: center;
     gap: 4px;
 }
+td .action-group i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    font-size: 1.4rem;
+    vertical-align: middle;
+}
 td .action-separator {
     width: 1px;
     height: 18px;

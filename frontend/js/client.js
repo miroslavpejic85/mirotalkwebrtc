@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.01
+ * @version 1.3.02
  */
 
 const userAgent = navigator.userAgent;
@@ -613,40 +613,40 @@ function getRow(obj) {
 
     const setRandomRoomIcon =
         config.BUTTONS.setRandomRoom && user.allowedRoomsALL
-            ? `<i id="${obj._id}_randomRoom" onclick="setRandomRoom('${obj._id}')" class="fas fa-redo random"></i>`
+            ? `<i id="${obj._id}_randomRoom" onclick="setRandomRoom('${obj._id}')" class="uil uil-redo random"></i>`
             : '';
 
     const copyRoomIcon = config.BUTTONS.copyRoom
-        ? `<i id="${obj._id}_copy" onclick="copyRoom('${obj._id}')" class='fas fa-copy'></i>`
+        ? `<i id="${obj._id}_copy" onclick="copyRoom('${obj._id}')" class='uil uil-copy'></i>`
         : '';
 
     const shareRoomIcon =
         config.BUTTONS.shareRoom && isMobile
-            ? `<i id="${obj._id}_share" onclick="shareRoom('${obj._id}')" class="fas fa-share-alt"></i>`
+            ? `<i id="${obj._id}_share" onclick="shareRoom('${obj._id}')" class="uil uil-share-alt"></i>`
             : '';
 
     const sendEmailIcon = config.BUTTONS.sendEmail
-        ? `<i id="${obj._id}_send_email" onclick="sendEmail('${obj._id}')" class="fas fa-envelope-open-text"></i>`
+        ? `<i id="${obj._id}_send_email" onclick="sendEmail('${obj._id}')" class="uil uil-envelope-open"></i>`
         : '';
 
     const sendSmSInvitationIcon = config.BUTTONS.sendSmSInvitation
-        ? `<i id="${obj._id}_send_sms" onclick="sendSmSInvitation('${obj._id}')" class="fas fa-sms"></i>`
+        ? `<i id="${obj._id}_send_sms" onclick="sendSmSInvitation('${obj._id}')" class="uil uil-comment-alt-message"></i>`
         : '';
 
     const joinInternalIcon = config.BUTTONS.joinInternal
-        ? `<i id="${obj._id}_joinInternal" onclick="joinRoom('${obj._id}')" class="fas fa-home"></i>`
+        ? `<i id="${obj._id}_joinInternal" onclick="joinRoom('${obj._id}')" class="uil uil-estate"></i>`
         : '';
 
     const joinExternalIcon = config.BUTTONS.joinExternal
-        ? `<i id="${obj._id}_joinExternal" onclick="joinRoom('${obj._id}', true)" class="fas fa-external-link-alt"></i>`
+        ? `<i id="${obj._id}_joinExternal" onclick="joinRoom('${obj._id}', true)" class="uil uil-external-link-alt"></i>`
         : '';
 
     const updateRowIcon = config.BUTTONS.updateRow
-        ? `<i id="${obj._id}_save" onclick="updateRow('${obj._id}')" class="fas fa-save"></i>`
+        ? `<i id="${obj._id}_save" onclick="updateRow('${obj._id}')" class="uil uil-save"></i>`
         : '';
 
     const delRowIcon = config.BUTTONS.delRow
-        ? `<i id="${obj._id}_delete" onclick="delRow('${obj._id}')" class="fas fa-times"></i>`
+        ? `<i id="${obj._id}_delete" onclick="delRow('${obj._id}')" class="uil uil-times"></i>`
         : '';
 
     let rooms = `<td><input id="${obj._id}_room" type="text" placeholder="Room name" name="room" value="${obj.room}"/></td>`;
@@ -919,14 +919,30 @@ function delRow(id) {
     });
 }
 
+function getActiveFilter() {
+    const active = document.querySelector('.filter-chip.active');
+    return active ? active.dataset.filter : 'all';
+}
+
+function getFilterLabel() {
+    const filter = getActiveFilter();
+    if (filter === 'today') return "today's";
+    if (filter === 'upcoming') return 'upcoming';
+    if (filter === 'past') return 'past';
+    return 'all';
+}
+
 function delAllRows() {
+    const filter = getActiveFilter();
+    const label = getFilterLabel();
+
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
         position: 'center',
         icon: 'warning',
-        title: 'Delete all rooms',
-        text: 'Are you sure you want to delete all rooms?',
+        title: `Delete ${label} rooms`,
+        text: `Are you sure you want to delete ${label} rooms?`,
         showDenyButton: true,
         confirmButtonText: `Yes`,
         denyButtonText: `No`,
@@ -934,16 +950,38 @@ function delAllRows() {
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
         if (result.isConfirmed) {
-            roomDeleteFindBy(userId)
-                .then((res) => {
-                    console.log('[API] - DELETE ALL ROWS RESPONSE', res);
-                    dataTable.clear().draw();
-                    debouncedLoadStats();
-                })
-                .catch((err) => {
-                    console.log('[API] - DELETE ALL ROWS ERROR', err);
-                    popupMessage('error', `API DELETE ALL error: ${err.message}`);
+            if (filter === 'all') {
+                roomDeleteFindBy(userId)
+                    .then((res) => {
+                        console.log('[API] - DELETE ALL ROWS RESPONSE', res);
+                        dataTable.clear().draw();
+                        debouncedLoadStats();
+                    })
+                    .catch((err) => {
+                        console.log('[API] - DELETE ALL ROWS ERROR', err);
+                        popupMessage('error', `API DELETE ALL error: ${err.message}`);
+                    });
+            } else {
+                const rowIds = [];
+                dataTable.rows({ search: 'applied' }).every(function () {
+                    rowIds.push(this.node().id);
                 });
+                if (rowIds.length === 0) {
+                    popupMessage('info', `No ${label} rooms to delete`);
+                    return;
+                }
+                Promise.all(rowIds.map((id) => roomDelete(id)))
+                    .then(() => {
+                        console.log(`[API] - DELETE ${label.toUpperCase()} ROWS RESPONSE`, rowIds);
+                        rowIds.forEach((id) => dataTable.row(`#${id}`).remove());
+                        dataTable.draw();
+                        debouncedLoadStats();
+                    })
+                    .catch((err) => {
+                        console.log(`[API] - DELETE ${label.toUpperCase()} ROWS ERROR`, err);
+                        popupMessage('error', `API DELETE error: ${err.message}`);
+                    });
+            }
         }
     });
 }
