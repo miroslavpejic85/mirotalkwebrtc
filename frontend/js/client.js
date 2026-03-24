@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.02
+ * @version 1.3.03
  */
 
 const userAgent = navigator.userAgent;
@@ -532,8 +532,6 @@ function toggleSettings() {
 async function showDataTable() {
     navDash.click();
 
-    const emptyState = document.getElementById('emptyState');
-
     roomFindBy(userId)
         .then((res) => {
             console.log('[API] - GET ALL ROOMS RESPONSE', res);
@@ -550,9 +548,9 @@ async function showDataTable() {
                 });
                 dataTable.draw();
                 initVisibleRowsFlatpickr();
-                if (emptyState) elemDisplay(emptyState, false);
+                toggleRoomsList(true);
             } else {
-                if (emptyState) elemDisplay(emptyState, true);
+                toggleRoomsList(false);
             }
         })
         .catch((err) => {
@@ -582,6 +580,7 @@ function addRow() {
                     addRowToolTips(res._id);
                     initVisibleRowsFlatpickr();
                     toggleAddRows();
+                    toggleRoomsList(true);
                     debouncedLoadStats();
                 }
             }
@@ -866,7 +865,7 @@ function updateRow(id) {
             if (res.message) {
                 popupMessage('warning', `${res.message}`);
             } else {
-                popupMessage('toast', 'Data saved successfully 👍');
+                popupMessage('toast', 'Data saved successfully');
                 debouncedLoadStats();
                 const row = document.getElementById(id);
                 if (row) {
@@ -907,6 +906,7 @@ function delRow(id) {
                     console.log('[API] - DELETE ROW RESPONSE', res);
                     dataTable.row(`#${id}`).remove().draw();
                     dataTableTR.classList.remove('selected');
+                    toggleRoomsList(dataTable.rows().count() > 0);
                     debouncedLoadStats();
                 })
                 .catch((err) => {
@@ -933,6 +933,7 @@ function getFilterLabel() {
 }
 
 function delAllRows() {
+    if (dataTable.rows().count() === 0) return;
     const filter = getActiveFilter();
     const label = getFilterLabel();
 
@@ -955,6 +956,7 @@ function delAllRows() {
                     .then((res) => {
                         console.log('[API] - DELETE ALL ROWS RESPONSE', res);
                         dataTable.clear().draw();
+                        toggleRoomsList(false);
                         debouncedLoadStats();
                     })
                     .catch((err) => {
@@ -975,6 +977,7 @@ function delAllRows() {
                         console.log(`[API] - DELETE ${label.toUpperCase()} ROWS RESPONSE`, rowIds);
                         rowIds.forEach((id) => dataTable.row(`#${id}`).remove());
                         dataTable.draw();
+                        toggleRoomsList(dataTable.rows().count() > 0);
                         debouncedLoadStats();
                     })
                     .catch((err) => {
@@ -1050,10 +1053,11 @@ function delMyAccount() {
 }
 
 function refreshPage() {
+    if (dataTable.rows().count() === 0) return;
     dataTable.clear().draw();
     showDataTable();
     loadDashboardStats();
-    popupMessage('toast', 'Data refreshed 🔄');
+    popupMessage('toast', 'Data refreshed');
 }
 
 function loadDashboardStats() {
@@ -1288,6 +1292,15 @@ function animateCSS(element, animation, prefix = 'animate__') {
 function elemDisplay(elem, show) {
     if (!elem) return;
     elem.style.display = show ? 'flex' : 'none';
+}
+
+function toggleRoomsList(hasData) {
+    const emptyState = document.getElementById('emptyState');
+    const filterBar = document.getElementById('filterBar');
+    const tableWrapper = document.getElementById('myTable_wrapper');
+    elemDisplay(emptyState, !hasData);
+    elemDisplay(filterBar, hasData);
+    if (tableWrapper) tableWrapper.style.display = hasData ? '' : 'none';
 }
 
 function getRandomInt(max) {

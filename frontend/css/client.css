@@ -1846,9 +1846,14 @@ tr.room-today {
 
 /* Empty state */
 .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     padding: 60px 20px;
     color: var(--black-light-color);
+    width: 100%;
 }
 .empty-state i {
     font-size: 48px;
