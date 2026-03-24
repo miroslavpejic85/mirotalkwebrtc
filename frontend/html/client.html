@@ -501,13 +501,11 @@
                             <div class="addrow-field-icon"><i class="uil uil-link"></i></div>
                             <div class="addrow-field-content">
                                 <span class="addrow-field-label">Room Name</span>
-                                <div class="addrow-room-input">
-                                    <input id="add-room" type="text" placeholder="Room name" name="room" required />
-                                    <button id="gen-room" class="addrow-gen-btn" aria-label="Generate random room name">
-                                        <i class="uil uil-sync"></i>
-                                    </button>
-                                </div>
+                                <input id="add-room" type="text" placeholder="Room name" name="room" required />
                             </div>
+                            <button id="gen-room" class="addrow-gen-btn" aria-label="Generate random room name">
+                                <i class="uil uil-sync"></i>
+                            </button>
                         </div>
                         <div id="sel-room-dropdown" class="custom-dropdown hidden" data-dropdown-id="sel-room">
                             <div class="custom-dropdown-trigger" tabindex="0">
@@ -542,6 +540,21 @@
                                 </button>
                             </div>
                         </div>
+                    </div>
+
+                    <div id="usersFilterBar" class="filter-bar">
+                        <button class="users-filter-chip active" data-filter="all">
+                            All <span id="usersCountAll" class="filter-count"></span>
+                        </button>
+                        <button class="users-filter-chip" data-filter="today">
+                            Today <span id="usersCountToday" class="filter-count"></span>
+                        </button>
+                        <button class="users-filter-chip" data-filter="7days">
+                            Last 7 Days <span id="usersCount7Days" class="filter-count"></span>
+                        </button>
+                        <button class="users-filter-chip" data-filter="30days">
+                            Last 30 Days <span id="usersCount30Days" class="filter-count"></span>
+                        </button>
                     </div>
 
                     <div id="usersEmptyState" class="empty-state">
@@ -644,6 +657,16 @@
                                     name="rooms"
                                     value="*"
                                 />
+                            </div>
+                            <div class="addrow-field-help">
+                                <i class="uil uil-question-circle"></i>
+                                <div class="addrow-field-help-tooltip">
+                                    <span><code>*</code> allows access to all rooms</span>
+                                    <span
+                                        >For specific rooms, use comma-separated names:
+                                        <code>room1, room2, room3</code></span
+                                    >
+                                </div>
                             </div>
                         </div>
                     </div>

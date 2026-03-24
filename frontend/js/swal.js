@@ -9,7 +9,7 @@ function popupMessage(type, message, timer = 3000) {
             Swal.fire({
                 allowOutsideClick: false,
                 allowEscapeKey: false,
-                position: 'center',
+                position: 'top',
                 icon: type,
                 title: type,
                 html: message,
@@ -21,7 +21,7 @@ function popupMessage(type, message, timer = 3000) {
             Swal.fire({
                 allowOutsideClick: false,
                 allowEscapeKey: false,
-                position: 'center',
+                position: 'top',
                 title: 'Copy Room',
                 html: message,
                 confirmButtonText: `Copy Room URL`,

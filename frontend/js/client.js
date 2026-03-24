@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.15
+ * @version 1.3.16
  */
 
 const userAgent = navigator.userAgent;
@@ -234,8 +234,8 @@ const usersDataTable = $('#usersTable').DataTable({
         { width: '12%', targets: 0 },
         { width: '16%', targets: 1 },
         { width: '10%', targets: 2 },
-        { width: '18%', targets: 3 },
-        { width: '12%', targets: 4 },
+        { width: '10%', targets: 3 },
+        { width: '20%', targets: 4 },
         { width: '8%', targets: 5 },
         { width: '12%', targets: 6 },
         { width: '12%', targets: 7 },
@@ -770,17 +770,47 @@ function loadUsers() {
         .then((users) => {
             console.log('[API] - USER GET ALL RESPONSE', users);
             usersDataTable.clear();
+
+            // Reset users filter to All
+            $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter((fn) => !fn._isUserFilter);
+            document.querySelectorAll('.users-filter-chip').forEach((c) => c.classList.remove('active'));
+            const allChip = document.querySelector('.users-filter-chip[data-filter="all"]');
+            if (allChip) allChip.classList.add('active');
+
             if (users && users.length > 0) {
+                const now = new Date();
+                const today = now.toISOString().split('T')[0];
+                const d7 = new Date(now);
+                d7.setDate(d7.getDate() - 7);
+                const d30 = new Date(now);
+                d30.setDate(d30.getDate() - 30);
+                let todayCount = 0,
+                    days7Count = 0,
+                    days30Count = 0;
                 users.forEach((u) => {
                     const row = getUserRow(u);
                     const rowNode = usersDataTable.row.add(row).node();
                     rowNode.id = 'user_' + u._id;
+                    if (u.createdAt) {
+                        const created = new Date(u.createdAt);
+                        if (created.toISOString().split('T')[0] === today) todayCount++;
+                        if (created >= d7) days7Count++;
+                        if (created >= d30) days30Count++;
+                    }
                 });
+                document.getElementById('usersCountAll').textContent = `(${users.length})`;
+                document.getElementById('usersCountToday').textContent = `(${todayCount})`;
+                document.getElementById('usersCount7Days').textContent = `(${days7Count})`;
+                document.getElementById('usersCount30Days').textContent = `(${days30Count})`;
                 usersDataTable.columns.adjust().draw();
                 toggleUsersList(true);
                 initUsersToolTips(users);
                 initCustomDropdowns(document.getElementById('usersTable'));
             } else {
+                document.getElementById('usersCountAll').textContent = '(0)';
+                document.getElementById('usersCountToday').textContent = '(0)';
+                document.getElementById('usersCount7Days').textContent = '(0)';
+                document.getElementById('usersCount30Days').textContent = '(0)';
                 usersDataTable.columns.adjust().draw();
                 toggleUsersList(false);
             }
@@ -805,6 +835,7 @@ function getUserRow(u) {
     const userAllow = Array.isArray(u.allow) ? u.allow : ['ALL'];
     const roomsStr = Array.isArray(u.allowedRooms) ? u.allowedRooms.join(', ') : '*';
     const createdDate = u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-';
+    const createdISO = u.createdAt ? new Date(u.createdAt).toISOString().split('T')[0] : '';
 
     const saveIcon = `<i id="usave_${u._id}" onclick="saveUser('${u._id}')" class="uil uil-save"></i>`;
     const deleteIcon = isSelf
@@ -830,7 +861,7 @@ function getUserRow(u) {
             <input id="uactive_${u._id}" type="checkbox" ${activeChecked} ${selfDisabled} onchange="this.parentElement.className='user-active-badge '+(this.checked?'active':'inactive');this.parentElement.querySelector('span').textContent=this.checked?'Active':'Inactive'" />
             <span>${u.active ? 'Active' : 'Inactive'}</span>
         </label>`,
-        createdDate,
+        `<span data-date="${createdISO}">${createdDate}</span>`,
         `<span class="user-actions">${saveIcon} ${deleteIcon}</span>`,
     ];
 }
@@ -873,6 +904,16 @@ function saveUser(id) {
                     popupMessage('toast', 'User updated successfully');
                     loadUsers();
                     loadDashboardStats();
+                    setTimeout(() => {
+                        const row = document.getElementById('user_' + id);
+                        if (row) {
+                            row.style.transition = 'background-color 0.3s';
+                            row.style.backgroundColor = 'rgba(76, 175, 80, 0.15)';
+                            setTimeout(() => {
+                                row.style.backgroundColor = '';
+                            }, 1500);
+                        }
+                    }, 300);
                 }
             })
             .catch((err) => {
@@ -1804,5 +1845,40 @@ document.querySelectorAll('.filter-chip').forEach((chip) => {
             $.fn.dataTable.ext.search.push(filterFn);
         }
         dataTable.draw();
+    });
+});
+
+// Filter chips for users table
+document.querySelectorAll('.users-filter-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+        document.querySelectorAll('.users-filter-chip').forEach((c) => c.classList.remove('active'));
+        chip.classList.add('active');
+        const filter = chip.dataset.filter;
+        const today = new Date().toISOString().split('T')[0];
+
+        $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter((fn) => !fn._isUserFilter);
+
+        if (filter !== 'all') {
+            const now = new Date();
+            const d7 = new Date(now);
+            d7.setDate(d7.getDate() - 7);
+            const d30 = new Date(now);
+            d30.setDate(d30.getDate() - 30);
+            const filterFn = function (settings, data, dataIndex) {
+                if (settings.nTable.id !== 'usersTable') return true;
+                const row = usersDataTable.row(dataIndex).node();
+                const dateEl = row ? row.querySelector('[data-date]') : null;
+                const rowDate = dateEl ? dateEl.dataset.date : '';
+                if (!rowDate) return false;
+                if (filter === 'today') return rowDate === today;
+                const rd = new Date(rowDate);
+                if (filter === '7days') return rd >= d7;
+                if (filter === '30days') return rd >= d30;
+                return true;
+            };
+            filterFn._isUserFilter = true;
+            $.fn.dataTable.ext.search.push(filterFn);
+        }
+        usersDataTable.draw();
     });
 });

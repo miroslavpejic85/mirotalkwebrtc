@@ -1148,6 +1148,73 @@ body.dark .dash-content .boxes .box:hover {
     margin-bottom: 2px;
 }
 
+.addrow-field-help {
+    position: relative;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.addrow-field-help > i {
+    font-size: 18px;
+    color: var(--text-color);
+    opacity: 0.5;
+    transition:
+        opacity 0.2s ease,
+        color 0.2s ease;
+}
+
+.addrow-field-help:hover > i {
+    opacity: 1;
+    color: var(--accent-color);
+}
+
+.addrow-field-help-tooltip {
+    display: none;
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 10px);
+    min-width: 280px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--box1-color);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-color);
+    z-index: 100;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.addrow-field-help-tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    right: 12px;
+    width: 10px;
+    height: 10px;
+    background: var(--box1-color);
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    transform: rotate(45deg);
+}
+
+.addrow-field-help:hover .addrow-field-help-tooltip {
+    display: flex;
+}
+
+.addrow-field-help-tooltip code {
+    background: var(--body-color);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 11px;
+    color: var(--accent-color);
+}
+
 .addrow-field-content input {
     padding: 4px 0 !important;
     margin-top: 0 !important;
@@ -1258,11 +1325,11 @@ body.dark .dash-content .boxes .box:hover {
 }
 
 .addrow-gen-btn {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    background: var(--box1-color);
+    background: transparent;
     color: var(--accent-color);
     cursor: pointer;
     display: flex;
@@ -1280,7 +1347,7 @@ body.dark .dash-content .boxes .box:hover {
 }
 
 .addrow-gen-btn i {
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .addrow-submit-btn {
@@ -1318,6 +1385,11 @@ body.dark .dash-content .boxes .box:hover {
 .addRowDiv i:hover {
     color: var(--color-hover);
     transition: var(--tran-03);
+}
+
+.addrow-gen-btn:hover i,
+.addrow-gen-btn i:hover {
+    color: #fff !important;
 }
 
 .accountDiv button,
@@ -2022,6 +2094,30 @@ tr.room-today {
     border-color: var(--accent-color);
 }
 
+.users-filter-chip {
+    padding: 6px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 13px;
+    font-family: 'Montserrat';
+    cursor: pointer;
+    transition: var(--tran-03);
+}
+.users-filter-chip:hover,
+.users-filter-chip.active {
+    background: var(--accent-color);
+    color: #fff;
+    border-color: var(--accent-color);
+}
+
+.filter-count {
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0.8;
+}
+
 /* Action icon grouping */
 td .action-group {
     display: inline-flex;
@@ -2283,9 +2379,9 @@ td .action-separator {
     display: inline-block;
     padding: 3px 8px;
     border-radius: 12px;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 600;
-    text-transform: uppercase;
+    text-transform: capitalize;
     cursor: pointer;
 }
 
