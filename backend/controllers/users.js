@@ -308,7 +308,7 @@ async function userConfirmation(req, res) {
             });
             const userSaveData = await userData.save();
             log.debug('User create OK', userSaveData);
-            res.status(200).json(userSaveData);
+            res.redirect('/confirmation?status=success');
             if (nodemailer.EMAIL_VERIFICATION) {
                 log.debug('Send email to the user');
                 const safeData = { ...userSaveData.toObject() };
@@ -322,11 +322,11 @@ async function userConfirmation(req, res) {
             }
         } else {
             log.debug('User already confirmed');
-            res.status(409).json({ message: 'User already confirmed!' });
+            res.redirect('/confirmation?status=already');
         }
     } catch (error) {
         log.error('confirmationUser', error);
-        res.status(400).json({ message: error.message });
+        res.redirect('/confirmation?status=error');
     }
 }
 

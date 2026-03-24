@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>MiroTalk WebRTC - Email Confirmation</title>
+        <link rel="apple-touch-icon" href="../Images/apple-touch-icon.png" />
+        <link rel="icon" type="image/x-icon" href="../Images/favicon.ico" />
+
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="MiroTalk WebRTC - Email Confirmation" />
+
+        <!-- https://ogp.me -->
+
+        <meta property="og:type" content="{{OG_TYPE}}" />
+        <meta property="og:site_name" content="{{OG_SITE_NAME}}" />
+        <meta property="og:title" content="{{OG_TITLE}}" />
+        <meta property="og:description" content="{{OG_DESCRIPTION}}" />
+        <meta property="og:image" content="{{OG_IMAGE}}" />
+        <meta property="og:url" content="{{OG_URL}}" />
+
+        <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+        <link rel="stylesheet" href="../css/home.css" />
+        <link rel="stylesheet" href="../css/common.css" />
+        <link rel="stylesheet" href="../css/confirmation.css" />
+
+        <script async src="../js/stats.js"></script>
+        <script defer src="../js/confirmation.js"></script>
+    </head>
+    <body>
+        <div class="main single-form">
+            <div class="signup">
+                <!-- Success -->
+                <div id="statusSuccess" class="confirmation-status">
+                    <div class="form-icon-circle">
+                        <i class="uil uil-check-circle"></i>
+                    </div>
+                    <label>Registration Confirmed!</label>
+                    <p class="form-desc">
+                        Your email has been verified and your account is now active. You can log in with your
+                        credentials.
+                    </p>
+                    <a class="back-login" href="/"><i class="uil uil-home"></i> Go to Home Page</a>
+                </div>
+
+                <!-- Already confirmed -->
+                <div id="statusAlready" class="confirmation-status">
+                    <div class="form-icon-circle warning">
+                        <i class="uil uil-info-circle"></i>
+                    </div>
+                    <label>Already Confirmed</label>
+                    <p class="form-desc">
+                        This account has already been confirmed. You can log in with your credentials.
+                    </p>
+                    <a class="back-login" href="/"><i class="uil uil-home"></i> Go to Home Page</a>
+                </div>
+
+                <!-- Error -->
+                <div id="statusError" class="confirmation-status">
+                    <div class="form-icon-circle error">
+                        <i class="uil uil-exclamation-triangle"></i>
+                    </div>
+                    <label>Confirmation Failed</label>
+                    <p class="form-desc">
+                        Something went wrong during confirmation. The link may be invalid or expired. Please try
+                        registering again.
+                    </p>
+                    <a class="back-login" href="/"><i class="uil uil-home"></i> Go to Home Page</a>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
