@@ -19,6 +19,7 @@ const token = require('./routes/token');
 const users = require('./routes/users');
 const password = require('./routes/password');
 const dashboard = require('./routes/dashboard');
+const oidc = require('./routes/oidc');
 const config = require('./config');
 const ngrok = require('./common/ngrok');
 const sentry = require('./common/sentry');
@@ -107,6 +108,7 @@ mongoose
         app.use(apiPath, users);
         app.use(apiPath, password);
         app.use(apiPath, dashboard);
+        app.use('/oidc', oidc);
 
         if (isOidcEnabled()) {
             // OIDC mode: redirect home to /client (OIDC middleware handles login redirect)
@@ -137,11 +139,6 @@ mongoose
         app.get('/config', isOidcEnabled() ? requiresAuth() : auth, (req, res) => {
             log.debug('Send config', config);
             res.status(200).json(config);
-        });
-
-        // Expose OIDC status to the frontend
-        app.get('/oidc/status', (req, res) => {
-            res.status(200).json({ enabled: isOidcEnabled() });
         });
 
         app.use((req, res) => {

@@ -164,6 +164,17 @@ body.dark .nav-links li a:hover {
     justify-content: center;
 }
 
+.oidc-profile-img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.admin-role-icon {
+    color: var(--accent-color);
+}
+
 .menu-items li a .link-name {
     color: var(--black-light-color);
     font-size: 18px;

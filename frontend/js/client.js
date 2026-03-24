@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.19
+ * @version 1.3.20
  */
 
 const userAgent = navigator.userAgent;
@@ -322,6 +322,28 @@ $(document).ready(async function () {
             // Update logout link for OIDC
             const topLogout = document.getElementById('topLogout');
             if (topLogout) topLogout.setAttribute('href', '/logout');
+
+            // Replace account icon with OIDC profile picture
+            if (oidcStatus.picture) {
+                const navAccLink = document.getElementById('navAcc');
+                if (navAccLink) {
+                    const icon = navAccLink.querySelector('i');
+                    if (icon) {
+                        icon.className = '';
+                        icon.style.fontSize = '0';
+                        const img = document.createElement('img');
+                        img.src = oidcStatus.picture;
+                        img.alt = oidcStatus.name || 'Profile';
+                        img.className = 'oidc-profile-img';
+                        icon.appendChild(img);
+                    }
+                }
+                const profileImg = myProfile?.querySelector('img');
+                if (profileImg) {
+                    profileImg.src = oidcStatus.picture;
+                    profileImg.alt = oidcStatus.name || 'Profile';
+                }
+            }
         }
     } catch (err) {
         console.warn('OIDC status check:', err.message);
@@ -1547,7 +1569,7 @@ function getMyAccount() {
                 accountRole.value = res.role === 'admin' ? 'Admin' : 'Guest';
                 accountRoleIcon.innerHTML =
                     res.role === 'admin'
-                        ? '<i class="uil uil-shield-check" style="color: var(--accent-color)"></i>'
+                        ? '<i class="uil uil-shield-check admin-role-icon"></i>'
                         : '<i class="uil uil-user"></i>';
                 toggleAccount();
             }
