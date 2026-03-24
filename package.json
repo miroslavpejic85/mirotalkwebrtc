@@ -43,6 +43,7 @@
         "crypto-js": "^4.2.0",
         "dotenv": "^17.3.1",
         "express": "^5.2.1",
+        "express-openid-connect": "^2.19.4",
         "express-rate-limit": "^8.3.1",
         "helmet": "^8.1.0",
         "js-yaml": "^4.1.1",
@@ -50,7 +51,7 @@
         "mongoose": "^9.3.2",
         "nodemailer": "^8.0.3",
         "swagger-ui-express": "^5.0.1",
-        "twilio": "^5.13.0"
+        "twilio": "^5.13.1"
     },
     "devDependencies": {
         "nodemon": "^3.1.14",

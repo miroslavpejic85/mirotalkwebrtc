@@ -434,6 +434,24 @@ async function userDeleteALL(req, res) {
     }
 }
 
+async function userGetMe(req, res) {
+    try {
+        const { email, username } = req.user;
+        const userFindOne = await User.findOne({
+            $or: [{ email: email }, { username: username }],
+        }).select('-password -resetPasswordToken -resetPasswordExpires');
+
+        if (!userFindOne) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json(userFindOne);
+    } catch (error) {
+        log.error('userGetMe', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
 module.exports = {
     userCreate,
     userLogin,
@@ -443,6 +461,7 @@ module.exports = {
     userConfirmation,
     userGetAll,
     userGet,
+    userGetMe,
     userUpdate,
     userDelete,
     userDeleteALL,

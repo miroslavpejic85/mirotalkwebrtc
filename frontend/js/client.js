@@ -306,6 +306,27 @@ $(document).ready(async function () {
     if (window.location.search.includes('token=')) {
         window.history.replaceState({}, document.title, window.location.pathname);
     }
+
+    // Check if OIDC is enabled and initialize accordingly
+    try {
+        const oidcStatus = await getOidcStatus();
+        if (oidcStatus && oidcStatus.enabled) {
+            isOidcMode = true;
+            // In OIDC mode, fetch current user via /user/me to set userId
+            const me = await userGetMe();
+            if (me && me._id) {
+                userId = me._id;
+                window.sessionStorage.userId = me._id;
+                window.sessionStorage.userToken = me.token || '';
+            }
+            // Update logout link for OIDC
+            const topLogout = document.getElementById('topLogout');
+            if (topLogout) topLogout.setAttribute('href', '/logout');
+        }
+    } catch (err) {
+        console.warn('OIDC status check:', err.message);
+    }
+
     getConfig()
         .then((cfg) => {
             loadConfig(cfg);
@@ -367,7 +388,8 @@ function handleTokens(cfg) {
 }
 
 function handleUserRoles() {
-    userGet(userId)
+    const userPromise = isOidcMode ? userGetMe() : userGet(userId);
+    userPromise
         .then((res) => {
             console.log('[API] - USER ROLES GET RESPONSE', res);
             if (res.message) {
@@ -1507,7 +1529,8 @@ function removeLastRow() {
 }
 
 function getMyAccount() {
-    userGet(userId)
+    const userPromise = isOidcMode ? userGetMe() : userGet(userId);
+    userPromise
         .then((res) => {
             console.log('[API] - USER GET RESPONSE', res);
             if (res.message) {
@@ -1553,7 +1576,7 @@ function delMyAccount() {
             userDelete(userId)
                 .then((res) => {
                     console.log('[API] - USER DELETE RESPONSE', res);
-                    openURL('/');
+                    openURL(isOidcMode ? '/logout' : '/');
                 })
                 .catch((err) => {
                     console.log('[API] - USER DELETE ERROR', err);

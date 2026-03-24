@@ -5,6 +5,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const express = require('express');
 const auth = require('./middleware/auth');
+const { isOidcEnabled, getOidcAuth, requiresAuth } = require('./middleware/oidc');
 const url = require('./middleware/url');
 const HtmlInjector = require('./middleware/htmlInjector');
 const corsOptions = require('./config/cors');
@@ -73,6 +74,13 @@ mongoose
         app.use(express.urlencoded({ extended: true, limit: '10kb' }));
         app.use(express.json({ limit: '10kb' }));
 
+        // OIDC middleware (when enabled, handles /login, /logout, /callback routes)
+        const oidcAuth = getOidcAuth();
+        if (oidcAuth) {
+            app.use(oidcAuth);
+            log.debug('OIDC authentication enabled');
+        }
+
         // Logs requests
         app.use(url, (req, res, next) => {
             const sanitizedBody = { ...req.body };
@@ -100,13 +108,23 @@ mongoose
         app.use(apiPath, password);
         app.use(apiPath, dashboard);
 
-        app.get('/', (req, res) => {
-            htmlInjector.injectHtml(login, res);
-        });
-
-        app.get('/client', auth, (req, res) => {
-            htmlInjector.injectHtml(client, res);
-        });
+        if (isOidcEnabled()) {
+            // OIDC mode: redirect home to /client (OIDC middleware handles login redirect)
+            app.get('/', (req, res) => {
+                res.redirect('/client');
+            });
+            app.get('/client', requiresAuth(), (req, res) => {
+                htmlInjector.injectHtml(client, res);
+            });
+        } else {
+            // Standard mode: show login page
+            app.get('/', (req, res) => {
+                htmlInjector.injectHtml(login, res);
+            });
+            app.get('/client', auth, (req, res) => {
+                htmlInjector.injectHtml(client, res);
+            });
+        }
 
         app.get('/password-forgot', (req, res) => {
             htmlInjector.injectHtml(passwordForgot, res);
@@ -116,9 +134,14 @@ mongoose
             htmlInjector.injectHtml(passwordReset, res);
         });
 
-        app.get('/config', auth, (req, res) => {
+        app.get('/config', isOidcEnabled() ? requiresAuth() : auth, (req, res) => {
             log.debug('Send config', config);
             res.status(200).json(config);
+        });
+
+        // Expose OIDC status to the frontend
+        app.get('/oidc/status', (req, res) => {
+            res.status(200).json({ enabled: isOidcEnabled() });
         });
 
         app.use((req, res) => {

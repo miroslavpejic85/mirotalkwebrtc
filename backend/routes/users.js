@@ -40,6 +40,11 @@ router.get('/user/confirmation', auth, (req, res) => {
     controllersUsers.userConfirmation(req, res);
 });
 
+//GET: /api/v1/user/me (current authenticated user)
+router.get('/user/me', auth, (req, res) => {
+    controllersUsers.userGetMe(req, res);
+});
+
 //GET: /api/v1/user/all (admin only)
 router.get('/user/all', admin, (req, res) => {
     controllersUsers.userGetAll(req, res);

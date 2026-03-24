@@ -2,12 +2,14 @@
 
 const apiPath = '/api/v1';
 const userEmail = window.localStorage.email;
-const userId = window.sessionStorage.userId;
-const userToken = window.sessionStorage.userToken;
+let userId = window.sessionStorage.userId;
+let userToken = window.sessionStorage.userToken;
 
 const headers = {
     'x-access-token': `${userToken}`,
 };
+
+let isOidcMode = false;
 
 // API USER
 
@@ -47,6 +49,14 @@ function userGet(id) {
     return axios({
         method: 'GET',
         url: `${apiPath}/user/${id}`,
+        headers: headers,
+    }).then((response) => response.data);
+}
+
+function userGetMe() {
+    return axios({
+        method: 'GET',
+        url: `${apiPath}/user/me`,
         headers: headers,
     }).then((response) => response.data);
 }
@@ -199,5 +209,14 @@ function passwordResetConfirm(data) {
         method: 'POST',
         url: `${apiPath}/password/reset/confirm`,
         data: data,
+    }).then((response) => response.data);
+}
+
+// API OIDC
+
+function getOidcStatus() {
+    return axios({
+        method: 'GET',
+        url: `/oidc/status`,
     }).then((response) => response.data);
 }
