@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.16
+ * @version 1.3.17
  */
 
 const userAgent = navigator.userAgent;
@@ -126,6 +126,8 @@ const accountCreatedAt = document.getElementById('account-created-at');
 const accountUpdatedAt = document.getElementById('account-updated-at');
 const accountServicesAllowed = document.getElementById('account-services-allowed');
 const accountRoomsAllowed = document.getElementById('account-rooms-allowed');
+const accountRole = document.getElementById('account-role');
+const accountRoleIcon = document.getElementById('account-role-icon');
 const accountDelete = document.getElementById('account-delete');
 
 const settingsDiv = document.getElementById('settingsDiv');
@@ -1504,6 +1506,11 @@ function getMyAccount() {
                 accountUpdatedAt.value = res.updatedAt;
                 accountServicesAllowed.value = res.allow;
                 accountRoomsAllowed.value = res.allowedRooms;
+                accountRole.value = res.role === 'admin' ? 'Admin' : 'Guest';
+                accountRoleIcon.innerHTML =
+                    res.role === 'admin'
+                        ? '<i class="uil uil-shield-check" style="color: var(--accent-color)"></i>'
+                        : '<i class="uil uil-user"></i>';
                 toggleAccount();
             }
         })

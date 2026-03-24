@@ -21,6 +21,7 @@ config.js
 docker-push.sh
 docker-compose.yml
 migrate-mongo-config.js
+security
 
 # VSCode settings
 .vscode/
