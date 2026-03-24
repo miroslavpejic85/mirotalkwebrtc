@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.14
+ * @version 1.3.15
  */
 
 const userAgent = navigator.userAgent;
@@ -22,6 +22,7 @@ console.log('INFO', result);
 
 const body = document.querySelector('body');
 const modeToggle = body.querySelector('.mode-toggle');
+const topModeToggle = document.getElementById('topModeToggle');
 const sidebar = body.querySelector('nav');
 const sidebarToggle = body.querySelector('.sidebar-toggle');
 
@@ -474,6 +475,12 @@ function hideElements() {
 }
 
 modeToggle.addEventListener('click', () => {
+    body.classList.toggle('dark');
+    window.localStorage.mode = body.classList.contains('dark') ? 'dark' : 'light';
+    updateFlatpickrTheme();
+});
+
+topModeToggle.addEventListener('click', () => {
     body.classList.toggle('dark');
     window.localStorage.mode = body.classList.contains('dark') ? 'dark' : 'light';
     updateFlatpickrTheme();
