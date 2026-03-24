@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.13
+ * @version 1.3.14
  */
 
 const userAgent = navigator.userAgent;
@@ -164,6 +164,14 @@ const refreshUsersBtn = document.getElementById('refresh-users-btn');
 const myTable = document.getElementById('myTable');
 const myTableBody = document.getElementById('myTableBody');
 
+function dropdownSearchRender(data, type) {
+    if (type === 'filter' || type === 'search') {
+        const match = data.match(/data-search="([^"]*)"/);
+        if (match) return match[1];
+    }
+    return data;
+}
+
 const dataTable = $('#myTable').DataTable({
     searching: true,
     paging: true,
@@ -183,6 +191,10 @@ const dataTable = $('#myTable').DataTable({
         { width: '10%', targets: 5 },
         { width: '20%', targets: 6 },
         { width: '10%', targets: 7 },
+        {
+            targets: [0, 6],
+            render: dropdownSearchRender,
+        },
         {
             targets: [0, 1, 2, 3, 4, 6],
             type: 'string',
@@ -226,6 +238,10 @@ const usersDataTable = $('#usersTable').DataTable({
         { width: '8%', targets: 5 },
         { width: '12%', targets: 6 },
         { width: '12%', targets: 7 },
+        {
+            targets: [2, 3],
+            render: dropdownSearchRender,
+        },
         {
             targets: [0, 1, 2, 3, 4, 6],
             type: 'string',
@@ -479,6 +495,7 @@ function buildCustomDropdownHTML(id, options, selectedValue, translate, disabled
         optionsHTML += `<div class="custom-dropdown-option${sel}" data-value="${o.value}"${noTranslate}>${o.label}</div>`;
     });
     return (
+        `<span data-search="${selectedLabel}">` +
         `<div class="custom-dropdown${disabledClass}" data-dropdown-id="${id}">` +
         `<div class="custom-dropdown-trigger" tabindex="0">` +
         `<span class="custom-dropdown-value"${noTranslate}>${selectedLabel}</span>` +
@@ -486,7 +503,8 @@ function buildCustomDropdownHTML(id, options, selectedValue, translate, disabled
         `</div>` +
         `<div class="custom-dropdown-options">${optionsHTML}</div>` +
         `<input type="hidden" id="${id}" value="${selectedValue}" />` +
-        `</div>`
+        `</div>` +
+        `</span>`
     );
 }
 
@@ -523,6 +541,8 @@ function initCustomDropdowns(container) {
                 const hidden = dd.querySelector('input[type="hidden"]');
                 if (hidden) hidden.value = opt.dataset.value;
                 dd.querySelector('.custom-dropdown-value').textContent = opt.textContent;
+                const searchWrapper = dd.closest('[data-search]');
+                if (searchWrapper) searchWrapper.dataset.search = opt.textContent;
                 dd.classList.remove('open');
             });
         });
