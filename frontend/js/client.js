@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.18
+ * @version 1.3.19
  */
 
 const userAgent = navigator.userAgent;
@@ -270,7 +270,10 @@ usersDataTable.on('draw', function () {
 const getMode = window.localStorage.mode || 'dark';
 const getStatus = window.localStorage.status;
 
-if (getMode && getMode === 'dark') body.classList.toggle('dark');
+if (getMode && getMode === 'dark') {
+    body.classList.toggle('dark');
+    topModeToggle.querySelector('i').className = 'uil uil-sun';
+}
 if (getStatus && getStatus === 'close') sidebar.classList.toggle('close');
 
 const toolTips = [
@@ -482,13 +485,17 @@ function hideElements() {
 
 modeToggle.addEventListener('click', () => {
     body.classList.toggle('dark');
-    window.localStorage.mode = body.classList.contains('dark') ? 'dark' : 'light';
+    const isDark = body.classList.contains('dark');
+    window.localStorage.mode = isDark ? 'dark' : 'light';
+    topModeToggle.querySelector('i').className = isDark ? 'uil uil-sun' : 'uil uil-moon';
     updateFlatpickrTheme();
 });
 
 topModeToggle.addEventListener('click', () => {
     body.classList.toggle('dark');
-    window.localStorage.mode = body.classList.contains('dark') ? 'dark' : 'light';
+    const isDark = body.classList.contains('dark');
+    window.localStorage.mode = isDark ? 'dark' : 'light';
+    topModeToggle.querySelector('i').className = isDark ? 'uil uil-sun' : 'uil uil-moon';
     updateFlatpickrTheme();
 });
 

@@ -14,6 +14,9 @@ const auth = (req, res, next) => {
         req?.headers['Authorization'];
 
     if (!token) {
+        if (req.accepts('html')) {
+            return res.redirect('/');
+        }
         return res.status(404).json({ message: 'Token not found' });
     }
 
@@ -30,6 +33,9 @@ const auth = (req, res, next) => {
         //log.debug('jwt auth decoded', decoded);
         req.user = decoded;
     } catch (err) {
+        if (req.accepts('html')) {
+            return res.redirect('/');
+        }
         return res.status(401).json({ message: 'Token invalid or expired' });
     }
     return next();
