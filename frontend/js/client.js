@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.10
+ * @version 1.3.11
  */
 
 const userAgent = navigator.userAgent;
@@ -771,21 +771,43 @@ function saveUser(id) {
 
     const data = { role, allow, allowedRooms, active };
 
-    userUpdate(id, data)
-        .then((res) => {
-            console.log('[API] - USER UPDATE RESPONSE', res);
-            if (res && res.message) {
-                popupMessage('warning', res.message);
-            } else {
-                popupMessage('toast', 'User updated successfully');
-                loadUsers();
-                loadDashboardStats();
-            }
-        })
-        .catch((err) => {
-            console.error('[API] - USER UPDATE ERROR', err);
-            popupMessage('error', `Failed to update user: ${err.message}`);
+    function doSave() {
+        userUpdate(id, data)
+            .then((res) => {
+                console.log('[API] - USER UPDATE RESPONSE', res);
+                if (res && res.message) {
+                    popupMessage('warning', res.message);
+                } else {
+                    popupMessage('toast', 'User updated successfully');
+                    loadUsers();
+                    loadDashboardStats();
+                }
+            })
+            .catch((err) => {
+                console.error('[API] - USER UPDATE ERROR', err);
+                popupMessage('error', `Failed to update user: ${err.message}`);
+            });
+    }
+
+    if (role === 'admin' && id !== userId) {
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            position: 'center',
+            icon: 'warning',
+            title: 'Assign admin role',
+            text: 'Are you sure you want to assign the admin role to this user?',
+            showDenyButton: true,
+            confirmButtonText: 'Yes',
+            denyButtonText: 'No',
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            if (result.isConfirmed) doSave();
         });
+    } else {
+        doSave();
+    }
 }
 
 function deleteUser(id) {
