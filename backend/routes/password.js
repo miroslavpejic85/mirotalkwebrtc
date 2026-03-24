@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const logs = require('../common/logs');
 const { sendPasswordResetEmail, sendPasswordChangeConfirmation } = require('../lib/nodemailer');
+const { passwordResetLimiter } = require('../middleware/rateLimiter');
 
 const utils = require('../common/utils');
 const { isValidEmail, isValidPassword } = utils;
@@ -17,7 +18,7 @@ const SERVER_URL = process.env.SERVER_URL;
 const USER_DEMO_EMAIL = process.env.USER_DEMO_EMAIL;
 
 // Request password reset
-router.post('/password/reset/request', async (req, res) => {
+router.post('/password/reset/request', passwordResetLimiter, async (req, res) => {
     try {
         const { email } = req.body;
 

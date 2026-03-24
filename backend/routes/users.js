@@ -5,13 +5,13 @@ const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const api = require('../middleware/api');
 const validator = require('../middleware/validator');
-const { loginLimiter } = require('../middleware/rateLimiter');
+const { loginLimiter, registrationLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 const controllersUsers = require('../controllers/users');
 
 //CREATE: /api/v1/user
-router.post('/user', validator, (req, res) => {
+router.post('/user', registrationLimiter, validator, (req, res) => {
     controllersUsers.userCreate(req, res);
 });
 

@@ -16,6 +16,11 @@ const corsOptions = () => {
         } catch (error) {
             log.error('Error parsing CORS_ORIGIN', error.message);
         }
+    } else {
+        const NODE_ENV = process.env.NODE_ENV || 'development';
+        if (NODE_ENV === 'production') {
+            log.warn('CORS origin is set to wildcard (*) in production. Consider restricting to specific origins.');
+        }
     }
 
     if (CORS_METHODS && CORS_METHODS !== '') {

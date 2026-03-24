@@ -15,6 +15,23 @@ const loginLimiter = rateLimit({
     max: USER_MAX_LOGIN_ATTEMPTS,
     message: 'Too many login attempts, please try again later.',
     keyGenerator: (req) => req.body?.username || ipKeyGenerator(req),
+    validate: false,
 });
 
-module.exports = { loginLimiter };
+const passwordResetLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 5,
+    message: 'Too many password reset requests, please try again later.',
+    keyGenerator: (req) => req.body?.email || ipKeyGenerator(req),
+    validate: false,
+});
+
+const registrationLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 10,
+    message: 'Too many registration attempts, please try again later.',
+    keyGenerator: ipKeyGenerator,
+    validate: false,
+});
+
+module.exports = { loginLimiter, passwordResetLimiter, registrationLimiter };

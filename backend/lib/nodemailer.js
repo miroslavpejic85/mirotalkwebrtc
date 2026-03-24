@@ -20,7 +20,6 @@ log.info('Email', {
     host: EMAIL_HOST,
     port: EMAIL_PORT,
     username: EMAIL_USERNAME,
-    password: EMAIL_PASSWORD,
     from: EMAIL_FROM,
 });
 
@@ -54,7 +53,7 @@ function sendConfirmationEmail(name, email, confirmationCode) {
 
 function sendConfirmationOkEmail(name, toEmail, credential) {
     const credentialObj = JSON.parse(credential);
-    const { role, email, username, password, active, allow, allowedRooms, createdAt, updatedAt } = credentialObj;
+    const { role, email, username, active, allow, allowedRooms, createdAt, updatedAt } = credentialObj;
     log.debug('sendConfirmationOkEmail', credentialObj);
     transport
         .sendMail({
@@ -92,10 +91,6 @@ function sendConfirmationOkEmail(name, toEmail, credential) {
                     <tr>
                         <td>Username</td>
                         <td>${username}</td>
-                    </tr>
-                    <tr>
-                        <td>Password</td>
-                        <td>${password}</td>
                     </tr>
                     <tr>
                         <td>Active</td>

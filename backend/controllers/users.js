@@ -93,7 +93,7 @@ async function userLogin(req, res) {
                     if (userFindOne.username !== username) {
                         log.debug('User found, wrong username!');
                         return res.status(201).send({
-                            message: '⚠️ Account already exists. <br/> The username seems wrong!',
+                            message: '⚠️ Invalid credentials. <br/> Please check your email, username and password.',
                         });
                     }
                     log.debug('User found, just refresh the token');
@@ -108,7 +108,7 @@ async function userLogin(req, res) {
                 } else {
                     log.debug('User found, wrong password!');
                     return res.status(201).send({
-                        message: '⚠️ Account already exists. <br/> The password seems wrong!',
+                        message: '⚠️ Invalid credentials. <br/> Please check your email, username and password.',
                     });
                 }
             });
@@ -122,7 +122,9 @@ async function userLogin(req, res) {
             }
             if (USER_REGISTRATION_MODE != true) {
                 log.error('USER REGISTRATION MODE DISABLED, user not found!');
-                return res.status(201).json({ message: 'User not found!' });
+                return res
+                    .status(201)
+                    .json({ message: '⚠️ Invalid credentials. <br/> Please check your email, username and password.' });
             }
             log.debug(`User demo: ${isUserDemo}`);
             if (!isUserDemo && nodemailer.EMAIL_VERIFICATION) {
@@ -306,14 +308,16 @@ async function userConfirmation(req, res) {
             });
             const userSaveData = await userData.save();
             log.debug('User create OK', userSaveData);
-            userSaveData.password = decoded.password.substring(0, 5) + '************';
             res.status(200).json(userSaveData);
             if (nodemailer.EMAIL_VERIFICATION) {
                 log.debug('Send email to the user');
+                const safeData = { ...userSaveData.toObject() };
+                delete safeData.password;
+                delete safeData.token;
                 nodemailer.sendConfirmationOkEmail(
                     userSaveData.username,
                     userSaveData.email,
-                    JSON.stringify(userSaveData, null, 4)
+                    JSON.stringify(safeData, null, 4)
                 );
             }
         } else {
@@ -341,7 +345,9 @@ async function userGetAll(req, res) {
 
 async function userGet(req, res) {
     try {
-        const data = await User.findById(req.params.id);
+        const data = await User.findById(req.params.id).select(
+            '-password -token -resetPasswordToken -resetPasswordExpires'
+        );
         res.json(data);
     } catch (error) {
         log.error('getUser', error);

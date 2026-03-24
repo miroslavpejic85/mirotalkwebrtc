@@ -24,7 +24,7 @@ const alphanumeric = new RegExp(/^[A-Za-z0-9-_]+$/);
 const miroTalkType = new RegExp(/^(SFU|P2P|C2C|BRO)$/);
 
 async function isAdmin(email, username, password) {
-    if (email == ADMIN_EMAIL && username == ADMIN_USERNAME && password == ADMIN_PASSWORD) {
+    if (email === ADMIN_EMAIL && username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
         return true;
     }
     const user = await User.findOne({ email, username }).select('role').lean();

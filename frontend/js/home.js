@@ -191,6 +191,7 @@ function signupOrLogin(data) {
                 window.sessionStorage.userId = res._id;
                 window.sessionStorage.userToken = res.token;
                 window.location.href = `/client/?token=${res.token}`;
+                // Token will be stripped from URL by client.js after reading
             }
         })
         .catch((err) => {

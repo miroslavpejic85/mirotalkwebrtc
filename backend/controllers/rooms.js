@@ -80,9 +80,13 @@ async function roomGet(req, res) {
 async function roomUpdate(req, res) {
     try {
         const id = req.params.id;
-        const updatedData = req.body;
+        const allowedFields = ['type', 'tag', 'email', 'phone', 'date', 'time', 'room'];
+        const updatedData = {};
+        for (const field of allowedFields) {
+            if (req.body[field] !== undefined) updatedData[field] = req.body[field];
+        }
         const options = { returnDocument: 'after' };
-        const result = await Room.findByIdAndUpdate(id, updatedData, options);
+        const result = await Room.findByIdAndUpdate(id, { $set: updatedData }, options);
         res.send(result);
     } catch (error) {
         log.error('Room update error', error);

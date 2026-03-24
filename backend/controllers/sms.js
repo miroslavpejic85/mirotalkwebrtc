@@ -1,6 +1,7 @@
 'use strict';
 
 const logs = require('../common/logs');
+const utils = require('../common/utils');
 const log = new logs('Controllers-sms');
 
 const smsEnabled = process.env.TWILIO_SMS == 'true';
@@ -19,6 +20,10 @@ async function smsSend(req, res) {
     }
     try {
         const { message, toNumber } = req.body;
+        const validPhone = utils.isValidPhoneNumber(toNumber);
+        if (validPhone !== true) {
+            return res.status(400).json({ message: validPhone });
+        }
         client.messages
             .create({
                 body: message,

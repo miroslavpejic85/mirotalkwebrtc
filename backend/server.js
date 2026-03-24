@@ -70,14 +70,22 @@ mongoose
         app.use(cors(corsOptions()));
         app.use(compression());
         app.use(express.static(frontendDir));
-        app.use(express.urlencoded({ extended: true }));
-        app.use(express.json());
+        app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+        app.use(express.json({ limit: '10kb' }));
 
         // Logs requests
         app.use(url, (req, res, next) => {
+            const sanitizedBody = { ...req.body };
+            const sensitiveFields = ['password', 'token', 'api_secret_key', 'secret'];
+            for (const field of sensitiveFields) {
+                if (sanitizedBody[field]) sanitizedBody[field] = '***';
+            }
+            const sanitizedHeaders = { ...req.headers };
+            if (sanitizedHeaders['x-access-token']) sanitizedHeaders['x-access-token'] = '***';
+            if (sanitizedHeaders['authorization']) sanitizedHeaders['authorization'] = '***';
             log.debug('New request:', {
-                headers: req.headers,
-                body: req.body,
+                headers: sanitizedHeaders,
+                body: sanitizedBody,
                 method: req.method,
                 path: req.originalUrl,
             });
@@ -152,7 +160,7 @@ mongoose
 
         // Handle client errors (malformed/incomplete HTTP requests) gracefully
         server.on('clientError', (err, socket) => {
-            err.code === 'HPE_HEADER_OVERFLOW' || err.message === 'Parse Error'
+            err.code?.startsWith('HPE_') || err.message?.startsWith('Parse Error')
                 ? log.warn('Client HTTP parse error', { error: err.message, code: err.code })
                 : log.warn('Client connection error', { error: err.message, code: err.code });
             if (socket && !socket.destroyed && socket.writable) {
