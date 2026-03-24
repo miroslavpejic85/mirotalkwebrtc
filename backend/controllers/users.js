@@ -97,8 +97,9 @@ async function userLogin(req, res) {
                         });
                     }
                     log.debug('User found, just refresh the token');
-                    const isUserAdmin = utils.isAdmin(email, username, password);
-                    userFindOne.role = isUserAdmin ? 'admin' : 'guest';
+                    if (utils.isAdmin(email, username, password) && userFindOne.role !== 'admin') {
+                        userFindOne.role = 'admin';
+                    }
                     userFindOne.token = token;
                     userFindOne.updatedAt = dateNow;
                     const saveUserFindOne = await userFindOne.save();
