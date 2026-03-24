@@ -216,30 +216,40 @@ body.dark .menu-items .logout-mode li a:hover {
     cursor: pointer;
 }
 
-.mode-toggle .switch {
+.mode-toggle .toggle-checkbox {
+    display: none;
+}
+
+.mode-toggle .toggle-slider {
     position: relative;
     display: inline-block;
-    height: 22px;
-    width: 40px;
-    border-radius: 25px;
+    width: 44px;
+    height: 24px;
+    border-radius: 12px;
     background-color: var(--toggle-color);
+    transition: background-color 0.3s ease;
 }
 
-.switch:before {
-    position: absolute;
-    left: 5px;
-    top: 50%;
-    height: 15px;
-    width: 15px;
-    border-radius: 50%;
-    background-color: var(--panel-color);
+.mode-toggle .toggle-slider:before {
     content: '';
-    transition: var(--tran-03);
+    position: absolute;
+    left: 3px;
+    top: 50%;
     transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: left 0.3s ease;
 }
 
-body.dark .switch:before {
-    left: 20px;
+.mode-toggle .toggle-checkbox:checked + .toggle-slider {
+    background-color: var(--accent-color);
+}
+
+.mode-toggle .toggle-checkbox:checked + .toggle-slider:before {
+    left: 23px;
 }
 
 .dashboard {
@@ -946,6 +956,10 @@ body.dark .dash-content .boxes .box:hover {
 }
 
 .settings-item .mode-toggle {
+    position: relative;
+    right: auto;
+    height: auto;
+    min-width: auto;
     cursor: pointer;
 }
 

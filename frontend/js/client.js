@@ -483,7 +483,10 @@ function hideElements() {
     //...
 }
 
-modeToggle.addEventListener('click', () => {
+const toggleCheckbox = modeToggle.querySelector('.toggle-checkbox');
+if (body.classList.contains('dark')) toggleCheckbox.checked = true;
+
+toggleCheckbox.addEventListener('change', () => {
     body.classList.toggle('dark');
     const isDark = body.classList.contains('dark');
     window.localStorage.mode = isDark ? 'dark' : 'light';
@@ -495,6 +498,7 @@ topModeToggle.addEventListener('click', () => {
     body.classList.toggle('dark');
     const isDark = body.classList.contains('dark');
     window.localStorage.mode = isDark ? 'dark' : 'light';
+    toggleCheckbox.checked = isDark;
     topModeToggle.querySelector('i').className = isDark ? 'uil uil-sun' : 'uil uil-moon';
     updateFlatpickrTheme();
 });
