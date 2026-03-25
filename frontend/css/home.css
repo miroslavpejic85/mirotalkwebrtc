@@ -282,22 +282,35 @@ button:active {
     box-shadow: 0 4px 12px var(--hover-ring);
 }
 
-#signupTermsBtn {
-    background: transparent !important;
-    color: rgba(255, 255, 255, 0.65) !important;
-    font-size: 12px !important;
-    font-weight: 500 !important;
-    margin-top: 6px !important;
-    text-decoration: underline;
-    height: auto !important;
-    padding: 6px !important;
+.terms-group {
+    margin-top: 6px;
+    display: flex;
+    justify-content: center;
 }
 
-#signupTermsBtn:hover {
-    color: #fff !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    transform: none !important;
+.terms-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.65);
+    cursor: pointer;
+}
+
+.terms-label input[type='checkbox'] {
+    accent-color: var(--primary-color);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.terms-label a {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: underline;
+}
+
+.terms-label a:hover {
+    color: #fff;
 }
 
 /*--------------------------------------------------------------

@@ -11,7 +11,8 @@ const signupUsernameInput = document.getElementById('signupUsernameInput');
 const signupEmailIdInput = document.getElementById('signupEmailIdInput');
 const signupPasswordIdInput = document.getElementById('signupPasswordIdInput');
 const signupRepeatPasswordIdInput = document.getElementById('signupRepeatPasswordIdInput');
-const signupTermsBtn = document.getElementById('signupTermsBtn');
+const signupTermsCheckbox = document.getElementById('signupTermsCheckbox');
+const signupTermsLink = document.getElementById('signupTermsLink');
 const signupBtn = document.getElementById('signupBtn');
 
 // login
@@ -44,9 +45,6 @@ loginUsernameInput.value = storageUsername;
 loginEmailIdInput.value = storageEmail;
 loginPasswordIdInput.value = '';
 
-elementDisplay(signupBtn, false);
-elementDisplay(signupTermsBtn, true);
-
 // Tab switching
 tabLogin.addEventListener('click', () => switchTab('login'));
 tabSignup.addEventListener('click', () => switchTab('signup'));
@@ -69,7 +67,7 @@ function switchTab(tab) {
 
 loginBtn.addEventListener('click', handleLogin);
 
-signupTermsBtn.addEventListener('click', handleSignupTerms);
+signupTermsLink.addEventListener('click', handleSignupTerms);
 
 signupBtn.addEventListener('click', handleSignup);
 
@@ -89,7 +87,8 @@ function handleLogin(e) {
     signupOrLogin(data);
 }
 
-function handleSignupTerms() {
+function handleSignupTerms(e) {
+    e.preventDefault();
     Swal.fire({
         title: 'Terms & Conditions',
         html: `
@@ -130,15 +129,16 @@ function handleSignupTerms() {
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
-        if (result.isConfirmed) {
-            elementDisplay(signupBtn, true);
-            elementDisplay(signupTermsBtn, false);
-        }
+        signupTermsCheckbox.checked = result.isConfirmed;
     });
 }
 
 function handleSignup(e) {
     e.preventDefault();
+    if (!signupTermsCheckbox.checked) {
+        popupMessage('warning', 'You must agree to the Terms & Conditions before signing up');
+        return false;
+    }
     cleanLoginInput();
     const validationError = validateInput(
         signupUsernameInput,
@@ -214,6 +214,7 @@ function cleanSignUpInput() {
     signupEmailIdInput.value = '';
     signupPasswordIdInput.value = '';
     signupRepeatPasswordIdInput.value = '';
+    signupTermsCheckbox.checked = false;
 }
 
 // Password visibility toggle
