@@ -2564,6 +2564,14 @@ body.dark .action-dropdown-item:hover {
     cursor: pointer;
 }
 
+/* Ensure table date/time inputs match other td inputs (override flatpickr defaults) */
+td input.flatpickr-date,
+td input.flatpickr-time {
+    text-align: left;
+    height: auto;
+    padding: 6px 8px;
+}
+
 .flatpickr-calendar {
     border-radius: 12px !important;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
