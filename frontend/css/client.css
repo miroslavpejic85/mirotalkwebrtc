@@ -1071,7 +1071,7 @@ body.dark .addRowDiv {
     text-transform: uppercase;
     letter-spacing: 0.8px;
     color: var(--black-light-color);
-    margin: 16px 0 8px 0;
+    margin: 20px 0 10px 0;
     padding: 0 4px;
 }
 
@@ -1083,7 +1083,7 @@ body.dark .addRowDiv {
     background-color: var(--box1-color);
     border: 1px solid var(--border-color);
     border-radius: 10px;
-    margin-bottom: 6px;
+    margin-bottom: 12px;
     transition: var(--tran-03);
 }
 
@@ -1241,7 +1241,7 @@ body.dark .addRowDiv {
 }
 
 .addrow-section {
-    margin-bottom: 16px;
+    margin-bottom: 24px;
 }
 
 .addrow-section-label {
@@ -1251,7 +1251,7 @@ body.dark .addRowDiv {
     text-transform: uppercase;
     letter-spacing: 0.8px;
     color: var(--black-light-color);
-    margin: 14px 0 8px 0;
+    margin: 20px 0 10px 0;
     padding: 0 4px;
 }
 
@@ -1263,7 +1263,7 @@ body.dark .addRowDiv {
     background-color: var(--box1-color);
     border: 1px solid var(--border-color);
     border-radius: 10px;
-    margin-bottom: 6px;
+    margin-bottom: 12px;
     transition: var(--tran-03);
 }
 
@@ -1522,7 +1522,7 @@ body.dark .custom-dropdown-options {
 
 .addrow-field-row {
     display: flex;
-    gap: 8px;
+    gap: 12px;
 }
 
 .addrow-field-half {
@@ -1695,7 +1695,7 @@ body.dark .custom-dropdown-options {
 }
 
 .account-section {
-    margin-bottom: 14px;
+    margin-bottom: 24px;
 }
 
 .account-section-label {
@@ -1705,7 +1705,7 @@ body.dark .custom-dropdown-options {
     text-transform: uppercase;
     letter-spacing: 0.8px;
     color: var(--black-light-color);
-    margin: 14px 0 8px 0;
+    margin: 20px 0 10px 0;
     padding: 0 4px;
 }
 
@@ -1717,7 +1717,7 @@ body.dark .custom-dropdown-options {
     background-color: var(--box1-color);
     border: 1px solid var(--border-color);
     border-radius: 10px;
-    margin-bottom: 6px;
+    margin-bottom: 12px;
     transition: var(--tran-03);
 }
 
@@ -1891,7 +1891,7 @@ body.dark .custom-dropdown-options {
 /* Account field row layout */
 .account-field-row {
     display: flex;
-    gap: 6px;
+    gap: 12px;
 }
 
 .account-field-half {
