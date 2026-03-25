@@ -1090,6 +1090,19 @@ body.dark .addRowDiv {
     border: none;
     box-shadow: none;
 }
+
+.accountDiv input:-webkit-autofill,
+.accountDiv input:-webkit-autofill:hover,
+.accountDiv input:-webkit-autofill:focus,
+.addRowDiv input:-webkit-autofill,
+.addRowDiv input:-webkit-autofill:hover,
+.addRowDiv input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 30px var(--box1-color) inset !important;
+    -webkit-text-fill-color: var(--text-color) !important;
+    transition: background-color 5000s ease-in-out 0s;
+    caret-color: var(--text-color);
+}
+
 .addRowDiv .date-time {
     display: inline;
     justify-content: space-around;

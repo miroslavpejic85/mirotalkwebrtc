@@ -185,6 +185,16 @@ body {
     color: var(--text-placeholder);
 }
 
+.input-group input:-webkit-autofill,
+.input-group input:-webkit-autofill:hover,
+.input-group input:-webkit-autofill:focus,
+.input-group input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px rgba(32, 33, 35, 0.8) inset !important;
+    -webkit-text-fill-color: var(--text-color) !important;
+    transition: background-color 5000s ease-in-out 0s;
+    caret-color: var(--text-color);
+}
+
 /*--------------------------------------------------------------
 # Password Toggle
 --------------------------------------------------------------*/
