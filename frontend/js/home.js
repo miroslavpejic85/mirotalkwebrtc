@@ -67,9 +67,21 @@ function switchTab(tab) {
 
 loginBtn.addEventListener('click', handleLogin);
 
+[loginUsernameInput, loginEmailIdInput, loginPasswordIdInput].forEach((input) => {
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleLogin(e);
+    });
+});
+
 signupTermsLink.addEventListener('click', handleSignupTerms);
 
 signupBtn.addEventListener('click', handleSignup);
+
+[signupUsernameInput, signupEmailIdInput, signupPasswordIdInput, signupRepeatPasswordIdInput].forEach((input) => {
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleSignup(e);
+    });
+});
 
 supportBtn.onclick = () => {
     window.open('https://codecanyon.net/user/miroslavpejic85', '_blank');
