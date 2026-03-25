@@ -694,64 +694,67 @@
                                 <input id="account-email" type="text" name="text" readonly />
                             </div>
                         </div>
-                        <div class="account-field">
-                            <div id="account-role-icon" class="account-field-icon"><i class="uil uil-user"></i></div>
-                            <div class="account-field-content">
-                                <span class="account-field-label">Role</span>
-                                <input id="account-role" type="text" name="text" readonly />
+                        <div class="account-field-row">
+                            <div class="account-field account-field-half">
+                                <div id="account-role-icon" class="account-field-icon">
+                                    <i class="uil uil-user"></i>
+                                </div>
+                                <div class="account-field-content">
+                                    <span class="account-field-label">Role</span>
+                                    <input id="account-role" type="text" name="text" readonly />
+                                </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="account-section">
-                        <span class="account-section-label">Access</span>
-                        <div class="account-field">
-                            <div class="account-field-icon"><i class="uil uil-bookmark"></i></div>
-                            <div class="account-field-content">
-                                <span class="account-field-label">Account ID</span>
-                                <input id="account-id" type="text" name="text" readonly />
+                            <div class="account-field account-field-half">
+                                <div class="account-field-icon"><i class="uil uil-bookmark"></i></div>
+                                <div class="account-field-content">
+                                    <span class="account-field-label">Account ID</span>
+                                    <input id="account-id" type="text" name="text" readonly />
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="account-section">
                         <span class="account-section-label">Permissions</span>
-                        <div class="account-field">
-                            <div class="account-field-icon"><i class="uil uil-apps"></i></div>
-                            <div class="account-field-content">
-                                <span class="account-field-label">Services Allowed</span>
-                                <input id="account-services-allowed" type="text" name="text" readonly />
+                        <div class="account-field-row">
+                            <div class="account-field account-field-half">
+                                <div class="account-field-icon"><i class="uil uil-apps"></i></div>
+                                <div class="account-field-content">
+                                    <span class="account-field-label">Services</span>
+                                    <input id="account-services-allowed" type="text" name="text" readonly />
+                                </div>
                             </div>
-                        </div>
-                        <div class="account-field">
-                            <div class="account-field-icon"><i class="uil uil-lock-open-alt"></i></div>
-                            <div class="account-field-content">
-                                <span class="account-field-label">Rooms Allowed</span>
-                                <input id="account-rooms-allowed" type="text" name="text" readonly />
+                            <div class="account-field account-field-half">
+                                <div class="account-field-icon"><i class="uil uil-lock-open-alt"></i></div>
+                                <div class="account-field-content">
+                                    <span class="account-field-label">Rooms</span>
+                                    <input id="account-rooms-allowed" type="text" name="text" readonly />
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="account-section">
                         <span class="account-section-label">Activity</span>
-                        <div class="account-field">
-                            <div class="account-field-icon"><i class="uil uil-calendar-alt"></i></div>
-                            <div class="account-field-content">
-                                <span class="account-field-label">Created at</span>
-                                <input id="account-created-at" type="text" name="text" readonly />
+                        <div class="account-field-row">
+                            <div class="account-field account-field-half">
+                                <div class="account-field-icon"><i class="uil uil-calendar-alt"></i></div>
+                                <div class="account-field-content">
+                                    <span class="account-field-label">Created</span>
+                                    <input id="account-created-at" type="text" name="text" readonly />
+                                </div>
                             </div>
-                        </div>
-                        <div class="account-field">
-                            <div class="account-field-icon"><i class="uil uil-history"></i></div>
-                            <div class="account-field-content">
-                                <span class="account-field-label">Updated at</span>
-                                <input id="account-updated-at" type="text" name="text" readonly />
+                            <div class="account-field account-field-half">
+                                <div class="account-field-icon"><i class="uil uil-history"></i></div>
+                                <div class="account-field-content">
+                                    <span class="account-field-label">Updated</span>
+                                    <input id="account-updated-at" type="text" name="text" readonly />
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="account-danger-zone">
-                        <span class="account-section-label">Danger Zone</span>
                         <button id="account-delete" class="account-delete-btn">
                             <i class="uil uil-trash-alt"></i> Delete Account
                         </button>
@@ -769,10 +772,7 @@
                         <li class="settings-item">
                             <a href="javascript:void(0)">
                                 <div class="settings-item-icon"><i class="uil uil-moon"></i></div>
-                                <div class="settings-item-text">
-                                    <span class="settings-item-name">Dark Mode</span>
-                                    <span class="settings-item-desc">Switch between light and dark theme</span>
-                                </div>
+                                <span class="settings-item-name">Dark Mode</span>
                             </a>
                             <label class="mode-toggle">
                                 <input type="checkbox" class="toggle-checkbox" />
@@ -784,10 +784,7 @@
                         <li class="settings-item">
                             <a href="javascript:void(0)">
                                 <div class="settings-item-icon"><i class="uil uil-globe"></i></div>
-                                <div class="settings-item-text">
-                                    <span class="settings-item-name">Translation</span>
-                                    <span class="settings-item-desc">Select your preferred language</span>
-                                </div>
+                                <span class="settings-item-name">Translation</span>
                             </a>
                         </li>
                         <li class="settings-item settings-translate-item">

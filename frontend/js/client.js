@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.31
+ * @version 1.3.32
  */
 
 const userAgent = navigator.userAgent;
@@ -859,53 +859,53 @@ document.getElementById('myInput').addEventListener('keyup', function () {
 
 function toggleAddRows() {
     if (addRowDiv.classList.contains('show')) {
-        animateCSS(addRowDiv, 'fadeOutRight').then((ok) => {
+        animateCSS(addRowDiv, 'slideOutRight').then((ok) => {
             addRowDiv.classList.toggle('show');
             hideBackdrop();
         });
     } else {
         addRowDiv.classList.toggle('show');
         showBackdrop();
-        animateCSS(addRowDiv, 'fadeInRight');
+        animateCSS(addRowDiv, 'slideInRight');
     }
 }
 
 function toggleAccount() {
     if (accountDiv.classList.contains('show')) {
-        animateCSS(accountDiv, 'fadeOutRight').then((ok) => {
+        animateCSS(accountDiv, 'slideOutRight').then((ok) => {
             accountDiv.classList.toggle('show');
             hideBackdrop();
         });
     } else {
         accountDiv.classList.toggle('show');
         showBackdrop();
-        animateCSS(accountDiv, 'fadeInRight');
+        animateCSS(accountDiv, 'slideInRight');
     }
 }
 
 function toggleSettings() {
     if (settingsDiv.classList.contains('show')) {
-        animateCSS(settingsDiv, 'fadeOutRight').then((ok) => {
+        animateCSS(settingsDiv, 'slideOutRight').then((ok) => {
             settingsDiv.classList.toggle('show');
             hideBackdrop();
         });
     } else {
         settingsDiv.classList.toggle('show');
         showBackdrop();
-        animateCSS(settingsDiv, 'fadeInRight');
+        animateCSS(settingsDiv, 'slideInRight');
     }
 }
 
 function toggleAddUserPanel() {
     if (addUserDiv.classList.contains('show')) {
-        animateCSS(addUserDiv, 'fadeOutRight').then((ok) => {
+        animateCSS(addUserDiv, 'slideOutRight').then((ok) => {
             addUserDiv.classList.toggle('show');
             hideBackdrop();
         });
     } else {
         addUserDiv.classList.toggle('show');
         showBackdrop();
-        animateCSS(addUserDiv, 'fadeInRight');
+        animateCSS(addUserDiv, 'slideInRight');
     }
 }
 
