@@ -126,7 +126,7 @@
 
         <section class="dashboard">
             <div class="top">
-                <i class="uil uil-bars sidebar-toggle"></i>
+                <i class="uil uil-bars sidebar-toggle" role="button" aria-label="Toggle sidebar"></i>
 
                 <div class="top-right-actions">
                     <a id="topModeToggle" class="top-action-btn" aria-label="Toggle theme">
@@ -407,7 +407,12 @@
                 <form id="addRowDiv" class="addRowDiv hidden" onsubmit="return false;">
                     <div class="addrow-header">
                         <h2 class="addrow-title"><i class="uil uil-plus-circle"></i> New Room</h2>
-                        <i id="add-close-btn" class="uil uil-times addrow-close"></i>
+                        <i
+                            id="add-close-btn"
+                            class="uil uil-times addrow-close"
+                            role="button"
+                            aria-label="Close panel"
+                        ></i>
                     </div>
 
                     <div class="addrow-section">
@@ -417,17 +422,49 @@
                             <div class="addrow-field-content">
                                 <span id="rowAppName" class="addrow-field-label">MiroTalk</span>
                                 <div id="add-type-dropdown" class="custom-dropdown">
-                                    <div class="custom-dropdown-trigger" tabindex="0">
+                                    <div
+                                        class="custom-dropdown-trigger"
+                                        tabindex="0"
+                                        role="button"
+                                        aria-haspopup="listbox"
+                                        aria-expanded="false"
+                                    >
                                         <span class="custom-dropdown-value">P2P</span>
                                         <i class="uil uil-angle-down custom-dropdown-arrow"></i>
                                     </div>
-                                    <div class="custom-dropdown-options">
-                                        <div class="custom-dropdown-option selected" data-value="P2P" translate="no">
+                                    <div class="custom-dropdown-options" role="listbox">
+                                        <div
+                                            class="custom-dropdown-option selected"
+                                            data-value="P2P"
+                                            translate="no"
+                                            role="option"
+                                        >
                                             P2P
                                         </div>
-                                        <div class="custom-dropdown-option" data-value="SFU" translate="no">SFU</div>
-                                        <div class="custom-dropdown-option" data-value="C2C" translate="no">C2C</div>
-                                        <div class="custom-dropdown-option" data-value="BRO" translate="no">BRO</div>
+                                        <div
+                                            class="custom-dropdown-option"
+                                            data-value="SFU"
+                                            translate="no"
+                                            role="option"
+                                        >
+                                            SFU
+                                        </div>
+                                        <div
+                                            class="custom-dropdown-option"
+                                            data-value="C2C"
+                                            translate="no"
+                                            role="option"
+                                        >
+                                            C2C
+                                        </div>
+                                        <div
+                                            class="custom-dropdown-option"
+                                            data-value="BRO"
+                                            translate="no"
+                                            role="option"
+                                        >
+                                            BRO
+                                        </div>
                                     </div>
                                     <input type="hidden" id="add-type" value="P2P" />
                                 </div>
@@ -440,14 +477,14 @@
                         <div class="addrow-field">
                             <div class="addrow-field-icon"><i class="uil uil-tag-alt"></i></div>
                             <div class="addrow-field-content">
-                                <span class="addrow-field-label">Tag</span>
+                                <label for="add-tag" class="addrow-field-label">Tag</label>
                                 <input id="add-tag" type="text" placeholder="e.g. Team Standup" name="tag" required />
                             </div>
                         </div>
                         <div class="addrow-field">
                             <div class="addrow-field-icon"><i class="uil uil-envelope"></i></div>
                             <div class="addrow-field-content">
-                                <span class="addrow-field-label">Email</span>
+                                <label for="add-email" class="addrow-field-label">Email</label>
                                 <input
                                     id="add-email"
                                     type="email"
@@ -460,7 +497,7 @@
                         <div class="addrow-field">
                             <div class="addrow-field-icon"><i class="uil uil-phone"></i></div>
                             <div class="addrow-field-content">
-                                <span class="addrow-field-label">Phone (optional)</span>
+                                <label for="add-phone" class="addrow-field-label">Phone (optional)</label>
                                 <input id="add-phone" type="text" placeholder="+1 234 567 890" name="phone" />
                             </div>
                         </div>
@@ -472,14 +509,14 @@
                             <div class="addrow-field addrow-field-half">
                                 <div class="addrow-field-icon"><i class="uil uil-calendar-alt"></i></div>
                                 <div class="addrow-field-content">
-                                    <span class="addrow-field-label">Date</span>
+                                    <label for="add-date" class="addrow-field-label">Date</label>
                                     <input id="add-date" type="text" name="date" placeholder="Select date" required />
                                 </div>
                             </div>
                             <div class="addrow-field addrow-field-half">
                                 <div class="addrow-field-icon"><i class="uil uil-clock"></i></div>
                                 <div class="addrow-field-content">
-                                    <span class="addrow-field-label">Time</span>
+                                    <label for="add-time" class="addrow-field-label">Time</label>
                                     <input id="add-time" type="text" name="time" placeholder="Select time" required />
                                 </div>
                             </div>
@@ -491,7 +528,7 @@
                         <div class="addrow-field">
                             <div class="addrow-field-icon"><i class="uil uil-link"></i></div>
                             <div class="addrow-field-content">
-                                <span class="addrow-field-label">Room Name</span>
+                                <label for="add-room" class="addrow-field-label">Room Name</label>
                                 <input id="add-room" type="text" placeholder="Room name" name="room" required />
                             </div>
                             <button id="gen-room" class="addrow-gen-btn" aria-label="Generate random room name">
@@ -499,11 +536,17 @@
                             </button>
                         </div>
                         <div id="sel-room-dropdown" class="custom-dropdown hidden" data-dropdown-id="sel-room">
-                            <div class="custom-dropdown-trigger" tabindex="0">
+                            <div
+                                class="custom-dropdown-trigger"
+                                tabindex="0"
+                                role="button"
+                                aria-haspopup="listbox"
+                                aria-expanded="false"
+                            >
                                 <span class="custom-dropdown-value"></span>
                                 <i class="uil uil-angle-down custom-dropdown-arrow"></i>
                             </div>
-                            <div class="custom-dropdown-options"></div>
+                            <div class="custom-dropdown-options" role="listbox"></div>
                             <input type="hidden" id="sel-room" value="" />
                         </div>
                     </div>
@@ -574,7 +617,12 @@
                 <form id="addUserDiv" class="addRowDiv hidden" onsubmit="return false;">
                     <div class="addrow-header">
                         <h2 class="addrow-title"><i class="uil uil-user-plus"></i> New User</h2>
-                        <i id="add-user-close-btn" class="uil uil-times addrow-close"></i>
+                        <i
+                            id="add-user-close-btn"
+                            class="uil uil-times addrow-close"
+                            role="button"
+                            aria-label="Close panel"
+                        ></i>
                     </div>
 
                     <div class="addrow-section">
@@ -582,7 +630,7 @@
                         <div class="addrow-field">
                             <div class="addrow-field-icon"><i class="uil uil-user"></i></div>
                             <div class="addrow-field-content">
-                                <span class="addrow-field-label">Username</span>
+                                <label for="add-user-username" class="addrow-field-label">Username</label>
                                 <input
                                     id="add-user-username"
                                     type="text"
@@ -595,7 +643,7 @@
                         <div class="addrow-field">
                             <div class="addrow-field-icon"><i class="uil uil-envelope"></i></div>
                             <div class="addrow-field-content">
-                                <span class="addrow-field-label">Email</span>
+                                <label for="add-user-email" class="addrow-field-label">Email</label>
                                 <input
                                     id="add-user-email"
                                     type="email"
@@ -608,7 +656,7 @@
                         <div class="addrow-field">
                             <div class="addrow-field-icon"><i class="uil uil-lock"></i></div>
                             <div class="addrow-field-content">
-                                <span class="addrow-field-label">Password</span>
+                                <label for="add-user-password" class="addrow-field-label">Password</label>
                                 <div class="password-input-wrap">
                                     <input
                                         id="add-user-password"
@@ -617,7 +665,12 @@
                                         name="password"
                                         required
                                     />
-                                    <button type="button" id="add-user-generate-password" class="password-action-btn" title="Generate password">
+                                    <button
+                                        type="button"
+                                        id="add-user-generate-password"
+                                        class="password-action-btn"
+                                        title="Generate password"
+                                    >
                                         <i class="uil uil-dice-five"></i>
                                     </button>
                                 </div>
@@ -630,7 +683,7 @@
                         <div class="addrow-field">
                             <div class="addrow-field-icon"><i class="uil uil-apps"></i></div>
                             <div class="addrow-field-content">
-                                <span class="addrow-field-label">Services Allowed</span>
+                                <span class="addrow-field-label" id="services-allowed-label">Services Allowed</span>
                                 <div class="user-services-checkboxes">
                                     <label
                                         ><input type="checkbox" id="add-user-svc-all" value="ALL" checked /> ALL</label
@@ -645,7 +698,7 @@
                         <div class="addrow-field">
                             <div class="addrow-field-icon"><i class="uil uil-lock-open-alt"></i></div>
                             <div class="addrow-field-content">
-                                <span class="addrow-field-label">Allowed Rooms</span>
+                                <label for="add-user-rooms" class="addrow-field-label">Allowed Rooms</label>
                                 <input
                                     id="add-user-rooms"
                                     type="text"
@@ -675,7 +728,12 @@
                 <div id="accountDiv" class="accountDiv hidden">
                     <div class="account-header">
                         <h2 class="account-title"><i class="uil uil-user"></i> My Account</h2>
-                        <i id="account-close-btn" class="uil uil-times account-close"></i>
+                        <i
+                            id="account-close-btn"
+                            class="uil uil-times account-close"
+                            role="button"
+                            aria-label="Close panel"
+                        ></i>
                     </div>
 
                     <div id="accountAvatarSection" class="account-avatar-section hidden">
@@ -688,14 +746,14 @@
                         <div class="account-field">
                             <div class="account-field-icon"><i class="uil uil-user-circle"></i></div>
                             <div class="account-field-content">
-                                <span class="account-field-label">Username</span>
+                                <label for="account-username" class="account-field-label">Username</label>
                                 <input id="account-username" type="text" name="text" readonly />
                             </div>
                         </div>
                         <div class="account-field">
                             <div class="account-field-icon"><i class="uil uil-envelope"></i></div>
                             <div class="account-field-content">
-                                <span class="account-field-label">Email</span>
+                                <label for="account-email" class="account-field-label">Email</label>
                                 <input id="account-email" type="text" name="text" readonly />
                             </div>
                         </div>
@@ -705,14 +763,14 @@
                                     <i class="uil uil-user"></i>
                                 </div>
                                 <div class="account-field-content">
-                                    <span class="account-field-label">Role</span>
+                                    <label for="account-role" class="account-field-label">Role</label>
                                     <input id="account-role" type="text" name="text" readonly />
                                 </div>
                             </div>
                             <div class="account-field account-field-half">
                                 <div class="account-field-icon"><i class="uil uil-bookmark"></i></div>
                                 <div class="account-field-content">
-                                    <span class="account-field-label">Account ID</span>
+                                    <label for="account-id" class="account-field-label">Account ID</label>
                                     <input id="account-id" type="text" name="text" readonly />
                                 </div>
                             </div>
@@ -725,14 +783,14 @@
                             <div class="account-field account-field-half">
                                 <div class="account-field-icon"><i class="uil uil-apps"></i></div>
                                 <div class="account-field-content">
-                                    <span class="account-field-label">Services</span>
+                                    <label for="account-services-allowed" class="account-field-label">Services</label>
                                     <input id="account-services-allowed" type="text" name="text" readonly />
                                 </div>
                             </div>
                             <div class="account-field account-field-half">
                                 <div class="account-field-icon"><i class="uil uil-lock-open-alt"></i></div>
                                 <div class="account-field-content">
-                                    <span class="account-field-label">Rooms</span>
+                                    <label for="account-rooms-allowed" class="account-field-label">Rooms</label>
                                     <input id="account-rooms-allowed" type="text" name="text" readonly />
                                 </div>
                             </div>
@@ -745,14 +803,14 @@
                             <div class="account-field account-field-half">
                                 <div class="account-field-icon"><i class="uil uil-calendar-alt"></i></div>
                                 <div class="account-field-content">
-                                    <span class="account-field-label">Created</span>
+                                    <label for="account-created-at" class="account-field-label">Created</label>
                                     <input id="account-created-at" type="text" name="text" readonly />
                                 </div>
                             </div>
                             <div class="account-field account-field-half">
                                 <div class="account-field-icon"><i class="uil uil-history"></i></div>
                                 <div class="account-field-content">
-                                    <span class="account-field-label">Updated</span>
+                                    <label for="account-updated-at" class="account-field-label">Updated</label>
                                     <input id="account-updated-at" type="text" name="text" readonly />
                                 </div>
                             </div>
@@ -772,7 +830,12 @@
                 <div id="settingsDiv" class="settingsDiv hidden">
                     <div class="settings-header">
                         <h2 class="settings-title"><i class="uil uil-setting"></i> Settings</h2>
-                        <i id="settings-close-btn" class="uil uil-times settings-close"></i>
+                        <i
+                            id="settings-close-btn"
+                            class="uil uil-times settings-close"
+                            role="button"
+                            aria-label="Close panel"
+                        ></i>
                     </div>
 
                     <ul class="settings-ul">

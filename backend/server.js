@@ -93,6 +93,7 @@ mongoose
             const sanitizedHeaders = { ...req.headers };
             if (sanitizedHeaders['x-access-token']) sanitizedHeaders['x-access-token'] = '***';
             if (sanitizedHeaders['authorization']) sanitizedHeaders['authorization'] = '***';
+            if (sanitizedHeaders['cookie']) sanitizedHeaders['cookie'] = '***';
             log.debug('New request:', {
                 headers: sanitizedHeaders,
                 body: sanitizedBody,

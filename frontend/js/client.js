@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.35
+ * @version 1.3.36
  */
 
 const userAgent = navigator.userAgent;
@@ -269,7 +269,8 @@ usersDataTable.on('draw', function () {
     initCustomDropdowns(document.getElementById('usersTable'));
 });
 
-const getMode = window.localStorage.mode || 'dark';
+const getMode =
+    window.localStorage.mode || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 const getStatus = window.localStorage.status;
 
 if (getMode && getMode === 'dark') {
@@ -572,16 +573,16 @@ function buildCustomDropdownHTML(id, options, selectedValue, translate, disabled
     let optionsHTML = '';
     options.forEach((o) => {
         const sel = o.value === selectedValue ? ' selected' : '';
-        optionsHTML += `<div class="custom-dropdown-option${sel}" data-value="${o.value}"${noTranslate}>${o.label}</div>`;
+        optionsHTML += `<div class="custom-dropdown-option${sel}" data-value="${o.value}"${noTranslate} role="option">${o.label}</div>`;
     });
     return (
         `<span data-search="${selectedLabel}">` +
         `<div class="custom-dropdown${disabledClass}" data-dropdown-id="${id}">` +
-        `<div class="custom-dropdown-trigger" tabindex="0">` +
+        `<div class="custom-dropdown-trigger" tabindex="0" role="button" aria-haspopup="listbox" aria-expanded="false">` +
         `<span class="custom-dropdown-value"${noTranslate}>${selectedLabel}</span>` +
         `<i class="uil uil-angle-down custom-dropdown-arrow"></i>` +
         `</div>` +
-        `<div class="custom-dropdown-options">${optionsHTML}</div>` +
+        `<div class="custom-dropdown-options" role="listbox">${optionsHTML}</div>` +
         `<input type="hidden" id="${id}" value="${selectedValue}" />` +
         `</div>` +
         `</span>`
@@ -619,10 +620,12 @@ function initCustomDropdowns(container) {
             const searchWrapper = dd.closest('[data-search]');
             if (searchWrapper) searchWrapper.dataset.search = opt.textContent;
             dd.classList.remove('open');
+            trigger.setAttribute('aria-expanded', 'false');
             trigger.focus();
         };
         trigger.addEventListener('click', () => {
             dd.classList.toggle('open');
+            trigger.setAttribute('aria-expanded', dd.classList.contains('open') ? 'true' : 'false');
             if (dd.classList.contains('open')) positionDropdownOptions(dd);
         });
         trigger.addEventListener('keydown', (e) => {
@@ -641,6 +644,7 @@ function initCustomDropdowns(container) {
                 }
             } else if (e.key === 'Escape') {
                 dd.classList.remove('open');
+                trigger.setAttribute('aria-expanded', 'false');
                 opts.forEach((o) => o.classList.remove('focused'));
             } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
                 e.preventDefault();
@@ -666,6 +670,8 @@ document.addEventListener('click', (e) => {
     document.querySelectorAll('.custom-dropdown.open').forEach((dd) => {
         if (!dd.contains(e.target)) {
             dd.classList.remove('open');
+            const trigger = dd.querySelector('.custom-dropdown-trigger');
+            if (trigger) trigger.setAttribute('aria-expanded', 'false');
             dd.querySelectorAll('.custom-dropdown-option.focused').forEach((o) => o.classList.remove('focused'));
         }
     });
@@ -945,6 +951,10 @@ function resetAddUserForm() {
     document.getElementById('add-user-svc-sfu').checked = false;
     document.getElementById('add-user-svc-c2c').checked = false;
     document.getElementById('add-user-svc-bro').checked = false;
+    [addUserUsername, addUserEmail, addUserPassword].forEach((el) => {
+        el.style.borderColor = '';
+        el.style.boxShadow = '';
+    });
 }
 
 function loadUsers() {
@@ -1166,6 +1176,11 @@ function createUser() {
     const roomsRaw = addUserRooms.value.trim();
 
     if (!username || !email || !password) {
+        [addUserUsername, addUserEmail, addUserPassword].forEach((el) => {
+            const isEmpty = !el.value.trim();
+            el.style.borderColor = isEmpty ? 'var(--danger-color)' : '';
+            el.style.boxShadow = isEmpty ? '0 0 0 2px var(--danger-bg-light)' : '';
+        });
         popupMessage('warning', 'Username, email, and password are required');
         return;
     }
@@ -1326,7 +1341,26 @@ async function showDataTable() {
 function addRow() {
     const data = getFormValues();
 
-    if (!data.tag || !data.email || !data.date || !data.time || !data.room) {
+    const requiredFields = [
+        { el: addTag, valid: !!data.tag },
+        { el: addEmail, valid: !!data.email },
+        { el: addDate, valid: !!data.date },
+        { el: addTime, valid: !!data.time },
+        { el: addRoom, valid: !!data.room },
+    ];
+    let allValid = true;
+    requiredFields.forEach(({ el, valid }) => {
+        if (!valid) {
+            el.style.borderColor = 'var(--danger-color)';
+            el.style.boxShadow = '0 0 0 2px var(--danger-bg-light)';
+            allValid = false;
+        } else {
+            el.style.borderColor = '';
+            el.style.boxShadow = '';
+        }
+    });
+    if (!allValid) {
+        popupMessage('warning', 'Please fill in all required fields');
         return false;
     }
 
@@ -1973,13 +2007,24 @@ function refreshPage() {
 }
 
 function loadDashboardStats() {
+    // Show skeleton loading on stat values
+    document.querySelectorAll('.stat-value').forEach((el) => {
+        el.classList.add('skeleton');
+    });
+
     getDashboardStats()
         .then((data) => {
             console.log('[API] - DASHBOARD STATS RESPONSE', data);
+            document.querySelectorAll('.stat-value').forEach((el) => {
+                el.classList.remove('skeleton');
+            });
             renderDashboardStats(data);
         })
         .catch((err) => {
             console.error('[API] - DASHBOARD STATS ERROR', err);
+            document.querySelectorAll('.stat-value').forEach((el) => {
+                el.classList.remove('skeleton');
+            });
         });
 }
 
@@ -2099,7 +2144,25 @@ function resetFormValues() {
     addRoom.value = getUUID4();
     if (addDate._flatpickr) addDate._flatpickr.setDate(addDate.value, false);
     if (addTime._flatpickr) addTime._flatpickr.setDate(addTime.value, false);
+    [addTag, addEmail, addDate, addTime, addRoom].forEach((el) => {
+        el.style.borderColor = '';
+        el.style.boxShadow = '';
+    });
 }
+
+// Clear validation styling on input
+[addTag, addEmail, addDate, addTime, addRoom].forEach((el) => {
+    el.addEventListener('input', () => {
+        el.style.borderColor = '';
+        el.style.boxShadow = '';
+    });
+});
+[addUserUsername, addUserEmail, addUserPassword].forEach((el) => {
+    el.addEventListener('input', () => {
+        el.style.borderColor = '';
+        el.style.boxShadow = '';
+    });
+});
 
 function getFlatpickrOnReady() {
     const isDark = document.body.classList.contains('dark');
