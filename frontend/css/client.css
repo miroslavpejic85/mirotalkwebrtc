@@ -1720,7 +1720,7 @@ body.dark .custom-dropdown-options {
     color: #fff;
     background: var(--accent-color);
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition:
         background-color 0.2s ease,
