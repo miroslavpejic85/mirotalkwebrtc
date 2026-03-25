@@ -609,13 +609,18 @@
                             <div class="addrow-field-icon"><i class="uil uil-lock"></i></div>
                             <div class="addrow-field-content">
                                 <span class="addrow-field-label">Password</span>
-                                <input
-                                    id="add-user-password"
-                                    type="password"
-                                    placeholder="Enter password"
-                                    name="password"
-                                    required
-                                />
+                                <div class="password-input-wrap">
+                                    <input
+                                        id="add-user-password"
+                                        type="text"
+                                        placeholder="Enter password"
+                                        name="password"
+                                        required
+                                    />
+                                    <button type="button" id="add-user-generate-password" class="password-action-btn" title="Generate password">
+                                        <i class="uil uil-dice-five"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -754,7 +759,10 @@
                         </div>
                     </div>
 
-                    <div class="account-danger-zone">
+                    <div class="account-actions">
+                        <button id="account-change-password" class="account-change-password-btn hidden">
+                            <i class="uil uil-lock"></i> Change Password
+                        </button>
                         <button id="account-delete" class="account-delete-btn">
                             <i class="uil uil-trash-alt"></i> Delete Account
                         </button>

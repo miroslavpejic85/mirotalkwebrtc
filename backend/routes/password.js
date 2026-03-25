@@ -6,6 +6,7 @@ const User = require('../models/users');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const logs = require('../common/logs');
+const auth = require('../middleware/auth');
 const { sendPasswordResetEmail, sendPasswordChangeConfirmation } = require('../lib/nodemailer');
 const { passwordResetLimiter } = require('../middleware/rateLimiter');
 
@@ -151,6 +152,54 @@ router.post('/password/reset/confirm', async (req, res) => {
         res.status(200).json({ message: 'Password reset successful' });
     } catch (error) {
         log.error('Password reset error', { error: error.message });
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Change password (authenticated)
+router.post('/password/change', auth, async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ message: 'Current password and new password are required' });
+        }
+
+        const validPassword = isValidPassword(newPassword);
+        if (validPassword !== true) {
+            return res.status(400).json({ message: validPassword });
+        }
+
+        const user = await User.findOne({ email: req.user.email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (user.email === USER_DEMO_EMAIL) {
+            return res.status(400).json({ message: 'Password change is not allowed for demo account' });
+        }
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Current password is incorrect' });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+        user.updatedAt = new Date().toISOString();
+        await user.save();
+
+        log.info('Password changed successfully', { email: user.email });
+
+        try {
+            await sendPasswordChangeConfirmation(user.username, user.email);
+        } catch (emailError) {
+            log.error('Failed to send confirmation email', { error: emailError.message });
+        }
+
+        res.status(200).json({ message: 'Password changed successfully' });
+    } catch (error) {
+        log.error('Password change error', { error: error.message });
         res.status(500).json({ message: 'Server error' });
     }
 });

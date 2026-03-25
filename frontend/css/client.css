@@ -1305,6 +1305,37 @@ body.dark .addRowDiv {
     outline: none;
 }
 
+.password-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.password-input-wrap input {
+    flex: 1;
+    min-width: 0;
+}
+
+.password-action-btn {
+    all: unset;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 16px;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+    flex-shrink: 0;
+}
+
+.password-action-btn:hover {
+    color: var(--primary-color);
+    background: var(--border-color);
+}
+
 /* Custom dropdown */
 .custom-dropdown {
     position: relative;
@@ -1660,15 +1691,89 @@ body.dark .custom-dropdown-options {
     box-shadow: none;
 }
 
-.account-danger-zone {
+.account-actions {
+    display: flex;
+    gap: 8px;
     margin-top: 20px;
     padding-top: 14px;
     border-top: 1px solid var(--border-color);
 }
 
+.account-change-password-btn {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--primary-color);
+    border-radius: 8px;
+    background-color: transparent;
+    color: var(--primary-color);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--tran-03);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.account-change-password-btn:hover {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+.change-password-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left;
+    margin-top: 10px;
+}
+
+.change-password-form label {
+    font-size: 13px;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.change-password-form .password-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.change-password-form .password-input-wrap .swal2-input {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.change-password-form .password-action-btn {
+    all: unset;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 16px;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+    flex-shrink: 0;
+}
+
+.change-password-form .password-action-btn:hover {
+    color: var(--primary-color);
+    background: var(--border-color);
+}
+
 .account-delete-btn {
-    width: 100%;
-    margin-top: 4px;
+    flex: 1;
+    margin-top: 0;
     padding: 10px;
     border: 1px solid var(--danger-color);
     border-radius: 8px;

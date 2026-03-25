@@ -167,6 +167,87 @@ paths:
                 '409':
                     description: Already confirmed
 
+    /user/invite:
+        post:
+            security:
+                - authorization: []
+            tags:
+                - user
+            summary: Send invitation email
+            description: Send an invitation email to a user with their login credentials.
+            operationId: sendInvitation
+            requestBody:
+                description: Invitation details
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                username:
+                                    type: string
+                                password:
+                                    type: string
+                            required:
+                                - email
+                                - username
+                                - password
+                required: true
+            responses:
+                '200':
+                    description: Invitation email sent successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                '400':
+                    description: Bad request
+                '403':
+                    description: Forbidden
+
+    /password/change:
+        post:
+            security:
+                - authorization: []
+            tags:
+                - user
+            summary: Change password
+            description: Change the authenticated user's password.
+            operationId: changePassword
+            requestBody:
+                description: Current and new password
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                currentPassword:
+                                    type: string
+                                newPassword:
+                                    type: string
+                            required:
+                                - currentPassword
+                                - newPassword
+                required: true
+            responses:
+                '200':
+                    description: Password changed successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                '400':
+                    description: Bad request
+                '404':
+                    description: User not found
+
     /user/{id}:
         get:
             security:

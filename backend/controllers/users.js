@@ -452,6 +452,21 @@ async function userGetMe(req, res) {
     }
 }
 
+async function sendInvitation(req, res) {
+    try {
+        const { email, username, password } = req.body;
+        if (!email || !username || !password) {
+            return res.status(400).json({ message: 'Email, username, and password are required' });
+        }
+        log.debug('Sending invitation email', { email, username });
+        nodemailer.sendInvitationEmail(username, email, password);
+        res.status(200).json({ message: 'Invitation email sent successfully' });
+    } catch (error) {
+        log.error('sendInvitation', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
 module.exports = {
     userCreate,
     userLogin,
@@ -465,4 +480,5 @@ module.exports = {
     userUpdate,
     userDelete,
     userDeleteALL,
+    sendInvitation,
 };

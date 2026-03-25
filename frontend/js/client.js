@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.33
+ * @version 1.3.35
  */
 
 const userAgent = navigator.userAgent;
@@ -128,6 +128,7 @@ const accountRoomsAllowed = document.getElementById('account-rooms-allowed');
 const accountRole = document.getElementById('account-role');
 const accountRoleIcon = document.getElementById('account-role-icon');
 const accountDelete = document.getElementById('account-delete');
+const accountChangePassword = document.getElementById('account-change-password');
 
 const settingsDiv = document.getElementById('settingsDiv');
 const settingsClose = document.getElementById('settings-close-btn');
@@ -160,6 +161,7 @@ const closeAddUserBtn = document.getElementById('add-user-close-btn');
 const addUserUsername = document.getElementById('add-user-username');
 const addUserEmail = document.getElementById('add-user-email');
 const addUserPassword = document.getElementById('add-user-password');
+const addUserGeneratePassword = document.getElementById('add-user-generate-password');
 const addUserRooms = document.getElementById('add-user-rooms');
 const addUserBtn = document.getElementById('add-user-btn');
 const refreshUsersBtn = document.getElementById('refresh-users-btn');
@@ -792,6 +794,13 @@ accountClose.addEventListener('click', () => {
 accountDelete.addEventListener('click', () => {
     delMyAccount();
 });
+accountChangePassword.addEventListener('click', () => {
+    changeMyPassword();
+});
+
+addUserGeneratePassword.addEventListener('click', () => {
+    addUserPassword.value = generateRandomPassword();
+});
 
 settingsClose.addEventListener('click', () => {
     toggleSettings();
@@ -1189,10 +1198,10 @@ function createUser() {
                 // Update the user with allow and allowedRooms
                 userUpdate(res._id, { username, allow, allowedRooms })
                     .then(() => {
-                        popupMessage('toast', 'User created successfully');
                         toggleAddUserPanel();
                         loadUsers();
                         loadDashboardStats();
+                        promptSendInvitation(username, email, password);
                     })
                     .catch((err) => {
                         console.error('[API] - USER UPDATE AFTER CREATE ERROR', err);
@@ -1210,6 +1219,41 @@ function createUser() {
         .finally(() => {
             btnReset(addUserBtn);
         });
+}
+
+function promptSendInvitation(username, email, password) {
+    if (isOidcMode) {
+        popupMessage('toast', 'User created successfully');
+        return;
+    }
+    Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: true,
+        position: 'top',
+        icon: 'success',
+        title: 'User Created',
+        html: `Send an invitation email to <strong>${email}</strong> with login credentials?`,
+        showCancelButton: true,
+        confirmButtonText: '<i class="uil uil-envelope-send"></i> Send Invitation',
+        cancelButtonText: 'Skip',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            userSendInvitation({ username, email, password })
+                .then((res) => {
+                    console.log('[API] - SEND INVITATION RESPONSE', res);
+                    popupMessage('toast', 'Invitation email sent successfully');
+                })
+                .catch((err) => {
+                    console.error('[API] - SEND INVITATION ERROR', err);
+                    const msg = err.response?.data?.message || err.message;
+                    popupMessage('error', `Failed to send invitation: ${msg}`);
+                });
+        } else {
+            popupMessage('toast', 'User created successfully');
+        }
+    });
 }
 
 async function showDataTable() {
@@ -1786,6 +1830,7 @@ function getMyAccount() {
                     res.role === 'admin'
                         ? '<i class="uil uil-shield-check admin-role-icon"></i>'
                         : '<i class="uil uil-user"></i>';
+                accountChangePassword.classList.toggle('hidden', isOidcMode);
                 toggleAccount();
             }
         })
@@ -1821,6 +1866,102 @@ function delMyAccount() {
                 });
         }
     });
+}
+
+function changeMyPassword() {
+    Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: true,
+        position: 'top',
+        icon: 'info',
+        title: 'Change Password',
+        html: `
+            <div class="change-password-form">
+                <div>
+                    <label>Current Password</label>
+                    <div class="password-input-wrap">
+                        <input type="password" id="swal-current-password" class="swal2-input" placeholder="Current password">
+                        <button type="button" class="password-action-btn swal-toggle-pw" title="Show password"><i class="uil uil-eye"></i></button>
+                    </div>
+                </div>
+                <div>
+                    <label>New Password</label>
+                    <div class="password-input-wrap">
+                        <input type="password" id="swal-new-password" class="swal2-input" placeholder="New password (min 6 chars)">
+                        <button type="button" class="password-action-btn swal-toggle-pw" title="Show password"><i class="uil uil-eye"></i></button>
+                    </div>
+                </div>
+                <div>
+                    <label>Confirm New Password</label>
+                    <div class="password-input-wrap">
+                        <input type="password" id="swal-confirm-password" class="swal2-input" placeholder="Confirm new password">
+                        <button type="button" class="password-action-btn swal-toggle-pw" title="Show password"><i class="uil uil-eye"></i></button>
+                    </div>
+                </div>
+            </div>
+        `,
+        didOpen: () => {
+            document.querySelectorAll('.swal-toggle-pw').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const input = btn.parentElement.querySelector('input');
+                    togglePasswordVisibility(input, btn);
+                });
+            });
+        },
+        showCancelButton: true,
+        confirmButtonText: '<i class="uil uil-check-circle"></i> Change',
+        cancelButtonText: 'Cancel',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        preConfirm: () => {
+            const currentPassword = document.getElementById('swal-current-password').value;
+            const newPassword = document.getElementById('swal-new-password').value;
+            const confirmPassword = document.getElementById('swal-confirm-password').value;
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                Swal.showValidationMessage('All fields are required');
+                return false;
+            }
+            if (newPassword.length < 6) {
+                Swal.showValidationMessage('New password must be at least 6 characters');
+                return false;
+            }
+            if (newPassword !== confirmPassword) {
+                Swal.showValidationMessage('New passwords do not match');
+                return false;
+            }
+            return { currentPassword, newPassword };
+        },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            passwordChange(result.value)
+                .then((res) => {
+                    console.log('[API] - CHANGE PASSWORD RESPONSE', res);
+                    popupMessage('toast', res.message || 'Password changed successfully');
+                })
+                .catch((err) => {
+                    console.error('[API] - CHANGE PASSWORD ERROR', err);
+                    const msg = err.response?.data?.message || err.message;
+                    popupMessage('warning', msg);
+                });
+        }
+    });
+}
+
+function generateRandomPassword(length = 12) {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*';
+    const array = crypto.getRandomValues(new Uint8Array(length));
+    return Array.from(array, (b) => chars[b % chars.length]).join('');
+}
+
+function togglePasswordVisibility(input, btn) {
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('uil-eye', 'uil-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.replace('uil-eye-slash', 'uil-eye');
+    }
 }
 
 function refreshPage() {

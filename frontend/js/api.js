@@ -157,6 +157,17 @@ function smsSend(data) {
     }).then((response) => response.data);
 }
 
+// API USER INVITATION
+
+function userSendInvitation(data) {
+    return axios({
+        method: 'POST',
+        url: `${apiPath}/user/invite`,
+        headers: headers,
+        data: data,
+    }).then((response) => response.data);
+}
+
 // API DASHBOARD
 
 function getDashboardStats() {
@@ -208,6 +219,15 @@ function passwordResetConfirm(data) {
     return axios({
         method: 'POST',
         url: `${apiPath}/password/reset/confirm`,
+        data: data,
+    }).then((response) => response.data);
+}
+
+function passwordChange(data) {
+    return axios({
+        method: 'POST',
+        url: `${apiPath}/password/change`,
+        headers: headers,
         data: data,
     }).then((response) => response.data);
 }

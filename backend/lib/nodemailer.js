@@ -191,11 +191,64 @@ function sendPasswordChangeConfirmation(name, email) {
         .catch((err) => log.error(err));
 }
 
+function sendInvitationEmail(name, email, password) {
+    transport
+        .sendMail({
+            from: EMAIL_FROM,
+            to: email,
+            subject: 'MiroTalk WEB - You are invited!',
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h1 style="color: #376df9;">Welcome to MiroTalk!</h1>
+                    <h2>Hello ${name}</h2>
+                    <p>An account has been created for you. Here are your login credentials:</p>
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Username</td>
+                            <td style="border: 1px solid #ddd; padding: 10px;">${name}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Email</td>
+                            <td style="border: 1px solid #ddd; padding: 10px;">${email}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Password</td>
+                            <td style="border: 1px solid #ddd; padding: 10px;">${password}</td>
+                        </tr>
+                    </table>
+                    <div style="margin: 30px 0;">
+                        <a href="${SERVER_URL}" 
+                           style="background-color: #376df9; color: white; padding: 12px 24px; 
+                                  text-decoration: none; border-radius: 5px; display: inline-block;">
+                            Login Now
+                        </a>
+                    </div>
+                    <div style="margin-top: 30px; padding: 14px 18px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                        <p style="margin: 0; color: #856404; font-size: 14px; font-weight: bold;">
+                            ⚠️ Security Notice
+                        </p>
+                        <p style="margin: 6px 0 0; color: #856404; font-size: 14px;">
+                            After logging in, please change your password from your Account settings for security reasons.
+                        </p>
+                    </div>
+                    <br/>
+                    <p>Enjoying our app? Unlock its full potential with a MiroTalk purchase on CodeCanyon.</p>
+                    <a href="${SUPPORT}" target="_blank">Purchase from CodeCanyon</a>
+                    <br/>
+                    <p>Thank you for your support!</p>
+                    <p>MiroTalk Team</p>
+                </div>
+            `,
+        })
+        .catch((err) => log.error(err));
+}
+
 module.exports = {
     sendConfirmationEmail,
     sendConfirmationOkEmail,
     sendPasswordResetEmail,
     sendPasswordChangeConfirmation,
+    sendInvitationEmail,
     EMAIL_VERIFICATION,
     SUPPORT,
 };
