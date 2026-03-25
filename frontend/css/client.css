@@ -1070,27 +1070,25 @@ body.dark .addRowDiv {
     margin-top: 8px;
     width: 100%;
     border-radius: 6px;
-    border: 1px solid var(--border-color);
-    background-color: var(--panel-color);
+    border: none;
+    background-color: transparent;
     color: var(--text-color);
     color-scheme: var(--input-color-schema);
     font-size: 14px;
     outline: none;
     cursor: auto;
-    transition:
-        border-color 0.2s ease,
-        background-color 0.2s ease;
+    transition: background-color 0.2s ease;
 }
 
 .accountDiv input:hover,
 .addRowDiv input:hover {
-    border-color: var(--color-hover);
+    border: none;
 }
 
 .accountDiv input:focus,
 .addRowDiv input:focus {
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px var(--accent-ring);
+    border: none;
+    box-shadow: none;
 }
 .addRowDiv .date-time {
     display: inline;
