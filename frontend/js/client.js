@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.22
+ * @version 1.3.30
  */
 
 const userAgent = navigator.userAgent;
@@ -121,7 +121,6 @@ const accountClose = document.getElementById('account-close-btn');
 const accountID = document.getElementById('account-id');
 const accountEmail = document.getElementById('account-email');
 const accountUsername = document.getElementById('account-username');
-const accountToken = document.getElementById('account-token');
 const accountCreatedAt = document.getElementById('account-created-at');
 const accountUpdatedAt = document.getElementById('account-updated-at');
 const accountServicesAllowed = document.getElementById('account-services-allowed');
@@ -136,6 +135,7 @@ const settingsClose = document.getElementById('settings-close-btn');
 const addRowDiv = document.getElementById('addRowDiv');
 const openAddBtn = document.getElementById('open-add-btn');
 const closeAddBtn = document.getElementById('add-close-btn');
+const panelBackdrop = document.getElementById('panelBackdrop');
 
 const addType = document.getElementById('add-type');
 const addTypeDropdown = document.getElementById('add-type-dropdown');
@@ -277,7 +277,7 @@ if (getMode && getMode === 'dark') {
 if (getStatus && getStatus === 'close') sidebar.classList.toggle('close');
 
 const toolTips = [
-    { element: delAllBtn, text: 'Delete all rooms', position: 'top' },
+    { element: delAllBtn, text: 'Delete rooms', position: 'top' },
     { element: refreshBtn, text: 'Refresh rooms', position: 'top' },
 ];
 
@@ -342,6 +342,16 @@ $(document).ready(async function () {
                 if (profileImg) {
                     profileImg.src = oidcStatus.picture;
                     profileImg.alt = oidcStatus.name || 'Profile';
+                }
+                // Show profile image in Account panel
+                const avatarSection = document.getElementById('accountAvatarSection');
+                const avatarImg = document.getElementById('accountAvatarImg');
+                const avatarName = document.getElementById('accountAvatarName');
+                if (avatarSection && avatarImg) {
+                    avatarImg.src = oidcStatus.picture;
+                    avatarImg.alt = oidcStatus.name || 'Profile';
+                    if (avatarName && oidcStatus.name) avatarName.textContent = oidcStatus.name;
+                    avatarSection.classList.remove('hidden');
                 }
             }
         }
@@ -598,30 +608,107 @@ function initCustomDropdowns(container) {
         dd.classList.add('cd-ready');
         if (dd.classList.contains('cd-disabled')) return;
         const trigger = dd.querySelector('.custom-dropdown-trigger');
+        const selectOption = (opt) => {
+            dd.querySelectorAll('.custom-dropdown-option').forEach((o) => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            const hidden = dd.querySelector('input[type="hidden"]');
+            if (hidden) hidden.value = opt.dataset.value;
+            dd.querySelector('.custom-dropdown-value').textContent = opt.textContent;
+            const searchWrapper = dd.closest('[data-search]');
+            if (searchWrapper) searchWrapper.dataset.search = opt.textContent;
+            dd.classList.remove('open');
+            trigger.focus();
+        };
         trigger.addEventListener('click', () => {
             dd.classList.toggle('open');
             if (dd.classList.contains('open')) positionDropdownOptions(dd);
         });
-        dd.querySelectorAll('.custom-dropdown-option').forEach((opt) => {
-            opt.addEventListener('click', () => {
-                dd.querySelectorAll('.custom-dropdown-option').forEach((o) => o.classList.remove('selected'));
-                opt.classList.add('selected');
-                const hidden = dd.querySelector('input[type="hidden"]');
-                if (hidden) hidden.value = opt.dataset.value;
-                dd.querySelector('.custom-dropdown-value').textContent = opt.textContent;
-                const searchWrapper = dd.closest('[data-search]');
-                if (searchWrapper) searchWrapper.dataset.search = opt.textContent;
+        trigger.addEventListener('keydown', (e) => {
+            const opts = [...dd.querySelectorAll('.custom-dropdown-option')];
+            if (!opts.length) return;
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                if (!dd.classList.contains('open')) {
+                    dd.classList.add('open');
+                    positionDropdownOptions(dd);
+                    const cur = dd.querySelector('.custom-dropdown-option.selected') || opts[0];
+                    cur.classList.add('focused');
+                } else {
+                    const focused = dd.querySelector('.custom-dropdown-option.focused');
+                    if (focused) selectOption(focused);
+                }
+            } else if (e.key === 'Escape') {
                 dd.classList.remove('open');
-            });
+                opts.forEach((o) => o.classList.remove('focused'));
+            } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (!dd.classList.contains('open')) {
+                    dd.classList.add('open');
+                    positionDropdownOptions(dd);
+                }
+                const focused = dd.querySelector('.custom-dropdown-option.focused');
+                let idx = focused ? opts.indexOf(focused) : -1;
+                opts.forEach((o) => o.classList.remove('focused'));
+                idx = e.key === 'ArrowDown' ? Math.min(idx + 1, opts.length - 1) : Math.max(idx - 1, 0);
+                opts[idx].classList.add('focused');
+                opts[idx].scrollIntoView({ block: 'nearest' });
+            }
+        });
+        dd.querySelectorAll('.custom-dropdown-option').forEach((opt) => {
+            opt.addEventListener('click', () => selectOption(opt));
         });
     });
 }
 
 document.addEventListener('click', (e) => {
     document.querySelectorAll('.custom-dropdown.open').forEach((dd) => {
-        if (!dd.contains(e.target)) dd.classList.remove('open');
+        if (!dd.contains(e.target)) {
+            dd.classList.remove('open');
+            dd.querySelectorAll('.custom-dropdown-option.focused').forEach((o) => o.classList.remove('focused'));
+        }
     });
 });
+
+// Button loading state helpers
+function btnLoading(btn, label) {
+    btn._origHTML = btn.innerHTML;
+    btn._origOnclick = btn.getAttribute('onclick');
+    btn.disabled = true;
+    if (btn.classList.contains('action-icon')) {
+        // Store original classes and swap icon class for spinner
+        btn._origClass = btn.className;
+        btn.className = 'action-icon loading';
+        btn.removeAttribute('onclick');
+        btn.style.pointerEvents = 'none';
+        btn.innerHTML = '<span class="btn-spinner"></span>';
+    } else {
+        btn.innerHTML = `<span class="btn-spinner"></span> ${label || 'Loading...'}`;
+    }
+}
+
+function btnReset(btn) {
+    btn.disabled = false;
+    if (btn._origClass) {
+        btn.className = btn._origClass;
+        btn._origClass = null;
+    }
+    if (btn._origOnclick) {
+        btn.setAttribute('onclick', btn._origOnclick);
+        btn._origOnclick = null;
+    }
+    btn.style.pointerEvents = '';
+    if (btn._origHTML != null) btn.innerHTML = btn._origHTML;
+}
+
+// Row flash feedback
+function flashRow(row, color = 'rgba(76, 175, 80, 0.15)') {
+    if (!row) return;
+    row.style.transition = 'background-color 0.3s';
+    row.style.backgroundColor = color;
+    setTimeout(() => {
+        row.style.backgroundColor = '';
+    }, 1500);
+}
 
 initCustomDropdowns();
 
@@ -774,9 +861,11 @@ function toggleAddRows() {
     if (addRowDiv.classList.contains('show')) {
         animateCSS(addRowDiv, 'fadeOutRight').then((ok) => {
             addRowDiv.classList.toggle('show');
+            hideBackdrop();
         });
     } else {
         addRowDiv.classList.toggle('show');
+        showBackdrop();
         animateCSS(addRowDiv, 'fadeInRight');
     }
 }
@@ -785,9 +874,11 @@ function toggleAccount() {
     if (accountDiv.classList.contains('show')) {
         animateCSS(accountDiv, 'fadeOutRight').then((ok) => {
             accountDiv.classList.toggle('show');
+            hideBackdrop();
         });
     } else {
         accountDiv.classList.toggle('show');
+        showBackdrop();
         animateCSS(accountDiv, 'fadeInRight');
     }
 }
@@ -796,9 +887,11 @@ function toggleSettings() {
     if (settingsDiv.classList.contains('show')) {
         animateCSS(settingsDiv, 'fadeOutRight').then((ok) => {
             settingsDiv.classList.toggle('show');
+            hideBackdrop();
         });
     } else {
         settingsDiv.classList.toggle('show');
+        showBackdrop();
         animateCSS(settingsDiv, 'fadeInRight');
     }
 }
@@ -807,12 +900,31 @@ function toggleAddUserPanel() {
     if (addUserDiv.classList.contains('show')) {
         animateCSS(addUserDiv, 'fadeOutRight').then((ok) => {
             addUserDiv.classList.toggle('show');
+            hideBackdrop();
         });
     } else {
         addUserDiv.classList.toggle('show');
+        showBackdrop();
         animateCSS(addUserDiv, 'fadeInRight');
     }
 }
+
+function showBackdrop() {
+    panelBackdrop.classList.remove('hidden');
+    requestAnimationFrame(() => panelBackdrop.classList.add('show'));
+}
+
+function hideBackdrop() {
+    panelBackdrop.classList.remove('show');
+    panelBackdrop.addEventListener('transitionend', () => panelBackdrop.classList.add('hidden'), { once: true });
+}
+
+panelBackdrop.addEventListener('click', () => {
+    if (addRowDiv.classList.contains('show')) toggleAddRows();
+    if (accountDiv.classList.contains('show')) toggleAccount();
+    if (settingsDiv.classList.contains('show')) toggleSettings();
+    if (addUserDiv.classList.contains('show')) toggleAddUserPanel();
+});
 
 function resetAddUserForm() {
     addUserUsername.value = '';
@@ -898,11 +1010,6 @@ function getUserRow(u) {
     const createdDate = u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-';
     const createdISO = u.createdAt ? new Date(u.createdAt).toISOString().split('T')[0] : '';
 
-    const saveIcon = `<i id="usave_${u._id}" onclick="saveUser('${u._id}')" class="uil uil-save"></i>`;
-    const deleteIcon = isSelf
-        ? ''
-        : `<i id="udel_${u._id}" onclick="deleteUser('${u._id}')" class="uil uil-times"></i>`;
-
     const services = ['ALL', 'P2P', 'SFU', 'C2C', 'BRO'];
 
     const roleOptions = [
@@ -911,6 +1018,18 @@ function getUserRow(u) {
     ];
     const allowDropdownOptions = services.map((s) => ({ value: s, label: s }));
     const selectedAllow = userAllow[0] || 'ALL';
+
+    const userInlineIcons = [];
+    userInlineIcons.push(
+        `<i id="usave_${u._id}" onclick="saveUser('${u._id}')" class="uil uil-save action-icon" title="Save"></i>`
+    );
+    if (!isSelf) {
+        userInlineIcons.push(
+            `<i id="udel_${u._id}" onclick="deleteUser('${u._id}')" class="uil uil-trash-alt action-icon danger" title="Delete"></i>`
+        );
+    }
+
+    const actionsHtml = `<span class="action-group">${userInlineIcons.join('')}</span>`;
 
     return [
         `<input id="uname_${u._id}" type="text" value="${escapeHtml(u.username)}" readonly />`,
@@ -923,7 +1042,7 @@ function getUserRow(u) {
             <span>${u.active ? 'Active' : 'Inactive'}</span>
         </label>`,
         `<span data-date="${createdISO}">${createdDate}</span>`,
-        `<span class="user-actions">${saveIcon} ${deleteIcon}</span>`,
+        actionsHtml,
     ];
 }
 
@@ -933,13 +1052,7 @@ function escapeHtml(str) {
 }
 
 function initUsersToolTips(users) {
-    users.forEach((u) => {
-        const tt = [
-            { element: document.getElementById(`usave_${u._id}`), text: 'Save user', position: 'top' },
-            { element: document.getElementById(`udel_${u._id}`), text: 'Delete user', position: 'top' },
-        ];
-        loadToolTip(tt);
-    });
+    // Tooltips not needed — dropdown action items are labeled
 }
 
 function saveUser(id) {
@@ -956,6 +1069,9 @@ function saveUser(id) {
     const data = { role, allow, allowedRooms, active };
 
     function doSave() {
+        const saveBtn = document.getElementById(`usave_${id}`);
+        if (saveBtn) btnLoading(saveBtn);
+
         userUpdate(id, data)
             .then((res) => {
                 console.log('[API] - USER UPDATE RESPONSE', res);
@@ -966,20 +1082,16 @@ function saveUser(id) {
                     loadUsers();
                     loadDashboardStats();
                     setTimeout(() => {
-                        const row = document.getElementById('user_' + id);
-                        if (row) {
-                            row.style.transition = 'background-color 0.3s';
-                            row.style.backgroundColor = 'rgba(76, 175, 80, 0.15)';
-                            setTimeout(() => {
-                                row.style.backgroundColor = '';
-                            }, 1500);
-                        }
+                        flashRow(document.getElementById('user_' + id));
                     }, 300);
                 }
             })
             .catch((err) => {
                 console.error('[API] - USER UPDATE ERROR', err);
                 popupMessage('error', `Failed to update user: ${err.message}`);
+            })
+            .finally(() => {
+                if (saveBtn) btnReset(saveBtn);
             });
     }
 
@@ -987,7 +1099,7 @@ function saveUser(id) {
         Swal.fire({
             allowOutsideClick: false,
             allowEscapeKey: false,
-            position: 'center',
+            position: 'top',
             icon: 'warning',
             title: 'Assign admin role',
             text: 'Are you sure you want to assign the admin role to this user?',
@@ -1012,7 +1124,7 @@ function deleteUser(id) {
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
-        position: 'center',
+        position: 'top',
         icon: 'warning',
         title: 'Delete user',
         text: 'Are you sure you want to delete this user and all their associated data?',
@@ -1066,6 +1178,8 @@ function createUser() {
 
     const data = { username, email, password };
 
+    btnLoading(addUserBtn, 'Creating...');
+
     userCreate(data)
         .then((res) => {
             console.log('[API] - USER CREATE RESPONSE', res);
@@ -1092,6 +1206,9 @@ function createUser() {
             console.error('[API] - USER CREATE ERROR', err);
             const msg = err.response?.data?.message || err.message;
             popupMessage('error', `Failed to create user: ${msg}`);
+        })
+        .finally(() => {
+            btnReset(addUserBtn);
         });
 }
 
@@ -1115,6 +1232,43 @@ async function showDataTable() {
                 dataTable.draw();
                 initVisibleRowsFlatpickr();
                 toggleRoomsList(true);
+
+                const pastRooms = res.filter((obj) => obj.date < today);
+                if (pastRooms.length > 0) {
+                    Swal.fire({
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        position: 'top',
+                        icon: 'warning',
+                        title: 'Expired rooms found',
+                        text: `You have ${pastRooms.length} expired room${pastRooms.length > 1 ? 's' : ''}. Would you like to delete them?`,
+                        showDenyButton: true,
+                        confirmButtonText: 'Yes, delete',
+                        denyButtonText: 'No, keep',
+                        showClass: { popup: 'animate__animated animate__fadeInDown' },
+                        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const pastIds = pastRooms.map((r) => r._id);
+                            Promise.all(pastIds.map((id) => roomDelete(id)))
+                                .then(() => {
+                                    console.log('[API] - DELETE PAST ROOMS RESPONSE', pastIds);
+                                    pastIds.forEach((id) => dataTable.row(`#${id}`).remove());
+                                    dataTable.draw();
+                                    toggleRoomsList(dataTable.rows().count() > 0);
+                                    debouncedLoadStats();
+                                    popupMessage(
+                                        'toast',
+                                        `${pastIds.length} expired room${pastIds.length > 1 ? 's' : ''} deleted`
+                                    );
+                                })
+                                .catch((err) => {
+                                    console.log('[API] - DELETE PAST ROOMS ERROR', err);
+                                    popupMessage('error', `Failed to delete expired rooms: ${err.message}`);
+                                });
+                        }
+                    });
+                }
             } else {
                 toggleRoomsList(false);
             }
@@ -1131,6 +1285,8 @@ function addRow() {
     if (!data.tag || !data.email || !data.date || !data.time || !data.room) {
         return false;
     }
+
+    btnLoading(addRowBtn, 'Creating...');
 
     roomCreate(data)
         .then((res) => {
@@ -1154,6 +1310,9 @@ function addRow() {
         .catch((err) => {
             console.error('[API] - ROOM CREATE ERROR', err);
             popupMessage('error', `API ROOM CREATE error: ${err.message}`);
+        })
+        .finally(() => {
+            btnReset(addRowBtn);
         });
 }
 
@@ -1166,49 +1325,78 @@ function getRow(obj) {
     )
         return;
 
-    const setRandomRoomIcon =
-        config.BUTTONS.setRandomRoom && user.allowedRoomsALL
-            ? `<i id="${obj._id}_randomRoom" onclick="setRandomRoom('${obj._id}')" class="uil uil-redo random"></i>`
-            : '';
+    const today = new Date().toISOString().split('T')[0];
+    const isPast = obj.date < today;
 
-    const copyRoomIcon = config.BUTTONS.copyRoom
-        ? `<i id="${obj._id}_copy" onclick="copyRoom('${obj._id}')" class='uil uil-copy'></i>`
-        : '';
+    // Inline primary actions (1-click)
+    const inlineIcons = [];
+    if (config.BUTTONS.updateRow && !isPast) {
+        inlineIcons.push(
+            `<i id="${obj._id}_save" onclick="updateRow('${obj._id}')" class="uil uil-save action-icon" title="Save"></i>`
+        );
+    }
+    if (config.BUTTONS.delRow) {
+        inlineIcons.push(
+            `<i id="${obj._id}_delete" onclick="delRow('${obj._id}')" class="uil uil-trash-alt action-icon danger" title="Delete"></i>`
+        );
+    }
 
-    const shareRoomIcon =
-        config.BUTTONS.shareRoom && isMobile
-            ? `<i id="${obj._id}_share" onclick="shareRoom('${obj._id}')" class="uil uil-share-alt"></i>`
-            : '';
+    // Dropdown secondary actions (skip entirely for past rooms)
+    const actionItems = [];
 
-    const sendEmailIcon = config.BUTTONS.sendEmail
-        ? `<i id="${obj._id}_send_email" onclick="sendEmail('${obj._id}')" class="uil uil-envelope-open"></i>`
-        : '';
+    if (!isPast) {
+        if (config.BUTTONS.copyRoom) {
+            actionItems.push(
+                `<button id="${obj._id}_copy" class="action-dropdown-item" onclick="copyRoom('${obj._id}'); closeActionDropdown(this);"><i class="uil uil-copy"></i> Copy Room</button>`
+            );
+        }
+        if (config.BUTTONS.shareRoom && isMobile) {
+            actionItems.push(
+                `<button id="${obj._id}_share" class="action-dropdown-item" onclick="shareRoom('${obj._id}'); closeActionDropdown(this);"><i class="uil uil-share-alt"></i> Share Room</button>`
+            );
+        }
+        if (config.BUTTONS.setRandomRoom && user.allowedRoomsALL) {
+            actionItems.push(
+                `<button id="${obj._id}_randomRoom" class="action-dropdown-item" onclick="setRandomRoom('${obj._id}'); closeActionDropdown(this);"><i class="uil uil-redo"></i> Random Room</button>`
+            );
+        }
 
-    const sendSmSInvitationIcon = config.BUTTONS.sendSmSInvitation
-        ? `<i id="${obj._id}_send_sms" onclick="sendSmSInvitation('${obj._id}')" class="uil uil-comment-alt-message"></i>`
-        : '';
+        if (actionItems.length > 0 && (config.BUTTONS.sendEmail || config.BUTTONS.sendSmSInvitation)) {
+            actionItems.push(`<div class="action-dropdown-divider"></div>`);
+        }
 
-    const joinInternalIcon = config.BUTTONS.joinInternal
-        ? `<i id="${obj._id}_joinInternal" onclick="joinRoom('${obj._id}')" class="uil uil-estate"></i>`
-        : '';
+        if (config.BUTTONS.sendEmail) {
+            actionItems.push(
+                `<button id="${obj._id}_send_email" class="action-dropdown-item" onclick="sendEmail('${obj._id}'); closeActionDropdown(this);"><i class="uil uil-envelope-open"></i> Send Email</button>`
+            );
+        }
+        if (config.BUTTONS.sendSmSInvitation) {
+            actionItems.push(
+                `<button id="${obj._id}_send_sms" class="action-dropdown-item" onclick="sendSmSInvitation('${obj._id}'); closeActionDropdown(this);"><i class="uil uil-comment-alt-message"></i> Send SMS</button>`
+            );
+        }
 
-    const joinExternalIcon = config.BUTTONS.joinExternal
-        ? `<i id="${obj._id}_joinExternal" onclick="joinRoom('${obj._id}', true)" class="uil uil-external-link-alt"></i>`
-        : '';
+        if (config.BUTTONS.joinInternal || config.BUTTONS.joinExternal) {
+            if (actionItems.length > 0) actionItems.push(`<div class="action-dropdown-divider"></div>`);
+        }
 
-    const updateRowIcon = config.BUTTONS.updateRow
-        ? `<i id="${obj._id}_save" onclick="updateRow('${obj._id}')" class="uil uil-save"></i>`
-        : '';
+        if (config.BUTTONS.joinInternal) {
+            actionItems.push(
+                `<button id="${obj._id}_joinInternal" class="action-dropdown-item" onclick="joinRoom('${obj._id}'); closeActionDropdown(this);"><i class="uil uil-estate"></i> Join Internal</button>`
+            );
+        }
+        if (config.BUTTONS.joinExternal) {
+            actionItems.push(
+                `<button id="${obj._id}_joinExternal" class="action-dropdown-item" onclick="joinRoom('${obj._id}', true); closeActionDropdown(this);"><i class="uil uil-external-link-alt"></i> Join External</button>`
+            );
+        }
+    }
 
-    const delRowIcon = config.BUTTONS.delRow
-        ? `<i id="${obj._id}_delete" onclick="delRow('${obj._id}')" class="uil uil-times"></i>`
-        : '';
-
-    let rooms = `<input id="${obj._id}_room" type="text" placeholder="Room name" name="room" value="${obj.room}"/>`;
+    let rooms = `<input id="${obj._id}_room" type="text" placeholder="Room name" name="room" value="${obj.room}"${isPast ? ' readonly' : ''}/>`;
 
     if (!user.allowedRoomsALL) {
         const roomOptions = user.allowedRooms.map((room) => ({ value: room, label: room }));
-        rooms = buildCustomDropdownHTML(obj._id + '_room', roomOptions, obj.room, false);
+        rooms = buildCustomDropdownHTML(obj._id + '_room', roomOptions, obj.room, false, isPast);
     }
 
     const typeOptions = [
@@ -1218,49 +1406,82 @@ function getRow(obj) {
         config.MiroTalk.BRO.Visible && { value: 'BRO', label: 'BRO' },
     ].filter(Boolean);
 
+    const ro = isPast ? ' readonly' : '';
+
     return [
-        `<td>${buildCustomDropdownHTML(obj._id + '_type', typeOptions, obj.type, false)}</td>`,
-        `<td><input id="${obj._id}_tag" type="text" name="tag" placeholder="Tag" value="${obj.tag}"/></td>`,
-        `<td><input id="${obj._id}_email" type="email" name="email" placeholder="Email address" value="${obj.email}"/></td>`,
-        `<td><input id="${obj._id}_phone" type="text" name="text" placeholder="Phone number" value="${obj.phone}"/></td>`,
-        `<td><input id="${obj._id}_date" type="text" name="date" placeholder="Date" value="${obj.date}" class="flatpickr-date"/></td>`,
-        `<td><input id="${obj._id}_time" type="text" name="time" placeholder="Time" value="${obj.time}" class="flatpickr-time"/></td>`,
+        `<td>${buildCustomDropdownHTML(obj._id + '_type', typeOptions, obj.type, false, isPast)}</td>`,
+        `<td><input id="${obj._id}_tag" type="text" name="tag" placeholder="Tag" value="${obj.tag}"${ro}/></td>`,
+        `<td><input id="${obj._id}_email" type="email" name="email" placeholder="Email address" value="${obj.email}"${ro}/></td>`,
+        `<td><input id="${obj._id}_phone" type="text" name="text" placeholder="Phone number" value="${obj.phone}"${ro}/></td>`,
+        `<td><input id="${obj._id}_date" type="text" name="date" placeholder="Date" value="${obj.date}" class="flatpickr-date"${ro}/></td>`,
+        `<td><input id="${obj._id}_time" type="text" name="time" placeholder="Time" value="${obj.time}" class="flatpickr-time"${ro}/></td>`,
         `<td>${rooms}</td>`,
         `<td>
-            <span class="action-group">
-                ${setRandomRoomIcon}
-                ${copyRoomIcon}
-                ${shareRoomIcon}
-                ${sendEmailIcon}
-                ${sendSmSInvitationIcon}
-            </span>
-            <span class="action-separator"></span>
-            <span class="action-group">
-                ${joinInternalIcon}
-                ${joinExternalIcon}
-            </span>
-            <span class="action-separator"></span>
-            <span class="action-group">
-                ${updateRowIcon}
-                ${delRowIcon}
-            </span>
+            <div class="action-cell">
+                <span class="action-group">${inlineIcons.join('')}</span>
+                ${
+                    actionItems.length > 0
+                        ? `
+                <div class="action-dropdown-wrap">
+                    <button class="action-dropdown-trigger" onclick="toggleActionDropdown(this)" aria-label="More actions">
+                        <i class="uil uil-ellipsis-v"></i>
+                    </button>
+                    <div class="action-dropdown-menu">
+                        ${actionItems.join('\n                        ')}
+                    </div>
+                </div>`
+                        : ''
+                }
+            </div>
         </td>`,
     ];
 }
 
 function addRowToolTips(id) {
-    const rowToolTips = [
-        { element: document.getElementById(`${id}_randomRoom`), text: 'Generate random room', position: 'top' },
-        { element: document.getElementById(`${id}_copy`), text: 'Copy room', position: 'top' },
-        { element: document.getElementById(`${id}_share`), text: 'Share room', position: 'top' },
-        { element: document.getElementById(`${id}_send_email`), text: 'Send email invitation', position: 'top' },
-        { element: document.getElementById(`${id}_send_sms`), text: 'Send sms invitation', position: 'top' },
-        { element: document.getElementById(`${id}_joinInternal`), text: 'Join room internal', position: 'top' },
-        { element: document.getElementById(`${id}_joinExternal`), text: 'Join room external', position: 'top' },
-        { element: document.getElementById(`${id}_save`), text: 'Update room', position: 'top' },
-        { element: document.getElementById(`${id}_delete`), text: 'Delete room', position: 'top' },
-    ];
-    loadToolTip(rowToolTips);
+    // No tooltips needed — actions are now labeled inside dropdown menu
+}
+
+function toggleActionDropdown(triggerBtn) {
+    const wrap = triggerBtn.closest('.action-dropdown-wrap');
+    const menu = wrap.querySelector('.action-dropdown-menu');
+    const isOpen = wrap.classList.contains('open');
+
+    // Close all other open dropdowns first
+    document.querySelectorAll('.action-dropdown-wrap.open').forEach((el) => {
+        el.classList.remove('open');
+    });
+
+    if (!isOpen) {
+        wrap.classList.add('open');
+
+        // Position the menu using fixed coordinates
+        const rect = triggerBtn.getBoundingClientRect();
+        menu.style.top = rect.bottom + 4 + 'px';
+        menu.style.left = 'auto';
+        menu.style.right = window.innerWidth - rect.right + 'px';
+
+        // If menu would overflow below viewport, show above instead
+        requestAnimationFrame(() => {
+            const menuRect = menu.getBoundingClientRect();
+            if (menuRect.bottom > window.innerHeight - 8) {
+                menu.style.top = rect.top - menuRect.height - 4 + 'px';
+            }
+        });
+
+        // Close on outside click
+        const closeHandler = (e) => {
+            if (!wrap.contains(e.target)) {
+                wrap.classList.remove('open');
+                document.removeEventListener('click', closeHandler, true);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', closeHandler, true), 0);
+    }
+}
+
+function closeActionDropdown(itemBtn) {
+    const wrap = itemBtn.closest('.action-dropdown-wrap');
+    if (wrap) wrap.classList.remove('open');
 }
 
 function initVisibleRowsToolTips() {
@@ -1344,7 +1565,7 @@ function sendSmSInvitation(id) {
         showDenyButton: true,
         imageUrl: '../Images/sms.png',
         title: 'SMS Invitation',
-        position: 'center',
+        position: 'top',
         input: 'text',
         inputPlaceholder: 'Enter phone number: [Prefix][Number]',
         inputValue: `${data.phone}`,
@@ -1408,6 +1629,9 @@ function joinRoom(id, external = false) {
 
 function updateRow(id) {
     const data = getRowValues(id);
+    const saveBtn = document.getElementById(`${id}_save`);
+
+    if (saveBtn) btnLoading(saveBtn);
 
     roomUpdate(id, data)
         .then((res) => {
@@ -1417,30 +1641,25 @@ function updateRow(id) {
             } else {
                 popupMessage('toast', 'Data saved successfully');
                 debouncedLoadStats();
-                const row = document.getElementById(id);
-                if (row) {
-                    row.style.transition = 'background-color 0.3s';
-                    row.style.backgroundColor = 'rgba(76, 175, 80, 0.15)';
-                    setTimeout(() => {
-                        row.style.backgroundColor = '';
-                    }, 1500);
-                }
+                flashRow(document.getElementById(id));
             }
         })
         .catch((err) => {
             console.log('[API] - UPDATE ROW ERROR', err);
             popupMessage('error', `API UPDATE ROW error: ${err.message}`);
             showDataTable();
+        })
+        .finally(() => {
+            if (saveBtn) btnReset(saveBtn);
         });
 }
 
 function delRow(id) {
     const dataTableTR = document.getElementById(id);
-    dataTableTR.classList.add('selected');
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
-        position: 'center',
+        position: 'top',
         icon: 'warning',
         title: 'Delete room',
         text: 'Are you sure you want to delete the room?',
@@ -1455,7 +1674,6 @@ function delRow(id) {
                 .then((res) => {
                     console.log('[API] - DELETE ROW RESPONSE', res);
                     dataTable.row(`#${id}`).remove().draw();
-                    dataTableTR.classList.remove('selected');
                     toggleRoomsList(dataTable.rows().count() > 0);
                     debouncedLoadStats();
                 })
@@ -1463,8 +1681,6 @@ function delRow(id) {
                     console.log('[API] - DELETE ROW ERROR', err);
                     popupMessage('error', `API DELETE ROW error: ${err.message}`);
                 });
-        } else {
-            dataTableTR.classList.remove('selected');
         }
     });
 }
@@ -1490,7 +1706,7 @@ function delAllRows() {
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
-        position: 'center',
+        position: 'top',
         icon: 'warning',
         title: `Delete ${label} rooms`,
         text: `Are you sure you want to delete ${label} rooms?`,
@@ -1561,7 +1777,6 @@ function getMyAccount() {
                 accountID.value = res._id;
                 accountEmail.value = res.email;
                 accountUsername.value = res.username;
-                accountToken.value = res.token;
                 accountCreatedAt.value = res.createdAt;
                 accountUpdatedAt.value = res.updatedAt;
                 accountServicesAllowed.value = res.allow;
@@ -1584,7 +1799,7 @@ function delMyAccount() {
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
-        position: 'center',
+        position: 'top',
         icon: 'warning',
         title: 'Delete account!',
         text: 'Are you sure to want delete your account and all associated data?',
@@ -1758,6 +1973,7 @@ function initFlatpickr() {
     flatpickr(addDate, {
         dateFormat: 'Y-m-d',
         defaultDate: new Date().toISOString().substring(0, 10),
+        minDate: 'today',
         allowInput: true,
         disableMobile: true,
         onReady,
@@ -1782,6 +1998,7 @@ function initRowFlatpickr(rowId) {
     if (dateEl && !dateEl._flatpickr) {
         flatpickr(dateEl, {
             dateFormat: 'Y-m-d',
+            minDate: 'today',
             allowInput: true,
             disableMobile: true,
             onReady,
@@ -1805,7 +2022,7 @@ function initVisibleRowsFlatpickr() {
     document.querySelectorAll('#myTableBody .flatpickr-date, #myTableBody .flatpickr-time').forEach((el) => {
         if (el._flatpickr) return;
         if (el.classList.contains('flatpickr-date')) {
-            flatpickr(el, { dateFormat: 'Y-m-d', allowInput: true, disableMobile: true, onReady });
+            flatpickr(el, { dateFormat: 'Y-m-d', minDate: 'today', allowInput: true, disableMobile: true, onReady });
         } else {
             flatpickr(el, {
                 enableTime: true,

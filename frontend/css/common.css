@@ -1,26 +1,4 @@
 /*--------------------------------------------------------------
-# Webkit-Scrollbar Styles
---------------------------------------------------------------*/
-
-::-webkit-scrollbar {
-    width: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: radial-gradient(#393939, #000000);
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background-color: radial-gradient(#393939, #000000);
-}
-
-::-webkit-scrollbar-track {
-    background: #1a1b1f;
-}
-
-/*--------------------------------------------------------------
 # Google Translate
 --------------------------------------------------------------*/
 
@@ -54,7 +32,7 @@
     padding: 8px 16px;
     color: rgba(255, 255, 255, 0.75);
     text-decoration: none;
-    font-size: 0.88em;
+    font-size: 14px;
     border-radius: 8px;
     transition: all 0.2s ease;
 }
@@ -65,5 +43,5 @@
 }
 
 .back-login i {
-    font-size: 0.85em;
+    font-size: 12px;
 }

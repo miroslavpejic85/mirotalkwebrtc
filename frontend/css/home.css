@@ -3,12 +3,38 @@
 :root {
     --primary-color: #202123;
     --secondary-color: #45494c;
-    --accent-color: #316fb2;
+    --accent-color: #376df9;
     --hover-color: #439fff;
     --text-color: #f5f5f5;
     --box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     --input-bg: rgba(32, 33, 35, 0.8);
-    --border-radius: 10px;
+    --hover-ring: rgba(67, 159, 255, 0.3);
+    --hover-bg-strong: rgba(67, 159, 255, 0.12);
+    --hover-bg-emphasis: rgba(67, 159, 255, 0.15);
+    --text-muted: #888;
+    --text-placeholder: #999;
+    --text-light: #bbb;
+}
+
+/*--------------------------------------------------------------
+# Scrollbar
+--------------------------------------------------------------*/
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--secondary-color);
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--hover-color);
+}
+
+::-webkit-scrollbar-track {
+    background: var(--primary-color);
 }
 
 body {
@@ -27,7 +53,7 @@ body {
     width: 400px;
     background: var(--secondary-color);
     color: var(--text-color);
-    border-radius: 16px;
+    border-radius: 12px;
     box-shadow: var(--box-shadow);
     overflow: hidden;
 }
@@ -49,8 +75,8 @@ body {
     justify-content: center;
     background: transparent;
     color: rgba(255, 255, 255, 0.5);
-    font-size: 0.95em;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
     border: none;
     border-bottom: 3px solid transparent;
     cursor: pointer;
@@ -116,7 +142,7 @@ body {
     align-items: center;
     background: var(--input-bg);
     border: 2px solid transparent;
-    border-radius: var(--border-radius);
+    border-radius: 6px;
     transition:
         border-color 0.3s ease,
         box-shadow 0.3s ease;
@@ -124,13 +150,13 @@ body {
 
 .input-group:focus-within {
     border-color: var(--hover-color);
-    box-shadow: 0 0 0 3px rgba(67, 159, 255, 0.12);
+    box-shadow: 0 0 0 3px var(--hover-bg-strong);
 }
 
 .input-group > i {
     padding: 0 0 0 14px;
-    color: #888;
-    font-size: 0.95em;
+    color: var(--text-muted);
+    font-size: 14px;
     min-width: 20px;
     text-align: center;
     transition: color 0.3s ease;
@@ -149,14 +175,14 @@ body {
     border: none;
     border-radius: 0;
     display: block;
-    font-size: 0.88em;
+    font-size: 14px;
     color: var(--text-color);
     outline: none;
     font-family: inherit;
 }
 
 .input-group input::placeholder {
-    color: #999;
+    color: var(--text-placeholder);
 }
 
 /*--------------------------------------------------------------
@@ -172,9 +198,9 @@ body {
     padding: 0 !important;
     background: transparent !important;
     border: none !important;
-    color: #888;
+    color: var(--text-muted);
     cursor: pointer;
-    font-size: 0.9em;
+    font-size: 14px;
     display: flex !important;
     align-items: center;
     justify-content: center;
@@ -215,12 +241,12 @@ button {
     gap: 8px;
     color: var(--text-color);
     background: var(--accent-color);
-    font-size: 0.95em;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
     margin-top: 18px;
     outline: none;
     border: none;
-    border-radius: var(--border-radius);
+    border-radius: 8px;
     transition: all 0.2s ease;
     cursor: pointer;
     letter-spacing: 0.3px;
@@ -230,7 +256,7 @@ button {
 button:hover {
     background-color: var(--hover-color);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(67, 159, 255, 0.3);
+    box-shadow: 0 4px 12px var(--hover-ring);
 }
 
 button:active {
@@ -242,14 +268,14 @@ button:active {
 }
 
 #loginBtn:hover {
-    background-color: #439fff;
-    box-shadow: 0 4px 12px rgba(67, 159, 255, 0.3);
+    background-color: var(--hover-color);
+    box-shadow: 0 4px 12px var(--hover-ring);
 }
 
 #signupTermsBtn {
     background: transparent !important;
     color: rgba(255, 255, 255, 0.65) !important;
-    font-size: 0.8em !important;
+    font-size: 12px !important;
     font-weight: 500 !important;
     margin-top: 6px !important;
     text-decoration: underline;
@@ -273,7 +299,7 @@ button:active {
     display: block;
     margin-top: 12px;
     color: rgba(255, 255, 255, 0.7);
-    font-size: 0.85em;
+    font-size: 14px;
     text-decoration: none;
     transition: color 0.3s ease;
 }
@@ -287,7 +313,7 @@ button:active {
     margin: 16px 0;
     padding: 12px 0;
     color: rgba(255, 255, 255, 0.5);
-    font-size: 0.72em;
+    font-size: 12px;
     font-weight: 500;
     text-align: center;
     cursor: pointer;
@@ -319,7 +345,7 @@ button:active {
 }
 
 .main.single-form label {
-    font-size: 1.6em;
+    font-size: 20px;
     margin: 16px 40px 8px;
     cursor: default;
 }
@@ -331,16 +357,16 @@ button:active {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(67, 159, 255, 0.15);
+    background: var(--hover-bg-emphasis);
     border-radius: 50%;
-    font-size: 1.6em;
+    font-size: 20px;
     color: var(--hover-color);
 }
 
 .form-desc {
     text-align: center;
-    color: #bbb;
-    font-size: 0.85em;
+    color: var(--text-light);
+    font-size: 14px;
     line-height: 1.5;
     margin: 0 40px 20px;
 }
@@ -354,7 +380,7 @@ button:active {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    font-family: Arial, sans-serif;
+    font-family: 'Montserrat', sans-serif;
     max-height: 400px;
     overflow-y: auto;
 }
@@ -375,30 +401,112 @@ button:active {
 # SweetAlert2 Overrides
 --------------------------------------------------------------*/
 
-.swal2-title,
-.swal2-content {
-    background-color: var(--primary-color) !important;
-    color: var(--text-color) !important;
-    text-align: center;
-}
-
-.swal2-html-container {
-    background-color: var(--primary-color) !important;
-    color: var(--text-color) !important;
-}
-
+/* Popup container */
 .swal2-popup {
+    font-family: 'Montserrat', sans-serif;
     border: 1px solid var(--secondary-color) !important;
+    border-radius: 12px !important;
     background-color: var(--primary-color) !important;
+    color: var(--text-color) !important;
 }
 
-.swal2-confirm {
-    width: 100%;
+/* Title */
+.swal2-title {
+    font-size: 20px !important;
+    font-weight: 600 !important;
+    color: var(--text-color) !important;
 }
 
-.swal2-cancel,
+/* Body text */
+.swal2-html-container {
+    font-size: 14px !important;
+    background-color: var(--primary-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Input fields */
+.swal2-input,
+.swal2-textarea,
+.swal2-select {
+    font-size: 14px !important;
+    border-radius: 6px !important;
+    border: 1px solid var(--secondary-color) !important;
+    background-color: var(--input-bg) !important;
+    color: var(--text-color) !important;
+}
+
+.swal2-input:focus,
+.swal2-textarea:focus,
+.swal2-select:focus {
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 0 3px var(--hover-ring) !important;
+    outline: none !important;
+}
+
+/* Buttons */
 .swal2-confirm {
+    background-color: var(--accent-color) !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
     width: 120px;
+}
+
+.swal2-cancel {
+    background-color: #ff4d4d !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    width: 120px;
+}
+
+.swal2-deny {
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+}
+
+.swal2-confirm:focus,
+.swal2-cancel:focus,
+.swal2-deny:focus {
+    box-shadow: 0 0 0 3px var(--hover-ring) !important;
+}
+
+/* Close button */
+.swal2-close {
+    color: var(--text-color) !important;
+}
+
+.swal2-close:hover {
+    color: #ff4d4d !important;
+}
+
+.swal2-close:focus {
+    box-shadow: none !important;
+}
+
+/* Validation message */
+.swal2-validation-message {
+    font-size: 14px !important;
+    background-color: var(--secondary-color) !important;
+    color: var(--text-color) !important;
+    border-radius: 6px !important;
+}
+
+/* Footer */
+.swal2-footer {
+    color: var(--text-color) !important;
+    border-top-color: var(--secondary-color) !important;
+    font-size: 14px !important;
+}
+
+/* Timer progress bar */
+.swal2-timer-progress-bar-container {
+    background: var(--secondary-color) !important;
+}
+
+.swal2-timer-progress-bar {
+    background: var(--accent-color) !important;
 }
 
 /*--------------------------------------------------------------

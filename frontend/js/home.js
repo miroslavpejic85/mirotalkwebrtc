@@ -125,8 +125,6 @@ function handleSignupTerms() {
         showCancelButton: true,
         cancelButtonText: 'Cancel',
         confirmButtonText: 'I Agree',
-        confirmButtonColor: '#007bff',
-        cancelButtonColor: '#dc3545',
         focusCancel: true,
         allowOutsideClick: false,
         showClass: { popup: 'animate__animated animate__fadeInDown' },

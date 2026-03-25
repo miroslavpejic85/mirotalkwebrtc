@@ -27,24 +27,16 @@
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap5.min.css" />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
 
-        <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.2.js"></script>
-        <script type="text/javascript" src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
-        <script type="text/javascript" src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap5.min.js"></script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.8"></script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
-
-        <script
-            type="text/javascript"
-            src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy-bundle.umd.min.js"
-        ></script>
-
+        <script defer src="https://code.jquery.com/jquery-3.6.2.js"></script>
+        <script defer src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+        <script defer src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap5.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.15"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+        <script defer src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"></script>
+        <script defer src="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy-bundle.umd.min.js"></script>
         <script defer src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/1.0.37/ua-parser.min.js"></script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
         <script async src="../js/stats.js"></script>
         <script defer src="../js/swal.js"></script>
@@ -373,7 +365,7 @@
                                 <button
                                     id="del-all-btn"
                                     class="custom-button custom-button-icon"
-                                    aria-label="Delete all rooms"
+                                    aria-label="Delete rooms"
                                 >
                                     <i class="uil uil-trash-alt"></i>
                                 </button>
@@ -680,6 +672,11 @@
                         <i id="account-close-btn" class="uil uil-times account-close"></i>
                     </div>
 
+                    <div id="accountAvatarSection" class="account-avatar-section hidden">
+                        <img id="accountAvatarImg" class="account-avatar-img" src="" alt="Profile" />
+                        <span id="accountAvatarName" class="account-avatar-name"></span>
+                    </div>
+
                     <div class="account-section">
                         <span class="account-section-label">Profile</span>
                         <div class="account-field">
@@ -707,13 +704,6 @@
 
                     <div class="account-section">
                         <span class="account-section-label">Access</span>
-                        <div class="account-field">
-                            <div class="account-field-icon"><i class="uil uil-key-skeleton"></i></div>
-                            <div class="account-field-content">
-                                <span class="account-field-label">Token</span>
-                                <input id="account-token" type="text" name="text" readonly />
-                            </div>
-                        </div>
                         <div class="account-field">
                             <div class="account-field-icon"><i class="uil uil-bookmark"></i></div>
                             <div class="account-field-content">
@@ -879,6 +869,8 @@
                     ></iframe>
                 </div>
             </div>
+
+            <div id="panelBackdrop" class="panel-backdrop hidden"></div>
         </section>
     </body>
 </html>

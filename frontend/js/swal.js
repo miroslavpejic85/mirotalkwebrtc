@@ -1,5 +1,7 @@
 'use strict';
 
+let activeToast = null;
+
 function popupMessage(type, message, timer = 3000) {
     switch (type) {
         case 'info':
@@ -30,6 +32,7 @@ function popupMessage(type, message, timer = 3000) {
             });
             break;
         case 'toast':
+            if (activeToast) activeToast.close();
             const Toast = Swal.mixin({
                 toast: true,
                 position: 'top-end',
@@ -38,11 +41,14 @@ function popupMessage(type, message, timer = 3000) {
                 timer: timer,
                 timerProgressBar: true,
             });
-            Toast.fire({
+            activeToast = Toast.fire({
                 icon: 'info',
-                title: message,
+                text: message,
                 showClass: { popup: 'animate__animated animate__fadeInDown' },
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+            });
+            activeToast.then(() => {
+                activeToast = null;
             });
             break;
         default:
