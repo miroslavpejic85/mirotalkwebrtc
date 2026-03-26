@@ -167,6 +167,36 @@ paths:
                 '409':
                     description: Already confirmed
 
+    /user/admin-create:
+        post:
+            security:
+                - authorization: []
+            tags:
+                - user
+            summary: Admin create user
+            description: Create a new user directly (skip email verification). Admin only.
+            operationId: userAdminCreate
+            requestBody:
+                description: User details
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UserReq'
+                required: true
+            responses:
+                '201':
+                    description: User created successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UserRes'
+                '400':
+                    description: Bad request
+                '403':
+                    description: Forbidden
+                '409':
+                    description: User already exists
+
     /user/invite:
         post:
             security:

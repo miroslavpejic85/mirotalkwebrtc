@@ -452,6 +452,39 @@ async function userGetMe(req, res) {
     }
 }
 
+async function userAdminCreate(req, res) {
+    try {
+        const { email, username, password } = req.body;
+        if (!email || !username || !password) {
+            return res.status(400).json({ message: 'Email, username, and password are required' });
+        }
+        const userFindOne = await User.findOne({ email: email, username: username });
+        if (!Object.is(userFindOne, null) && Object.keys(userFindOne).length > 0) {
+            return res.status(409).json({ message: 'User already exist!' });
+        }
+        log.debug('Admin creating user directly (skip email verification)');
+        const isUserAdmin = await utils.isAdmin(email, username, password);
+        const encryptedPassword = await bcrypt.hash(password, 10);
+        const payload = { username, email, password };
+        const token = utils.tokenEncode(payload);
+        const userData = new User({
+            email: email,
+            username: username,
+            password: encryptedPassword,
+            role: isUserAdmin ? 'admin' : 'guest',
+            token: token,
+            active: true,
+            createdAt: new Date().toISOString(),
+        });
+        const userSaveData = await userData.save();
+        log.debug('Admin user create OK', userSaveData);
+        res.status(201).json(userSaveData);
+    } catch (error) {
+        log.error('userAdminCreate', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
 async function sendInvitation(req, res) {
     try {
         const { email, username, password } = req.body;
@@ -469,6 +502,7 @@ async function sendInvitation(req, res) {
 
 module.exports = {
     userCreate,
+    userAdminCreate,
     userLogin,
     userIsAuth,
     userRoomsAllowed,

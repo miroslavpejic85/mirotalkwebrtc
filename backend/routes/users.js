@@ -70,6 +70,11 @@ router.delete('/user/deleteALL', admin, (req, res) => {
     controllersUsers.userDeleteALL(req, res);
 });
 
+//CREATE: /api/v1/user/admin-create (admin only, skip email verification)
+router.post('/user/admin-create', admin, validator, (req, res) => {
+    controllersUsers.userAdminCreate(req, res);
+});
+
 //POST: /api/v1/user/invite (admin only)
 router.post('/user/invite', admin, (req, res) => {
     controllersUsers.sendInvitation(req, res);

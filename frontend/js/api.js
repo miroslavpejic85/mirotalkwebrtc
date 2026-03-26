@@ -13,10 +13,11 @@ let isOidcMode = false;
 
 // API USER
 
-function userCreate(data) {
+function userAdminCreate(data) {
     return axios({
         method: 'POST',
-        url: `${apiPath}/user`,
+        url: `${apiPath}/user/admin-create`,
+        headers: headers,
         data: data,
     }).then((response) => response.data);
 }

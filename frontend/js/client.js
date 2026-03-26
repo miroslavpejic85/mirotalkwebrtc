@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.42
+ * @version 1.3.43
  */
 
 const userAgent = navigator.userAgent;
@@ -1204,7 +1204,7 @@ function createUser() {
 
     btnLoading(addUserBtn, 'Creating...');
 
-    userCreate(data)
+    userAdminCreate(data)
         .then((res) => {
             console.log('[API] - USER CREATE RESPONSE', res);
             if (res && res.message && !res._id) {
@@ -1237,10 +1237,6 @@ function createUser() {
 }
 
 function promptSendInvitation(username, email, password) {
-    if (isOidcMode) {
-        popupMessage('toast', 'User created successfully');
-        return;
-    }
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: true,
