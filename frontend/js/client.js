@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.41
+ * @version 1.3.42
  */
 
 const userAgent = navigator.userAgent;
@@ -1982,9 +1982,23 @@ function changeMyPassword() {
 }
 
 function generateRandomPassword(length = 12) {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*';
-    const array = crypto.getRandomValues(new Uint8Array(length));
-    return Array.from(array, (b) => chars[b % chars.length]).join('');
+    const lower = 'abcdefghijklmnopqrstuvwxyz';
+    const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const digits = '0123456789';
+    const special = '!,%,&,@,#,$,^,*,?,_,~';
+    const all = lower + upper + digits + special;
+    const pick = (s) => s[crypto.getRandomValues(new Uint8Array(1))[0] % s.length];
+    const required = [pick(lower), pick(upper), pick(digits), pick(special)];
+    const remaining = Array.from(
+        crypto.getRandomValues(new Uint8Array(length - required.length)),
+        (b) => all[b % all.length]
+    );
+    const password = [...required, ...remaining];
+    for (let i = password.length - 1; i > 0; i--) {
+        const j = crypto.getRandomValues(new Uint8Array(1))[0] % (i + 1);
+        [password[i], password[j]] = [password[j], password[i]];
+    }
+    return password.join('');
 }
 
 function togglePasswordVisibility(input, btn) {
