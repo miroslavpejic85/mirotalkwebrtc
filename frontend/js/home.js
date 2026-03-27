@@ -11,8 +11,6 @@ const signupUsernameInput = document.getElementById('signupUsernameInput');
 const signupEmailIdInput = document.getElementById('signupEmailIdInput');
 const signupPasswordIdInput = document.getElementById('signupPasswordIdInput');
 const signupRepeatPasswordIdInput = document.getElementById('signupRepeatPasswordIdInput');
-const signupTermsCheckbox = document.getElementById('signupTermsCheckbox');
-const signupTermsLink = document.getElementById('signupTermsLink');
 const signupBtn = document.getElementById('signupBtn');
 
 // login
@@ -73,8 +71,6 @@ loginBtn.addEventListener('click', handleLogin);
     });
 });
 
-signupTermsLink.addEventListener('click', handleSignupTerms);
-
 signupBtn.addEventListener('click', handleSignup);
 
 [signupUsernameInput, signupEmailIdInput, signupPasswordIdInput, signupRepeatPasswordIdInput].forEach((input) => {
@@ -99,8 +95,19 @@ function handleLogin(e) {
     signupOrLogin(data);
 }
 
-function handleSignupTerms(e) {
+function handleSignup(e) {
     e.preventDefault();
+    cleanLoginInput();
+    const validationError = validateInput(
+        signupUsernameInput,
+        signupEmailIdInput,
+        signupPasswordIdInput,
+        signupRepeatPasswordIdInput
+    );
+    if (validationError) {
+        popupMessage('warning', validationError);
+        return false;
+    }
     Swal.fire({
         title: 'Terms & Conditions',
         html: `
@@ -141,29 +148,11 @@ function handleSignupTerms(e) {
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
-        signupTermsCheckbox.checked = result.isConfirmed;
+        if (result.isConfirmed) {
+            const data = gatherInputData(signupUsernameInput, signupEmailIdInput, signupPasswordIdInput);
+            signupOrLogin(data);
+        }
     });
-}
-
-function handleSignup(e) {
-    e.preventDefault();
-    if (!signupTermsCheckbox.checked) {
-        popupMessage('warning', 'You must agree to the Terms & Conditions before signing up');
-        return false;
-    }
-    cleanLoginInput();
-    const validationError = validateInput(
-        signupUsernameInput,
-        signupEmailIdInput,
-        signupPasswordIdInput,
-        signupRepeatPasswordIdInput
-    );
-    if (validationError) {
-        popupMessage('warning', validationError);
-        return false;
-    }
-    const data = gatherInputData(signupUsernameInput, signupEmailIdInput, signupPasswordIdInput);
-    signupOrLogin(data);
 }
 
 function gatherInputData(usernameInput, emailInput, passwordInput) {
@@ -226,7 +215,6 @@ function cleanSignUpInput() {
     signupEmailIdInput.value = '';
     signupPasswordIdInput.value = '';
     signupRepeatPasswordIdInput.value = '';
-    signupTermsCheckbox.checked = false;
 }
 
 // Password visibility toggle
