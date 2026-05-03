@@ -15,12 +15,22 @@ COPY .env.template ./.env
 RUN apk add --no-cache bash vim
 
 # Install dependencies (with retry for QEMU flakiness on arm64)
-RUN for i in 1 2 3; do \
-        npm ci --only=production --silent && break || \
-        { echo "Retry $i: npm ci failed"; sleep 2; }; \
-    done \
-    && npm cache clean --force \
-    && rm -rf /tmp/* /var/tmp/* /usr/share/doc/*
+RUN set -e; \
+    success=0; \
+    for i in 1 2 3; do \
+        if npm ci --omit=dev --silent; then \
+            success=1; \
+            break; \
+        fi; \
+        echo "Retry $i: npm ci failed"; \
+        if [ "$i" -lt 3 ]; then sleep 2; fi; \
+    done; \
+    if [ "$success" -ne 1 ]; then \
+        echo "npm ci failed after retries"; \
+        exit 1; \
+    fi; \
+    npm cache clean --force; \
+    rm -rf /tmp/* /var/tmp/* /usr/share/doc/*
 
 # Copy the application code
 COPY frontend frontend
