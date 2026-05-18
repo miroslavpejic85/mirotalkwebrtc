@@ -5,7 +5,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const express = require('express');
 const auth = require('./middleware/auth');
-const { isOidcEnabled, getOidcAuth, requiresAuth } = require('./middleware/oidc');
+const { isOidcEnabled, getOidcAuth, oidcHostGuard, requiresAuth } = require('./middleware/oidc');
 const url = require('./middleware/url');
 const HtmlInjector = require('./middleware/htmlInjector');
 const corsOptions = require('./config/cors');
@@ -79,6 +79,7 @@ mongoose
         // OIDC middleware (when enabled, handles /login, /logout, /callback routes)
         const oidcAuth = getOidcAuth();
         if (oidcAuth) {
+            app.use(oidcHostGuard);
             app.use(oidcAuth);
             log.debug('OIDC authentication enabled');
         }
