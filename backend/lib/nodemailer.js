@@ -243,12 +243,87 @@ function sendInvitationEmail(name, email, password) {
         .catch((err) => log.error(err));
 }
 
+/**
+ * Send a room invitation email (server-side flow).
+ *
+ * Returns the nodemailer info object on success, throws on failure so the
+ * caller (email queue worker) can record the error and schedule a retry.
+ */
+function sendRoomInvitationEmail({ to, subject, roomUrl, roomType, room, date, time, inviterName, message }) {
+    const safeSubject = subject || `You are invited to a MiroTalk ${roomType || ''} meeting`.trim();
+    const greeting = inviterName
+        ? `${inviterName} has invited you to a meeting.`
+        : 'You have been invited to a meeting.';
+    const customMessage = message
+        ? `<p style="margin: 16px 0; padding: 12px 16px; background-color: #f4f7fb; border-left: 4px solid #376df9; border-radius: 4px; white-space: pre-wrap;">${String(
+              message
+          )
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')}</p>`
+        : '';
+
+    return transport.sendMail({
+        from: EMAIL_FROM,
+        to,
+        subject: safeSubject,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h1 style="color: #376df9;">MiroTalk Meeting Invitation</h1>
+                <p>${greeting}</p>
+                ${customMessage}
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Service</td>
+                        <td style="border: 1px solid #ddd; padding: 10px;">MiroTalk ${roomType || ''}</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Room</td>
+                        <td style="border: 1px solid #ddd; padding: 10px;">${room || ''}</td>
+                    </tr>
+                    ${
+                        date
+                            ? `<tr>
+                        <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Date</td>
+                        <td style="border: 1px solid #ddd; padding: 10px;">${date}</td>
+                    </tr>`
+                            : ''
+                    }
+                    ${
+                        time
+                            ? `<tr>
+                        <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Time</td>
+                        <td style="border: 1px solid #ddd; padding: 10px;">${time}</td>
+                    </tr>`
+                            : ''
+                    }
+                </table>
+                <div style="margin: 30px 0;">
+                    <a href="${roomUrl}"
+                       style="background-color: #376df9; color: white; padding: 12px 24px;
+                              text-decoration: none; border-radius: 5px; display: inline-block;">
+                        Join Meeting
+                    </a>
+                </div>
+                <p>Or copy and paste this link into your browser:</p>
+                <p style="color: #666; word-break: break-all;">${roomUrl}</p>
+                <br/>
+                <p>Enjoying our app? Unlock its full potential with a MiroTalk purchase on CodeCanyon.</p>
+                <a href="${SUPPORT}" target="_blank">Purchase from CodeCanyon</a>
+                <br/>
+                <p>Thank you for your support!</p>
+                <p>MiroTalk Team</p>
+            </div>
+        `,
+    });
+}
+
 module.exports = {
     sendConfirmationEmail,
     sendConfirmationOkEmail,
     sendPasswordResetEmail,
     sendPasswordChangeConfirmation,
     sendInvitationEmail,
+    sendRoomInvitationEmail,
     EMAIL_VERIFICATION,
     SUPPORT,
 };

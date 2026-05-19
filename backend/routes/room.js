@@ -5,8 +5,10 @@ const api = require('../middleware/api');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const validator = require('../middleware/validator');
+const { roomInvitationLimiter } = require('../middleware/rateLimiter');
 const router = express.Router();
 const controllersRooms = require('../controllers/rooms');
+const controllersInvitations = require('../controllers/invitations');
 
 //CREATE: /api/v1/room
 router.post('/room', auth, validator, (req, res) => {
@@ -16,6 +18,11 @@ router.post('/room', auth, validator, (req, res) => {
 //EXISTS: /api/v1/room/exists
 router.post('/room/exists', api, (req, res) => {
     controllersRooms.roomExists(req, res);
+});
+
+//INVITE: /api/v1/room/invite (server-side email invitations; gated by EMAIL_INVITATION_SERVER_SIDE)
+router.post('/room/invite', auth, roomInvitationLimiter, (req, res) => {
+    controllersInvitations.sendRoomInvitation(req, res);
 });
 
 //GET: /api/v1/room/findBy/userId

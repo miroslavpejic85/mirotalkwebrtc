@@ -101,4 +101,11 @@ module.exports = {
         updateRow: true,
         delRow: true,
     },
+    EMAIL_INVITATION: {
+        // Feature flag exposed to the frontend so it can render the
+        // "Send Invitation (Server)" action alongside the existing mailto: "Send Email".
+        // Reads from process.env so a single env var controls behavior end-to-end.
+        serverSide: process.env.EMAIL_INVITATION_SERVER_SIDE === 'true' || false,
+        maxRecipients: Number(process.env.EMAIL_INVITATION_MAX_RECIPIENTS) || 50,
+    },
 };

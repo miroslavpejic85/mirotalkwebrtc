@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.55
+ * @version 1.3.60
  */
 
 const userAgent = navigator.userAgent;
@@ -1470,6 +1470,11 @@ function getRow(obj) {
             actionItems.push(
                 `<button id="${obj._id}_send_email" class="action-dropdown-item" onclick="sendEmail('${obj._id}'); closeActionDropdown(this);"><i class="uil uil-envelope-open"></i> Send Email</button>`
             );
+            if (config.EMAIL_INVITATION && config.EMAIL_INVITATION.serverSide) {
+                actionItems.push(
+                    `<button id="${obj._id}_send_email_server" class="action-dropdown-item" onclick="openServerInvitationModal('${obj._id}'); closeActionDropdown(this);"><i class="uil uil-envelope-send"></i> Send Invitation</button>`
+                );
+            }
         }
         if (config.BUTTONS.sendSmSInvitation) {
             actionItems.push(
@@ -1656,6 +1661,133 @@ function sendEmail(id) {
     const emailSubject = `Please join our MiroTalk ${data.type} Video Chat Meeting`;
     const emailBody = `The meeting is scheduled at: ${newLine} Date: ${data.date} ${newLine} Time: ${data.time} ${newLine} Click to join: ${roomURL} ${newLine}`;
     document.location = 'mailto:' + data.email + '?subject=' + emailSubject + '&body=' + emailBody;
+}
+
+// Server-side invitation flow (shown only when EMAIL_INVITATION_SERVER_SIDE=true).
+// Opens a Swal modal accepting a single recipient, a comma/newline-separated list,
+// or a CSV upload. Sends to the backend which queues + dispatches via SMTP.
+// Markup lives in <template id="srvInvTemplate"> in client.html; styles in client.css.
+function openServerInvitationModal(id) {
+    const data = getRowValues(id);
+    const maxRecipients = (config.EMAIL_INVITATION && config.EMAIL_INVITATION.maxRecipients) || 50;
+    const defaultSubject = `Please join our MiroTalk ${data.type} Video Chat Meeting`;
+    const defaultRecipients = data.email ? data.email : '';
+
+    // Clone the template and populate dynamic fields via DOM APIs (safe from XSS).
+    const tpl = document.getElementById('srvInvTemplate');
+    const formNode = tpl.content.firstElementChild.cloneNode(true);
+    formNode.querySelector('[data-srv-inv-max]').textContent = maxRecipients;
+    formNode.querySelector('#srvInvRecipients').value = defaultRecipients;
+    formNode.querySelector('#srvInvSubject').value = defaultSubject;
+
+    Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        position: 'top',
+        title: 'Send Invitation ',
+        width: 640,
+        showCancelButton: true,
+        confirmButtonText: 'Send',
+        cancelButtonText: 'Cancel',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        html: formNode,
+        didOpen: () => {
+            const csvInput = document.getElementById('srvInvCsv');
+            const recipientsArea = document.getElementById('srvInvRecipients');
+            const dropZone = document.getElementById('srvInvDrop');
+            const dropFileLabel = document.getElementById('srvInvDropFile');
+
+            const importCsvFile = (file) => {
+                if (!file) return;
+                dropFileLabel.textContent = `Loaded: ${file.name}`;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const text = String(ev.target.result || '');
+                    // Naively extract anything that looks like an email from the CSV.
+                    const matches = text.match(/[\w.+-]+@[\w-]+\.[\w.-]+/g) || [];
+                    const existing = recipientsArea.value.trim();
+                    recipientsArea.value = existing ? `${existing}\n${matches.join('\n')}` : matches.join('\n');
+                };
+                reader.readAsText(file);
+            };
+
+            csvInput.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                importCsvFile(file);
+            });
+
+            ['dragenter', 'dragover'].forEach((evt) =>
+                dropZone.addEventListener(evt, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropZone.classList.add('is-dragover');
+                })
+            );
+            ['dragleave', 'drop'].forEach((evt) =>
+                dropZone.addEventListener(evt, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropZone.classList.remove('is-dragover');
+                })
+            );
+            dropZone.addEventListener('drop', (e) => {
+                const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+                if (!file) return;
+                // Reflect the dropped file in the native input for consistency.
+                try {
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    csvInput.files = dt.files;
+                } catch (_) {
+                    /* DataTransfer not assignable in some browsers — ignore */
+                }
+                importCsvFile(file);
+            });
+        },
+        preConfirm: () => {
+            const recipients = document.getElementById('srvInvRecipients').value.trim();
+            const subject = document.getElementById('srvInvSubject').value.trim();
+            const message = document.getElementById('srvInvMessage').value;
+            if (!recipients) {
+                Swal.showValidationMessage('Please enter at least one recipient');
+                return false;
+            }
+            return { recipients, subject, message };
+        },
+    }).then((result) => {
+        if (!result.isConfirmed || !result.value) return;
+        const payload = {
+            roomId: id,
+            recipients: result.value.recipients,
+            subject: result.value.subject || undefined,
+            message: result.value.message || undefined,
+        };
+        roomSendInvitation(payload)
+            .then((res) => {
+                console.log('[API] - ROOM INVITATION RESPONSE', res);
+                const queued = res.queued || 0;
+                const invalid = (res.invalid && res.invalid.length) || 0;
+                const blocked = (res.blocked && res.blocked.length) || 0;
+                const duplicates = res.duplicates || 0;
+                if (queued > 0) {
+                    popupMessage(
+                        'success',
+                        `Queued ${queued} invitation${queued === 1 ? '' : 's'}.<br/>` +
+                            (invalid ? `Invalid: ${invalid}<br/>` : '') +
+                            (blocked ? `Blocked: ${blocked}<br/>` : '') +
+                            (duplicates ? `Duplicates: ${duplicates}` : '')
+                    );
+                } else {
+                    popupMessage('warning', res.message || 'No invitations queued');
+                }
+            })
+            .catch((err) => {
+                console.error('[API] - ROOM INVITATION ERROR', err);
+                const msg = err.response?.data?.message || err.message;
+                popupMessage('error', `Failed to send invitations: ${msg}`);
+            });
+    });
 }
 
 function sendSmSInvitation(id) {

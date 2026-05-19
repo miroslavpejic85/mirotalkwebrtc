@@ -3296,3 +3296,91 @@ body.dark #usersTable tr:hover {
         border-top: 1px solid var(--border-color);
     }
 }
+
+/* Server-side invitation modal (used by openServerInvitationModal in client.js) */
+#srvInvForm {
+    text-align: left;
+    padding: 4px 6px;
+    color: var(--text-color);
+}
+#srvInvForm label {
+    display: block;
+    font-weight: 600;
+    margin: 10px 0 4px;
+    color: var(--text-color);
+}
+#srvInvForm label:first-child {
+    margin-top: 6px;
+}
+#srvInvForm textarea,
+#srvInvForm input[type='text'],
+#srvInvForm input[type='file'] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--box1-color);
+    color: var(--text-color);
+    font: inherit;
+    outline: none;
+    color-scheme: var(--input-color-schema);
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+#srvInvForm textarea {
+    resize: vertical;
+}
+#srvInvForm textarea::placeholder,
+#srvInvForm input[type='text']::placeholder {
+    color: var(--black-light-color);
+    opacity: 0.7;
+}
+#srvInvForm textarea:focus,
+#srvInvForm input[type='text']:focus,
+#srvInvForm input[type='file']:focus {
+    border-color: var(--color-hover);
+    box-shadow: 0 0 0 3px var(--hover-ring);
+}
+#srvInvForm input[type='file']::file-selector-button {
+    margin-right: 8px;
+    padding: 6px 10px;
+    border: 0;
+    border-radius: 4px;
+    background: var(--accent-color);
+    color: #fff;
+    cursor: pointer;
+}
+#srvInvForm input[type='file']::file-selector-button:hover {
+    background: var(--color-hover);
+}
+#srvInvDrop {
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+    background: var(--box1-color);
+    color: var(--black-light-color);
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        color 0.15s ease;
+}
+#srvInvDrop .srv-inv-drop-hint {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+}
+#srvInvDrop.is-dragover {
+    border-color: var(--color-hover);
+    background: var(--hover-bg-light);
+    color: var(--text-color);
+}
+#srvInvDrop .srv-inv-drop-file {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.85em;
+    color: var(--accent-color);
+    word-break: break-all;
+}

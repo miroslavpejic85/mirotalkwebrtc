@@ -985,6 +985,31 @@
             </div>
 
             <div id="panelBackdrop" class="panel-backdrop hidden"></div>
+
+            <!-- Server-side invitation modal body (cloned by openServerInvitationModal in client.js) -->
+            <template id="srvInvTemplate">
+                <div id="srvInvForm">
+                    <label> Recipients (comma or newline-separated, max <span data-srv-inv-max></span>) </label>
+                    <textarea
+                        id="srvInvRecipients"
+                        rows="5"
+                        placeholder="alice@example.com, bob@example.com"
+                    ></textarea>
+                    <label>Or upload a CSV file</label>
+                    <div id="srvInvDrop">
+                        <span class="srv-inv-drop-hint">
+                            <i class="uil uil-cloud-upload"></i>
+                            Drag &amp; drop a CSV here, or use the picker below
+                        </span>
+                        <input type="file" id="srvInvCsv" accept=".csv,text/csv,text/plain" />
+                        <span id="srvInvDropFile" class="srv-inv-drop-file"></span>
+                    </div>
+                    <label>Subject</label>
+                    <input type="text" id="srvInvSubject" />
+                    <label>Custom message (optional)</label>
+                    <textarea id="srvInvMessage" rows="3" placeholder="Add a personal note..."></textarea>
+                </div>
+            </template>
         </section>
     </body>
 </html>

@@ -34,4 +34,14 @@ const registrationLimiter = rateLimit({
     validate: false,
 });
 
-module.exports = { loginLimiter, passwordResetLimiter, registrationLimiter };
+const roomInvitationLimiter = rateLimit({
+    windowMs: Number(process.env.EMAIL_INVITATION_RATE_WINDOW_MS) || 60 * 60 * 1000,
+    max: Number(process.env.EMAIL_INVITATION_RATE_MAX) || 20,
+    message: 'Too many invitation requests, please try again later.',
+    // Prefer the authenticated user's identity (set by the `auth` middleware) so the limit
+    // travels with the user across IPs; fall back to client IP for unauthenticated edge cases.
+    keyGenerator: (req) => req.user?.email || req.user?.username || ipKeyGenerator(req),
+    validate: false,
+});
+
+module.exports = { loginLimiter, passwordResetLimiter, registrationLimiter, roomInvitationLimiter };

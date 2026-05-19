@@ -24,6 +24,7 @@ const config = require('./config');
 const ngrok = require('./common/ngrok');
 const sentry = require('./common/sentry');
 const logs = require('./common/logs');
+const emailQueue = require('./lib/emailQueue');
 const path = require('path');
 const packageJson = require('../package.json');
 
@@ -67,6 +68,9 @@ mongoose.set('strictQuery', true);
 mongoose
     .connect(MONGO_URL, { dbName: MONGO_DATABASE })
     .then(() => {
+        // Start the server-side email invitation worker (no-op when the feature flag is off).
+        emailQueue.start();
+
         const app = express();
 
         app.use(helmet.noSniff()); // Enable content type sniffing prevention

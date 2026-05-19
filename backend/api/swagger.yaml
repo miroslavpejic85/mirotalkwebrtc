@@ -414,6 +414,57 @@ paths:
                 '400':
                     description: Bad request
 
+    /room/invite:
+        post:
+            security:
+                - authorization: []
+            tags:
+                - api
+            summary: Send room invitation emails (server-side)
+            description: >
+                Sends MiroTalk meeting invitation emails directly from the server.
+                Requires EMAIL_INVITATION_SERVER_SIDE=true; otherwise returns 403.
+                Accepts a single recipient string, a comma/newline-separated list, or an array.
+                Invitations are queued in MongoDB and dispatched with retry/backoff.
+            operationId: sendRoomInvitation
+            requestBody:
+                description: Room invitation request
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - roomId
+                                - recipients
+                            properties:
+                                roomId:
+                                    type: string
+                                    description: Mongo _id of the room to invite to
+                                recipients:
+                                    oneOf:
+                                        - type: string
+                                        - type: array
+                                          items:
+                                              type: string
+                                    description: Single email, comma/newline-separated list, or array of emails
+                                subject:
+                                    type: string
+                                message:
+                                    type: string
+                                    description: Optional custom message (max 2000 chars)
+            responses:
+                '200':
+                    description: Invitations queued
+                '400':
+                    description: Validation error (no valid recipients, too many, etc.)
+                '403':
+                    description: Feature disabled or access denied
+                '404':
+                    description: Room not found
+                '429':
+                    description: Rate limit or daily cap exceeded
+
     /room/findBy/{userId}:
         get:
             security:

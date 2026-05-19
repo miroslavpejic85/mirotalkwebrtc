@@ -147,6 +147,15 @@ function roomDeleteALL() {
     }).then((response) => response.data);
 }
 
+function roomSendInvitation(data) {
+    return axios({
+        method: 'POST',
+        url: `${apiPath}/room/invite`,
+        headers: headers,
+        data: data,
+    }).then((response) => response.data);
+}
+
 // API SMS
 
 function smsSend(data) {
