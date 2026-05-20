@@ -43,6 +43,145 @@ function safeUrlAttr(value) {
     return escapeHtml(raw);
 }
 
+// Default meeting duration when the room record doesn't carry one (minutes).
+const ICS_DEFAULT_DURATION_MIN = Number(process.env.EMAIL_INVITATION_ICS_DURATION_MIN) || 60;
+
+// Escape a text value for inclusion in an iCalendar TEXT property per RFC 5545 §3.3.11.
+function icsEscapeText(value) {
+    return String(value == null ? '' : value)
+        .replace(/\\/g, '\\\\')
+        .replace(/\r\n|\r|\n/g, '\\n')
+        .replace(/;/g, '\\;')
+        .replace(/,/g, '\\,');
+}
+
+// Fold a single iCalendar content line to <=75 octets per RFC 5545 §3.1 (line folding).
+// Continuation lines start with a single space.
+function icsFoldLine(line) {
+    if (Buffer.byteLength(line, 'utf8') <= 75) return line;
+    const out = [];
+    let buf = '';
+    let bufBytes = 0;
+    for (const ch of line) {
+        const chBytes = Buffer.byteLength(ch, 'utf8');
+        const limit = out.length === 0 ? 75 : 74; // continuation lines reserve 1 byte for the leading space
+        if (bufBytes + chBytes > limit) {
+            out.push(buf);
+            buf = ch;
+            bufBytes = chBytes;
+        } else {
+            buf += ch;
+            bufBytes += chBytes;
+        }
+    }
+    if (buf) out.push(buf);
+    return out.map((seg, i) => (i === 0 ? seg : ' ' + seg)).join('\r\n');
+}
+
+// Format a Date as a UTC iCalendar timestamp: 20260520T101500Z
+function icsUtcStamp(date) {
+    const pad = (n) => String(n).padStart(2, '0');
+    return (
+        date.getUTCFullYear() +
+        pad(date.getUTCMonth() + 1) +
+        pad(date.getUTCDate()) +
+        'T' +
+        pad(date.getUTCHours()) +
+        pad(date.getUTCMinutes()) +
+        pad(date.getUTCSeconds()) +
+        'Z'
+    );
+}
+
+/**
+ * Build a minimal VCALENDAR (METHOD:REQUEST) for a room invitation.
+ *
+ * The room date/time are persisted as plain strings (YYYY-MM-DD and HH:mm,
+ * no timezone), so we emit them as RFC 5545 "floating" local times — every
+ * calendar client interprets them in the recipient's own timezone, which
+ * matches how the inviter entered them. Returns null if date/time are
+ * missing or malformed (caller will simply skip the attachment).
+ */
+function buildInvitationIcs({ room, roomUrl, date, time, inviterName, message, roomType, recipient }) {
+    const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(date || '').trim());
+    const timeMatch = /^(\d{2}):(\d{2})$/.exec(String(time || '').trim());
+    if (!dateMatch || !timeMatch) return null;
+
+    const [, y, mo, d] = dateMatch;
+    const [, h, mi] = timeMatch;
+
+    // Floating local-time DTSTART (no TZID, no Z): clients render in viewer's local TZ.
+    const dtStart = `${y}${mo}${d}T${h}${mi}00`;
+
+    // Compute DTEND by adding the default duration to the local wall-clock value.
+    // Using Date.UTC keeps the math TZ-free; we then strip the Z to keep it floating.
+    const endMs =
+        Date.UTC(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), 0) + ICS_DEFAULT_DURATION_MIN * 60 * 1000;
+    const endDate = new Date(endMs);
+    const pad = (n) => String(n).padStart(2, '0');
+    const dtEnd =
+        endDate.getUTCFullYear() +
+        pad(endDate.getUTCMonth() + 1) +
+        pad(endDate.getUTCDate()) +
+        'T' +
+        pad(endDate.getUTCHours()) +
+        pad(endDate.getUTCMinutes()) +
+        '00';
+
+    const dtStamp = icsUtcStamp(new Date());
+
+    // Stable UID per (room + start) so calendar updates replace the prior event.
+    const uidBase = `${room || 'mirotalk'}-${dtStart}`.replace(/[^A-Za-z0-9._-]/g, '-');
+    const uidHost = (EMAIL_FROM && EMAIL_FROM.split('@')[1]) || 'mirotalk.local';
+    const uid = `${uidBase}@${uidHost}`;
+
+    const summary = `MiroTalk ${roomType || ''} meeting: ${room || ''}`.trim();
+    const descriptionParts = [];
+    if (inviterName) descriptionParts.push(`Invited by: ${inviterName}`);
+    if (message) descriptionParts.push(String(message));
+    descriptionParts.push(`Join: ${roomUrl}`);
+    const description = descriptionParts.join('\n');
+
+    const organizerLine = EMAIL_FROM
+        ? `ORGANIZER;CN=${icsEscapeText(inviterName || 'MiroTalk')}:mailto:${EMAIL_FROM}`
+        : null;
+    const attendeeLine = recipient
+        ? `ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:${recipient}`
+        : null;
+
+    const lines = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//MiroTalk//Invitation//EN',
+        'CALSCALE:GREGORIAN',
+        'METHOD:REQUEST',
+        'BEGIN:VEVENT',
+        `UID:${uid}`,
+        `DTSTAMP:${dtStamp}`,
+        `DTSTART:${dtStart}`,
+        `DTEND:${dtEnd}`,
+        `SUMMARY:${icsEscapeText(summary)}`,
+        `DESCRIPTION:${icsEscapeText(description)}`,
+        `LOCATION:${icsEscapeText(roomUrl || '')}`,
+        roomUrl ? `URL:${icsEscapeText(roomUrl)}` : null,
+        organizerLine,
+        attendeeLine,
+        'STATUS:CONFIRMED',
+        'TRANSP:OPAQUE',
+        'BEGIN:VALARM',
+        'ACTION:DISPLAY',
+        `DESCRIPTION:${icsEscapeText(summary)}`,
+        'TRIGGER:-PT15M',
+        'END:VALARM',
+        'END:VEVENT',
+        'END:VCALENDAR',
+    ]
+        .filter(Boolean)
+        .map(icsFoldLine);
+
+    return lines.join('\r\n') + '\r\n';
+}
+
 const IS_TLS_PORT = EMAIL_PORT === 465;
 const transport = nodemailer.createTransport({
     host: EMAIL_HOST,
@@ -294,10 +433,34 @@ function sendRoomInvitationEmail({ to, subject, roomUrl, roomType, room, date, t
           )}</p>`
         : '';
 
+    // Attach a calendar invite (.ics) when the room has a date+time, so recipients
+    // can add the meeting to their calendar in one click. Built as RFC 5545
+    // floating local time to match how the inviter entered it.
+    const icsContent = buildInvitationIcs({
+        room,
+        roomUrl,
+        date,
+        time,
+        inviterName,
+        message,
+        roomType,
+        recipient: to,
+    });
+    const attachments = icsContent
+        ? [
+              {
+                  filename: 'invitation.ics',
+                  content: icsContent,
+                  contentType: 'text/calendar; charset=utf-8; method=REQUEST',
+              },
+          ]
+        : undefined;
+
     return transport.sendMail({
         from: EMAIL_FROM,
         to,
         subject: safeSubject,
+        attachments,
         html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h1 style="color: #376df9;">MiroTalk Meeting Invitation</h1>
