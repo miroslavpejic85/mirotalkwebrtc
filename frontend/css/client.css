@@ -3384,3 +3384,156 @@ body.dark #usersTable tr:hover {
     color: var(--accent-color);
     word-break: break-all;
 }
+.srv-inv-recurring-row {
+    margin-top: 14px;
+    padding: 10px 12px;
+    border: 1px dashed var(--border-color, #555);
+    border-radius: 8px;
+}
+.srv-inv-recurring-row .srv-inv-recurring-label,
+#srvInvForm label.srv-inv-recurring-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    width: 100%;
+    margin: 0;
+    text-align: left;
+}
+.srv-inv-recurring-row .srv-inv-recurring-label > span:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.srv-inv-recurring-row .srv-inv-recurring-label .mode-toggle {
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+.srv-inv-recurring-row small {
+    display: block;
+    opacity: 0.7;
+    font-size: 0.8em;
+    margin-top: 2px;
+}
+.recurring-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    margin-right: 4px;
+    border-radius: 999px;
+    font-size: 0.72em;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: #2f9e6b;
+    background: rgba(47, 158, 107, 0.12);
+    border: 1px solid rgba(47, 158, 107, 0.35);
+    vertical-align: middle;
+    cursor: pointer;
+    line-height: 1;
+    white-space: nowrap;
+    font-family: inherit;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+.recurring-badge i {
+    font-size: 1.1em;
+}
+.recurring-badge:hover {
+    background: rgba(47, 158, 107, 0.2);
+    color: #228a5a;
+}
+.recurring-cell {
+    text-align: center;
+}
+.recurring-off {
+    opacity: 0.4;
+    font-size: 0.9em;
+}
+
+/* ===== Custom tippy theme for the recurring badge ===== */
+.tippy-box[data-theme~='recurring'] {
+    background: linear-gradient(180deg, #1f2a36 0%, #15202b 100%);
+    color: #e6edf3;
+    border: 1px solid rgba(47, 158, 107, 0.45);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    font-size: 0.85em;
+}
+.tippy-box[data-theme~='recurring'] > .tippy-arrow {
+    color: #15202b;
+}
+.tippy-box[data-theme~='recurring'] .tippy-content {
+    padding: 0;
+}
+.tippy-recurring {
+    min-width: 220px;
+    max-width: 280px;
+}
+.tippy-recurring-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(47, 158, 107, 0.18);
+    color: #6fe3ad;
+    font-weight: 600;
+    font-size: 0.95em;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 1px solid rgba(47, 158, 107, 0.35);
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+}
+.tippy-recurring-header i {
+    font-size: 1.2em;
+}
+.tippy-recurring-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+}
+.tippy-recurring-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.3;
+}
+.tippy-recurring-row[hidden] {
+    display: none;
+}
+.tippy-recurring-row > i {
+    color: #6fe3ad;
+    font-size: 1.05em;
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+.tippy-recurring-main {
+    color: #e6edf3;
+    font-weight: 500;
+}
+.tippy-recurring-sub {
+    color: #9aa6b2;
+    font-size: 0.88em;
+    margin-top: 1px;
+}
+.tippy-recurring-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #9aa6b2;
+    font-size: 0.8em;
+    font-style: italic;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+}
+.tippy-recurring-hint i {
+    font-size: 1em;
+}

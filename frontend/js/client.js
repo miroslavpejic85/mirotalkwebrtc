@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.60
+ * @version 1.3.70
  */
 
 const userAgent = navigator.userAgent;
@@ -197,14 +197,15 @@ const dataTable = $('#myTable').DataTable({
     scrollX: true,
     order: [[4, 'asc']],
     columnDefs: [
-        { width: '10%', targets: 0 },
-        { width: '10%', targets: 1 },
-        { width: '20%', targets: 2 },
-        { width: '10%', targets: 3 },
-        { width: '10%', targets: 4 },
-        { width: '10%', targets: 5 },
-        { width: '20%', targets: 6 },
-        { width: '10%', targets: 7 },
+        { width: '9%', targets: 0 },
+        { width: '9%', targets: 1 },
+        { width: '18%', targets: 2 },
+        { width: '9%', targets: 3 },
+        { width: '9%', targets: 4 },
+        { width: '9%', targets: 5 },
+        { width: '18%', targets: 6 },
+        { width: '9%', targets: 7 },
+        { width: '10%', targets: 8 },
         {
             targets: [0, 6],
             render: dropdownSearchRender,
@@ -215,15 +216,15 @@ const dataTable = $('#myTable').DataTable({
             searchable: true,
         },
         {
-            targets: [5, 7],
+            targets: [5, 7, 8],
             orderable: false,
             searchable: false,
         },
         {
-            targets: [0, 1, 2, 3, 4, 5, 6, 7],
+            targets: [0, 1, 2, 3, 4, 5, 6, 7, 8],
             className: 'dt-body-justify',
         },
-    ], // [MiroTalk, Tag, Email, Phone, Date, Time, Room, Actions]
+    ], // [MiroTalk, Tag, Email, Phone, Date, Time, Room, Recurring, Actions]
 });
 $('#myTable').css('width', '100%');
 
@@ -1417,6 +1418,105 @@ function addRow() {
         });
 }
 
+function recurringBadgeTooltip(obj, recurring) {
+    try {
+        if (!obj || !obj.date || !obj.time) return 'Recurring weekly invitation active';
+        const base = new Date(`${obj.date}T${obj.time}:00`);
+        if (isNaN(base.getTime())) return 'Recurring weekly invitation active';
+        const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+        const now = Date.now();
+        let next = base.getTime();
+        if (next <= now) {
+            const weeks = Math.floor((now - next) / WEEK_MS) + 1;
+            next = next + weeks * WEEK_MS;
+        }
+        const d = new Date(next);
+        const day = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+        const hm = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+        const recipients = recurring && Array.isArray(recurring.recipients) ? recurring.recipients.length : 0;
+        const recLabel = recipients ? ` • ${recipients} recipient${recipients === 1 ? '' : 's'}` : '';
+        return `Recurring weekly • Next: ${day} ${hm}${recLabel}`;
+    } catch (_) {
+        return 'Recurring weekly invitation active';
+    }
+}
+
+// Rich HTML tooltip for the recurring badge — clones #recurringTooltipTemplate from client.html
+// and fills the data-slot placeholders. Returns the populated outerHTML for tippy (allowHTML).
+function recurringBadgeTooltipHTML(obj, recurring) {
+    let nextLabel = '—';
+    let countdown = '';
+    try {
+        if (obj && obj.date && obj.time) {
+            const base = new Date(`${obj.date}T${obj.time}:00`);
+            if (!isNaN(base.getTime())) {
+                const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+                const now = Date.now();
+                let nextMs = base.getTime();
+                if (nextMs <= now) {
+                    const weeks = Math.floor((now - nextMs) / WEEK_MS) + 1;
+                    nextMs = nextMs + weeks * WEEK_MS;
+                }
+                const d = new Date(nextMs);
+                const day = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+                const hm = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+                nextLabel = `${day} • ${hm}`;
+
+                const diff = Math.max(0, nextMs - now);
+                const days = Math.floor(diff / 86400000);
+                const hours = Math.floor((diff % 86400000) / 3600000);
+                const mins = Math.floor((diff % 3600000) / 60000);
+                if (days > 0) countdown = `in ${days}d ${hours}h`;
+                else if (hours > 0) countdown = `in ${hours}h ${mins}m`;
+                else countdown = `in ${mins}m`;
+            }
+        }
+    } catch (_) {}
+
+    const recipients = recurring && Array.isArray(recurring.recipients) ? recurring.recipients.length : 0;
+    const recipientsLine = recipients ? `${recipients} recipient${recipients === 1 ? '' : 's'}` : 'No recipients';
+
+    let lastLine = '';
+    if (recurring && recurring.lastRunAt) {
+        try {
+            const last = new Date(recurring.lastRunAt);
+            if (!isNaN(last.getTime())) {
+                lastLine = `Last sent: ${last.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} ${last.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`;
+            }
+        } catch (_) {}
+    }
+
+    const tpl = document.getElementById('recurringTooltipTemplate');
+    if (!tpl || !tpl.content) {
+        // Fallback (template missing) — minimal plain text so tippy still renders something.
+        return `Recurring weekly • Next: ${nextLabel} • ${recipientsLine}`;
+    }
+
+    const frag = tpl.content.cloneNode(true);
+    const root = frag.querySelector('.tippy-recurring');
+    const setSlot = (name, text) => {
+        const el = root.querySelector(`[data-slot="${name}"]`);
+        if (el) el.textContent = text;
+        return el;
+    };
+
+    setSlot('next', nextLabel);
+    const cdEl = setSlot('countdown', countdown);
+    if (cdEl) cdEl.hidden = !countdown;
+
+    setSlot('recipients', recipientsLine);
+
+    const lastRow = root.querySelector('[data-slot="last-row"]');
+    if (lastLine) {
+        setSlot('last', lastLine);
+        if (lastRow) lastRow.hidden = false;
+    } else if (lastRow) {
+        lastRow.hidden = true;
+    }
+
+    return root.outerHTML;
+}
+
 function getRow(obj) {
     if (
         !config.MiroTalk.P2P.Visible &&
@@ -1429,16 +1529,24 @@ function getRow(obj) {
     const today = new Date().toISOString().split('T')[0];
     const isPast = obj.date < today;
 
+    // Cache recurring state so other UI flows (delete, modal) can read it without an extra API call.
+    const recurring = obj.recurring && obj.recurring.enabled ? obj.recurring : null;
+    window.__roomRecurring = window.__roomRecurring || {};
+    window.__roomRecurring[obj._id] = recurring;
+    const recurringCell = recurring
+        ? `<button id="${obj._id}_recurring" type="button" class="recurring-badge" onclick="disableRecurringInvitation('${obj._id}')" data-tippy="${recurringBadgeTooltip(obj, recurring)}, click to disable" data-tippy-html="${encodeURIComponent(recurringBadgeTooltipHTML(obj, recurring))}"><i class="uil uil-sync"></i>Recurring</button>`
+        : `<span id="${obj._id}_recurring" class="recurring-off" data-tippy="Recurring invitation disabled">—</span>`;
+
     // Inline primary actions (1-click)
     const inlineIcons = [];
     if (config.BUTTONS.updateRow && !isPast) {
         inlineIcons.push(
-            `<i id="${obj._id}_save" onclick="updateRow('${obj._id}')" class="uil uil-save action-icon" title="Save"></i>`
+            `<i id="${obj._id}_save" onclick="updateRow('${obj._id}')" class="uil uil-save action-icon" data-tippy="Save"></i>`
         );
     }
     if (config.BUTTONS.delRow) {
         inlineIcons.push(
-            `<i id="${obj._id}_delete" onclick="delRow('${obj._id}')" class="uil uil-trash-alt action-icon danger" title="Delete"></i>`
+            `<i id="${obj._id}_delete" onclick="delRow('${obj._id}')" class="uil uil-trash-alt action-icon danger" data-tippy="Delete"></i>`
         );
     }
 
@@ -1473,6 +1581,11 @@ function getRow(obj) {
             if (config.EMAIL_INVITATION && config.EMAIL_INVITATION.serverSide) {
                 actionItems.push(
                     `<button id="${obj._id}_send_email_server" class="action-dropdown-item" onclick="openServerInvitationModal('${obj._id}'); closeActionDropdown(this);"><i class="uil uil-envelope-send"></i> Send Invitation</button>`
+                );
+            }
+            if (config.EMAIL_INVITATION && config.EMAIL_INVITATION.recurring && recurring) {
+                actionItems.push(
+                    `<button id="${obj._id}_recurring_off" class="action-dropdown-item" onclick="disableRecurringInvitation('${obj._id}'); closeActionDropdown(this);"><i class="uil uil-sync-slash"></i> Disable Recurring</button>`
                 );
             }
         }
@@ -1522,6 +1635,7 @@ function getRow(obj) {
         `<td><input id="${obj._id}_date" type="text" name="date" placeholder="Date" value="${obj.date}" class="flatpickr-date"${ro}/></td>`,
         `<td><input id="${obj._id}_time" type="text" name="time" placeholder="Time" value="${obj.time}" class="flatpickr-time"${ro}/></td>`,
         `<td>${rooms}</td>`,
+        `<td class="recurring-cell">${recurringCell}</td>`,
         `<td>
             <div class="action-cell">
                 <span class="action-group">${inlineIcons.join('')}</span>
@@ -1544,7 +1658,40 @@ function getRow(obj) {
 }
 
 function addRowToolTips(id) {
-    // No tooltips needed — actions are now labeled inside dropdown menu
+    // Attach tippy tooltip to the recurring badge / placeholder if present.
+    const el = document.getElementById(`${id}_recurring`);
+    if (el && !el._tippy) {
+        if (el.dataset.tippyHtml) {
+            // Rich HTML tooltip for the active recurring badge.
+            let html = '';
+            try {
+                html = decodeURIComponent(el.dataset.tippyHtml);
+            } catch (_) {
+                html = el.dataset.tippy || '';
+            }
+            setTippy(el, html, 'top', {
+                allowHTML: true,
+                theme: 'recurring',
+                maxWidth: 280,
+                offset: [0, 10],
+                animation: 'shift-away',
+                interactive: false,
+            });
+        } else if (el.dataset.tippy) {
+            setTippy(el, el.dataset.tippy, 'top');
+        }
+    }
+    // Save / Delete inline action icons — use tippy for consistency with the badge.
+    const saveEl = document.getElementById(`${id}_save`);
+    if (saveEl && !saveEl._tippy) {
+        setTippy(saveEl, 'Save', 'top');
+        saveEl.removeAttribute('title');
+    }
+    const delEl = document.getElementById(`${id}_delete`);
+    if (delEl && !delEl._tippy) {
+        setTippy(delEl, 'Delete', 'top');
+        delEl.removeAttribute('title');
+    }
 }
 
 function toggleActionDropdown(triggerBtn) {
@@ -1680,6 +1827,18 @@ function openServerInvitationModal(id) {
     formNode.querySelector('#srvInvRecipients').value = defaultRecipients;
     formNode.querySelector('#srvInvSubject').value = defaultSubject;
 
+    // Show the recurring toggle only when the feature is enabled server-side
+    // and the row already has a scheduled date+time (required for weekly cadence).
+    const recurringEnabled = !!(config.EMAIL_INVITATION && config.EMAIL_INVITATION.recurring);
+    const recurringRow = formNode.querySelector('#srvInvRecurringRow');
+    const existingRecurring = (window.__roomRecurring && window.__roomRecurring[id]) || null;
+    if (recurringEnabled && data.date && data.time) {
+        recurringRow.hidden = false;
+        if (existingRecurring) {
+            formNode.querySelector('#srvInvRecurring').checked = true;
+        }
+    }
+
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
@@ -1749,11 +1908,13 @@ function openServerInvitationModal(id) {
             const recipients = document.getElementById('srvInvRecipients').value.trim();
             const subject = document.getElementById('srvInvSubject').value.trim();
             const message = document.getElementById('srvInvMessage').value;
+            const recurringEl = document.getElementById('srvInvRecurring');
+            const recurring = !!(recurringEl && recurringEl.checked);
             if (!recipients) {
                 Swal.showValidationMessage('Please enter at least one recipient');
                 return false;
             }
-            return { recipients, subject, message };
+            return { recipients, subject, message, recurring };
         },
     }).then((result) => {
         if (!result.isConfirmed || !result.value) return;
@@ -1763,23 +1924,48 @@ function openServerInvitationModal(id) {
             subject: result.value.subject || undefined,
             message: result.value.message || undefined,
         };
+        const recurringRequested = !!result.value.recurring;
         roomSendInvitation(payload)
-            .then((res) => {
+            .then(async (res) => {
                 console.log('[API] - ROOM INVITATION RESPONSE', res);
                 const queued = res.queued || 0;
                 const invalid = (res.invalid && res.invalid.length) || 0;
                 const blocked = (res.blocked && res.blocked.length) || 0;
                 const duplicates = res.duplicates || 0;
+
+                // If recurring was requested, enable it BEFORE showing the success popup
+                // so we can consolidate the result into a single message (avoids the
+                // success modal being replaced/overridden by the recurring toast).
+                let recurringLine = '';
+                if (recurringRequested) {
+                    try {
+                        const r = await roomSetRecurring(id, {
+                            enabled: true,
+                            recipients: payload.recipients,
+                            subject: payload.subject,
+                            message: payload.message,
+                        });
+                        console.log('[API] - RECURRING ENABLED', r);
+                        recurringLine = '<br/><b>Recurring weekly invitation enabled.</b>';
+                        refreshRoomRow(id);
+                    } catch (err) {
+                        console.error('[API] - RECURRING ENABLE ERROR', err);
+                        const m = err.response?.data?.message || err.message;
+                        recurringLine = `<br/><b style="color:#d33">Failed to enable recurring:</b> ${m}`;
+                    }
+                }
+
                 if (queued > 0) {
                     popupMessage(
                         'success',
                         `Queued ${queued} invitation${queued === 1 ? '' : 's'}.<br/>` +
                             (invalid ? `Invalid: ${invalid}<br/>` : '') +
                             (blocked ? `Blocked: ${blocked}<br/>` : '') +
-                            (duplicates ? `Duplicates: ${duplicates}` : '')
+                            (duplicates ? `Duplicates: ${duplicates}` : '') +
+                            recurringLine
                     );
                 } else {
-                    popupMessage('warning', res.message || 'No invitations queued');
+                    popupMessage('warning', (res.message || 'No invitations queued') + recurringLine);
                 }
             })
             .catch((err) => {
@@ -1889,6 +2075,31 @@ function updateRow(id) {
 
 function delRow(id) {
     const dataTableTR = document.getElementById(id);
+    const recurring = (window.__roomRecurring && window.__roomRecurring[id]) || null;
+    if (recurring) {
+        Swal.fire({
+            position: 'top',
+            icon: 'warning',
+            title: 'Recurring invitation active',
+            text: 'Disable recurring invitations before deleting this room.',
+            confirmButtonText: 'Disable recurring',
+            showCancelButton: true,
+            cancelButtonText: 'Cancel',
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((r) => {
+            if (r.isConfirmed) {
+                // After disabling recurring, chain straight into the delete confirm
+                // so the user doesn't have to click Delete again.
+                disableRecurringInvitation(id, { skipConfirm: true, onSuccess: () => confirmDeleteRoom(id) });
+            }
+        });
+        return;
+    }
+    confirmDeleteRoom(id);
+}
+
+function confirmDeleteRoom(id) {
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
@@ -1912,9 +2123,87 @@ function delRow(id) {
                 })
                 .catch((err) => {
                     console.log('[API] - DELETE ROW ERROR', err);
+                    const data = err && err.response && err.response.data;
+                    if (data && data.code === 'RECURRING_ACTIVE') {
+                        popupMessage('warning', data.message);
+                        return;
+                    }
                     popupMessage('error', `API DELETE ROW error: ${err.message}`);
                 });
         }
+    });
+}
+
+/**
+ * Re-fetch a single room and refresh its row in the DataTable (incl. recurring state).
+ * Falls back silently if the row is missing (e.g. after delete) or the fetch fails.
+ */
+function refreshRoomRow(id) {
+    return roomGet(id)
+        .then((obj) => {
+            const tableRow = getRow(obj);
+            if (!tableRow) return;
+            const today = new Date().toISOString().split('T')[0];
+            const existing = dataTable.row(`#${id}`);
+            if (existing && existing.node()) {
+                existing.remove();
+            }
+            const rowNode = dataTable.row.add(tableRow).node();
+            rowNode.id = obj._id;
+            if (obj.date < today) rowNode.classList.add('room-past');
+            else if (obj.date === today) rowNode.classList.add('room-today');
+            dataTable.draw(false);
+            try {
+                initVisibleRowsFlatpickr();
+            } catch (_) {
+                /* flatpickr init may be a no-op for non-visible rows */
+            }
+        })
+        .catch((err) => {
+            console.warn('[API] - refreshRoomRow failed', err && err.message);
+        });
+}
+
+/**
+ * Disable the weekly recurring invitation for a room.
+ * Updates the cached state and re-renders the affected row so the indicator/menu reflect it.
+ */
+function disableRecurringInvitation(id, options = {}) {
+    const { skipConfirm = false, onSuccess } = options;
+
+    const performDisable = () => {
+        roomSetRecurring(id, { enabled: false })
+            .then((res) => {
+                console.log('[API] - RECURRING DISABLED', res);
+                if (window.__roomRecurring) window.__roomRecurring[id] = null;
+                popupMessage('toast', 'Recurring invitation disabled');
+                refreshRoomRow(id);
+                if (typeof onSuccess === 'function') onSuccess();
+            })
+            .catch((err) => {
+                console.error('[API] - RECURRING DISABLE ERROR', err);
+                const m = err.response?.data?.message || err.message;
+                popupMessage('error', `Failed to disable recurring: ${m}`);
+            });
+    };
+
+    if (skipConfirm) {
+        performDisable();
+        return;
+    }
+
+    Swal.fire({
+        position: 'top',
+        icon: 'question',
+        title: 'Disable recurring invitation?',
+        text: 'No further weekly invitation emails will be sent for this room.',
+        showCancelButton: true,
+        confirmButtonText: 'Disable',
+        cancelButtonText: 'Cancel',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then((result) => {
+        if (result.isConfirmed) performDisable();
     });
 }
 
@@ -1922,7 +2211,6 @@ function getActiveFilter() {
     const active = document.querySelector('.filter-chip.active');
     return active ? active.dataset.filter : 'all';
 }
-
 function getFilterLabel() {
     const filter = getActiveFilter();
     if (filter === 'today') return "today's";
@@ -2458,12 +2746,13 @@ function loadToolTip(tt) {
     });
 }
 
-function setTippy(elem, content, placement) {
+function setTippy(elem, content, placement, options = {}) {
     if (isMobile) return;
     try {
         tippy(elem, {
             content: content,
             placement: placement,
+            ...options,
         });
     } catch (err) {
         console.error('setTippy error', err.message);

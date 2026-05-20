@@ -465,6 +465,57 @@ paths:
                 '429':
                     description: Rate limit or daily cap exceeded
 
+    /room/{id}/recurring:
+        post:
+            security:
+                - authorization: []
+            tags:
+                - api
+            summary: Enable or disable weekly recurring invitations for a room
+            description: >
+                When `enabled=true`, the server schedules a weekly invitation email
+                (same day-of-week and time as the room schedule) to the provided
+                recipients until the toggle is disabled. Requires
+                EMAIL_INVITATION_SERVER_SIDE=true and EMAIL_INVITATION_RECURRING!=false.
+            operationId: setRoomRecurring
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - enabled
+                            properties:
+                                enabled:
+                                    type: boolean
+                                recipients:
+                                    oneOf:
+                                        - type: string
+                                        - type: array
+                                          items:
+                                              type: string
+                                    description: Required when enabling
+                                subject:
+                                    type: string
+                                message:
+                                    type: string
+            responses:
+                '200':
+                    description: Recurring state updated
+                '400':
+                    description: Validation error
+                '403':
+                    description: Feature disabled or access denied
+                '404':
+                    description: Room not found
+
     /room/findBy/{userId}:
         get:
             security:

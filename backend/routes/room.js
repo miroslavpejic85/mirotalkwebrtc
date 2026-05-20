@@ -25,6 +25,11 @@ router.post('/room/invite', auth, roomInvitationLimiter, (req, res) => {
     controllersInvitations.sendRoomInvitation(req, res);
 });
 
+//RECURRING: /api/v1/room/:id/recurring (enable/disable weekly recurring invitations)
+router.post('/room/:id/recurring', auth, roomInvitationLimiter, (req, res) => {
+    controllersInvitations.setRoomRecurring(req, res);
+});
+
 //GET: /api/v1/room/findBy/userId
 router.get('/room/findBy/:userId', auth, (req, res) => {
     controllersRooms.roomFindBy(req, res);

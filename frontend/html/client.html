@@ -425,6 +425,7 @@
                                 <th>Date</th>
                                 <th>Time</th>
                                 <th>Room</th>
+                                <th>Recurring</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -1008,6 +1009,46 @@
                     <input type="text" id="srvInvSubject" />
                     <label>Custom message (optional)</label>
                     <textarea id="srvInvMessage" rows="3" placeholder="Add a personal note..."></textarea>
+                    <div id="srvInvRecurringRow" class="srv-inv-recurring-row" hidden>
+                        <label class="srv-inv-recurring-label">
+                            <span>
+                                <i class="uil uil-sync"></i> Recurring Invitation
+                                <small>Send this invitation every week at the same day &amp; time</small>
+                            </span>
+                            <span class="mode-toggle">
+                                <input type="checkbox" id="srvInvRecurring" class="toggle-checkbox" />
+                                <span class="toggle-slider"></span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Recurring badge rich tooltip body (cloned + populated by recurringBadgeTooltipHTML in client.js) -->
+            <template id="recurringTooltipTemplate">
+                <div class="tippy-recurring">
+                    <div class="tippy-recurring-header">
+                        <i class="uil uil-sync"></i>
+                        <span>Recurring weekly</span>
+                    </div>
+                    <div class="tippy-recurring-body">
+                        <div class="tippy-recurring-row">
+                            <i class="uil uil-clock"></i>
+                            <div>
+                                <div class="tippy-recurring-main" data-slot="next">—</div>
+                                <div class="tippy-recurring-sub" data-slot="countdown" hidden></div>
+                            </div>
+                        </div>
+                        <div class="tippy-recurring-row">
+                            <i class="uil uil-envelope"></i>
+                            <div class="tippy-recurring-main" data-slot="recipients">No recipients</div>
+                        </div>
+                        <div class="tippy-recurring-row" data-slot="last-row" hidden>
+                            <i class="uil uil-check-circle"></i>
+                            <div class="tippy-recurring-sub" data-slot="last"></div>
+                        </div>
+                    </div>
+                    <div class="tippy-recurring-hint"><i class="uil uil-mouse-alt"></i> Click badge to disable</div>
                 </div>
             </template>
         </section>

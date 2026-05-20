@@ -156,6 +156,15 @@ function roomSendInvitation(data) {
     }).then((response) => response.data);
 }
 
+function roomSetRecurring(id, data) {
+    return axios({
+        method: 'POST',
+        url: `${apiPath}/room/${id}/recurring`,
+        headers: headers,
+        data: data,
+    }).then((response) => response.data);
+}
+
 // API SMS
 
 function smsSend(data) {

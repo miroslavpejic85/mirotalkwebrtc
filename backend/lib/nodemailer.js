@@ -23,6 +23,26 @@ log.info('Email', {
     from: EMAIL_FROM,
 });
 
+// HTML-escape user-controlled values before interpolating into email markup.
+// Escapes the 5 chars relevant for both element and attribute contexts.
+function escapeHtml(value) {
+    return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// Encode a URL for safe use inside an HTML attribute (`href`).
+// Strips any javascript: / data: / vbscript: schemes that could execute on click,
+// then HTML-escapes the result for attribute context.
+function safeUrlAttr(value) {
+    const raw = String(value == null ? '' : value).trim();
+    if (/^\s*(javascript|data|vbscript):/i.test(raw)) return '#';
+    return escapeHtml(raw);
+}
+
 const IS_TLS_PORT = EMAIL_PORT === 465;
 const transport = nodemailer.createTransport({
     host: EMAIL_HOST,
@@ -250,16 +270,28 @@ function sendInvitationEmail(name, email, password) {
  * caller (email queue worker) can record the error and schedule a retry.
  */
 function sendRoomInvitationEmail({ to, subject, roomUrl, roomType, room, date, time, inviterName, message }) {
-    const safeSubject = subject || `You are invited to a MiroTalk ${roomType || ''} meeting`.trim();
-    const greeting = inviterName
-        ? `${inviterName} has invited you to a meeting.`
+    // Defense-in-depth: every interpolated field is HTML-escaped (or URL-sanitized) at render time,
+    // even though upstream callers also validate/limit them. Schema-level validators for room/date/time
+    // are intentionally permissive, so this is the authoritative XSS boundary for outbound mail.
+    const safeRoomType = escapeHtml(roomType);
+    const safeRoom = escapeHtml(room);
+    const safeDate = escapeHtml(date);
+    const safeTime = escapeHtml(time);
+    const safeRoomUrlAttr = safeUrlAttr(roomUrl);
+    const safeRoomUrlText = escapeHtml(roomUrl);
+    const safeInviter = escapeHtml(inviterName);
+
+    const rawSubject = typeof subject === 'string' && subject.trim() ? subject.trim() : '';
+    // Cap subject to avoid oversized SMTP headers / DB bloat; nodemailer encodes headers itself.
+    const safeSubject = (rawSubject || `You are invited to a MiroTalk ${roomType || ''} meeting`.trim()).slice(0, 200);
+
+    const greeting = safeInviter
+        ? `${safeInviter} has invited you to a meeting.`
         : 'You have been invited to a meeting.';
     const customMessage = message
-        ? `<p style="margin: 16px 0; padding: 12px 16px; background-color: #f4f7fb; border-left: 4px solid #376df9; border-radius: 4px; white-space: pre-wrap;">${String(
-              message
-          )
-              .replace(/</g, '&lt;')
-              .replace(/>/g, '&gt;')}</p>`
+        ? `<p style="margin: 16px 0; padding: 12px 16px; background-color: #f4f7fb; border-left: 4px solid #376df9; border-radius: 4px; white-space: pre-wrap;">${escapeHtml(
+              String(message)
+          )}</p>`
         : '';
 
     return transport.sendMail({
@@ -274,38 +306,38 @@ function sendRoomInvitationEmail({ to, subject, roomUrl, roomType, room, date, t
                 <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
                     <tr>
                         <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Service</td>
-                        <td style="border: 1px solid #ddd; padding: 10px;">MiroTalk ${roomType || ''}</td>
+                        <td style="border: 1px solid #ddd; padding: 10px;">MiroTalk ${safeRoomType}</td>
                     </tr>
                     <tr>
                         <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Room</td>
-                        <td style="border: 1px solid #ddd; padding: 10px;">${room || ''}</td>
+                        <td style="border: 1px solid #ddd; padding: 10px;">${safeRoom}</td>
                     </tr>
                     ${
-                        date
+                        safeDate
                             ? `<tr>
                         <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Date</td>
-                        <td style="border: 1px solid #ddd; padding: 10px;">${date}</td>
+                        <td style="border: 1px solid #ddd; padding: 10px;">${safeDate}</td>
                     </tr>`
                             : ''
                     }
                     ${
-                        time
+                        safeTime
                             ? `<tr>
                         <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Time</td>
-                        <td style="border: 1px solid #ddd; padding: 10px;">${time}</td>
+                        <td style="border: 1px solid #ddd; padding: 10px;">${safeTime}</td>
                     </tr>`
                             : ''
                     }
                 </table>
                 <div style="margin: 30px 0;">
-                    <a href="${roomUrl}"
+                    <a href="${safeRoomUrlAttr}"
                        style="background-color: #376df9; color: white; padding: 12px 24px;
                               text-decoration: none; border-radius: 5px; display: inline-block;">
                         Join Meeting
                     </a>
                 </div>
                 <p>Or copy and paste this link into your browser:</p>
-                <p style="color: #666; word-break: break-all;">${roomUrl}</p>
+                <p style="color: #666; word-break: break-all;">${safeRoomUrlText}</p>
                 <br/>
                 <p>Enjoying our app? Unlock its full potential with a MiroTalk purchase on CodeCanyon.</p>
                 <a href="${SUPPORT}" target="_blank">Purchase from CodeCanyon</a>

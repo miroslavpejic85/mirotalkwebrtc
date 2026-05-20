@@ -25,6 +25,7 @@ const ngrok = require('./common/ngrok');
 const sentry = require('./common/sentry');
 const logs = require('./common/logs');
 const emailQueue = require('./lib/emailQueue');
+const recurringInvitations = require('./lib/recurringInvitations');
 const path = require('path');
 const packageJson = require('../package.json');
 
@@ -70,6 +71,8 @@ mongoose
     .then(() => {
         // Start the server-side email invitation worker (no-op when the feature flag is off).
         emailQueue.start();
+        // Start the weekly recurring invitation scheduler (no-op when disabled).
+        recurringInvitations.start();
 
         const app = express();
 

@@ -107,5 +107,10 @@ module.exports = {
         // Reads from process.env so a single env var controls behavior end-to-end.
         serverSide: process.env.EMAIL_INVITATION_SERVER_SIDE === 'true' || false,
         maxRecipients: Number(process.env.EMAIL_INVITATION_MAX_RECIPIENTS) || 50,
+        // Recurring weekly invitations. Requires serverSide=true and the email queue worker.
+        recurring:
+            (process.env.EMAIL_INVITATION_SERVER_SIDE === 'true' &&
+                process.env.EMAIL_INVITATION_RECURRING !== 'false') ||
+            false,
     },
 };

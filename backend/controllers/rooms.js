@@ -88,6 +88,16 @@ async function roomFindBy(req, res) {
 async function roomDeleteFindBy(req, res) {
     try {
         if (!(await ensureOwnerOrAdmin(req, res, req.params.userId))) return;
+        const hasRecurring = await Room.exists({
+            userId: req.params.userId,
+            'recurring.enabled': true,
+        });
+        if (hasRecurring) {
+            return res.status(409).json({
+                code: 'RECURRING_ACTIVE',
+                message: 'Disable recurring invitations before deleting these rooms.',
+            });
+        }
         const data = await Room.deleteMany({ userId: req.params.userId });
         log.debug('deleAllRooms data', data);
         data.deletedCount > 0
@@ -138,11 +148,17 @@ async function roomUpdate(req, res) {
 async function roomDelete(req, res) {
     try {
         const id = req.params.id;
-        const existing = await Room.findById(id).select('userId').lean();
+        const existing = await Room.findById(id).select('userId recurring').lean();
         if (!existing) {
             return res.status(404).json({ message: 'Room not found' });
         }
         if (!(await ensureOwnerOrAdmin(req, res, existing.userId))) return;
+        if (existing.recurring && existing.recurring.enabled) {
+            return res.status(409).json({
+                code: 'RECURRING_ACTIVE',
+                message: 'Disable recurring invitations before deleting this room.',
+            });
+        }
         const data = await Room.findByIdAndDelete(id);
         res.json({ message: `Document with ${data._id} has been deleted` });
     } catch (error) {

@@ -116,9 +116,10 @@ async function sendRoomInvitation(req, res) {
             return res.status(400).json({ message: `Unsupported room type: ${room.type}` });
         }
 
-        const safeSubject =
+        const safeSubject = (
             (typeof subject === 'string' && subject.trim()) ||
-            `Please join our MiroTalk ${room.type} Video Chat Meeting`;
+            `Please join our MiroTalk ${room.type} Video Chat Meeting`
+        ).slice(0, 200);
         const safeMessage = typeof message === 'string' ? message.slice(0, 2000) : undefined;
         const inviterName = req.user?.username || req.user?.email;
 
@@ -159,4 +160,115 @@ async function sendRoomInvitation(req, res) {
     }
 }
 
-module.exports = { sendRoomInvitation };
+/**
+ * Enable or disable the weekly recurring invitation for a room.
+ * Body: { enabled: boolean, recipients?, subject?, message? }
+ * When enabling, recipients are required and validated; when disabling, future
+ * sends stop immediately on the next scheduler tick (the timer flag is the gate).
+ */
+async function setRoomRecurring(req, res) {
+    try {
+        if (!config.EMAIL_INVITATION || !config.EMAIL_INVITATION.serverSide) {
+            return res.status(403).json({ message: 'Server-side email invitations are disabled' });
+        }
+        if (!config.EMAIL_INVITATION.recurring) {
+            return res.status(403).json({ message: 'Recurring invitations are disabled' });
+        }
+
+        const { id } = req.params;
+        const { enabled, recipients, subject, message } = req.body || {};
+
+        const room = await Room.findById(id);
+        if (!room) return res.status(404).json({ message: 'Room not found' });
+
+        const auth = await ensureOwnerOrAdmin(req, res, room.userId);
+        if (!auth.ok) return;
+
+        if (enabled === false) {
+            room.recurring = {
+                ...(room.recurring ? room.recurring.toObject() : {}),
+                enabled: false,
+                // Preserve recipients/subject/message so re-enabling reuses prior config.
+            };
+            await room.save();
+            log.info('Recurring invitation disabled', {
+                roomId: String(room._id),
+                userId: auth.authUserId,
+            });
+            return res.status(200).json({ message: 'Recurring invitation disabled', recurring: room.recurring });
+        }
+
+        if (enabled !== true) {
+            return res.status(400).json({ message: '`enabled` must be a boolean' });
+        }
+
+        if (!room.date || !room.time) {
+            return res.status(400).json({
+                message: 'Room must have a date and time before enabling recurring invitations',
+            });
+        }
+
+        const parsed = emailUtils.parseRecipients(recipients);
+        if (parsed.length === 0) {
+            return res.status(400).json({ message: 'At least one recipient is required' });
+        }
+        const classified = emailUtils.validateEmailList(parsed, { max: MAX_RECIPIENTS });
+        if (classified.valid.length === 0) {
+            return res.status(400).json({
+                message: 'No valid recipients',
+                invalid: classified.invalid,
+                blocked: classified.blocked,
+                duplicates: classified.duplicates,
+            });
+        }
+        if (classified.exceededMax) {
+            return res.status(400).json({
+                message: `Too many recipients (max ${MAX_RECIPIENTS})`,
+                valid: classified.valid.length,
+                max: MAX_RECIPIENTS,
+            });
+        }
+
+        const safeSubject = (
+            (typeof subject === 'string' && subject.trim()) ||
+            `Please join our MiroTalk ${room.type} Video Chat Meeting`
+        ).slice(0, 200);
+        const safeMessage = typeof message === 'string' ? message.slice(0, 2000) : undefined;
+        const inviterName = req.user?.username || req.user?.email;
+
+        room.recurring = {
+            enabled: true,
+            recipients: classified.valid,
+            subject: safeSubject,
+            message: safeMessage,
+            inviterName,
+            enabledAt: new Date(),
+            // Reset lastSentAt so the next eligible occurrence (>= enabledAt) fires.
+            lastSentAt: null,
+            lastError: null,
+        };
+        await room.save();
+
+        log.info('Recurring invitation enabled', {
+            roomId: String(room._id),
+            userId: auth.authUserId,
+            recipients: classified.valid.length,
+            invalid: classified.invalid.length,
+            blocked: classified.blocked.length,
+            duplicates: classified.duplicates,
+        });
+
+        return res.status(200).json({
+            message: 'Recurring invitation enabled',
+            recurring: room.recurring,
+            invalid: classified.invalid,
+            blocked: classified.blocked,
+            duplicates: classified.duplicates,
+        });
+    } catch (error) {
+        log.error('Set recurring invitation error', error);
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+module.exports = { sendRoomInvitation, setRoomRecurring };
