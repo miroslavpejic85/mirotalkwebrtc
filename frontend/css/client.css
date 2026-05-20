@@ -3510,6 +3510,11 @@ body.dark #usersTable tr:hover {
     margin-bottom: 8px;
     font-size: 0.9em;
 }
+#srvInvDrop input[type='file'] {
+    width: auto;
+    display: inline-block;
+    margin: 0 auto;
+}
 #srvInvDrop.is-dragover {
     border-color: var(--color-hover);
     background: var(--hover-bg-light);
