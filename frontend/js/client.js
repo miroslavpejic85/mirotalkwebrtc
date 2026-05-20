@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.71
+ * @version 1.3.72
  */
 
 const userAgent = navigator.userAgent;
@@ -1545,7 +1545,7 @@ function getRow(obj) {
     window.__roomRecurring[obj._id] = recurring;
     const recurringCell = recurring
         ? `<button id="${obj._id}_recurring" type="button" class="recurring-badge" onclick="disableRecurringInvitation('${obj._id}')" data-tippy="${recurringBadgeTooltip(obj, recurring)}, click to disable" data-tippy-html="${encodeURIComponent(recurringBadgeTooltipHTML(obj, recurring))}"><i class="uil uil-sync"></i>Recurring</button>`
-        : `<span id="${obj._id}_recurring" class="recurring-off" data-tippy="Recurring invitation disabled">—</span>`;
+        : `<span id="${obj._id}_recurring" class="recurring-badge recurring-badge-off" data-tippy="Recurring invitation disabled"><i class="uil uil-sync-slash"></i>Off</span>`;
 
     // Inline primary actions (1-click)
     const inlineIcons = [];

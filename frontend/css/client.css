@@ -3592,6 +3592,16 @@ body.dark #usersTable tr:hover {
     opacity: 0.4;
     font-size: 0.9em;
 }
+.recurring-badge-off {
+    color: #8a93a0;
+    background: rgba(138, 147, 160, 0.1);
+    border-color: rgba(138, 147, 160, 0.3);
+    cursor: default;
+}
+.recurring-badge-off:hover {
+    background: rgba(138, 147, 160, 0.1);
+    color: #8a93a0;
+}
 
 /* ===== Custom tippy theme for the recurring badge ===== */
 .tippy-box[data-theme~='recurring'] {
