@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.70
+ * @version 1.3.71
  */
 
 const userAgent = navigator.userAgent;
@@ -148,7 +148,7 @@ const closeAddBtn = document.getElementById('add-close-btn');
 const panelBackdrop = document.getElementById('panelBackdrop');
 
 const addType = document.getElementById('add-type');
-const addTypeDropdown = document.getElementById('add-type-dropdown');
+const addTypeCards = document.getElementById('add-type-cards');
 const addTag = document.getElementById('add-tag');
 const addEmail = document.getElementById('add-email');
 const addPhone = document.getElementById('add-phone');
@@ -159,6 +159,9 @@ const genRoom = document.getElementById('gen-room');
 const selRoom = document.getElementById('sel-room');
 const selRoomDropdown = document.getElementById('sel-room-dropdown');
 const addRowBtn = document.getElementById('add-row-btn');
+const addrowLinkPreview = document.getElementById('addrow-link-preview');
+const addrowLinkPreviewUrl = document.getElementById('addrow-link-preview-url');
+const addrowLinkPreviewCopy = document.getElementById('addrow-link-preview-copy');
 
 const refreshBtn = document.getElementById('refresh-page-btn');
 const delAllBtn = document.getElementById('del-all-btn');
@@ -536,19 +539,23 @@ function toggleElements() {
         elemDisplay(boxesDS, false);
         elemDisplay(statsProjectsSection, false);
     }
-    const dropdownOptions = addTypeDropdown.querySelectorAll('.custom-dropdown-option');
-    dropdownOptions.forEach((opt) => {
-        const val = opt.dataset.value;
-        if (val === 'P2P' && !config.MiroTalk.P2P.Visible) opt.remove();
-        else if (val === 'SFU' && !config.MiroTalk.SFU.Visible) opt.remove();
-        else if (val === 'C2C' && !config.MiroTalk.C2C.Visible) opt.remove();
-        else if (val === 'BRO' && !config.MiroTalk.BRO.Visible) opt.remove();
+    const serviceCards = addTypeCards.querySelectorAll('.service-card');
+    serviceCards.forEach((card) => {
+        const val = card.dataset.value;
+        if (val === 'P2P' && !config.MiroTalk.P2P.Visible) card.remove();
+        else if (val === 'SFU' && !config.MiroTalk.SFU.Visible) card.remove();
+        else if (val === 'C2C' && !config.MiroTalk.C2C.Visible) card.remove();
+        else if (val === 'BRO' && !config.MiroTalk.BRO.Visible) card.remove();
     });
-    const firstOpt = addTypeDropdown.querySelector('.custom-dropdown-option');
-    if (firstOpt) {
-        firstOpt.classList.add('selected');
-        addType.value = firstOpt.dataset.value;
-        addTypeDropdown.querySelector('.custom-dropdown-value').textContent = firstOpt.textContent;
+    const remaining = addTypeCards.querySelectorAll('.service-card');
+    remaining.forEach((c, i) => {
+        c.classList.toggle('selected', i === 0);
+        c.setAttribute('aria-checked', i === 0 ? 'true' : 'false');
+        c.setAttribute('tabindex', i === 0 ? '0' : '-1');
+    });
+    if (remaining[0]) {
+        addType.value = remaining[0].dataset.value;
+        updateRoomLinkPreview();
     }
 }
 
@@ -804,7 +811,10 @@ addRowBtn.addEventListener('click', () => {
 });
 genRoom.addEventListener('click', (e) => {
     e.preventDefault();
-    addRoom.value = getUUID4();
+    addRoom.value = generateFriendlyRoomSlug();
+    addRoom.style.borderColor = '';
+    addRoom.style.boxShadow = '';
+    updateRoomLinkPreview();
 });
 
 refreshBtn.addEventListener('click', () => {
@@ -2598,13 +2608,14 @@ function resetFormValues() {
     addPhone.value = '';
     addDate.value = new Date().toISOString().substring(0, 10);
     addTime.value = new Date().toISOString().substring(11, 16);
-    addRoom.value = getUUID4();
+    addRoom.value = generateFriendlyRoomSlug();
     if (addDate._flatpickr) addDate._flatpickr.setDate(addDate.value, false);
     if (addTime._flatpickr) addTime._flatpickr.setDate(addTime.value, false);
     [addTag, addEmail, addDate, addTime, addRoom].forEach((el) => {
         el.style.borderColor = '';
         el.style.boxShadow = '';
     });
+    updateRoomLinkPreview();
 }
 
 // Clear validation styling on input
@@ -2614,6 +2625,136 @@ function resetFormValues() {
         el.style.boxShadow = '';
     });
 });
+
+// Live update room link preview when the room name changes
+addRoom.addEventListener('input', () => updateRoomLinkPreview());
+
+// Service card selection (click + keyboard)
+if (addTypeCards) {
+    const selectServiceCard = (card) => {
+        const cards = addTypeCards.querySelectorAll('.service-card');
+        cards.forEach((c) => {
+            const isSel = c === card;
+            c.classList.toggle('selected', isSel);
+            c.setAttribute('aria-checked', isSel ? 'true' : 'false');
+            c.setAttribute('tabindex', isSel ? '0' : '-1');
+        });
+        addType.value = card.dataset.value;
+        updateRoomLinkPreview();
+    };
+    addTypeCards.addEventListener('click', (e) => {
+        const card = e.target.closest('.service-card');
+        if (card) selectServiceCard(card);
+    });
+    addTypeCards.addEventListener('keydown', (e) => {
+        if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) return;
+        const cards = [...addTypeCards.querySelectorAll('.service-card')];
+        if (!cards.length) return;
+        const current = document.activeElement.closest('.service-card');
+        let idx = cards.indexOf(current);
+        if (idx < 0) idx = cards.findIndex((c) => c.classList.contains('selected'));
+        if (e.key === 'Home') idx = 0;
+        else if (e.key === 'End') idx = cards.length - 1;
+        else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') idx = (idx + 1) % cards.length;
+        else idx = (idx - 1 + cards.length) % cards.length;
+        e.preventDefault();
+        selectServiceCard(cards[idx]);
+        cards[idx].focus();
+    });
+}
+
+// Copy room link from preview
+if (addrowLinkPreviewCopy) {
+    addrowLinkPreviewCopy.addEventListener('click', async () => {
+        const url = addrowLinkPreviewUrl?.textContent?.trim();
+        if (!url) return;
+        try {
+            await navigator.clipboard.writeText(url);
+            addrowLinkPreviewCopy.classList.add('copied');
+            const icon = addrowLinkPreviewCopy.querySelector('i');
+            const prev = icon ? icon.className : '';
+            if (icon) icon.className = 'uil uil-check';
+            setTimeout(() => {
+                addrowLinkPreviewCopy.classList.remove('copied');
+                if (icon && prev) icon.className = prev;
+            }, 1200);
+        } catch (_) {
+            /* clipboard not available */
+        }
+    });
+}
+
+// Friendly room slug: e.g. "swift-otter-482"
+const ROOM_SLUG_ADJ = [
+    'swift',
+    'brave',
+    'calm',
+    'bright',
+    'lucky',
+    'silent',
+    'cosmic',
+    'happy',
+    'mighty',
+    'quiet',
+    'rapid',
+    'sunny',
+    'witty',
+    'zen',
+    'noble',
+    'bold',
+];
+const ROOM_SLUG_NOUN = [
+    'otter',
+    'falcon',
+    'panda',
+    'tiger',
+    'comet',
+    'forest',
+    'river',
+    'meadow',
+    'phoenix',
+    'dolphin',
+    'eagle',
+    'lynx',
+    'meteor',
+    'orbit',
+    'pixel',
+    'quartz',
+];
+
+function generateFriendlyRoomSlug() {
+    const rnd = (n) => {
+        if (window.crypto?.getRandomValues) {
+            const buf = new Uint32Array(1);
+            window.crypto.getRandomValues(buf);
+            return buf[0] % n;
+        }
+        return Math.floor(Math.random() * n);
+    };
+    const adj = ROOM_SLUG_ADJ[rnd(ROOM_SLUG_ADJ.length)];
+    const noun = ROOM_SLUG_NOUN[rnd(ROOM_SLUG_NOUN.length)];
+    const num = 100 + rnd(900);
+    return `${adj}-${noun}-${num}`;
+}
+
+function updateRoomLinkPreview() {
+    if (!addrowLinkPreview || !addrowLinkPreviewUrl) return;
+    const roomValue = (user && user.allowedRoomsALL ? addRoom.value : selRoom.value || addRoom.value) || '';
+    const room = roomValue.trim().replace(/\s+/g, '-');
+    if (!room || !addType?.value) {
+        addrowLinkPreviewUrl.textContent = 'Room link will appear here';
+        addrowLinkPreview.classList.add('empty');
+        return;
+    }
+    try {
+        const url = getRoomURL({ type: addType.value, room, email: addEmail.value || '' }, true);
+        addrowLinkPreviewUrl.textContent = url || '';
+        addrowLinkPreview.classList.toggle('empty', !url);
+    } catch (_) {
+        addrowLinkPreview.classList.add('empty');
+        addrowLinkPreviewUrl.textContent = 'Room link will appear here';
+    }
+}
 [addUserUsername, addUserEmail, addUserPassword].forEach((el) => {
     el.addEventListener('input', () => {
         el.style.borderColor = '';

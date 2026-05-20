@@ -1229,19 +1229,23 @@ body.dark .addRowDiv {
     color: var(--accent-color);
 }
 
-.addrow-close {
+.addRowDiv .addrow-close {
     font-size: 20px;
     color: var(--black-light-color);
     cursor: pointer;
+    margin-top: 0;
     padding: 6px;
     border-radius: 6px;
     transition: var(--tran-03);
     display: flex;
     align-items: center;
     justify-content: center;
+    background: transparent;
+    border: none;
+    font-family: inherit;
 }
 
-.addrow-close:hover {
+.addRowDiv .addrow-close:hover {
     color: var(--color-hover);
     background-color: var(--hover-bg-medium);
 }
@@ -1611,6 +1615,142 @@ body.dark .custom-dropdown-options {
 .addrow-gen-btn:hover i,
 .addrow-gen-btn i:hover {
     color: #fff !important;
+}
+
+/* Service segmented cards */
+.addRowDiv .service-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.addRowDiv .service-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    margin-top: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    font-weight: 400;
+    text-align: left;
+    cursor: pointer;
+    transition: var(--tran-03);
+    position: relative;
+}
+
+.addRowDiv .service-card:hover {
+    border-color: var(--accent-color);
+    background: var(--hover-bg-medium);
+}
+
+.addRowDiv .service-card:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+.addRowDiv .service-card.selected {
+    border-color: var(--accent-color);
+    background: var(--accent-bg);
+    box-shadow: 0 0 0 1px var(--accent-color) inset;
+}
+
+.addRowDiv .service-card-icon {
+    font-size: 18px;
+    color: var(--accent-color);
+}
+
+.addRowDiv .service-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.addRowDiv .service-card-desc {
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--black-light-color);
+}
+
+.addRowDiv .service-card.hidden {
+    display: none;
+}
+
+@media (max-width: 480px) {
+    .addRowDiv .service-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Room link preview */
+.addRowDiv .addrow-link-preview {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 8px 10px;
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    background: var(--hover-bg-light, var(--hover-bg-medium));
+    font-size: 12px;
+    min-height: 34px;
+}
+
+.addRowDiv .addrow-link-preview.empty {
+    opacity: 0.55;
+}
+
+.addRowDiv .addrow-link-preview-icon {
+    color: var(--accent-color);
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.addRowDiv .addrow-link-preview-url {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+    color: var(--black-light-color);
+    user-select: all;
+}
+
+.addRowDiv .addrow-link-preview-copy {
+    width: 26px;
+    height: 26px;
+    margin-top: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--accent-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--tran-03);
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.addRowDiv .addrow-link-preview-copy:hover {
+    background: var(--accent-color);
+    color: #fff;
+    border-color: var(--accent-color);
+}
+
+.addRowDiv .addrow-link-preview-copy.copied {
+    background: var(--accent-color);
+    color: #fff;
+    border-color: var(--accent-color);
+}
+
+.addRowDiv .addrow-link-preview-copy i {
+    font-size: 13px;
 }
 
 .accountDiv button,

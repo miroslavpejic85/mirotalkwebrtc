@@ -419,7 +419,7 @@
                         <thead>
                             <tr>
                                 <th id="tableAppName">MiroTalk</th>
-                                <th>Tag</th>
+                                <th>Title</th>
                                 <th>Email</th>
                                 <th>Phone</th>
                                 <th>Date</th>
@@ -436,80 +436,88 @@
                 <form id="addRowDiv" class="addRowDiv hidden" onsubmit="return false;">
                     <div class="addrow-header">
                         <h2 class="addrow-title"><i class="uil uil-plus-circle"></i> New Room</h2>
-                        <i
-                            id="add-close-btn"
-                            class="uil uil-times addrow-close"
-                            role="button"
-                            aria-label="Close panel"
-                        ></i>
+                        <button id="add-close-btn" type="button" class="addrow-close" aria-label="Close panel">
+                            <i class="uil uil-times"></i>
+                        </button>
                     </div>
 
                     <div class="addrow-section">
-                        <span class="addrow-section-label">Service</span>
+                        <span class="addrow-section-label">Meeting</span>
                         <div class="addrow-field">
-                            <div class="addrow-field-icon"><i class="uil uil-rocket"></i></div>
+                            <div class="addrow-field-icon"><i class="uil uil-comment-alt-lines"></i></div>
                             <div class="addrow-field-content">
-                                <span id="rowAppName" class="addrow-field-label">MiroTalk</span>
-                                <div id="add-type-dropdown" class="custom-dropdown">
-                                    <div
-                                        class="custom-dropdown-trigger"
-                                        tabindex="0"
-                                        role="button"
-                                        aria-haspopup="listbox"
-                                        aria-expanded="false"
-                                    >
-                                        <span class="custom-dropdown-value">P2P</span>
-                                        <i class="uil uil-angle-down custom-dropdown-arrow"></i>
-                                    </div>
-                                    <div class="custom-dropdown-options" role="listbox">
-                                        <div
-                                            class="custom-dropdown-option selected"
-                                            data-value="P2P"
-                                            translate="no"
-                                            role="option"
-                                        >
-                                            P2P
-                                        </div>
-                                        <div
-                                            class="custom-dropdown-option"
-                                            data-value="SFU"
-                                            translate="no"
-                                            role="option"
-                                        >
-                                            SFU
-                                        </div>
-                                        <div
-                                            class="custom-dropdown-option"
-                                            data-value="C2C"
-                                            translate="no"
-                                            role="option"
-                                        >
-                                            C2C
-                                        </div>
-                                        <div
-                                            class="custom-dropdown-option"
-                                            data-value="BRO"
-                                            translate="no"
-                                            role="option"
-                                        >
-                                            BRO
-                                        </div>
-                                    </div>
-                                    <input type="hidden" id="add-type" value="P2P" />
-                                </div>
+                                <label for="add-tag" class="addrow-field-label">Meeting title</label>
+                                <input
+                                    id="add-tag"
+                                    type="text"
+                                    placeholder="e.g. Team Standup"
+                                    name="tag"
+                                    autocomplete="off"
+                                    required
+                                />
                             </div>
                         </div>
+                    </div>
+
+                    <div class="addrow-section">
+                        <span class="addrow-section-label">
+                            Service · <span id="rowAppName" translate="no">MiroTalk</span>
+                        </span>
+                        <div id="add-type-cards" class="service-cards" role="radiogroup" aria-label="Service type">
+                            <button
+                                type="button"
+                                class="service-card selected"
+                                data-value="P2P"
+                                role="radio"
+                                aria-checked="true"
+                                tabindex="0"
+                            >
+                                <i class="uil uil-users-alt service-card-icon"></i>
+                                <span class="service-card-title" translate="no">P2P</span>
+                                <span class="service-card-desc">Small group · Peer-to-peer, lowest latency</span>
+                            </button>
+                            <button
+                                type="button"
+                                class="service-card"
+                                data-value="SFU"
+                                role="radio"
+                                aria-checked="false"
+                                tabindex="-1"
+                            >
+                                <i class="uil uil-server-network service-card-icon"></i>
+                                <span class="service-card-title" translate="no">SFU</span>
+                                <span class="service-card-desc">Large meetings · Server-routed, scales better</span>
+                            </button>
+                            <button
+                                type="button"
+                                class="service-card"
+                                data-value="C2C"
+                                role="radio"
+                                aria-checked="false"
+                                tabindex="-1"
+                            >
+                                <i class="uil uil-comment-alt-message service-card-icon"></i>
+                                <span class="service-card-title" translate="no">C2C</span>
+                                <span class="service-card-desc">1-to-1 calls · Simple direct conversations</span>
+                            </button>
+                            <button
+                                type="button"
+                                class="service-card"
+                                data-value="BRO"
+                                role="radio"
+                                aria-checked="false"
+                                tabindex="-1"
+                            >
+                                <i class="uil uil-megaphone service-card-icon"></i>
+                                <span class="service-card-title" translate="no">BRO</span>
+                                <span class="service-card-desc">Broadcast · One speaker, many viewers</span>
+                            </button>
+                        </div>
+                        <input type="hidden" id="add-type" value="P2P" />
                     </div>
 
                     <div class="addrow-section">
                         <span class="addrow-section-label">Contact</span>
-                        <div class="addrow-field">
-                            <div class="addrow-field-icon"><i class="uil uil-tag-alt"></i></div>
-                            <div class="addrow-field-content">
-                                <label for="add-tag" class="addrow-field-label">Tag</label>
-                                <input id="add-tag" type="text" placeholder="e.g. Team Standup" name="tag" required />
-                            </div>
-                        </div>
                         <div class="addrow-field">
                             <div class="addrow-field-icon"><i class="uil uil-envelope"></i></div>
                             <div class="addrow-field-content">
@@ -557,10 +565,16 @@
                         <div class="addrow-field">
                             <div class="addrow-field-icon"><i class="uil uil-link"></i></div>
                             <div class="addrow-field-content">
-                                <label for="add-room" class="addrow-field-label">Room Name</label>
+                                <label for="add-room" class="addrow-field-label">Room name</label>
                                 <input id="add-room" type="text" placeholder="Room name" name="room" required />
                             </div>
-                            <button id="gen-room" class="addrow-gen-btn" aria-label="Generate random room name">
+                            <button
+                                id="gen-room"
+                                type="button"
+                                class="addrow-gen-btn"
+                                aria-label="Generate random room name"
+                                title="Generate random room name"
+                            >
                                 <i class="uil uil-sync"></i>
                             </button>
                         </div>
@@ -578,9 +592,24 @@
                             <div class="custom-dropdown-options" role="listbox"></div>
                             <input type="hidden" id="sel-room" value="" />
                         </div>
+                        <div id="addrow-link-preview" class="addrow-link-preview" aria-live="polite">
+                            <i class="uil uil-link-h addrow-link-preview-icon"></i>
+                            <span id="addrow-link-preview-url" class="addrow-link-preview-url" translate="no"></span>
+                            <button
+                                id="addrow-link-preview-copy"
+                                type="button"
+                                class="addrow-link-preview-copy"
+                                aria-label="Copy room link"
+                                title="Copy link"
+                            >
+                                <i class="uil uil-copy"></i>
+                            </button>
+                        </div>
                     </div>
 
-                    <button id="add-row-btn" class="addrow-submit-btn"><i class="uil uil-plus"></i> Create Room</button>
+                    <button id="add-row-btn" type="button" class="addrow-submit-btn">
+                        <i class="uil uil-plus"></i> Create Room
+                    </button>
                 </form>
 
                 <div id="dsUsers" class="dsUsers">
