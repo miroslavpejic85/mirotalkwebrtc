@@ -1,10 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
-
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Montserrat', sans-serif;
+    font-family: inherit;
 }
 
 :root {
@@ -2302,7 +2300,7 @@ tr:nth-child(even) {
 
 /* Popup container */
 .swal2-popup {
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-sans);
     border: 1px solid var(--border-color) !important;
     border-radius: 12px !important;
     background-color: var(--panel-color) !important;
@@ -2957,7 +2955,7 @@ td input.flatpickr-time {
     border-radius: 12px !important;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
     border: 1px solid var(--border-color) !important;
-    font-family: 'Montserrat', sans-serif !important;
+    font-family: var(--font-sans) !important;
     background: var(--panel-color) !important;
     overflow: hidden;
 }
@@ -3009,7 +3007,7 @@ td input.flatpickr-time {
 .flatpickr-current-month .flatpickr-monthDropdown-months option {
     background: var(--panel-color) !important;
     color: var(--text-color) !important;
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-sans);
     font-size: 14px;
 }
 

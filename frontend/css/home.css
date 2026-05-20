@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
-
 :root {
     --primary-color: #202123;
     --secondary-color: #45494c;
@@ -46,7 +44,7 @@ body {
     justify-content: center;
     align-items: center;
     background: var(--primary-color);
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-sans);
 }
 
 .main {
@@ -372,7 +370,7 @@ button:active {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-sans);
     max-height: 400px;
     overflow-y: auto;
 }
@@ -395,7 +393,7 @@ button:active {
 
 /* Popup container */
 .swal2-popup {
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-sans);
     border: 1px solid var(--secondary-color) !important;
     border-radius: 12px !important;
     background-color: var(--primary-color) !important;
