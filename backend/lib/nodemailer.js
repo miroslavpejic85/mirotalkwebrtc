@@ -46,6 +46,18 @@ function safeUrlAttr(value) {
 // Default meeting duration when the room record doesn't carry one (minutes).
 const ICS_DEFAULT_DURATION_MIN = Number(process.env.EMAIL_INVITATION_ICS_DURATION_MIN) || 60;
 
+// Human-readable duration string for the email body (e.g. "45 minutes", "1 hour 30 minutes").
+function formatDurationLabel(minutes) {
+    const m = Number(minutes);
+    if (!Number.isFinite(m) || m <= 0) return '';
+    const hours = Math.floor(m / 60);
+    const mins = Math.round(m % 60);
+    const parts = [];
+    if (hours > 0) parts.push(`${hours} hour${hours === 1 ? '' : 's'}`);
+    if (mins > 0) parts.push(`${mins} minute${mins === 1 ? '' : 's'}`);
+    return parts.join(' ') || `${m} minutes`;
+}
+
 // Escape a text value for inclusion in an iCalendar TEXT property per RFC 5545 §3.3.11.
 function icsEscapeText(value) {
     return String(value == null ? '' : value)
@@ -102,7 +114,7 @@ function icsUtcStamp(date) {
  * matches how the inviter entered them. Returns null if date/time are
  * missing or malformed (caller will simply skip the attachment).
  */
-function buildInvitationIcs({ room, roomUrl, date, time, inviterName, message, roomType, recipient }) {
+function buildInvitationIcs({ room, roomUrl, date, time, durationMin, inviterName, message, roomType, recipient }) {
     const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(date || '').trim());
     const timeMatch = /^(\d{2}):(\d{2})$/.exec(String(time || '').trim());
     if (!dateMatch || !timeMatch) return null;
@@ -113,10 +125,18 @@ function buildInvitationIcs({ room, roomUrl, date, time, inviterName, message, r
     // Floating local-time DTSTART (no TZID, no Z): clients render in viewer's local TZ.
     const dtStart = `${y}${mo}${d}T${h}${mi}00`;
 
-    // Compute DTEND by adding the default duration to the local wall-clock value.
+    // Per-room duration (minutes) takes precedence over the env default.
+    // Clamp to the same 5..1440 bounds the schema enforces to defend against bad inputs.
+    const requestedDuration = Number(durationMin);
+    const effectiveDuration =
+        Number.isFinite(requestedDuration) && requestedDuration >= 5 && requestedDuration <= 1440
+            ? Math.round(requestedDuration)
+            : ICS_DEFAULT_DURATION_MIN;
+
+    // Compute DTEND by adding the effective duration to the local wall-clock value.
     // Using Date.UTC keeps the math TZ-free; we then strip the Z to keep it floating.
     const endMs =
-        Date.UTC(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), 0) + ICS_DEFAULT_DURATION_MIN * 60 * 1000;
+        Date.UTC(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), 0) + effectiveDuration * 60 * 1000;
     const endDate = new Date(endMs);
     const pad = (n) => String(n).padStart(2, '0');
     const dtEnd =
@@ -408,7 +428,18 @@ function sendInvitationEmail(name, email, password) {
  * Returns the nodemailer info object on success, throws on failure so the
  * caller (email queue worker) can record the error and schedule a retry.
  */
-function sendRoomInvitationEmail({ to, subject, roomUrl, roomType, room, date, time, inviterName, message }) {
+function sendRoomInvitationEmail({
+    to,
+    subject,
+    roomUrl,
+    roomType,
+    room,
+    date,
+    time,
+    durationMin,
+    inviterName,
+    message,
+}) {
     // Defense-in-depth: every interpolated field is HTML-escaped (or URL-sanitized) at render time,
     // even though upstream callers also validate/limit them. Schema-level validators for room/date/time
     // are intentionally permissive, so this is the authoritative XSS boundary for outbound mail.
@@ -419,6 +450,14 @@ function sendRoomInvitationEmail({ to, subject, roomUrl, roomType, room, date, t
     const safeRoomUrlAttr = safeUrlAttr(roomUrl);
     const safeRoomUrlText = escapeHtml(roomUrl);
     const safeInviter = escapeHtml(inviterName);
+
+    // Resolve the duration shown in the email body (mirrors the ICS DTEND computation).
+    const requestedDuration = Number(durationMin);
+    const effectiveDuration =
+        Number.isFinite(requestedDuration) && requestedDuration >= 5 && requestedDuration <= 1440
+            ? Math.round(requestedDuration)
+            : ICS_DEFAULT_DURATION_MIN;
+    const safeDuration = escapeHtml(formatDurationLabel(effectiveDuration));
 
     const rawSubject = typeof subject === 'string' && subject.trim() ? subject.trim() : '';
     // Cap subject to avoid oversized SMTP headers / DB bloat; nodemailer encodes headers itself.
@@ -441,6 +480,7 @@ function sendRoomInvitationEmail({ to, subject, roomUrl, roomType, room, date, t
         roomUrl,
         date,
         time,
+        durationMin,
         inviterName,
         message,
         roomType,
@@ -491,6 +531,10 @@ function sendRoomInvitationEmail({ to, subject, roomUrl, roomType, room, date, t
                     </tr>`
                             : ''
                     }
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Duration</td>
+                        <td style="border: 1px solid #ddd; padding: 10px;">${safeDuration}</td>
+                    </tr>
                 </table>
                 <div style="margin: 30px 0;">
                     <a href="${safeRoomUrlAttr}"

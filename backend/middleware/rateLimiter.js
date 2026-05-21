@@ -15,6 +15,10 @@ const loginLimiter = rateLimit({
     max: USER_MAX_LOGIN_ATTEMPTS,
     message: 'Too many login attempts, please try again later.',
     keyGenerator: (req) => req.body?.username || ipKeyGenerator(req),
+    // Only count failed logins toward the limit so legitimate users repeatedly
+    // signing in (or refreshing the dashboard) don't get locked out by their
+    // own success.
+    skipSuccessfulRequests: true,
     validate: false,
 });
 

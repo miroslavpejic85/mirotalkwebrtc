@@ -131,6 +131,7 @@ async function sendRoomInvitation(req, res) {
             roomUrl,
             date: room.date,
             time: room.time,
+            duration: room.duration || undefined,
             subject: safeSubject,
             message: safeMessage,
             inviterName,

@@ -137,6 +137,7 @@ async function dispatchOccurrence(room, occurrence) {
         roomUrl,
         date: room.date,
         time: room.time,
+        duration: room.duration || undefined,
         subject,
         message,
         inviterName: room.recurring.inviterName,

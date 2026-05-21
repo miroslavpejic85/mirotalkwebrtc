@@ -28,9 +28,21 @@ async function ensureOwnerOrAdmin(req, res, targetUserId) {
     return true;
 }
 
+// Coerce client-supplied duration to a sane minutes value or null (no override).
+// Mirrors the schema constraints (5..1440) so invalid input is dropped rather than rejected,
+// keeping the invitation flow on its env-default fallback.
+function normalizeDuration(value) {
+    if (value === null || value === undefined || value === '') return null;
+    const n = Number(value);
+    if (!Number.isFinite(n)) return null;
+    const rounded = Math.round(n);
+    if (rounded < 5 || rounded > 1440) return null;
+    return rounded;
+}
+
 async function roomCreate(req, res) {
     try {
-        const { type, tag, email, phone, date, time, room } = req.body;
+        const { type, tag, email, phone, date, time, duration, room } = req.body;
 
         // Derive userId server-side from authenticated user — never trust req.body.userId
         const authUserId = await getAuthUserId(req);
@@ -46,6 +58,7 @@ async function roomCreate(req, res) {
             phone: phone,
             date: date,
             time: time,
+            duration: normalizeDuration(duration),
             room: room,
         });
         const dataToSave = await data.save();
@@ -131,10 +144,13 @@ async function roomUpdate(req, res) {
             return res.status(404).json({ message: 'Room not found' });
         }
         if (!(await ensureOwnerOrAdmin(req, res, existing.userId))) return;
-        const allowedFields = ['type', 'tag', 'email', 'phone', 'date', 'time', 'room'];
+        const allowedFields = ['type', 'tag', 'email', 'phone', 'date', 'time', 'duration', 'room'];
         const updatedData = {};
         for (const field of allowedFields) {
             if (req.body[field] !== undefined) updatedData[field] = req.body[field];
+        }
+        if (updatedData.duration !== undefined) {
+            updatedData.duration = normalizeDuration(updatedData.duration);
         }
         const options = { returnDocument: 'after' };
         const result = await Room.findByIdAndUpdate(id, { $set: updatedData }, options);

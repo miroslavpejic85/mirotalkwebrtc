@@ -55,6 +55,7 @@ async function processJob(job) {
             room: job.room,
             date: job.date,
             time: job.time,
+            durationMin: job.duration,
             inviterName: job.inviterName,
             message: job.message,
         });

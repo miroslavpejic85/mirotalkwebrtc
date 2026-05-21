@@ -24,6 +24,10 @@ const roomSchema = new mongoose.Schema({
     phone: { type: String },
     date: { type: String },
     time: { type: String },
+    // Meeting duration in minutes (user-defined per room).
+    // When set, propagates into the .ics DTEND and the email/tooltip "Duration" row,
+    // overriding the EMAIL_INVITATION_ICS_DURATION_MIN env default.
+    duration: { type: Number, min: 5, max: 1440, default: null },
     room: { type: String, index: true },
     recurring: { type: recurringSchema, default: () => ({ enabled: false }) },
 });

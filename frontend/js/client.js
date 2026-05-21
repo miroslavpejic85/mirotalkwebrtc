@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.75
+ * @version 1.3.76
  */
 
 const userAgent = navigator.userAgent;
@@ -181,6 +181,9 @@ const refreshUsersBtn = document.getElementById('refresh-users-btn');
 const myTable = document.getElementById('myTable');
 const myTableBody = document.getElementById('myTableBody');
 
+const DURATION_OPTIONS = [15, 30, 45, 60, 90, 120, 180, 240, 480];
+const DEFAULT_DURATION_MIN = 30;
+
 function dropdownSearchRender(data, type) {
     if (type === 'filter' || type === 'search') {
         const match = data.match(/data-search="([^"]*)"/);
@@ -200,34 +203,35 @@ const dataTable = $('#myTable').DataTable({
     scrollX: true,
     order: [[4, 'asc']],
     columnDefs: [
-        { width: '9%', targets: 0 },
-        { width: '9%', targets: 1 },
-        { width: '18%', targets: 2 },
-        { width: '9%', targets: 3 },
-        { width: '9%', targets: 4 },
-        { width: '9%', targets: 5 },
-        { width: '18%', targets: 6 },
-        { width: '9%', targets: 7 },
-        { width: '10%', targets: 8 },
+        { width: '8%', targets: 0 },
+        { width: '8%', targets: 1 },
+        { width: '16%', targets: 2 },
+        { width: '8%', targets: 3 },
+        { width: '8%', targets: 4 },
+        { width: '7%', targets: 5 },
+        { width: '7%', targets: 6 },
+        { width: '16%', targets: 7 },
+        { width: '8%', targets: 8 },
+        { width: '14%', targets: 9 },
         {
-            targets: [0, 6],
+            targets: [0, 7],
             render: dropdownSearchRender,
         },
         {
-            targets: [0, 1, 2, 3, 4, 6],
+            targets: [0, 1, 2, 3, 4, 6, 7],
             type: 'string',
             searchable: true,
         },
         {
-            targets: [5, 7, 8],
+            targets: [5, 8, 9],
             orderable: false,
             searchable: false,
         },
         {
-            targets: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+            targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
             className: 'dt-body-justify',
         },
-    ], // [MiroTalk, Tag, Email, Phone, Date, Time, Room, Recurring, Actions]
+    ], // [MiroTalk, Tag, Email, Phone, Date, Time, Duration, Room, Recurring, Actions]
 });
 $('#myTable').css('width', '100%');
 
@@ -297,16 +301,16 @@ const toolTips = [
     { element: refreshBtn, text: 'Refresh rooms', position: 'top' },
 ];
 
+const tokens = {
+    sfu: '',
+    p2p: '',
+    //...
+};
+
 let html = {
     support: true,
     profile: true,
     projects: true,
-    //...
-};
-
-const tokens = {
-    sfu: '',
-    p2p: '',
     //...
 };
 
@@ -316,6 +320,8 @@ let user = {
     allowedRooms: ['*'],
     allowedRoomsALL: true,
 };
+
+let addDuration = document.getElementById('add-duration');
 
 $(document).ready(async function () {
     // Strip token from URL to prevent leakage via browser history/referrer
@@ -748,6 +754,44 @@ function flashRow(row, color = 'rgba(76, 175, 80, 0.15)') {
 }
 
 initCustomDropdowns();
+
+// Human-readable duration string ("45 minutes", "1 hour 30 minutes"). Mirrors the
+// backend formatter so badge tooltip + email body show the same label.
+function formatDurationLabel(minutes) {
+    const m = Number(minutes);
+    if (!Number.isFinite(m) || m <= 0) return '';
+    const hours = Math.floor(m / 60);
+    const mins = Math.round(m % 60);
+    const parts = [];
+    if (hours > 0) parts.push(`${hours} hour${hours === 1 ? '' : 's'}`);
+    if (mins > 0) parts.push(`${mins} minute${mins === 1 ? '' : 's'}`);
+    return parts.join(' ') || `${m} minutes`;
+}
+
+function buildDurationDropdownOptions(value) {
+    const current = Number.isFinite(Number(value)) ? Number(value) : DEFAULT_DURATION_MIN;
+    const list = DURATION_OPTIONS.includes(current) ? DURATION_OPTIONS : [current, ...DURATION_OPTIONS];
+    return list.map((m) => ({ value: String(m), label: formatDurationLabel(m) }));
+}
+
+function buildDurationSelectHTML(id, value, isPast) {
+    const current = Number.isFinite(Number(value)) ? Number(value) : DEFAULT_DURATION_MIN;
+    return buildCustomDropdownHTML(id, buildDurationDropdownOptions(current), String(current), false, !!isPast);
+}
+
+(function initAddDurationDropdown() {
+    const wrap = document.getElementById('add-duration-wrap');
+    if (!wrap) return;
+    wrap.innerHTML = buildCustomDropdownHTML(
+        'add-duration',
+        buildDurationDropdownOptions(DEFAULT_DURATION_MIN),
+        String(DEFAULT_DURATION_MIN),
+        false,
+        false
+    );
+    initCustomDropdowns(wrap);
+    addDuration = document.getElementById('add-duration');
+})();
 
 navOverview.addEventListener('click', () => {
     navShow([dsOverview], navOverview);
@@ -1445,7 +1489,8 @@ function recurringBadgeTooltip(obj, recurring) {
         const hm = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
         const recipients = recurring && Array.isArray(recurring.recipients) ? recurring.recipients.length : 0;
         const recLabel = recipients ? ` • ${recipients} recipient${recipients === 1 ? '' : 's'}` : '';
-        return `Recurring weekly • Next: ${day} ${hm}${recLabel}`;
+        const durLabel = obj && obj.duration ? ` • ${formatDurationLabel(obj.duration)}` : '';
+        return `Recurring weekly • Next: ${day} ${hm}${durLabel}${recLabel}`;
     } catch (_) {
         return 'Recurring weekly invitation active';
     }
@@ -1515,6 +1560,14 @@ function recurringBadgeTooltipHTML(obj, recurring) {
     if (cdEl) cdEl.hidden = !countdown;
 
     setSlot('recipients', recipientsLine);
+
+    const durationRow = root.querySelector('[data-slot="duration-row"]');
+    if (obj && obj.duration) {
+        setSlot('duration', formatDurationLabel(obj.duration));
+        if (durationRow) durationRow.hidden = false;
+    } else if (durationRow) {
+        durationRow.hidden = true;
+    }
 
     const lastRow = root.querySelector('[data-slot="last-row"]');
     if (lastLine) {
@@ -1636,6 +1689,11 @@ function getRow(obj) {
     ].filter(Boolean);
 
     const ro = isPast ? ' readonly' : '';
+    const durationCellHtml = buildDurationSelectHTML(
+        `${obj._id}_duration`,
+        obj.duration != null && obj.duration !== '' ? Number(obj.duration) : DEFAULT_DURATION_MIN,
+        isPast
+    );
 
     return [
         `<td>${buildCustomDropdownHTML(obj._id + '_type', typeOptions, obj.type, false, isPast)}</td>`,
@@ -1644,6 +1702,7 @@ function getRow(obj) {
         `<td><input id="${obj._id}_phone" type="text" name="text" placeholder="Phone number" value="${obj.phone}"${ro}/></td>`,
         `<td><input id="${obj._id}_date" type="text" name="date" placeholder="Date" value="${obj.date}" class="flatpickr-date"${ro}/></td>`,
         `<td><input id="${obj._id}_time" type="text" name="time" placeholder="Time" value="${obj.time}" class="flatpickr-time"${ro}/></td>`,
+        `<td>${durationCellHtml}</td>`,
         `<td>${rooms}</td>`,
         `<td class="recurring-cell">${recurringCell}</td>`,
         `<td>
@@ -2574,6 +2633,7 @@ function getRoomURL(data, bro = true) {
 }
 
 function getRowValues(id) {
+    const durationEl = document.getElementById(id + '_duration');
     return {
         userId: userId,
         type: document.getElementById(id + '_type').value,
@@ -2582,6 +2642,7 @@ function getRowValues(id) {
         phone: document.getElementById(id + '_phone').value,
         date: document.getElementById(id + '_date').value,
         time: document.getElementById(id + '_time').value,
+        duration: durationEl && durationEl.value !== '' ? Number(durationEl.value) : null,
         room: document.getElementById(id + '_room').value,
     };
 }
@@ -2598,8 +2659,17 @@ function getFormValues() {
         phone: addPhone.value,
         date: addDate.value,
         time: addTime.value,
+        duration: addDuration && addDuration.value !== '' ? Number(addDuration.value) : null,
         room: roomValue,
     };
+}
+
+function currentTimeHHmmRoundedTo5() {
+    const d = new Date();
+    const minutes = Math.floor(d.getMinutes() / 5) * 5;
+    d.setMinutes(minutes, 0, 0);
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 function resetFormValues() {
@@ -2607,7 +2677,20 @@ function resetFormValues() {
     addEmail.value = '';
     addPhone.value = '';
     addDate.value = new Date().toISOString().substring(0, 10);
-    addTime.value = new Date().toISOString().substring(11, 16);
+    addTime.value = currentTimeHHmmRoundedTo5();
+    if (addDuration) {
+        addDuration.value = String(DEFAULT_DURATION_MIN);
+        const dd = document.querySelector('.custom-dropdown[data-dropdown-id="add-duration"]');
+        if (dd) {
+            const opt = dd.querySelector(`.custom-dropdown-option[data-value="${DEFAULT_DURATION_MIN}"]`);
+            if (opt) {
+                dd.querySelectorAll('.custom-dropdown-option').forEach((o) => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                const valEl = dd.querySelector('.custom-dropdown-value');
+                if (valEl) valEl.textContent = opt.textContent;
+            }
+        }
+    }
     addRoom.value = generateFriendlyRoomSlug();
     if (addDate._flatpickr) addDate._flatpickr.setDate(addDate.value, false);
     if (addTime._flatpickr) addTime._flatpickr.setDate(addTime.value, false);
@@ -2786,7 +2869,8 @@ function initFlatpickr() {
         noCalendar: true,
         dateFormat: 'H:i',
         time_24hr: true,
-        defaultDate: new Date().toISOString().substring(11, 16),
+        minuteIncrement: 5,
+        defaultDate: currentTimeHHmmRoundedTo5(),
         allowInput: true,
         disableMobile: true,
         onReady,
@@ -2812,6 +2896,7 @@ function initRowFlatpickr(rowId) {
             noCalendar: true,
             dateFormat: 'H:i',
             time_24hr: true,
+            minuteIncrement: 5,
             allowInput: true,
             disableMobile: true,
             onReady,
@@ -2831,6 +2916,7 @@ function initVisibleRowsFlatpickr() {
                 noCalendar: true,
                 dateFormat: 'H:i',
                 time_24hr: true,
+                minuteIncrement: 5,
                 allowInput: true,
                 disableMobile: true,
                 onReady,

@@ -796,6 +796,12 @@ components:
                 time:
                     type: string
                     example: '00:00'
+                duration:
+                    type: integer
+                    description: Meeting duration in minutes (5..1440). Falls back to EMAIL_INVITATION_ICS_DURATION_MIN when unset.
+                    minimum: 5
+                    maximum: 1440
+                    example: 60
 
         RoomExistsReq:
             type: object
@@ -835,6 +841,12 @@ components:
                 time:
                     type: string
                     example: '00:00'
+                duration:
+                    type: integer
+                    nullable: true
+                    minimum: 5
+                    maximum: 1440
+                    example: 60
         RoomExistsRes:
             type: object
             properties:

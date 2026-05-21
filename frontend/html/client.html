@@ -430,6 +430,7 @@
                                 <th>Phone</th>
                                 <th>Date</th>
                                 <th>Time</th>
+                                <th>Duration</th>
                                 <th>Room</th>
                                 <th>Recurring</th>
                                 <th>Actions</th>
@@ -562,6 +563,13 @@
                                     <label for="add-time" class="addrow-field-label">Time</label>
                                     <input id="add-time" type="text" name="time" placeholder="Select time" required />
                                 </div>
+                            </div>
+                        </div>
+                        <div class="addrow-field">
+                            <div class="addrow-field-icon"><i class="uil uil-hourglass"></i></div>
+                            <div class="addrow-field-content">
+                                <label for="add-duration" class="addrow-field-label">Duration</label>
+                                <div id="add-duration-wrap"></div>
                             </div>
                         </div>
                     </div>
@@ -1077,6 +1085,10 @@
                         <div class="tippy-recurring-row">
                             <i class="uil uil-envelope"></i>
                             <div class="tippy-recurring-main" data-slot="recipients">No recipients</div>
+                        </div>
+                        <div class="tippy-recurring-row" data-slot="duration-row" hidden>
+                            <i class="uil uil-hourglass"></i>
+                            <div class="tippy-recurring-main" data-slot="duration"></div>
                         </div>
                         <div class="tippy-recurring-row" data-slot="last-row" hidden>
                             <i class="uil uil-check-circle"></i>
