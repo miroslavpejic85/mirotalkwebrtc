@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.77
+ * @version 1.3.78
  */
 
 const userAgent = navigator.userAgent;
@@ -854,7 +854,7 @@ addRowBtn.addEventListener('click', () => {
 });
 genRoom.addEventListener('click', (e) => {
     e.preventDefault();
-    addRoom.value = generateFriendlyRoomSlug();
+    addRoom.value = getUUID4();
     addRoom.style.borderColor = '';
     addRoom.style.boxShadow = '';
     updateRoomLinkPreview();
@@ -2693,7 +2693,7 @@ function resetFormValues() {
             }
         }
     }
-    addRoom.value = generateFriendlyRoomSlug();
+    addRoom.value = getUUID4();
     if (addDate._flatpickr) addDate._flatpickr.setDate(addDate.value, false);
     if (addTime._flatpickr) addTime._flatpickr.setDate(addTime.value, false);
     [addTag, addEmail, addDate, addTime, addRoom].forEach((el) => {
@@ -2767,59 +2767,6 @@ if (addrowLinkPreviewCopy) {
             /* clipboard not available */
         }
     });
-}
-
-// Friendly room slug: e.g. "swift-otter-482"
-const ROOM_SLUG_ADJ = [
-    'swift',
-    'brave',
-    'calm',
-    'bright',
-    'lucky',
-    'silent',
-    'cosmic',
-    'happy',
-    'mighty',
-    'quiet',
-    'rapid',
-    'sunny',
-    'witty',
-    'zen',
-    'noble',
-    'bold',
-];
-const ROOM_SLUG_NOUN = [
-    'otter',
-    'falcon',
-    'panda',
-    'tiger',
-    'comet',
-    'forest',
-    'river',
-    'meadow',
-    'phoenix',
-    'dolphin',
-    'eagle',
-    'lynx',
-    'meteor',
-    'orbit',
-    'pixel',
-    'quartz',
-];
-
-function generateFriendlyRoomSlug() {
-    const rnd = (n) => {
-        if (window.crypto?.getRandomValues) {
-            const buf = new Uint32Array(1);
-            window.crypto.getRandomValues(buf);
-            return buf[0] % n;
-        }
-        return Math.floor(Math.random() * n);
-    };
-    const adj = ROOM_SLUG_ADJ[rnd(ROOM_SLUG_ADJ.length)];
-    const noun = ROOM_SLUG_NOUN[rnd(ROOM_SLUG_NOUN.length)];
-    const num = 100 + rnd(900);
-    return `${adj}-${noun}-${num}`;
 }
 
 function updateRoomLinkPreview() {
