@@ -755,17 +755,16 @@ function flashRow(row, color = 'rgba(76, 175, 80, 0.15)') {
 
 initCustomDropdowns();
 
-// Human-readable duration string ("45 minutes", "1 hour 30 minutes"). Mirrors the
-// backend formatter so badge tooltip + email body show the same label.
+// Compact human-readable duration string ("45m", "1h", "1h 30m").
 function formatDurationLabel(minutes) {
     const m = Number(minutes);
     if (!Number.isFinite(m) || m <= 0) return '';
     const hours = Math.floor(m / 60);
     const mins = Math.round(m % 60);
     const parts = [];
-    if (hours > 0) parts.push(`${hours} hour${hours === 1 ? '' : 's'}`);
-    if (mins > 0) parts.push(`${mins} minute${mins === 1 ? '' : 's'}`);
-    return parts.join(' ') || `${m} minutes`;
+    if (hours > 0) parts.push(`${hours}h`);
+    if (mins > 0) parts.push(`${mins}m`);
+    return parts.join(' ') || `${m}m`;
 }
 
 function buildDurationDropdownOptions(value) {
