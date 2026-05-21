@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.76
+ * @version 1.3.77
  */
 
 const userAgent = navigator.userAgent;
@@ -1874,7 +1874,10 @@ function sendEmail(id) {
     const data = getRowValues(id);
     const roomURL = getRoomURL(data, false);
     const emailSubject = `Please join our MiroTalk ${data.type} Video Chat Meeting`;
-    const emailBody = `The meeting is scheduled at: ${newLine} Date: ${data.date} ${newLine} Time: ${data.time} ${newLine} Click to join: ${roomURL} ${newLine}`;
+    const durationLine = Number.isFinite(data.duration)
+        ? ` Duration: ${formatDurationLabel(data.duration)} ${newLine}`
+        : '';
+    const emailBody = `The meeting is scheduled at: ${newLine} Date: ${data.date} ${newLine} Time: ${data.time} ${newLine}${durationLine} Click to join: ${roomURL} ${newLine}`;
     document.location = 'mailto:' + data.email + '?subject=' + emailSubject + '&body=' + emailBody;
 }
 
