@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.78
+ * @version 1.3.79
  */
 
 const userAgent = navigator.userAgent;
@@ -1033,8 +1033,11 @@ function resetAddUserForm() {
     document.getElementById('add-user-svc-c2c').checked = false;
     document.getElementById('add-user-svc-bro').checked = false;
     [addUserUsername, addUserEmail, addUserPassword].forEach((el) => {
-        el.style.borderColor = '';
-        el.style.boxShadow = '';
+        const field = el.closest('.addrow-field');
+        if (field) {
+            field.style.borderColor = '';
+            field.style.boxShadow = '';
+        }
     });
 }
 
@@ -1259,8 +1262,11 @@ function createUser() {
     if (!username || !email || !password) {
         [addUserUsername, addUserEmail, addUserPassword].forEach((el) => {
             const isEmpty = !el.value.trim();
-            el.style.borderColor = isEmpty ? 'var(--danger-color)' : '';
-            el.style.boxShadow = isEmpty ? '0 0 0 2px var(--danger-bg-light)' : '';
+            const field = el.closest('.addrow-field');
+            if (field) {
+                field.style.borderColor = isEmpty ? 'var(--danger-color)' : '';
+                field.style.boxShadow = isEmpty ? '0 0 0 2px var(--danger-bg-light)' : '';
+            }
         });
         popupMessage('warning', 'Username, email, and password are required');
         return;
@@ -1427,13 +1433,18 @@ function addRow() {
     ];
     let allValid = true;
     requiredFields.forEach(({ el, valid }) => {
+        const field = el.closest('.addrow-field');
         if (!valid) {
-            el.style.borderColor = 'var(--danger-color)';
-            el.style.boxShadow = '0 0 0 2px var(--danger-bg-light)';
+            if (field) {
+                field.style.borderColor = 'var(--danger-color)';
+                field.style.boxShadow = '0 0 0 2px var(--danger-bg-light)';
+            }
             allValid = false;
         } else {
-            el.style.borderColor = '';
-            el.style.boxShadow = '';
+            if (field) {
+                field.style.borderColor = '';
+                field.style.boxShadow = '';
+            }
         }
     });
     if (!allValid) {
@@ -2697,8 +2708,11 @@ function resetFormValues() {
     if (addDate._flatpickr) addDate._flatpickr.setDate(addDate.value, false);
     if (addTime._flatpickr) addTime._flatpickr.setDate(addTime.value, false);
     [addTag, addEmail, addDate, addTime, addRoom].forEach((el) => {
-        el.style.borderColor = '';
-        el.style.boxShadow = '';
+        const field = el.closest('.addrow-field');
+        if (field) {
+            field.style.borderColor = '';
+            field.style.boxShadow = '';
+        }
     });
     updateRoomLinkPreview();
 }
@@ -2706,8 +2720,11 @@ function resetFormValues() {
 // Clear validation styling on input
 [addTag, addEmail, addDate, addTime, addRoom].forEach((el) => {
     el.addEventListener('input', () => {
-        el.style.borderColor = '';
-        el.style.boxShadow = '';
+        const field = el.closest('.addrow-field');
+        if (field) {
+            field.style.borderColor = '';
+            field.style.boxShadow = '';
+        }
     });
 });
 
@@ -2789,8 +2806,11 @@ function updateRoomLinkPreview() {
 }
 [addUserUsername, addUserEmail, addUserPassword].forEach((el) => {
     el.addEventListener('input', () => {
-        el.style.borderColor = '';
-        el.style.boxShadow = '';
+        const field = el.closest('.addrow-field');
+        if (field) {
+            field.style.borderColor = '';
+            field.style.boxShadow = '';
+        }
     });
 });
 
