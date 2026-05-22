@@ -751,17 +751,80 @@
                     <div class="addrow-section">
                         <span class="addrow-section-label">Permissions</span>
                         <div class="addrow-field">
-                            <div class="addrow-field-icon"><i class="uil uil-apps"></i></div>
                             <div class="addrow-field-content">
                                 <span class="addrow-field-label" id="services-allowed-label">Services Allowed</span>
-                                <div class="user-services-checkboxes">
-                                    <label
-                                        ><input type="checkbox" id="add-user-svc-all" value="ALL" checked /> ALL</label
+                                <div
+                                    id="add-user-svc-cards"
+                                    class="service-cards service-cards-multi"
+                                    role="group"
+                                    aria-label="Services allowed"
+                                >
+                                    <button
+                                        type="button"
+                                        class="service-card selected"
+                                        data-value="ALL"
+                                        role="checkbox"
+                                        aria-checked="true"
+                                        tabindex="0"
                                     >
-                                    <label><input type="checkbox" id="add-user-svc-p2p" value="P2P" /> P2P</label>
-                                    <label><input type="checkbox" id="add-user-svc-sfu" value="SFU" /> SFU</label>
-                                    <label><input type="checkbox" id="add-user-svc-c2c" value="C2C" /> C2C</label>
-                                    <label><input type="checkbox" id="add-user-svc-bro" value="BRO" /> BRO</label>
+                                        <i class="uil uil-globe service-card-icon"></i>
+                                        <span class="service-card-title" translate="no">ALL</span>
+                                        <span class="service-card-desc">Full access · Every service available</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="service-card"
+                                        data-value="P2P"
+                                        role="checkbox"
+                                        aria-checked="false"
+                                        tabindex="-1"
+                                    >
+                                        <i class="uil uil-users-alt service-card-icon"></i>
+                                        <span class="service-card-title" translate="no">P2P</span>
+                                        <span class="service-card-desc"
+                                            >Small group · Peer-to-peer, lowest latency</span
+                                        >
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="service-card"
+                                        data-value="SFU"
+                                        role="checkbox"
+                                        aria-checked="false"
+                                        tabindex="-1"
+                                    >
+                                        <i class="uil uil-server-network service-card-icon"></i>
+                                        <span class="service-card-title" translate="no">SFU</span>
+                                        <span class="service-card-desc"
+                                            >Large meetings · Server-routed, scales better</span
+                                        >
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="service-card"
+                                        data-value="C2C"
+                                        role="checkbox"
+                                        aria-checked="false"
+                                        tabindex="-1"
+                                    >
+                                        <i class="uil uil-comment-alt-message service-card-icon"></i>
+                                        <span class="service-card-title" translate="no">C2C</span>
+                                        <span class="service-card-desc"
+                                            >1-to-1 calls · Simple direct conversations</span
+                                        >
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="service-card"
+                                        data-value="BRO"
+                                        role="checkbox"
+                                        aria-checked="false"
+                                        tabindex="-1"
+                                    >
+                                        <i class="uil uil-megaphone service-card-icon"></i>
+                                        <span class="service-card-title" translate="no">BRO</span>
+                                        <span class="service-card-desc">Broadcast · One speaker, many viewers</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>

@@ -3358,36 +3358,38 @@ body.dark #usersTable tr:hover {
     color: var(--danger-badge-color);
 }
 
-.user-services-checkboxes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+/* Multi-select variant of service-cards (used for "Services Allowed" in Add User) */
+.addRowDiv .service-cards.service-cards-multi {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     margin-top: 4px;
 }
 
-.user-services-checkboxes label {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 13px;
-    color: var(--text-color);
-    cursor: pointer;
-    padding: 3px 8px;
-    border-radius: 6px;
+.addRowDiv .service-card[role='checkbox'] {
+    padding-right: 28px;
+}
+
+.addRowDiv .service-card[role='checkbox']::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
     border: 1px solid var(--border-color);
-    background: var(--panel-color);
+    background: transparent;
     transition: var(--tran-03);
 }
 
-.user-services-checkboxes label:hover {
+.addRowDiv .service-card[role='checkbox'].selected::after {
+    content: '\2713';
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 14px;
+    text-align: center;
+    color: #fff;
+    background: var(--accent-color);
     border-color: var(--accent-color);
-}
-
-.user-services-checkboxes input[type='checkbox'] {
-    width: 14px;
-    height: 14px;
-    cursor: pointer;
-    accent-color: var(--accent-color);
 }
 
 @media (max-width: 560px) {

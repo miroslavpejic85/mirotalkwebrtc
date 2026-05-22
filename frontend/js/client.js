@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.79
+ * @version 1.3.80
  */
 
 const userAgent = navigator.userAgent;
@@ -911,27 +911,86 @@ document.getElementById('usersSearchInput').addEventListener('keyup', function (
     usersDataTable.search(this.value).draw();
 });
 
-const svcAllCheckbox = document.getElementById('add-user-svc-all');
-const svcIndividual = ['add-user-svc-p2p', 'add-user-svc-sfu', 'add-user-svc-c2c', 'add-user-svc-bro'].map((id) =>
-    document.getElementById(id)
-);
+const svcCardsContainer = document.getElementById('add-user-svc-cards');
 
-svcAllCheckbox.addEventListener('change', () => {
-    if (svcAllCheckbox.checked) {
-        svcIndividual.forEach((cb) => (cb.checked = false));
-    }
-});
+function getAddUserSvcCards() {
+    return svcCardsContainer ? [...svcCardsContainer.querySelectorAll('.service-card')] : [];
+}
 
-svcIndividual.forEach((cb) => {
-    cb.addEventListener('change', () => {
-        if (cb.checked) {
-            svcAllCheckbox.checked = false;
-        }
-        if (!svcIndividual.some((c) => c.checked)) {
-            svcAllCheckbox.checked = true;
-        }
+function setSvcCardSelected(card, selected) {
+    card.classList.toggle('selected', selected);
+    card.setAttribute('aria-checked', selected ? 'true' : 'false');
+}
+
+function getSelectedSvcValues() {
+    return getAddUserSvcCards()
+        .filter((c) => c.classList.contains('selected'))
+        .map((c) => c.dataset.value);
+}
+
+function resetAddUserSvcCards() {
+    getAddUserSvcCards().forEach((c, i) => {
+        const isAll = c.dataset.value === 'ALL';
+        setSvcCardSelected(c, isAll);
+        c.setAttribute('tabindex', isAll ? '0' : '-1');
     });
-});
+}
+
+if (svcCardsContainer) {
+    const toggleSvcCard = (card) => {
+        const value = card.dataset.value;
+        const cards = getAddUserSvcCards();
+        const allCard = cards.find((c) => c.dataset.value === 'ALL');
+        const individualCards = cards.filter((c) => c.dataset.value !== 'ALL');
+
+        if (value === 'ALL') {
+            // ALL toggles on; turns off individuals
+            setSvcCardSelected(allCard, true);
+            individualCards.forEach((c) => setSvcCardSelected(c, false));
+        } else {
+            // Toggle individual; turn off ALL when any individual is selected
+            const nowSelected = !card.classList.contains('selected');
+            setSvcCardSelected(card, nowSelected);
+            if (nowSelected) {
+                setSvcCardSelected(allCard, false);
+            }
+            // If no individuals selected, fall back to ALL
+            if (!individualCards.some((c) => c.classList.contains('selected'))) {
+                setSvcCardSelected(allCard, true);
+            }
+        }
+    };
+
+    svcCardsContainer.addEventListener('click', (e) => {
+        const card = e.target.closest('.service-card');
+        if (card) toggleSvcCard(card);
+    });
+
+    svcCardsContainer.addEventListener('keydown', (e) => {
+        const cards = getAddUserSvcCards();
+        if (!cards.length) return;
+        const current = document.activeElement.closest('.service-card');
+
+        if (e.key === ' ' || e.key === 'Enter') {
+            if (current) {
+                e.preventDefault();
+                toggleSvcCard(current);
+            }
+            return;
+        }
+
+        if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) return;
+        let idx = cards.indexOf(current);
+        if (idx < 0) idx = 0;
+        if (e.key === 'Home') idx = 0;
+        else if (e.key === 'End') idx = cards.length - 1;
+        else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') idx = (idx + 1) % cards.length;
+        else idx = (idx - 1 + cards.length) % cards.length;
+        e.preventDefault();
+        cards.forEach((c, i) => c.setAttribute('tabindex', i === idx ? '0' : '-1'));
+        cards[idx].focus();
+    });
+}
 
 function navShow(elements = [], activeNav = null) {
     elemDisplay(dsOverview, false);
@@ -1027,11 +1086,7 @@ function resetAddUserForm() {
     addUserEmail.value = '';
     addUserPassword.value = '';
     addUserRooms.value = '*';
-    document.getElementById('add-user-svc-all').checked = true;
-    document.getElementById('add-user-svc-p2p').checked = false;
-    document.getElementById('add-user-svc-sfu').checked = false;
-    document.getElementById('add-user-svc-c2c').checked = false;
-    document.getElementById('add-user-svc-bro').checked = false;
+    resetAddUserSvcCards();
     [addUserUsername, addUserEmail, addUserPassword].forEach((el) => {
         const field = el.closest('.addrow-field');
         if (field) {
@@ -1272,12 +1327,7 @@ function createUser() {
         return;
     }
 
-    const allow = [];
-    if (document.getElementById('add-user-svc-all').checked) allow.push('ALL');
-    if (document.getElementById('add-user-svc-p2p').checked) allow.push('P2P');
-    if (document.getElementById('add-user-svc-sfu').checked) allow.push('SFU');
-    if (document.getElementById('add-user-svc-c2c').checked) allow.push('C2C');
-    if (document.getElementById('add-user-svc-bro').checked) allow.push('BRO');
+    const allow = getSelectedSvcValues();
     if (allow.length === 0) allow.push('ALL');
 
     const allowedRooms = roomsRaw
