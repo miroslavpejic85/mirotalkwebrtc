@@ -7,6 +7,7 @@ const express = require('express');
 const auth = require('./middleware/auth');
 const { isOidcEnabled, getOidcAuth, oidcHostGuard, requiresAuth } = require('./middleware/oidc');
 const url = require('./middleware/url');
+const { applyEmbedHeaders } = require('./middleware/embedHeaders');
 const HtmlInjector = require('./middleware/htmlInjector');
 const corsOptions = require('./config/cors');
 const cors = require('cors');
@@ -77,6 +78,7 @@ mongoose
         const app = express();
 
         app.use(helmet.noSniff()); // Enable content type sniffing prevention
+        app.use(applyEmbedHeaders); // Apply iframe embedding restrictions (CSP frame-ancestors / X-Frame-Options)
         app.use(cors(corsOptions()));
         app.use(compression());
         app.use(express.static(frontendDir));
