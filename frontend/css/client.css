@@ -1643,7 +1643,26 @@ body.dark .custom-dropdown-options {
 
 .addRowDiv .service-card:hover {
     border-color: var(--accent-color);
-    background: var(--hover-bg-medium);
+    background: var(--accent-color);
+    color: #fff;
+}
+
+.addRowDiv .service-card:hover .service-card-icon,
+.addRowDiv .service-card:hover .service-card-desc {
+    color: #fff;
+}
+
+body.dark .addRowDiv .service-card:hover {
+    background: var(--accent-bg);
+    color: inherit;
+}
+
+body.dark .addRowDiv .service-card:hover .service-card-icon {
+    color: var(--accent-color);
+}
+
+body.dark .addRowDiv .service-card:hover .service-card-desc {
+    color: var(--black-light-color);
 }
 
 .addRowDiv .service-card:focus-visible {
@@ -1655,6 +1674,29 @@ body.dark .custom-dropdown-options {
     border-color: var(--accent-color);
     background: var(--accent-bg);
     box-shadow: 0 0 0 1px var(--accent-color) inset;
+}
+
+.addRowDiv .service-card.selected:hover {
+    background: var(--accent-color);
+    color: #fff;
+}
+
+.addRowDiv .service-card.selected:hover .service-card-icon,
+.addRowDiv .service-card.selected:hover .service-card-desc {
+    color: #fff;
+}
+
+body.dark .addRowDiv .service-card.selected:hover {
+    background: var(--accent-bg);
+    color: inherit;
+}
+
+body.dark .addRowDiv .service-card.selected:hover .service-card-icon {
+    color: var(--accent-color);
+}
+
+body.dark .addRowDiv .service-card.selected:hover .service-card-desc {
+    color: var(--black-light-color);
 }
 
 .addRowDiv .service-card-icon {
