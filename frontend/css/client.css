@@ -1999,6 +1999,12 @@ body.dark .addRowDiv .service-card.selected:hover .service-card-desc {
     color: #fff;
 }
 
+#account-manage-subscription:hover {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #fff;
+}
+
 .change-password-form {
     display: flex;
     flex-direction: column;
