@@ -360,37 +360,61 @@ async function userGet(req, res) {
 async function userUpdate(req, res) {
     try {
         const id = req.params.id;
-        const updatedData = req.body;
+        const {
+            username,
+            password,
+            email,
+            role,
+            active,
+            allow,
+            allowedRooms,
+            subscriptionType,
+            subscriptionStatus,
+            subscriptionExpiresAt,
+        } = req.body;
         const options = { returnDocument: 'after' };
-        const dateNow = new Date().toISOString();
+
+        const user = await User.findById(id).select('email').lean();
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
 
         const isAdmin = await utils.isAdmin(req.user.email, req.user.username, req.user.password);
 
-        if (!isAdmin) {
-            const targetUser = await User.findById(id).select('email').lean();
-            if (!targetUser || targetUser.email !== req.user.email) {
-                return res.status(403).json({ message: 'You can only update your own account' });
-            }
-            // Non-admin users cannot change sensitive fields
-            delete updatedData.role;
-            delete updatedData.active;
-            delete updatedData.allow;
-            delete updatedData.allowedRooms;
+        if (!isAdmin && user.email !== req.user.email) {
+            return res.status(403).json({ message: 'You can only update your own account' });
         }
 
-        if (updatedData.password) {
-            const encryptedPassword = await bcrypt.hash(updatedData.password, 10);
-            const isUserAdmin = await utils.isAdmin(updatedData.email, updatedData.username, updatedData.password);
-            updatedData.role = isUserAdmin ? 'admin' : 'guest';
-            updatedData.password = encryptedPassword;
+        const updatedFields = {};
+
+        // Username is allowed for both admin and self
+        if (username !== undefined) updatedFields.username = username;
+
+        // Password is allowed for both admin and self
+        if (password) {
+            updatedFields.password = await bcrypt.hash(password, 10);
         }
-        updatedData.updatedAt = dateNow;
-        log.debug('Going to update user data');
-        const result = await User.findByIdAndUpdate(id, updatedData, options);
+
+        // Administrative fields
+        if (isAdmin) {
+            if (email !== undefined) updatedFields.email = email;
+            if (role !== undefined) updatedFields.role = role;
+            if (active !== undefined) updatedFields.active = active;
+            if (allow !== undefined) updatedFields.allow = allow;
+            if (allowedRooms !== undefined) updatedFields.allowedRooms = allowedRooms;
+            if (subscriptionType !== undefined) updatedFields.subscriptionType = subscriptionType;
+            if (subscriptionStatus !== undefined) updatedFields.subscriptionStatus = subscriptionStatus;
+            if (subscriptionExpiresAt !== undefined) updatedFields.subscriptionExpiresAt = subscriptionExpiresAt;
+        }
+
+        updatedFields.updatedAt = new Date().toISOString();
+
+        log.debug('Updating user data', { id, updatedFields });
+        const result = await User.findByIdAndUpdate(id, updatedFields, options);
         return res.send(result);
     } catch (error) {
         log.error('updateUser', error);
-        res.status(400).json({ message: error.message });
+        res.status(400).json({ message: 'Error updating user' });
     }
 }
 
