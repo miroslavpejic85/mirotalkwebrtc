@@ -124,6 +124,8 @@ For detailed guides and references, visit the **[official documentation](https:/
 
 <br/>
 
+![stripe](./frontend/Images/stripe.gif)
+
 `MiroTalk WEB` can run as a paid **SaaS** platform powered by [Stripe](https://stripe.com). Enable it with `SAAS=true` in your `.env`.
 
 - **`SAAS=false` (default):** the application behaves exactly as the open-source self-hosted version - no subscriptions, no payment gating.
