@@ -110,6 +110,7 @@ For detailed guides and references, visit the **[official documentation](https:/
 
 - [About](https://docs.mirotalk.com/mirotalk-web/)
 - [Self-Hosting Guide](https://docs.mirotalk.com/mirotalk-web/self-hosting/)
+- [Stripe integration](https://docs.mirotalk.com/mirotalk-web/stripe/)
 - [Automation-scripts](https://docs.mirotalk.com/scripts/about/)
 - [Configurations](https://docs.mirotalk.com/mirotalk-web/configurations/)
 - [Integration](https://docs.mirotalk.com/mirotalk-web/integration/)
