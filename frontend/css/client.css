@@ -3232,6 +3232,28 @@ td input.flatpickr-time {
     gap: 10px;
 }
 
+.users-plan-filter {
+    height: 36px;
+    padding: 0 32px 0 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--panel-color);
+    color: var(--text-color);
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 14px;
+}
+
+.users-plan-filter:focus-visible {
+    border-color: var(--primary-color);
+}
+
 #usersTable {
     width: 100%;
     border-collapse: separate;
@@ -3396,6 +3418,30 @@ body.dark #usersTable tr:hover {
 }
 
 #usersTable td .user-active-badge.inactive {
+    background-color: var(--danger-badge-bg);
+    color: var(--danger-badge-color);
+}
+
+#usersTable td .user-plan-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+#usersTable td .user-plan-badge.lifetime {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+#usersTable td .user-plan-badge.monthly {
+    background-color: var(--success-badge-bg);
+    color: var(--success-color);
+}
+
+#usersTable td .user-plan-badge.none {
     background-color: var(--danger-badge-bg);
     color: var(--danger-badge-color);
 }

@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.00
+ * @version 1.4.01
  */
 
 const userAgent = navigator.userAgent;
@@ -262,32 +262,33 @@ const usersDataTable = $('#usersTable').DataTable({
     info: false,
     responsive: true,
     scrollX: true,
-    order: [[6, 'desc']],
+    order: [[7, 'desc']],
     columnDefs: [
-        { width: '12%', targets: 0 },
-        { width: '16%', targets: 1 },
-        { width: '10%', targets: 2 },
-        { width: '10%', targets: 3 },
-        { width: '20%', targets: 4 },
+        { width: '11%', targets: 0 },
+        { width: '15%', targets: 1 },
+        { width: '9%', targets: 2 },
+        { width: '9%', targets: 3 },
+        { width: '17%', targets: 4 },
         { width: '8%', targets: 5 },
-        { width: '12%', targets: 6 },
-        { width: '12%', targets: 7 },
+        { width: '9%', targets: 6 },
+        { width: '11%', targets: 7 },
+        { width: '11%', targets: 8 },
         {
             targets: [2, 3],
             render: dropdownSearchRender,
         },
         {
-            targets: [0, 1, 2, 3, 4, 6],
+            targets: [0, 1, 2, 3, 4, 6, 7],
             type: 'string',
             searchable: true,
         },
         {
-            targets: [5, 7],
+            targets: [5, 8],
             orderable: false,
             searchable: false,
         },
         {
-            targets: [0, 1, 2, 3, 4, 5, 6, 7],
+            targets: [0, 1, 2, 3, 4, 5, 6, 7, 8],
             className: 'dt-body-justify',
         },
     ],
@@ -1118,10 +1119,14 @@ function loadUsers() {
             usersDataTable.clear();
 
             // Reset users filter to All
-            $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter((fn) => !fn._isUserFilter);
+            $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(
+                (fn) => !fn._isUserFilter && !fn._isUserPlanFilter
+            );
             document.querySelectorAll('.users-filter-chip').forEach((c) => c.classList.remove('active'));
             const allChip = document.querySelector('.users-filter-chip[data-filter="all"]');
             if (allChip) allChip.classList.add('active');
+            const planFilterEl = document.getElementById('usersPlanFilter');
+            if (planFilterEl) planFilterEl.value = 'all';
 
             if (users && users.length > 0) {
                 const now = new Date();
@@ -1204,6 +1209,8 @@ function getUserRow(u) {
 
     const actionsHtml = `<span class="action-group">${userInlineIcons.join('')}</span>`;
 
+    const plan = getUserPlan(u);
+
     return [
         `<input id="uname_${u._id}" type="text" value="${escapeHtml(u.username)}" readonly />`,
         `<input id="uemail_${u._id}" type="email" value="${escapeHtml(u.email)}" readonly />`,
@@ -1214,9 +1221,23 @@ function getUserRow(u) {
             <input id="uactive_${u._id}" type="checkbox" ${activeChecked} ${selfDisabled} onchange="this.parentElement.className='user-active-badge '+(this.checked?'active':'inactive');this.parentElement.querySelector('span').textContent=this.checked?'Active':'Inactive'" />
             <span>${u.active ? 'Active' : 'Inactive'}</span>
         </label>`,
+        `<span class="user-plan-badge ${plan.className}">${plan.label}</span>`,
         `<span data-date="${createdISO}">${createdDate}</span>`,
         actionsHtml,
     ];
+}
+
+function getUserPlan(u) {
+    const isActive = u.subscriptionStatus === 'active';
+    const notExpired = !u.subscriptionExpiresAt || new Date(u.subscriptionExpiresAt).getTime() > Date.now();
+
+    if (u.subscriptionType === 'lifetime' && isActive) {
+        return { label: 'Lifetime', className: 'lifetime' };
+    }
+    if (u.subscriptionType === 'monthly' && isActive && notExpired) {
+        return { label: 'Monthly', className: 'monthly' };
+    }
+    return { label: 'None', className: 'none' };
 }
 
 function escapeHtml(str) {
@@ -3167,3 +3188,25 @@ document.querySelectorAll('.users-filter-chip').forEach((chip) => {
         usersDataTable.draw();
     });
 });
+
+// Plan filter select for users table
+const usersPlanFilterEl = document.getElementById('usersPlanFilter');
+if (usersPlanFilterEl) {
+    usersPlanFilterEl.addEventListener('change', () => {
+        const plan = usersPlanFilterEl.value;
+
+        $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter((fn) => !fn._isUserPlanFilter);
+
+        if (plan !== 'all') {
+            const filterFn = function (settings, data, dataIndex) {
+                if (settings.nTable.id !== 'usersTable') return true;
+                const row = usersDataTable.row(dataIndex).node();
+                const badge = row ? row.querySelector('.user-plan-badge') : null;
+                return !!badge && badge.classList.contains(plan);
+            };
+            filterFn._isUserPlanFilter = true;
+            $.fn.dataTable.ext.search.push(filterFn);
+        }
+        usersDataTable.draw();
+    });
+}

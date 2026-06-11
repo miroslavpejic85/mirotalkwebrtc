@@ -656,6 +656,12 @@
                                 <input id="usersSearchInput" type="text" placeholder="Search users..." />
                             </div>
                             <div class="users-btn-group">
+                                <select id="usersPlanFilter" class="users-plan-filter" aria-label="Filter by plan">
+                                    <option value="all">All plans</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="lifetime">Lifetime</option>
+                                    <option value="none">None</option>
+                                </select>
                                 <button id="open-add-user-btn" class="custom-button">
                                     <i class="uil uil-user-plus"></i> Add New User
                                 </button>
@@ -700,6 +706,7 @@
                                 <th>Services</th>
                                 <th>Rooms</th>
                                 <th>Active</th>
+                                <th>Plan</th>
                                 <th>Created</th>
                                 <th>Actions</th>
                             </tr>

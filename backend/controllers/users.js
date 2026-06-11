@@ -333,7 +333,9 @@ async function userConfirmation(req, res) {
 async function userGetAll(req, res) {
     try {
         const users = await User.find()
-            .select('_id email username role allow allowedRooms active createdAt updatedAt')
+            .select(
+                '_id email username role allow allowedRooms active subscriptionType subscriptionStatus subscriptionExpiresAt createdAt updatedAt'
+            )
             .sort({ createdAt: -1 })
             .lean();
         res.json(users);
