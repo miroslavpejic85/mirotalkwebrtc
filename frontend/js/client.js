@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.01
+ * @version 1.4.02
  */
 
 const userAgent = navigator.userAgent;
@@ -332,6 +332,9 @@ let config = {};
 let user = {
     allowedRooms: ['*'],
     allowedRoomsALL: true,
+    // In SaaS mode, server-side email invitations are reserved for admins and
+    // subscribed plans. Computed in resolveServerInviteEligibility().
+    canServerInvite: true,
 };
 
 let addDuration = document.getElementById('add-duration');
@@ -463,6 +466,26 @@ function handleTokens(cfg) {
     //...
 }
 
+// Decide whether the current user may use server-side email invitations.
+// Self-hosted (SAAS off) and admins are always allowed; otherwise an active
+// paid subscription is required (demo/free accounts are nudged to /pricing).
+function resolveServerInviteEligibility(role) {
+    const saasEnabled = !!(config && config.SAAS && config.SAAS.enabled);
+    if (!saasEnabled || role === 'admin') {
+        user.canServerInvite = true;
+        return;
+    }
+    // Non-admin in SaaS mode: gate on active subscription.
+    user.canServerInvite = false;
+    getBilling()
+        .then((res) => {
+            user.canServerInvite = !!(res && res.active);
+        })
+        .catch(() => {
+            user.canServerInvite = false;
+        });
+}
+
 function handleUserRoles() {
     const userPromise = isOidcMode ? userGetMe() : userGet(userId);
     userPromise
@@ -472,8 +495,10 @@ function handleUserRoles() {
                 popupMessage('warning', `${res.message}`);
             } else {
                 const { role, allow, allowedRooms } = res;
+                user.role = role;
                 user.allowedRooms = allowedRooms;
                 user.allowedRoomsALL = allowedRooms.includes('*');
+                resolveServerInviteEligibility(role);
                 elemDisplay(addRoom, user.allowedRoomsALL);
                 elemDisplay(genRoom, user.allowedRoomsALL);
                 elemDisplay(selRoomDropdown, !user.allowedRoomsALL);
@@ -1983,6 +2008,25 @@ function sendEmail(id) {
 // or a CSV upload. Sends to the backend which queues + dispatches via SMTP.
 // Markup lives in <template id="srvInvTemplate"> in client.html; styles in client.css.
 function openServerInvitationModal(id) {
+    // In SaaS mode, server-side invitations require an active paid plan.
+    // Nudge demo/free users to the pricing page instead of opening the form.
+    if (!user.canServerInvite) {
+        Swal.fire({
+            position: 'top',
+            icon: 'warning',
+            title: 'Upgrade required',
+            text: 'Sending invitations directly from the server is available on a paid plan.',
+            showCancelButton: true,
+            confirmButtonText: '<i class="uil uil-tag-alt"></i> View Plans',
+            cancelButtonText: 'Close',
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            if (result.isConfirmed) openURL('/pricing');
+        });
+        return;
+    }
+
     const data = getRowValues(id);
     const maxRecipients = (config.EMAIL_INVITATION && config.EMAIL_INVITATION.maxRecipients) || 50;
     const defaultSubject = `Please join our MiroTalk ${data.type} Video Chat Meeting`;
@@ -2138,7 +2182,25 @@ function openServerInvitationModal(id) {
             })
             .catch((err) => {
                 console.error('[API] - ROOM INVITATION ERROR', err);
-                const msg = err.response?.data?.message || err.message;
+                const data = err.response?.data || {};
+                if (data.code === 'SUBSCRIPTION_REQUIRED') {
+                    user.canServerInvite = false;
+                    Swal.fire({
+                        position: 'top',
+                        icon: 'warning',
+                        title: 'Upgrade required',
+                        text: data.message || 'This feature is available on a paid plan.',
+                        showCancelButton: true,
+                        confirmButtonText: '<i class="uil uil-tag-alt"></i> View Plans',
+                        cancelButtonText: 'Close',
+                        showClass: { popup: 'animate__animated animate__fadeInDown' },
+                        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                    }).then((result) => {
+                        if (result.isConfirmed) openURL('/pricing');
+                    });
+                    return;
+                }
+                const msg = data.message || err.message;
                 popupMessage('error', `Failed to send invitations: ${msg}`);
             });
     });

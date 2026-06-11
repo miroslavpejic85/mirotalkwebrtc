@@ -7,6 +7,7 @@ const utils = require('../common/utils');
 const emailUtils = require('../common/emailUtils');
 const emailQueue = require('../lib/emailQueue');
 const config = require('../config');
+const { isDemoUser } = require('../middleware/saas');
 const logs = require('../common/logs');
 
 const log = new logs('Controllers-invitations');
@@ -57,6 +58,16 @@ async function sendRoomInvitation(req, res) {
     try {
         if (!config.EMAIL_INVITATION || !config.EMAIL_INVITATION.serverSide) {
             return res.status(403).json({ message: 'Server-side email invitations are disabled' });
+        }
+
+        // In SaaS mode the shared demo account cannot dispatch real emails
+        // (spam/abuse prevention); server-side invitations are reserved for
+        // subscribed plans and admin accounts.
+        if (config.SAAS && config.SAAS.enabled && isDemoUser(req.user)) {
+            return res.status(403).json({
+                code: 'SUBSCRIPTION_REQUIRED',
+                message: 'Server-side email invitations are available on a paid plan',
+            });
         }
 
         const { roomId, recipients, subject, message } = req.body || {};
@@ -174,6 +185,16 @@ async function setRoomRecurring(req, res) {
         }
         if (!config.EMAIL_INVITATION.recurring) {
             return res.status(403).json({ message: 'Recurring invitations are disabled' });
+        }
+
+        // In SaaS mode the shared demo account cannot dispatch real emails
+        // (spam/abuse prevention); recurring invitations are reserved for
+        // subscribed plans and admin accounts.
+        if (config.SAAS && config.SAAS.enabled && isDemoUser(req.user)) {
+            return res.status(403).json({
+                code: 'SUBSCRIPTION_REQUIRED',
+                message: 'Recurring invitations are available on a paid plan',
+            });
         }
 
         const { id } = req.params;
