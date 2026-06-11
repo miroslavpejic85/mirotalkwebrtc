@@ -1,0 +1,148 @@
+/*--------------------------------------------------------------
+# Pricing Page
+--------------------------------------------------------------*/
+
+.pricing-main {
+    width: 100%;
+    flex: 1;
+    box-sizing: border-box;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    padding: 40px 20px;
+    background: var(--primary-color);
+    color: var(--text-color);
+}
+
+.pricing-header {
+    text-align: center;
+}
+
+.pricing-header h1 {
+    font-size: 2rem;
+    margin: 0 0 10px;
+}
+
+.pricing-header p {
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.pricing-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    justify-content: center;
+    align-items: stretch;
+    width: 100%;
+    max-width: 760px;
+}
+
+.pricing-card {
+    position: relative;
+    flex: 1 1 280px;
+    max-width: 340px;
+    background: var(--secondary-color);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--box-shadow);
+}
+
+.pricing-card.featured {
+    border-color: var(--accent-color);
+}
+
+.pricing-badge {
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    background: var(--accent-color);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 999px;
+}
+
+.pricing-card-icon {
+    font-size: 2rem;
+    color: var(--hover-color);
+    margin-bottom: 12px;
+}
+
+.pricing-card-title {
+    font-size: 1.25rem;
+    margin: 0 0 8px;
+}
+
+.pricing-card-price {
+    font-size: 2.4rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.pricing-card-price small {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-left: 4px;
+}
+
+.pricing-card-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 24px;
+    flex: 1;
+}
+
+.pricing-card-features li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    color: var(--text-color);
+}
+
+.pricing-card-features li i {
+    color: var(--accent-color);
+}
+
+.pricing-btn {
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent-color);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.pricing-btn:hover {
+    background: var(--hover-color);
+}
+
+.pricing-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.pricing-footer a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    text-decoration: none;
+}
+
+.pricing-footer a:hover {
+    color: var(--text-color);
+}

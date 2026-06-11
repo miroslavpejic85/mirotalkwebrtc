@@ -113,4 +113,19 @@ module.exports = {
                 process.env.EMAIL_INVITATION_RECURRING !== 'false') ||
             false,
     },
+    SAAS: {
+        // SaaS (paid subscription) mode. When disabled, the platform behaves
+        // exactly as a self-hosted install (no subscription checks, no Stripe).
+        // Only non-secret values are exposed here, since the whole config object
+        // is served to the frontend via GET /config. The Stripe secret key and
+        // webhook secret are read directly from process.env in backend/lib/stripe.js.
+        enabled: process.env.SAAS === 'true' || false,
+        stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY || '',
+        monthlyPriceId: process.env.STRIPE_MONTHLY_PRICE_ID || '',
+        lifetimePriceId: process.env.STRIPE_LIFETIME_PRICE_ID || '',
+        pricing: {
+            monthly: '$9',
+            lifetime: '$199',
+        },
+    },
 };

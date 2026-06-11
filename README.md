@@ -119,6 +119,24 @@ For detailed guides and references, visit the **[official documentation](https:/
 </details>
 
 <details open>
+<summary>💳 SaaS Mode (Paid Subscriptions)</summary>
+
+<br/>
+
+`MiroTalk WEB` can run as a paid **SaaS** platform powered by [Stripe](https://stripe.com). Enable it with `SAAS=true` in your `.env`.
+
+- **`SAAS=false` (default):** the application behaves exactly as the open-source self-hosted version - no subscriptions, no payment gating.
+- **`SAAS=true`:** registered users (excluding demo and admin accounts) must hold an active subscription to create/manage rooms and join meetings. Two plans are offered out of the box:
+    - **Monthly** - recurring Stripe subscription.
+    - **Lifetime** - one-time Stripe payment.
+
+For full setup, environment variables, Stripe configuration, webhooks, and local testing, see **[docs/STRIPE.md](docs/STRIPE.md)**.
+
+> ⚠️ **Commercial license required.** Running `MiroTalk WEB` in SaaS mode (i.e. reselling access or operating it as a paid service) requires a commercial license, which can be purchased on [CodeCanyon](https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313).
+
+</details>
+
+<details open>
 <summary>☁️ Recommended Hosting Providers</summary>
 
 <br/>

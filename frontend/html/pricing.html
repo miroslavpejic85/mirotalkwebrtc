@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>MiroTalk WebRTC - Pricing</title>
+        <link rel="apple-touch-icon" href="../Images/apple-touch-icon.png" />
+        <link rel="icon" type="image/x-icon" href="../Images/favicon.ico" />
+
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="color-scheme" content="dark light" />
+        <meta name="description" content="MiroTalk WebRTC - Pricing & Plans" />
+
+        <!-- https://ogp.me -->
+
+        <meta property="og:type" content="{{OG_TYPE}}" />
+        <meta property="og:site_name" content="{{OG_SITE_NAME}}" />
+        <meta property="og:title" content="{{OG_TITLE}}" />
+        <meta property="og:description" content="{{OG_DESCRIPTION}}" />
+        <meta property="og:image" content="{{OG_IMAGE}}" />
+        <meta property="og:url" content="{{OG_URL}}" />
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
+        />
+        <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+        <link rel="stylesheet" href="../css/home.css" />
+        <link rel="stylesheet" href="../css/common.css" />
+        <link rel="stylesheet" href="../css/pricing.css" />
+
+        <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.15"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+        <script async src="../js/stats.js"></script>
+        <script defer src="../js/swal.js"></script>
+        <script defer src="../js/api.js"></script>
+        <script defer src="../js/pricing.js"></script>
+    </head>
+    <body>
+        <div class="pricing-main">
+            <div class="pricing-header">
+                <h1><i class="uil uil-rocket"></i> Choose your plan</h1>
+                <p>Unlock full access to the MiroTalk platform.</p>
+            </div>
+
+            <div class="pricing-cards">
+                <!-- Monthly -->
+                <div class="pricing-card">
+                    <div class="pricing-card-icon"><i class="uil uil-calendar-alt"></i></div>
+                    <h2 class="pricing-card-title">Monthly</h2>
+                    <div class="pricing-card-price"><span id="monthlyPrice">$9</span><small>/month</small></div>
+                    <ul class="pricing-card-features">
+                        <li><i class="uil uil-check"></i> Full platform access</li>
+                        <li><i class="uil uil-check"></i> Cancel anytime</li>
+                        <li><i class="uil uil-check"></i> Billed monthly</li>
+                    </ul>
+                    <button id="subscribeMonthly" class="pricing-btn">Subscribe</button>
+                </div>
+
+                <!-- Lifetime -->
+                <div class="pricing-card featured">
+                    <div class="pricing-badge">Best value</div>
+                    <div class="pricing-card-icon"><i class="uil uil-trophy"></i></div>
+                    <h2 class="pricing-card-title">Lifetime</h2>
+                    <div class="pricing-card-price"><span id="lifetimePrice">$199</span><small>once</small></div>
+                    <ul class="pricing-card-features">
+                        <li><i class="uil uil-check"></i> Full platform access</li>
+                        <li><i class="uil uil-check"></i> One-time payment</li>
+                        <li><i class="uil uil-check"></i> Pay once, use forever</li>
+                    </ul>
+                    <button id="buyLifetime" class="pricing-btn">Buy Lifetime</button>
+                </div>
+            </div>
+
+            <div class="pricing-footer">
+                <a href="/client"><i class="uil uil-estate"></i> Back to Dashboard</a>
+            </div>
+        </div>
+    </body>
+</html>

@@ -320,6 +320,28 @@
                         </div>
                     </div>
 
+                    <!-- Subscriptions Section (SaaS mode only) -->
+                    <div id="statsSubscriptionsSection" class="stats-section" style="display: none">
+                        <h3 class="stats-section-title"><i class="uil uil-credit-card"></i> Subscriptions</h3>
+                        <div class="stats-container">
+                            <div id="statMonthlySubs" class="stat-card stat-accent-green">
+                                <div class="stat-icon-wrap"><i class="uil uil-calendar-alt"></i></div>
+                                <span class="stat-value" id="statMonthlySubsVal">-</span>
+                                <span class="stat-label">Monthly</span>
+                            </div>
+                            <div id="statLifetimeSubs" class="stat-card stat-accent-purple">
+                                <div class="stat-icon-wrap"><i class="uil uil-trophy"></i></div>
+                                <span class="stat-value" id="statLifetimeSubsVal">-</span>
+                                <span class="stat-label">Lifetime</span>
+                            </div>
+                            <div id="statTotalSubs" class="stat-card stat-accent-blue">
+                                <div class="stat-icon-wrap"><i class="uil uil-check-circle"></i></div>
+                                <span class="stat-value" id="statTotalSubsVal">-</span>
+                                <span class="stat-label">Active Total</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Rooms Section -->
                     <div id="statsRoomsSection" class="stats-section">
                         <h3 class="stats-section-title">
@@ -928,6 +950,36 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <div id="accountBillingSection" class="account-section hidden">
+                        <span class="account-section-label">Billing</span>
+                        <div class="account-field">
+                            <div class="account-field-icon"><i class="uil uil-credit-card"></i></div>
+                            <div class="account-field-content">
+                                <label for="account-plan" class="account-field-label">Plan</label>
+                                <input id="account-plan" type="text" name="text" readonly />
+                            </div>
+                        </div>
+                        <div class="account-field-row">
+                            <div class="account-field account-field-half">
+                                <div class="account-field-icon"><i class="uil uil-check-circle"></i></div>
+                                <div class="account-field-content">
+                                    <label for="account-sub-status" class="account-field-label">Status</label>
+                                    <input id="account-sub-status" type="text" name="text" readonly />
+                                </div>
+                            </div>
+                            <div id="account-renewal-field" class="account-field account-field-half">
+                                <div class="account-field-icon"><i class="uil uil-calendar-alt"></i></div>
+                                <div class="account-field-content">
+                                    <label for="account-renewal" class="account-field-label">Renewal</label>
+                                    <input id="account-renewal" type="text" name="text" readonly />
+                                </div>
+                            </div>
+                        </div>
+                        <button id="account-manage-subscription" class="account-change-password-btn hidden">
+                            <i class="uil uil-cog"></i> Manage Subscription
+                        </button>
                     </div>
 
                     <div class="account-section">

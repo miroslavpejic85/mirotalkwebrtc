@@ -21,6 +21,9 @@ const users = require('./routes/users');
 const password = require('./routes/password');
 const dashboard = require('./routes/dashboard');
 const oidc = require('./routes/oidc');
+const stripe = require('./routes/stripe');
+const controllersStripe = require('./controllers/stripe');
+const { requireSubscription } = require('./middleware/saas');
 const config = require('./config');
 const ngrok = require('./common/ngrok');
 const sentry = require('./common/sentry');
@@ -60,9 +63,10 @@ const client = path.join(__dirname, '../', 'frontend/html/client.html');
 const passwordForgot = path.join(__dirname, '../', 'frontend/html/password-forgot.html');
 const passwordReset = path.join(__dirname, '../', 'frontend/html/password-reset.html');
 const confirmation = path.join(__dirname, '../', 'frontend/html/confirmation.html');
+const pricing = path.join(__dirname, '../', 'frontend/html/pricing.html');
 
 // File to cache and inject custom HTML data like OG tags and any other elements.
-const filesPath = [login, client, passwordForgot, passwordReset, confirmation];
+const filesPath = [login, client, passwordForgot, passwordReset, confirmation, pricing];
 const htmlInjector = new HtmlInjector(filesPath, config || null);
 
 mongoose.set('strictQuery', true);
@@ -82,6 +86,13 @@ mongoose
         app.use(cors(corsOptions()));
         app.use(compression());
         app.use(express.static(frontendDir));
+
+        // Stripe webhook needs the raw request body to verify the signature,
+        // so it must be registered before the JSON body parser below.
+        app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+            controllersStripe.handleWebhook(req, res);
+        });
+
         app.use(express.urlencoded({ extended: true, limit: '10kb' }));
         app.use(express.json({ limit: '10kb' }));
 
@@ -120,6 +131,7 @@ mongoose
         app.use(apiPath, users);
         app.use(apiPath, password);
         app.use(apiPath, dashboard);
+        app.use(apiPath, stripe);
         app.use('/oidc', oidc);
 
         if (isOidcEnabled()) {
@@ -127,7 +139,7 @@ mongoose
             app.get('/', (req, res) => {
                 res.redirect('/client');
             });
-            app.get('/client', requiresAuth(), (req, res) => {
+            app.get('/client', requiresAuth(), requireSubscription, (req, res) => {
                 htmlInjector.injectHtml(client, res);
             });
         } else {
@@ -135,10 +147,14 @@ mongoose
             app.get('/', (req, res) => {
                 htmlInjector.injectHtml(login, res);
             });
-            app.get('/client', auth, (req, res) => {
+            app.get('/client', auth, requireSubscription, (req, res) => {
                 htmlInjector.injectHtml(client, res);
             });
         }
+
+        app.get('/pricing', (req, res) => {
+            htmlInjector.injectHtml(pricing, res);
+        });
 
         app.get('/password-forgot', (req, res) => {
             htmlInjector.injectHtml(passwordForgot, res);

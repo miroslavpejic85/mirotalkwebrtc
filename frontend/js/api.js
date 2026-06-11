@@ -259,3 +259,38 @@ function getOidcStatus() {
         url: `/oidc/status`,
     }).then((response) => response.data);
 }
+
+// API STRIPE / BILLING
+
+function stripeCheckout(plan) {
+    return axios({
+        method: 'POST',
+        url: `${apiPath}/stripe/checkout`,
+        headers: headers,
+        data: { plan: plan },
+    }).then((response) => response.data);
+}
+
+function stripePortal() {
+    return axios({
+        method: 'POST',
+        url: `${apiPath}/stripe/portal`,
+        headers: headers,
+    }).then((response) => response.data);
+}
+
+function getBilling() {
+    return axios({
+        method: 'GET',
+        url: `${apiPath}/stripe/billing`,
+        headers: headers,
+    }).then((response) => response.data);
+}
+
+function stripeVerifySession(sessionId) {
+    return axios({
+        method: 'GET',
+        url: `${apiPath}/stripe/verify?session_id=${encodeURIComponent(sessionId)}`,
+        headers: headers,
+    }).then((response) => response.data);
+}

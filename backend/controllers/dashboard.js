@@ -23,6 +23,8 @@ async function getDashboardStats(req, res) {
                 upcomingRooms,
                 todayRooms,
                 latestUser,
+                monthlySubscribers,
+                lifetimeSubscribers,
             ] = await Promise.all([
                 User.countDocuments(),
                 User.countDocuments({ active: true }),
@@ -32,6 +34,8 @@ async function getDashboardStats(req, res) {
                 Room.countDocuments({ date: { $gte: today } }),
                 Room.countDocuments({ date: today }),
                 User.findOne().sort({ createdAt: -1 }).select('username createdAt').lean(),
+                User.countDocuments({ subscriptionType: 'monthly', subscriptionStatus: 'active' }),
+                User.countDocuments({ subscriptionType: 'lifetime', subscriptionStatus: 'active' }),
             ]);
 
             const typeCounts = { P2P: 0, SFU: 0, C2C: 0, BRO: 0 };
@@ -54,6 +58,8 @@ async function getDashboardStats(req, res) {
                 todayRooms,
                 latestUser: latestUser ? latestUser.username : '-',
                 latestUserDate: latestUser ? latestUser.createdAt : null,
+                monthlySubscribers,
+                lifetimeSubscribers,
             });
         }
 

@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.83
+ * @version 1.4.00
  */
 
 const userAgent = navigator.userAgent;
@@ -85,6 +85,11 @@ const statSFUVal = document.getElementById('statSFUVal');
 const statC2CVal = document.getElementById('statC2CVal');
 const statBROVal = document.getElementById('statBROVal');
 
+const statsSubscriptionsSection = document.getElementById('statsSubscriptionsSection');
+const statMonthlySubsVal = document.getElementById('statMonthlySubsVal');
+const statLifetimeSubsVal = document.getElementById('statLifetimeSubsVal');
+const statTotalSubsVal = document.getElementById('statTotalSubsVal');
+
 const boxesDS = document.getElementById('boxesDS');
 const statsProjectsSection = document.getElementById('statsProjectsSection');
 
@@ -138,6 +143,13 @@ const accountRole = document.getElementById('account-role');
 const accountRoleIcon = document.getElementById('account-role-icon');
 const accountDelete = document.getElementById('account-delete');
 const accountChangePassword = document.getElementById('account-change-password');
+
+const accountBillingSection = document.getElementById('accountBillingSection');
+const accountPlan = document.getElementById('account-plan');
+const accountSubStatus = document.getElementById('account-sub-status');
+const accountRenewal = document.getElementById('account-renewal');
+const accountRenewalField = document.getElementById('account-renewal-field');
+const accountManageSubscription = document.getElementById('account-manage-subscription');
 
 const settingsDiv = document.getElementById('settingsDiv');
 const settingsClose = document.getElementById('settings-close-btn');
@@ -882,6 +894,9 @@ accountDelete.addEventListener('click', () => {
 });
 accountChangePassword.addEventListener('click', () => {
     changeMyPassword();
+});
+accountManageSubscription.addEventListener('click', () => {
+    manageSubscription();
 });
 
 addUserGeneratePassword.addEventListener('click', () => {
@@ -2440,12 +2455,78 @@ function getMyAccount() {
                         ? '<i class="uil uil-shield-check admin-role-icon"></i>'
                         : '<i class="uil uil-user"></i>';
                 accountChangePassword.classList.toggle('hidden', isOidcMode);
+                loadBilling();
                 toggleAccount();
             }
         })
         .catch((err) => {
             console.error('[API] - USER GET ERROR', err);
             popupMessage('error', `USER GET error: ${err.message}`);
+        });
+}
+
+function loadBilling() {
+    // Billing is only relevant when the server runs in SaaS mode.
+    if (!config || !config.SAAS || !config.SAAS.enabled) {
+        accountBillingSection.classList.add('hidden');
+        return;
+    }
+
+    getBilling()
+        .then((res) => {
+            if (res.message) {
+                accountBillingSection.classList.add('hidden');
+                return;
+            }
+
+            accountBillingSection.classList.remove('hidden');
+
+            if (res.subscriptionType === 'lifetime') {
+                accountPlan.value = 'Lifetime License';
+                accountSubStatus.value = res.active ? 'Active' : capitalize(res.subscriptionStatus) || 'Inactive';
+                accountRenewalField.classList.add('hidden');
+            } else if (res.subscriptionType === 'monthly') {
+                accountPlan.value = 'Monthly';
+                accountSubStatus.value = res.active ? 'Active' : capitalize(res.subscriptionStatus) || 'Inactive';
+                accountRenewalField.classList.remove('hidden');
+                accountRenewal.value = res.subscriptionExpiresAt
+                    ? new Date(res.subscriptionExpiresAt).toLocaleDateString()
+                    : '-';
+            } else {
+                accountPlan.value = 'No active plan';
+                accountSubStatus.value = 'Inactive';
+                accountRenewalField.classList.add('hidden');
+            }
+
+            // Only subscription customers can use the Stripe Billing Portal.
+            accountManageSubscription.classList.toggle('hidden', !res.hasBillingAccount);
+        })
+        .catch((err) => {
+            console.error('[API] - BILLING GET ERROR', err);
+            accountBillingSection.classList.add('hidden');
+        });
+}
+
+function capitalize(value) {
+    if (!value) return value;
+    return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function manageSubscription() {
+    accountManageSubscription.disabled = true;
+    stripePortal()
+        .then((res) => {
+            if (res && res.url) {
+                window.location.href = res.url;
+            } else {
+                popupMessage('error', 'Unable to open the billing portal.');
+                accountManageSubscription.disabled = false;
+            }
+        })
+        .catch((err) => {
+            const message = err?.response?.data?.message || 'Unable to open the billing portal.';
+            popupMessage('error', message);
+            accountManageSubscription.disabled = false;
         });
 }
 
@@ -2628,6 +2709,17 @@ function renderDashboardStats(data) {
         statGuestsVal.textContent = data.guestCount;
         statLatestUserVal.textContent = data.latestUser;
         statTotalRoomsVal.textContent = data.totalRooms;
+
+        // Subscriptions (SaaS mode only)
+        const saasEnabled = !!(config && config.SAAS && config.SAAS.enabled);
+        elemDisplay(statsSubscriptionsSection, saasEnabled);
+        if (saasEnabled) {
+            const monthly = data.monthlySubscribers || 0;
+            const lifetime = data.lifetimeSubscribers || 0;
+            statMonthlySubsVal.textContent = monthly;
+            statLifetimeSubsVal.textContent = lifetime;
+            statTotalSubsVal.textContent = monthly + lifetime;
+        }
         statTotalRoomsLabel.textContent = 'Total Rooms';
         statTodayVal.textContent = data.todayRooms;
         statTodayLabel.textContent = 'Today';
@@ -2641,6 +2733,7 @@ function renderDashboardStats(data) {
         statBROVal.textContent = data.roomsByType.BRO;
     } else {
         elemDisplay(statsUsersSection, false);
+        elemDisplay(statsSubscriptionsSection, false);
         elemDisplay(statMemberSince, true);
         statMemberSinceVal.textContent = data.memberSince ? new Date(data.memberSince).toLocaleDateString() : '-';
         statTotalRoomsVal.textContent = data.myRooms;

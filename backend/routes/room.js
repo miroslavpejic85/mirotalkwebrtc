@@ -5,13 +5,14 @@ const api = require('../middleware/api');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const validator = require('../middleware/validator');
+const { requireSubscription } = require('../middleware/saas');
 const { roomInvitationLimiter } = require('../middleware/rateLimiter');
 const router = express.Router();
 const controllersRooms = require('../controllers/rooms');
 const controllersInvitations = require('../controllers/invitations');
 
 //CREATE: /api/v1/room
-router.post('/room', auth, validator, (req, res) => {
+router.post('/room', auth, requireSubscription, validator, (req, res) => {
     controllersRooms.roomCreate(req, res);
 });
 
@@ -21,12 +22,12 @@ router.post('/room/exists', api, (req, res) => {
 });
 
 //INVITE: /api/v1/room/invite (server-side email invitations; gated by EMAIL_INVITATION_SERVER_SIDE)
-router.post('/room/invite', auth, roomInvitationLimiter, (req, res) => {
+router.post('/room/invite', auth, requireSubscription, roomInvitationLimiter, (req, res) => {
     controllersInvitations.sendRoomInvitation(req, res);
 });
 
 //RECURRING: /api/v1/room/:id/recurring (enable/disable weekly recurring invitations)
-router.post('/room/:id/recurring', auth, roomInvitationLimiter, (req, res) => {
+router.post('/room/:id/recurring', auth, requireSubscription, roomInvitationLimiter, (req, res) => {
     controllersInvitations.setRoomRecurring(req, res);
 });
 
@@ -46,12 +47,12 @@ router.get('/room/:id', auth, (req, res) => {
 });
 
 //UPDATE: /api/v1/room/id
-router.patch('/room/:id', auth, validator, (req, res) => {
+router.patch('/room/:id', auth, requireSubscription, validator, (req, res) => {
     controllersRooms.roomUpdate(req, res);
 });
 
 //DELETE: /api/v1/room/id
-router.delete('/room/:id', auth, (req, res) => {
+router.delete('/room/:id', auth, requireSubscription, (req, res) => {
     controllersRooms.roomDelete(req, res);
 });
 
