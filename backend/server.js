@@ -175,7 +175,12 @@ mongoose
 
         app.get('/app-config', (req, res) => {
             log.debug('Send app-config', config.App);
-            res.status(200).json(config.App);
+            res.status(200).json({
+                app: config.App,
+                saas: {
+                    enabled: config?.SAAS?.enabled,
+                },
+            });
         });
 
         app.use((req, res) => {

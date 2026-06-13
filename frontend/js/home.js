@@ -31,6 +31,10 @@ const brandLogo = document.getElementById('brandLogo');
 const brandNameSubtitle = document.getElementById('brandNameSubtitle');
 const brandImage = document.getElementById('brandImage');
 
+// Pricing page buttons
+const navPricingBtn = document.getElementById('navPricingBtn');
+const heroPricingBtn = document.getElementById('heroPricingBtn');
+
 // support
 const supportBtn = document.getElementById('supportBtn');
 
@@ -288,12 +292,16 @@ function cleanSignUpInput() {
     signupRepeatPasswordIdInput.value = '';
 }
 
-function loadAppConfig(app) {
-    if (app && app.Name && app.Logo && app.Image) {
-        brandNameSubtitle.textContent = app.Name;
-        brandName.textContent = app.Name;
-        brandLogo.src = app.Logo;
-        brandImage.src = app.Image;
+function loadAppConfig(cfg) {
+    if (cfg && cfg.app && cfg.app.Name && cfg.app.Logo && cfg.app.Image) {
+        brandNameSubtitle.textContent = cfg.app.Name;
+        brandName.textContent = cfg.app.Name;
+        brandLogo.src = cfg.app.Logo;
+        brandImage.src = cfg.app.Image;
+    }
+    if (cfg && cfg.saas && !cfg.saas.enabled) {
+        elementDisplay(navPricingBtn, false);
+        elementDisplay(heroPricingBtn, false);
     }
 }
 
@@ -314,13 +322,13 @@ document.querySelectorAll('.password-toggle').forEach((btn) => {
 
 document.addEventListener('DOMContentLoaded', () => {
     if (sessionStorage.getItem('appConfig')) {
-        const app = JSON.parse(sessionStorage.getItem('appConfig'));
-        loadAppConfig(app);
+        const cfg = JSON.parse(sessionStorage.getItem('appConfig'));
+        loadAppConfig(cfg);
     } else {
         getAppConfig()
-            .then((app) => {
-                sessionStorage.setItem('appConfig', JSON.stringify(app));
-                loadAppConfig(app);
+            .then((cfg) => {
+                sessionStorage.setItem('appConfig', JSON.stringify(cfg));
+                loadAppConfig(cfg);
             })
             .catch(() => {});
     }
