@@ -35,6 +35,11 @@ router.post('/user/roomsAllowed', api, (req, res) => {
     controllersUsers.userRoomsAllowed(req, res);
 });
 
+//GET: /api/v1/user/demo-config (public, exposes demo credentials only when demo mode is enabled)
+router.get('/user/demo-config', loginLimiter, (req, res) => {
+    controllersUsers.userDemoConfig(req, res);
+});
+
 //GET: /api/v1/user/confirmation/?token=<token>
 router.get('/user/confirmation', auth, (req, res) => {
     controllersUsers.userConfirmation(req, res);

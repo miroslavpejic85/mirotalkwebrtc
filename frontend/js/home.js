@@ -25,6 +25,12 @@ const tabSignup = document.getElementById('tabSignup');
 const loginPanel = document.getElementById('loginPanel');
 const signupPanel = document.getElementById('signupPanel');
 
+// branding
+const brandName = document.getElementById('brandName');
+const brandLogo = document.getElementById('brandLogo');
+const brandNameSubtitle = document.getElementById('brandNameSubtitle');
+const brandImage = document.getElementById('brandImage');
+
 // support
 const supportBtn = document.getElementById('supportBtn');
 
@@ -46,6 +52,71 @@ loginPasswordIdInput.value = '';
 // Tab switching
 tabLogin.addEventListener('click', () => switchTab('login'));
 tabSignup.addEventListener('click', () => switchTab('signup'));
+
+// Landing CTA buttons -> switch to the proper auth tab and scroll the card into view
+const heroSignUpBtn = document.getElementById('heroSignUpBtn');
+const heroDemoBtn = document.getElementById('heroDemoBtn');
+const navSignUpBtn = document.getElementById('navSignUpBtn');
+const navSignInBtn = document.getElementById('navSignInBtn');
+const switchToLoginLink = document.getElementById('switchToLoginLink');
+
+function focusAuthCard(tab) {
+    switchTab(tab);
+    const card = document.querySelector('.main');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+heroSignUpBtn?.addEventListener('click', () => focusAuthCard('signup'));
+navSignUpBtn?.addEventListener('click', () => focusAuthCard('signup'));
+navSignInBtn?.addEventListener('click', () => focusAuthCard('login'));
+switchToLoginLink?.addEventListener('click', () => switchTab('login'));
+
+// Deep-link: /?signup=1 (e.g. coming from the pricing page) focuses the Sign up card.
+(function handleSignupDeepLink() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('signup') === '1') {
+        focusAuthCard('signup');
+        window.history.replaceState({}, document.title, '/');
+    }
+})();
+
+// Demo account: if the server has demo mode enabled, show a one-click
+// "Try the demo" CTA that logs in with the shared demo credentials.
+let demoCredentials = null;
+
+function loginAsDemo() {
+    if (!demoCredentials) return focusAuthCard('login');
+    signupOrLogin({
+        username: demoCredentials.username,
+        email: (demoCredentials.email || '').toLowerCase().trim(),
+        password: demoCredentials.password,
+    });
+}
+
+(function initDemoMode() {
+    if (sessionStorage.getItem('userDemo')) {
+        demoCredentials = JSON.parse(sessionStorage.getItem('userDemo'));
+        loadDemoCredentials(demoCredentials);
+    } else {
+        userDemoConfig()
+            .then((cfg) => {
+                demoCredentials = cfg;
+                sessionStorage.setItem('userDemo', JSON.stringify(demoCredentials));
+                loadDemoCredentials(demoCredentials);
+            })
+            .catch((err) => console.warn('[API] - DEMO CONFIG unavailable', err?.message));
+    }
+
+    function loadDemoCredentials(demoCredentials) {
+        if (demoCredentials && demoCredentials.enabled) {
+            heroDemoBtn.hidden = false;
+            // Demote the sign-up button to secondary so the demo is the primary CTA
+            heroSignUpBtn?.classList.remove('hero-cta-primary');
+            heroSignUpBtn?.classList.add('hero-cta-secondary');
+            heroDemoBtn.addEventListener('click', loginAsDemo);
+        }
+    }
+})();
 
 function switchTab(tab) {
     if (tab === 'login') {
@@ -217,6 +288,15 @@ function cleanSignUpInput() {
     signupRepeatPasswordIdInput.value = '';
 }
 
+function loadAppConfig(app) {
+    if (app && app.Name && app.Logo && app.Image) {
+        brandNameSubtitle.textContent = app.Name;
+        brandName.textContent = app.Name;
+        brandLogo.src = app.Logo;
+        brandImage.src = app.Image;
+    }
+}
+
 // Password visibility toggle
 document.querySelectorAll('.password-toggle').forEach((btn) => {
     btn.addEventListener('click', function () {
@@ -230,4 +310,18 @@ document.querySelectorAll('.password-toggle').forEach((btn) => {
             icon.classList.replace('uil-eye-slash', 'uil-eye');
         }
     });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (sessionStorage.getItem('appConfig')) {
+        const app = JSON.parse(sessionStorage.getItem('appConfig'));
+        loadAppConfig(app);
+    } else {
+        getAppConfig()
+            .then((app) => {
+                sessionStorage.setItem('appConfig', JSON.stringify(app));
+                loadAppConfig(app);
+            })
+            .catch(() => {});
+    }
 });

@@ -399,7 +399,7 @@ function sendInvitationEmail(name, email, password) {
                         <a href="${SERVER_URL}" 
                            style="background-color: #376df9; color: white; padding: 12px 24px; 
                                   text-decoration: none; border-radius: 5px; display: inline-block;">
-                            Login Now
+                            Sign in Now
                         </a>
                     </div>
                     <div style="margin-top: 30px; padding: 14px 18px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
@@ -407,7 +407,7 @@ function sendInvitationEmail(name, email, password) {
                             ⚠️ Security Notice
                         </p>
                         <p style="margin: 6px 0 0; color: #856404; font-size: 14px;">
-                            After logging in, please change your password from your Account settings for security reasons.
+                            After signing in, please change your password from your Account settings for security reasons.
                         </p>
                     </div>
                     <br/>

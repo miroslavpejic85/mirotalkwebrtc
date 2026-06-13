@@ -173,6 +173,11 @@ mongoose
             res.status(200).json(config);
         });
 
+        app.get('/app-config', (req, res) => {
+            log.debug('Send app-config', config.App);
+            res.status(200).json(config.App);
+        });
+
         app.use((req, res) => {
             res.status(404).json({ message: 'Page not found' });
         });

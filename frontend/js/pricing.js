@@ -102,7 +102,48 @@ function pollBilling(onDone) {
     poll();
 }
 
+function showAccountRequiredModal({ icon, title, html }) {
+    return Swal.fire({
+        position: 'top',
+        icon,
+        title,
+        html,
+        showCancelButton: true,
+        confirmButtonText: '<i class="uil uil-user-plus"></i> Create account',
+        cancelButtonText: 'Cancel',
+        allowOutsideClick: false,
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '/?signup=1';
+        }
+    });
+}
+
 function startCheckout(plan, button) {
+    // Subscribing requires an account: Stripe checkout is tied to the logged-in
+    // user. If there is no session token, guide the visitor to sign up first.
+    const isLoggedIn = !!window.sessionStorage.userToken;
+    // Check if demo user is trying to subscribe, which is not allowed since it's a shared account. Guide them to sign up for a real account first.
+    const demoUser = window.sessionStorage.userDemo;
+
+    if (!isLoggedIn) {
+        return showAccountRequiredModal({
+            icon: 'info',
+            title: 'Create your account first',
+            html: 'To subscribe, please create a free account first.<br/>Your plan will unlock your private dashboard and meeting rooms.',
+        });
+    }
+
+    if (demoUser) {
+        return showAccountRequiredModal({
+            icon: 'warning',
+            title: 'Demo accounts cannot subscribe',
+            html: 'To subscribe, please create your own free account first.<br/>Your plan will unlock your private dashboard and meeting rooms.',
+        });
+    }
+
     button.disabled = true;
     stripeCheckout(plan)
         .then((data) => {

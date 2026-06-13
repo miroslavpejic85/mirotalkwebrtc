@@ -30,6 +30,13 @@ function userLogin(data) {
     }).then((response) => response.data);
 }
 
+function userDemoConfig() {
+    return axios({
+        method: 'GET',
+        url: `${apiPath}/user/demo-config`,
+    }).then((response) => response.data);
+}
+
 function userConfirmation(token) {
     return axios({
         method: 'GET',
@@ -203,6 +210,14 @@ function getConfig() {
     return axios({
         method: 'GET',
         url: `/config`,
+        headers: headers,
+    }).then((response) => response.data);
+}
+
+function getAppConfig() {
+    return axios({
+        method: 'GET',
+        url: `/app-config`,
         headers: headers,
     }).then((response) => response.data);
 }

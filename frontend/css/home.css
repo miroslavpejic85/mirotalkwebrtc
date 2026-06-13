@@ -509,3 +509,410 @@ button:active {
         min-width: 300px;
     }
 }
+
+/*--------------------------------------------------------------
+# SaaS Landing (home page only -> body.home)
+--------------------------------------------------------------*/
+
+body.home {
+    display: block;
+    min-height: 100vh;
+    padding: 0;
+    background:
+        radial-gradient(1100px 600px at 12% -10%, rgba(55, 109, 249, 0.18), transparent 60%),
+        radial-gradient(900px 600px at 100% 0%, rgba(67, 159, 255, 0.12), transparent 55%), var(--primary-color);
+}
+
+/* Top navigation */
+.landing-nav {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 20px 5vw;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.landing-nav .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: 0.3px;
+}
+
+.landing-nav .brand img {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-links > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition:
+        color 0.25s ease,
+        background 0.25s ease;
+}
+
+.nav-links > a:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/* Override global button rules for nav buttons */
+.nav-links .nav-signin,
+.nav-links .nav-cta {
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 9px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.nav-links .nav-signin {
+    background: transparent;
+    color: var(--text-color);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.nav-links .nav-signin:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--hover-color);
+    color: #fff;
+    transform: none;
+    box-shadow: none;
+}
+
+.nav-links .nav-cta {
+    background: var(--accent-color);
+    color: #fff;
+    border: none;
+}
+
+.nav-links .nav-cta:hover {
+    background: var(--hover-color);
+    box-shadow: 0 6px 18px var(--hover-ring);
+}
+
+/* Landing grid: hero + auth card */
+.landing-grid {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 24px 5vw 64px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 420px;
+    gap: 56px;
+    align-items: start;
+}
+
+/* Hero */
+.hero {
+    padding-top: 8px;
+}
+
+.hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    margin-bottom: 22px;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    color: var(--hover-color);
+    background: var(--hover-bg-emphasis);
+    border: 1px solid var(--hover-ring);
+    border-radius: 999px;
+}
+
+.hero-title {
+    margin: 0 0 18px;
+    font-size: clamp(34px, 5vw, 54px);
+    line-height: 1.08;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.5px;
+}
+
+.hero-title .accent {
+    background: linear-gradient(90deg, var(--accent-color), var(--hover-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+    margin: 0 0 28px;
+    max-width: 560px;
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--text-light);
+}
+
+.hero-features {
+    list-style: none;
+    margin: 0 0 30px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 24px;
+    max-width: 560px;
+}
+
+.hero-features li {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    font-size: 14.5px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.hero-features li i {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--hover-color);
+    background: var(--hover-bg-strong);
+    border-radius: 9px;
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 26px;
+}
+
+.hero-actions .hero-cta-primary {
+    width: auto;
+    height: 52px;
+    margin: 0;
+    padding: 0 28px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--accent-color), var(--hover-color));
+    box-shadow: 0 8px 24px var(--hover-ring);
+    cursor: pointer;
+}
+
+.hero-actions .hero-cta-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px var(--hover-ring);
+}
+
+.hero-actions .hero-cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: auto;
+    height: 52px;
+    margin: 0;
+    padding: 0 24px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-color);
+    background: transparent;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.hero-actions .hero-cta-secondary:hover {
+    border-color: var(--hover-color);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+    transform: none;
+    box-shadow: none;
+}
+
+.hero-trust {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 34px;
+    font-size: 13.5px;
+    color: var(--text-light);
+}
+
+.trust-stars {
+    display: inline-flex;
+    gap: 2px;
+    color: #f5b301;
+    font-size: 16px;
+}
+
+.hero-mockup {
+    margin: 0;
+}
+
+.hero-mockup img {
+    width: 100%;
+    height: auto;
+    border-radius: 14px;
+    display: block;
+}
+
+/* Auth card on landing */
+.home .main {
+    width: 100%;
+    margin: 0;
+    position: sticky;
+    top: 24px;
+    padding-bottom: 8px;
+}
+
+.auth-intro {
+    padding: 26px 28px 4px;
+    text-align: center;
+}
+
+.auth-intro h2 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.auth-intro p {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--text-light);
+}
+
+.auth-switch-hint {
+    margin: 14px 0 4px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+.auth-switch-hint button {
+    display: inline;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0 2px;
+    background: transparent;
+    color: var(--hover-color);
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.auth-switch-hint button:hover {
+    background: transparent;
+    color: #fff;
+    transform: none;
+    box-shadow: none;
+}
+
+.auth-badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin: 18px auto 4px;
+    padding: 0 20px;
+}
+
+.auth-badges span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-light);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+}
+
+.auth-badges span i {
+    color: var(--hover-color);
+    font-size: 13px;
+}
+
+/* Landing responsive */
+@media screen and (max-width: 980px) {
+    .landing-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        max-width: 560px;
+    }
+
+    .home .main {
+        position: static;
+        order: -1;
+    }
+
+    .hero {
+        text-align: center;
+    }
+
+    .hero-subtitle {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .hero-features {
+        margin-left: auto;
+        margin-right: auto;
+        text-align: left;
+    }
+
+    .hero-actions,
+    .hero-trust {
+        justify-content: center;
+    }
+}
+
+@media screen and (max-width: 560px) {
+    .nav-links > a {
+        display: none;
+    }
+
+    .hero-features {
+        grid-template-columns: 1fr;
+    }
+
+    .home .main {
+        width: 92vw;
+        min-width: 300px;
+        margin: 0 auto;
+    }
+}

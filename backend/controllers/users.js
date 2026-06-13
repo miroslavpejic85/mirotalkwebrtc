@@ -62,6 +62,29 @@ async function userCreate(req, res) {
     }
 }
 
+/**
+ * Public endpoint exposing whether the shared demo account is available.
+ * Credentials are only returned when USER_DEMO_MODE is enabled, so the
+ * landing page can offer a one-click "Try the demo" login. When disabled,
+ * no credentials leak to the client.
+ */
+async function userDemoConfig(req, res) {
+    try {
+        if (!USER_DEMO.enabled) {
+            return res.status(200).json({ enabled: false });
+        }
+        return res.status(200).json({
+            enabled: true,
+            username: USER_DEMO.username,
+            email: USER_DEMO.email,
+            password: USER_DEMO.password,
+        });
+    } catch (error) {
+        log.error('userDemoConfig', error);
+        res.status(400).json({ enabled: false });
+    }
+}
+
 async function userLogin(req, res) {
     try {
         const { email, username, password } = req.body;
@@ -530,6 +553,7 @@ module.exports = {
     userCreate,
     userAdminCreate,
     userLogin,
+    userDemoConfig,
     userIsAuth,
     userRoomsAllowed,
     userIsRoomAllowed,

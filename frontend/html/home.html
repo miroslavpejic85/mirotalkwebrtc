@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
     <head>
-        <title>MiroTalk WebRTC admin login</title>
+        <title>MiroTalk WebRTC — Secure video meetings, scheduled your way</title>
         <link rel="apple-touch-icon" href="../Images/apple-touch-icon.png" />
         <link rel="icon" type="image/x-icon" href="../Images/favicon.ico" />
 
@@ -9,7 +9,10 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="color-scheme" content="dark light" />
-        <meta name="description" content="MiroTalk WebRTC admin panel, for rooms scheduling." />
+        <meta
+            name="description"
+            content="MiroTalk WebRTC — the all-in-one platform to schedule, manage and launch encrypted video meetings. No downloads, right from your browser."
+        />
 
         <!-- https://ogp.me -->
 
@@ -40,74 +43,172 @@
         <script defer src="../js/home.js"></script>
         <script defer src="../js/translate.js"></script>
     </head>
-    <body>
-        <div class="main">
-            <div class="tab-header">
-                <button id="tabLogin" class="tab-btn active" type="button">Login</button>
-                <button id="tabSignup" class="tab-btn" type="button">Sign up</button>
-            </div>
+    <body class="home">
+        <!-- Top navigation -->
+        <header class="landing-nav">
+            <a class="brand" href="/">
+                <img id="brandLogo" src="../Images/logo.png" alt="MiroTalk logo" />
+                <span id="brandName">MiroTalk</span>
+            </a>
+            <nav class="nav-links">
+                <a href="/pricing"><i class="uil uil-tag-alt"></i> Pricing</a>
+                <button id="navSignInBtn" type="button" class="nav-signin">Sign in</button>
+                <button id="navSignUpBtn" type="button" class="nav-cta">Get started</button>
+            </nav>
+        </header>
 
-            <div class="tab-content">
-                <div id="loginPanel" class="tab-panel active">
-                    <div class="input-group">
-                        <i class="uil uil-user"></i>
-                        <input id="loginUsernameInput" type="text" name="User name" placeholder="User name" required />
-                    </div>
-                    <div class="input-group">
-                        <i class="uil uil-envelope"></i>
-                        <input id="loginEmailIdInput" type="email" name="Email" placeholder="Email" required />
-                    </div>
-                    <div class="input-group">
-                        <i class="uil uil-lock"></i>
-                        <input
-                            id="loginPasswordIdInput"
-                            type="password"
-                            name="Password"
-                            placeholder="Password"
-                            required
-                        />
-                        <button type="button" class="password-toggle" tabindex="-1"><i class="uil uil-eye"></i></button>
-                    </div>
-                    <button id="loginBtn"><i class="uil uil-sign-in-alt"></i> Login</button>
-                    <a id="forgotPasswordLink" href="/password-forgot">Forgot Password?</a>
+        <div class="landing-grid">
+            <!-- Hero / value proposition -->
+            <section class="hero">
+                <span class="hero-eyebrow"><i class="uil uil-shield-check"></i> End-to-end encrypted WebRTC</span>
+
+                <h1 class="hero-title">
+                    Secure video meetings,<br />
+                    <span class="accent">scheduled your way.</span>
+                </h1>
+
+                <p class="hero-subtitle">
+                    <span id="brandNameSubtitle">MiroTalk</span> is the all-in-one platform to schedule, manage and
+                    launch encrypted video rooms. No downloads, no friction. Just share a link and start talking, right
+                    from the browser.
+                </p>
+
+                <ul class="hero-features">
+                    <li><i class="uil uil-calendar-alt"></i> Schedule &amp; manage meeting rooms</li>
+                    <li><i class="uil uil-desktop"></i> HD video, screen share &amp; recording</li>
+                    <li><i class="uil uil-lock-access"></i> Private &amp; encrypted by design</li>
+                    <li><i class="uil uil-globe"></i> Join from any browser, any device</li>
+                </ul>
+
+                <div class="hero-actions">
+                    <button id="heroDemoBtn" type="button" class="hero-cta-primary" hidden>
+                        <i class="uil uil-play-circle"></i> Try the demo
+                    </button>
+                    <button id="heroSignUpBtn" type="button" class="hero-cta-primary">
+                        <i class="uil uil-rocket"></i> Start today
+                    </button>
+                    <a href="/pricing" class="hero-cta-secondary"><i class="uil uil-tag-alt"></i> See pricing</a>
                 </div>
 
-                <div id="signupPanel" class="tab-panel">
-                    <div class="input-group">
-                        <i class="uil uil-user"></i>
-                        <input id="signupUsernameInput" type="text" name="User name" placeholder="User name" required />
+                <div class="hero-trust">
+                    <div class="trust-stars">
+                        <i class="uil uil-star"></i><i class="uil uil-star"></i><i class="uil uil-star"></i
+                        ><i class="uil uil-star"></i><i class="uil uil-star"></i>
                     </div>
-                    <div class="input-group">
-                        <i class="uil uil-envelope"></i>
-                        <input id="signupEmailIdInput" type="email" name="Email" placeholder="Email" required />
-                    </div>
-                    <div class="input-group">
-                        <i class="uil uil-lock"></i>
-                        <input
-                            id="signupPasswordIdInput"
-                            type="password"
-                            name="Password"
-                            placeholder="Password"
-                            required
-                        />
-                        <button type="button" class="password-toggle" tabindex="-1"><i class="uil uil-eye"></i></button>
-                    </div>
-                    <div class="input-group">
-                        <i class="uil uil-lock"></i>
-                        <input
-                            id="signupRepeatPasswordIdInput"
-                            type="password"
-                            name="Confirm password"
-                            placeholder="Confirm password"
-                            required
-                        />
-                        <button type="button" class="password-toggle" tabindex="-1"><i class="uil uil-eye"></i></button>
-                    </div>
-                    <button id="signupBtn"><i class="uil uil-user-plus"></i> Sign up</button>
+                    <span>Loved by thousands of teams &amp; creators worldwide</span>
                 </div>
-            </div>
 
-            <p id="supportBtn">&copy; 2026 MiroTalk, all rights reserved</p>
+                <figure class="hero-mockup">
+                    <img
+                        id="brandImage"
+                        src="../Images/mirotalk-web.png"
+                        alt="MiroTalk dashboard on desktop and mobile"
+                    />
+                </figure>
+            </section>
+
+            <!-- Auth card -->
+            <div class="main">
+                <div class="auth-intro">
+                    <h2>Welcome 👋</h2>
+                    <p>Create your account or sign in to manage your rooms.</p>
+                </div>
+
+                <div class="tab-header">
+                    <button id="tabLogin" class="tab-btn active" type="button">Sign in</button>
+                    <button id="tabSignup" class="tab-btn" type="button">Sign up</button>
+                </div>
+
+                <div class="tab-content">
+                    <div id="loginPanel" class="tab-panel active">
+                        <div class="input-group">
+                            <i class="uil uil-user"></i>
+                            <input
+                                id="loginUsernameInput"
+                                type="text"
+                                name="User name"
+                                placeholder="User name"
+                                required
+                            />
+                        </div>
+                        <div class="input-group">
+                            <i class="uil uil-envelope"></i>
+                            <input id="loginEmailIdInput" type="email" name="Email" placeholder="Email" required />
+                        </div>
+                        <div class="input-group">
+                            <i class="uil uil-lock"></i>
+                            <input
+                                id="loginPasswordIdInput"
+                                type="password"
+                                name="Password"
+                                placeholder="Password"
+                                required
+                            />
+                            <button type="button" class="password-toggle" tabindex="-1">
+                                <i class="uil uil-eye"></i>
+                            </button>
+                        </div>
+                        <button id="loginBtn"><i class="uil uil-sign-in-alt"></i> Sign in</button>
+                        <a id="forgotPasswordLink" href="/password-forgot">Forgot Password?</a>
+                    </div>
+
+                    <div id="signupPanel" class="tab-panel">
+                        <div class="input-group">
+                            <i class="uil uil-user"></i>
+                            <input
+                                id="signupUsernameInput"
+                                type="text"
+                                name="User name"
+                                placeholder="User name"
+                                required
+                            />
+                        </div>
+                        <div class="input-group">
+                            <i class="uil uil-envelope"></i>
+                            <input id="signupEmailIdInput" type="email" name="Email" placeholder="Email" required />
+                        </div>
+                        <div class="input-group">
+                            <i class="uil uil-lock"></i>
+                            <input
+                                id="signupPasswordIdInput"
+                                type="password"
+                                name="Password"
+                                placeholder="Password"
+                                required
+                            />
+                            <button type="button" class="password-toggle" tabindex="-1">
+                                <i class="uil uil-eye"></i>
+                            </button>
+                        </div>
+                        <div class="input-group">
+                            <i class="uil uil-lock"></i>
+                            <input
+                                id="signupRepeatPasswordIdInput"
+                                type="password"
+                                name="Confirm password"
+                                placeholder="Confirm password"
+                                required
+                            />
+                            <button type="button" class="password-toggle" tabindex="-1">
+                                <i class="uil uil-eye"></i>
+                            </button>
+                        </div>
+                        <button id="signupBtn"><i class="uil uil-user-plus"></i> Create account</button>
+                        <p class="auth-switch-hint">
+                            Already have an account?
+                            <button id="switchToLoginLink" type="button">Sign in</button>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="auth-badges">
+                    <span><i class="uil uil-shield-check"></i> Encrypted</span>
+                    <span><i class="uil uil-bolt"></i> No install</span>
+                    <span><i class="uil uil-check-circle"></i> Free to start</span>
+                </div>
+
+                <p id="supportBtn">&copy; 2026 MiroTalk, all rights reserved</p>
+            </div>
         </div>
     </body>
 </html>
