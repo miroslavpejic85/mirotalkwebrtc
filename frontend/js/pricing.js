@@ -125,22 +125,12 @@ function startCheckout(plan, button) {
     // Subscribing requires an account: Stripe checkout is tied to the logged-in
     // user. If there is no session token, guide the visitor to sign up first.
     const isLoggedIn = !!window.sessionStorage.userToken;
-    // Check if demo user is trying to subscribe, which is not allowed since it's a shared account. Guide them to sign up for a real account first.
-    const demoUser = window.sessionStorage.userDemo;
 
     if (!isLoggedIn) {
         return showAccountRequiredModal({
             icon: 'info',
             title: 'Create your account first',
             html: 'To subscribe, please create a free account first.<br/>Your plan will unlock your private dashboard and meeting rooms.',
-        });
-    }
-
-    if (!isLoggedIn && demoUser) {
-        return showAccountRequiredModal({
-            icon: 'warning',
-            title: 'Demo accounts cannot subscribe',
-            html: 'To subscribe, please create your own free account first.<br/>Your plan will unlock your private dashboard and meeting rooms.',
         });
     }
 
