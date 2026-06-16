@@ -136,7 +136,7 @@ function startCheckout(plan, button) {
         });
     }
 
-    if (demoUser) {
+    if (!isLoggedIn && demoUser) {
         return showAccountRequiredModal({
             icon: 'warning',
             title: 'Demo accounts cannot subscribe',
