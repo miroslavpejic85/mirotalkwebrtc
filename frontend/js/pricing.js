@@ -145,7 +145,11 @@ function startCheckout(plan, button) {
             }
         })
         .catch((error) => {
-            const message = error?.response?.data?.message || 'Unable to start checkout. Please try again.';
+            console.error('Response data:', error?.response?.data);
+            const message =
+                error?.response?.data?.message ||
+                error?.response?.data?.error ||
+                'Unable to start checkout. Please try again.';
             popupMessage('error', message);
             button.disabled = false;
         });

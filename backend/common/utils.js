@@ -11,6 +11,10 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
+const DEMO_EMAIL = process.env.USER_DEMO_EMAIL;
+const DEMO_USERNAME = process.env.USER_DEMO_USERNAME;
+const DEMO_PASSWORD = process.env.USER_DEMO_PASSWORD;
+
 const lowerCase = new RegExp('[a-z]');
 const upperCase = new RegExp('[A-Z]');
 const numbers = new RegExp('[0-9]');
@@ -31,6 +35,10 @@ async function isAdmin(email, username, password) {
     }
     const user = await User.findOne({ email, username }).select('role').lean();
     return user?.role === 'admin';
+}
+
+function isDemo(email, username, password) {
+    return email === DEMO_EMAIL && username === DEMO_USERNAME && password === DEMO_PASSWORD;
 }
 
 function tokenEncode(token) {
@@ -135,6 +143,7 @@ function isValidType(type) {
 
 module.exports = {
     isAdmin,
+    isDemo,
     tokenEncode,
     tokenDecode,
     isValidUsername,

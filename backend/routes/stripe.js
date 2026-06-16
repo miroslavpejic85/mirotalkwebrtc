@@ -2,12 +2,13 @@
 
 const express = require('express');
 const auth = require('../middleware/auth');
+const demo = require('../middleware/demo');
 
 const router = express.Router();
 const controllersStripe = require('../controllers/stripe');
 
 //CHECKOUT: /api/v1/stripe/checkout
-router.post('/stripe/checkout', auth, (req, res) => {
+router.post('/stripe/checkout', demo, auth, (req, res) => {
     controllersStripe.createCheckout(req, res);
 });
 
