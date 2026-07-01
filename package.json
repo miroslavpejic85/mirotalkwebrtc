@@ -1,6 +1,6 @@
 {
     "name": "mirotalkwebrtc",
-    "version": "1.4.13",
+    "version": "1.4.14",
     "description": "MiroTalk WebRTC admin",
     "main": "server.js",
     "scripts": {
@@ -12,7 +12,7 @@
         "mongo:down": "docker-compose -f docker-compose-mongo.yml down",
         "mailpit:up": "docker-compose -f docker-compose-mailpit.yml up -d",
         "mailpit:down": "docker-compose -f docker-compose-mailpit.yml down",
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "node --test \"test/**/*.test.js\"",
         "lint": "npx prettier --write .",
         "docker-build": "docker build --tag mirotalk/webrtc:latest .",
         "docker-rmi": "docker images |grep '<none>' |awk '{print $3}' |xargs docker rmi",
@@ -36,7 +36,7 @@
     "homepage": "https://github.com/miroslavpejic85/mirotalkwebrtc",
     "dependencies": {
         "@ngrok/ngrok": "1.7.0",
-        "@sentry/node": "^10.60.0",
+        "@sentry/node": "^10.63.0",
         "axios": "^1.18.1",
         "bcryptjs": "^3.0.3",
         "colors": "1.4.0",
@@ -45,19 +45,19 @@
         "crypto-js": "^4.2.0",
         "dotenv": "^17.4.2",
         "express": "^5.2.1",
-        "express-openid-connect": "^3.0.0",
+        "express-openid-connect": "^3.1.0",
         "express-rate-limit": "^8.5.2",
         "helmet": "^8.2.0",
-        "js-yaml": "^5.1.0",
+        "js-yaml": "^5.2.0",
         "jsonwebtoken": "^9.0.3",
-        "mongoose": "^9.7.2",
-        "nodemailer": "^9.0.1",
-        "stripe": "^22.2.1",
+        "mongoose": "^9.7.3",
+        "nodemailer": "^9.0.3",
+        "stripe": "^22.3.0",
         "swagger-ui-express": "^5.0.1",
         "twilio": "^6.0.2"
     },
     "devDependencies": {
         "nodemon": "^3.1.14",
-        "prettier": "3.8.4"
+        "prettier": "3.9.4"
     }
 }
