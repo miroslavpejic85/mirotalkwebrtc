@@ -135,7 +135,7 @@ For detailed guides and references, visit the **[official documentation](https:/
 
 For full setup, environment variables, Stripe configuration, webhooks, and local testing, see **[docs/STRIPE.md](docs/STRIPE.md)**.
 
-> ⚠️ **Commercial license required.** Running `MiroTalk WEB` in SaaS mode (i.e. reselling access or operating it as a paid service) requires a commercial license, which can be purchased on [CodeCanyon](https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313).
+> ⚠️ **Commercial license required.** Running `MiroTalk WEB` in SaaS mode (i.e. reselling access or operating it as a paid service) requires a **Extended** license, which can be purchased on [CodeCanyon](https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313).
 
 </details>
 
