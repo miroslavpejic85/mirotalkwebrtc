@@ -51,7 +51,11 @@ function loadStripeLib({ saasEnabled = true, env = {} } = {}) {
         },
         checkout: {
             sessions: {
-                create: async (params) => ({ id: 'cs_test_123', url: 'https://stripe.test/checkout', __params: params }),
+                create: async (params) => ({
+                    id: 'cs_test_123',
+                    url: 'https://stripe.test/checkout',
+                    __params: params,
+                }),
                 retrieve: async (id) => ({ id, payment_status: 'paid', __retrieved: true }),
             },
         },
@@ -161,7 +165,13 @@ test('reports disabled when SAAS is enabled but the secret key is missing', () =
 test('createSubscriptionCheckout creates a subscription-mode session for the monthly price', async () => {
     const { lib } = loadStripeLib({ saasEnabled: true });
 
-    const user = { _id: 'u1', email: 'a@b.c', username: 'alice', stripeCustomerId: 'cus_existing', save: async () => {} };
+    const user = {
+        _id: 'u1',
+        email: 'a@b.c',
+        username: 'alice',
+        stripeCustomerId: 'cus_existing',
+        save: async () => {},
+    };
     const session = await lib.createSubscriptionCheckout(user, 'https://ok', 'https://cancel');
 
     assert.equal(session.__params.mode, 'subscription');
@@ -193,7 +203,13 @@ test('getOrCreateCustomer reuses an existing customer id without calling Stripe'
         return { id: 'cus_should_not_be_used' };
     };
 
-    const user = { _id: 'u3', email: 'a@b.c', username: 'alice', stripeCustomerId: 'cus_existing', save: async () => {} };
+    const user = {
+        _id: 'u3',
+        email: 'a@b.c',
+        username: 'alice',
+        stripeCustomerId: 'cus_existing',
+        save: async () => {},
+    };
     const id = await lib.getOrCreateCustomer(user);
 
     assert.equal(id, 'cus_existing');
