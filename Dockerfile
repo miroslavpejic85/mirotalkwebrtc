@@ -14,21 +14,8 @@ COPY .env.template ./.env
 # Install necessary system packages
 RUN apk add --no-cache bash vim
 
-# Install dependencies (with retry for QEMU flakiness on arm64)
-RUN set -e; \
-    success=0; \
-    for i in 1 2 3; do \
-        if npm ci --omit=dev --silent; then \
-            success=1; \
-            break; \
-        fi; \
-        echo "Retry $i: npm ci failed"; \
-        if [ "$i" -lt 3 ]; then sleep 2; fi; \
-    done; \
-    if [ "$success" -ne 1 ]; then \
-        echo "npm ci failed after retries"; \
-        exit 1; \
-    fi; \
+# Install dependencies
+RUN npm ci --omit=dev --silent; \
     npm cache clean --force; \
     rm -rf /tmp/* /var/tmp/* /usr/share/doc/*
 
