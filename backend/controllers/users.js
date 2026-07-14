@@ -3,6 +3,7 @@
 const User = require('../models/users');
 const Room = require('../models/room');
 const nodemailer = require('../lib/nodemailer');
+const stripeLib = require('../lib/stripe');
 const utils = require('../common/utils');
 const logs = require('../common/logs');
 const bcrypt = require('bcryptjs');
@@ -473,6 +474,9 @@ async function userDelete(req, res) {
 
         const dataUser = await User.findByIdAndDelete(id);
         if (dataUser && dataUser._id == id) {
+            // Cancel any active Stripe subscription and remove the customer so the
+            // user is not billed after their account is gone (no-op when Stripe is disabled).
+            await stripeLib.cleanupUserBilling(dataUser);
             const deleteRooms = await Room.deleteMany({ userId: dataUser._id });
             log.debug(
                 `Going to delete User with id ${dataUser._id} and all associated rooms (${deleteRooms.deletedCount})`

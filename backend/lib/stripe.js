@@ -109,6 +109,40 @@ async function retrieveCheckoutSession(sessionId) {
     return stripe.checkout.sessions.retrieve(sessionId);
 }
 
+/**
+ * Cancel any active subscription and delete the Stripe customer for a user
+ * that is being removed. Safe to call when Stripe is disabled (no-op) and
+ * tolerant of resources that were already removed on Stripe's side.
+ */
+async function cleanupUserBilling(user) {
+    if (!isEnabled() || !user) return;
+
+    if (user.stripeSubscriptionId) {
+        try {
+            await stripe.subscriptions.cancel(user.stripeSubscriptionId);
+            log.debug('Subscription canceled on account deletion', {
+                subscription: user.stripeSubscriptionId,
+            });
+        } catch (error) {
+            // Ignore "already canceled / not found" so account deletion can proceed.
+            if (error?.code !== 'resource_missing') {
+                log.error('cleanupUserBilling: failed to cancel subscription', error);
+            }
+        }
+    }
+
+    if (user.stripeCustomerId) {
+        try {
+            await stripe.customers.del(user.stripeCustomerId);
+            log.debug('Customer deleted on account deletion', { customer: user.stripeCustomerId });
+        } catch (error) {
+            if (error?.code !== 'resource_missing') {
+                log.error('cleanupUserBilling: failed to delete customer', error);
+            }
+        }
+    }
+}
+
 module.exports = {
     isEnabled,
     getOrCreateCustomer,
@@ -118,4 +152,5 @@ module.exports = {
     constructEvent,
     retrieveSubscription,
     retrieveCheckoutSession,
+    cleanupUserBilling,
 };
