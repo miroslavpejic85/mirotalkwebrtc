@@ -50,7 +50,14 @@ async function userCreate(req, res) {
                 });
                 const userSaveData = await userData.save();
                 log.debug('User create OK', userSaveData);
-                res.status(201).json(userSaveData);
+                const safeUser = userSaveData.toObject();
+                delete safeUser.password;
+                delete safeUser.token;
+                delete safeUser.resetPasswordToken;
+                delete safeUser.resetPasswordExpires;
+                delete safeUser.stripeCustomerId;
+                delete safeUser.stripeSubscriptionId;
+                res.status(201).json(safeUser);
             }
         } else {
             log.debug('User already exist');
@@ -373,6 +380,16 @@ async function userGet(req, res) {
         const data = await User.findById(req.params.id).select(
             '-password -token -resetPasswordToken -resetPasswordExpires'
         );
+        if (!data) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const isAdmin = await utils.isAdmin(req.user.email, req.user.username, req.user.password);
+
+        if (!isAdmin && data.email !== req.user.email) {
+            return res.status(403).json({ message: 'You can only read your own account' });
+        }
+
         res.json(data);
     } catch (error) {
         log.error('getUser', error);
@@ -527,7 +544,14 @@ async function userAdminCreate(req, res) {
         });
         const userSaveData = await userData.save();
         log.debug('Admin user create OK', userSaveData);
-        res.status(201).json(userSaveData);
+        const safeUser = userSaveData.toObject();
+        delete safeUser.password;
+        delete safeUser.token;
+        delete safeUser.resetPasswordToken;
+        delete safeUser.resetPasswordExpires;
+        delete safeUser.stripeCustomerId;
+        delete safeUser.stripeSubscriptionId;
+        res.status(201).json(safeUser);
     } catch (error) {
         log.error('userAdminCreate', error);
         res.status(400).json({ message: error.message });
