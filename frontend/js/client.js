@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.20
+ * @version 1.4.21
  */
 
 const userAgent = navigator.userAgent;
@@ -1723,6 +1723,11 @@ function getRow(obj) {
 
     // Inline primary actions (1-click)
     const inlineIcons = [];
+    if (config.BUTTONS.joinInternal && !isPast) {
+        inlineIcons.push(
+            `<i id="${obj._id}_joinInternal" onclick="joinRoom('${obj._id}')" class="uil uil-play action-icon" data-tippy="Join"></i>`
+        );
+    }
     if (config.BUTTONS.updateRow && !isPast) {
         inlineIcons.push(
             `<i id="${obj._id}_save" onclick="updateRow('${obj._id}')" class="uil uil-save action-icon" data-tippy="Save"></i>`
@@ -1779,15 +1784,10 @@ function getRow(obj) {
             );
         }
 
-        if (config.BUTTONS.joinInternal || config.BUTTONS.joinExternal) {
+        if (config.BUTTONS.joinExternal) {
             if (actionItems.length > 0) actionItems.push(`<div class="action-dropdown-divider"></div>`);
         }
 
-        if (config.BUTTONS.joinInternal) {
-            actionItems.push(
-                `<button id="${obj._id}_joinInternal" class="action-dropdown-item" onclick="joinRoom('${obj._id}'); closeActionDropdown(this);"><i class="uil uil-estate"></i> Join Internal</button>`
-            );
-        }
         if (config.BUTTONS.joinExternal) {
             actionItems.push(
                 `<button id="${obj._id}_joinExternal" class="action-dropdown-item" onclick="joinRoom('${obj._id}', true); closeActionDropdown(this);"><i class="uil uil-external-link-alt"></i> Join External</button>`
@@ -1871,7 +1871,12 @@ function addRowToolTips(id) {
             setTippy(el, el.dataset.tippy, 'top');
         }
     }
-    // Save / Delete inline action icons — use tippy for consistency with the badge.
+    // Join / Save / Delete inline action icons — use tippy for consistency with the badge.
+    const joinEl = document.getElementById(`${id}_joinInternal`);
+    if (joinEl && !joinEl._tippy) {
+        setTippy(joinEl, 'Join', 'top');
+        joinEl.removeAttribute('title');
+    }
     const saveEl = document.getElementById(`${id}_save`);
     if (saveEl && !saveEl._tippy) {
         setTippy(saveEl, 'Save', 'top');
