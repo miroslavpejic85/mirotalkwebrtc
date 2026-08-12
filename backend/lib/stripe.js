@@ -17,7 +17,7 @@ if (SAAS_ENABLED) {
     if (!STRIPE_SECRET_KEY) {
         log.error('SAAS mode enabled but STRIPE_SECRET_KEY is missing');
     } else {
-        stripe = require('stripe')(STRIPE_SECRET_KEY, { apiVersion: '2026-06-24.dahlia' });
+        stripe = require('stripe')(STRIPE_SECRET_KEY, { apiVersion: '2026-07-29.dahlia' });
         log.info('Stripe initialized', {
             monthlyPrice: !!STRIPE_MONTHLY_PRICE_ID,
             lifetimePrice: !!STRIPE_LIFETIME_PRICE_ID,

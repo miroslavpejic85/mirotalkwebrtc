@@ -24,9 +24,9 @@ const path = require('node:path');
 const Module = require('node:module');
 
 // The API version pinned by backend/lib/stripe.js. This must match the version
-// expected by the installed Stripe Node SDK (v22 -> '2026-06-24.dahlia').
+// expected by the installed Stripe Node SDK (v22 -> '2026-07-29.dahlia').
 // Update this constant if the SDK / lib pin changes.
-const EXPECTED_API_VERSION = '2026-06-24.dahlia';
+const EXPECTED_API_VERSION = '2026-07-29.dahlia';
 
 const LIB_PATH = path.resolve(__dirname, '../backend/lib/stripe.js');
 const CONFIG_PATH = path.resolve(__dirname, '../backend/config.js');
