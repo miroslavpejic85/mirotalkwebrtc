@@ -524,8 +524,9 @@ body.home {
     min-height: 100vh;
     padding: 0;
     background:
-        radial-gradient(1100px 600px at 12% -10%, rgba(55, 109, 249, 0.18), transparent 60%),
-        radial-gradient(900px 600px at 100% 0%, rgba(67, 159, 255, 0.12), transparent 55%), var(--primary-color);
+        radial-gradient(1400px 900px at 0% -20%, rgba(55, 109, 249, 0.11), transparent 70%),
+        radial-gradient(1200px 900px at 105% -10%, rgba(67, 159, 255, 0.07), transparent 68%), var(--primary-color);
+    background-repeat: no-repeat;
     color: var(--text-color);
 }
 
@@ -1057,8 +1058,8 @@ html[data-theme='light'] ::-webkit-scrollbar-thumb {
 
 html[data-theme='light'] body.home {
     background:
-        radial-gradient(1100px 600px at 12% -10%, rgba(36, 94, 219, 0.12), transparent 60%),
-        radial-gradient(900px 600px at 100% 0%, rgba(67, 159, 255, 0.09), transparent 55%), var(--primary-color);
+        radial-gradient(1400px 900px at 0% -20%, rgba(36, 94, 219, 0.08), transparent 70%),
+        radial-gradient(1200px 900px at 105% -10%, rgba(67, 159, 255, 0.05), transparent 68%), var(--primary-color);
 }
 
 html[data-theme='light'] .landing-nav .brand,
