@@ -30,6 +30,7 @@ const sentry = require('./common/sentry');
 const logs = require('./common/logs');
 const emailQueue = require('./lib/emailQueue');
 const recurringInvitations = require('./lib/recurringInvitations');
+const roomReminders = require('./lib/roomReminders');
 const path = require('path');
 const packageJson = require('../package.json');
 
@@ -78,6 +79,8 @@ mongoose
         emailQueue.start();
         // Start the weekly recurring invitation scheduler (no-op when disabled).
         recurringInvitations.start();
+        // Start the one-shot room reminder scheduler (no-op when disabled).
+        roomReminders.start();
 
         const app = express();
 

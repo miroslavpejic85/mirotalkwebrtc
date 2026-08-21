@@ -6,6 +6,7 @@ const EmailInvitation = require('../models/emailInvitation');
 const utils = require('../common/utils');
 const emailUtils = require('../common/emailUtils');
 const emailQueue = require('../lib/emailQueue');
+const { computeReminderAt } = require('../lib/roomReminders');
 const config = require('../config');
 const { isDemoUser } = require('../middleware/saas');
 const logs = require('../common/logs');
@@ -293,4 +294,100 @@ async function setRoomRecurring(req, res) {
     }
 }
 
-module.exports = { sendRoomInvitation, setRoomRecurring };
+async function setRoomReminder(req, res) {
+    try {
+        if (!config.EMAIL_INVITATION || !config.EMAIL_INVITATION.serverSide) {
+            return res.status(403).json({ message: 'Server-side email invitations are disabled' });
+        }
+        if (!config.EMAIL_INVITATION.reminders) {
+            return res.status(403).json({ message: 'Email reminders are disabled' });
+        }
+        if (config.SAAS && config.SAAS.enabled && isDemoUser(req.user)) {
+            return res.status(403).json({
+                code: 'SUBSCRIPTION_REQUIRED',
+                message: 'Email reminders are available on a paid plan',
+            });
+        }
+
+        const room = await Room.findById(req.params.id);
+        if (!room) return res.status(404).json({ message: 'Room not found' });
+
+        const auth = await ensureOwnerOrAdmin(req, res, room.userId);
+        if (!auth.ok) return;
+
+        const { enabled, offsetMinutes, timezoneOffset, recipients, subject, message } = req.body || {};
+        if (enabled === false) {
+            room.reminder = {
+                ...(room.reminder ? room.reminder.toObject() : {}),
+                enabled: false,
+            };
+            await room.save();
+            return res.status(200).json({ message: 'Room reminder disabled', reminder: room.reminder });
+        }
+        if (enabled !== true) {
+            return res.status(400).json({ message: '`enabled` must be a boolean' });
+        }
+
+        const normalizedOffset = Number(offsetMinutes);
+        const normalizedTimezoneOffset =
+            timezoneOffset === undefined || timezoneOffset === null || timezoneOffset === ''
+                ? new Date().getTimezoneOffset()
+                : Number(timezoneOffset);
+        const scheduledFor = computeReminderAt(room.date, room.time, normalizedOffset, normalizedTimezoneOffset);
+        if (!scheduledFor) {
+            return res.status(400).json({ message: 'Select a valid reminder time for a scheduled room' });
+        }
+        if (scheduledFor.getTime() <= Date.now()) {
+            return res.status(400).json({ message: 'The selected reminder time has already passed' });
+        }
+
+        const parsed = emailUtils.parseRecipients(recipients);
+        const classified = emailUtils.validateEmailList(parsed, { max: MAX_RECIPIENTS });
+        if (classified.valid.length === 0) {
+            return res.status(400).json({
+                message: 'At least one valid recipient is required',
+                invalid: classified.invalid,
+                blocked: classified.blocked,
+            });
+        }
+        if (classified.exceededMax) {
+            return res.status(400).json({ message: `Too many recipients (max ${MAX_RECIPIENTS})` });
+        }
+
+        room.reminder = {
+            enabled: true,
+            offsetMinutes: normalizedOffset,
+            timezoneOffset: normalizedTimezoneOffset,
+            recipients: classified.valid,
+            subject: (
+                (typeof subject === 'string' && subject.trim()) ||
+                `Reminder: MiroTalk ${room.type} meeting starts soon`
+            ).slice(0, 200),
+            message: typeof message === 'string' ? message.slice(0, 2000) : undefined,
+            inviterName: req.user?.username || req.user?.email,
+            scheduledFor,
+            sentAt: null,
+            lastError: null,
+        };
+        await room.save();
+
+        log.info('Room reminder enabled', {
+            roomId: String(room._id),
+            userId: auth.authUserId,
+            scheduledFor,
+            recipients: classified.valid.length,
+        });
+        return res.status(200).json({
+            message: 'Room reminder scheduled',
+            reminder: room.reminder,
+            invalid: classified.invalid,
+            blocked: classified.blocked,
+            duplicates: classified.duplicates,
+        });
+    } catch (error) {
+        log.error('Set room reminder error', error);
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+module.exports = { sendRoomInvitation, setRoomRecurring, setRoomReminder };

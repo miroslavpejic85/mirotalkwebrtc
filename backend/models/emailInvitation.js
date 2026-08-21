@@ -15,6 +15,7 @@ const mongoose = require('mongoose');
  */
 const emailInvitationSchema = new mongoose.Schema(
     {
+        kind: { type: String, enum: ['invitation', 'reminder'], default: 'invitation' },
         userId: { type: String, required: true, index: true }, // inviter
         roomId: { type: String, required: true },
         roomType: { type: String, enum: ['P2P', 'SFU', 'C2C', 'BRO'], required: true },

@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.46
+ * @version 1.4.47
  */
 
 const userAgent = navigator.userAgent;
@@ -1719,9 +1719,24 @@ function getRow(obj) {
     const recurring = obj.recurring && obj.recurring.enabled ? obj.recurring : null;
     window.__roomRecurring = window.__roomRecurring || {};
     window.__roomRecurring[obj._id] = recurring;
-    const recurringCell = recurring
-        ? `<button id="${obj._id}_recurring" type="button" class="recurring-badge" onclick="disableRecurringInvitation('${obj._id}')" data-tippy="${recurringBadgeTooltip(obj, recurring)}, click to disable" data-tippy-html="${encodeURIComponent(recurringBadgeTooltipHTML(obj, recurring))}"><i class="uil uil-sync"></i>Recurring</button>`
-        : `<span id="${obj._id}_recurring" class="recurring-badge recurring-badge-off" data-tippy="Recurring invitation disabled"><i class="uil uil-sync-slash"></i>Off</span>`;
+    const reminder = obj.reminder && obj.reminder.enabled ? obj.reminder : null;
+    window.__roomReminder = window.__roomReminder || {};
+    window.__roomReminder[obj._id] = reminder;
+    const automationBadges = [];
+    if (recurring) {
+        automationBadges.push(
+            `<button id="${obj._id}_recurring" type="button" class="recurring-badge" onclick="disableRecurringInvitation('${obj._id}')" data-tippy="${recurringBadgeTooltip(obj, recurring)}, click to disable" data-tippy-html="${encodeURIComponent(recurringBadgeTooltipHTML(obj, recurring))}"><i class="uil uil-sync"></i>Recurring</button>`
+        );
+    }
+    if (reminder) {
+        const reminderAt = new Date(reminder.scheduledFor).toLocaleString();
+        automationBadges.push(
+            `<button id="${obj._id}_reminder" type="button" class="recurring-badge reminder-badge" onclick="disableRoomReminder('${obj._id}')" data-tippy="Reminder scheduled for ${reminderAt}. Click to cancel"><i class="uil uil-bell"></i>Reminder</button>`
+        );
+    }
+    const automationCell = automationBadges.length
+        ? automationBadges.join('')
+        : `<span class="recurring-badge recurring-badge-off" data-tippy="No invitation automation enabled"><i class="uil uil-bell-slash"></i>Off</span>`;
 
     // Inline primary actions (1-click)
     const inlineIcons = [];
@@ -1827,7 +1842,7 @@ function getRow(obj) {
         `<td><input id="${obj._id}_time" type="text" name="time" placeholder="Time" value="${obj.time}" class="flatpickr-time"${ro}/></td>`,
         `<td>${durationCellHtml}</td>`,
         `<td>${rooms}</td>`,
-        `<td class="recurring-cell">${recurringCell}</td>`,
+        `<td class="recurring-cell">${automationCell}</td>`,
         `<td>
             <div class="action-cell">
                 <span class="action-group">${inlineIcons.join('')}</span>
@@ -2089,6 +2104,16 @@ function openServerInvitationModal(id) {
         }
     }
 
+    const remindersEnabled = !!(config.EMAIL_INVITATION && config.EMAIL_INVITATION.reminders);
+    const reminderRow = formNode.querySelector('#srvInvReminderRow');
+    const existingReminder = (window.__roomReminder && window.__roomReminder[id]) || null;
+    if (remindersEnabled && data.date && data.time) {
+        reminderRow.hidden = false;
+        if (existingReminder) {
+            formNode.querySelector('#srvInvReminder').value = String(existingReminder.offsetMinutes || '');
+        }
+    }
+
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
@@ -2160,11 +2185,13 @@ function openServerInvitationModal(id) {
             const message = document.getElementById('srvInvMessage').value;
             const recurringEl = document.getElementById('srvInvRecurring');
             const recurring = !!(recurringEl && recurringEl.checked);
+            const reminderEl = document.getElementById('srvInvReminder');
+            const reminderOffset = reminderEl && reminderEl.value ? Number(reminderEl.value) : null;
             if (!recipients) {
                 Swal.showValidationMessage('Please enter at least one recipient');
                 return false;
             }
-            return { recipients, subject, message, recurring };
+            return { recipients, subject, message, recurring, reminderOffset };
         },
     }).then((result) => {
         if (!result.isConfirmed || !result.value) return;
@@ -2175,7 +2202,9 @@ function openServerInvitationModal(id) {
             message: result.value.message || undefined,
         };
         const recurringRequested = !!result.value.recurring;
-        roomSendInvitation(payload)
+        const reminderOffset = result.value.reminderOffset;
+        roomUpdate(id, data)
+            .then(() => roomSendInvitation(payload))
             .then(async (res) => {
                 console.log('[API] - ROOM INVITATION RESPONSE', res);
                 const queued = res.queued || 0;
@@ -2205,6 +2234,37 @@ function openServerInvitationModal(id) {
                     }
                 }
 
+                let reminderLine = '';
+                if (reminderOffset) {
+                    try {
+                        const meetingDate = new Date(`${data.date}T${data.time}:00`);
+                        const reminderResponse = await roomSetReminder(id, {
+                            enabled: true,
+                            offsetMinutes: reminderOffset,
+                            timezoneOffset: meetingDate.getTimezoneOffset(),
+                            recipients: payload.recipients,
+                            message: payload.message,
+                        });
+                        console.log('[API] - REMINDER ENABLED', reminderResponse);
+                        reminderLine = `<br/><b>Reminder scheduled ${formatReminderOffset(reminderOffset)}.</b>`;
+                        refreshRoomRow(id);
+                    } catch (err) {
+                        console.error('[API] - REMINDER ENABLE ERROR', err);
+                        const message = err.response?.data?.message || err.message;
+                        reminderLine = `<br/><b style="color:#d33">Failed to schedule reminder:</b> ${message}`;
+                    }
+                } else if (existingReminder) {
+                    try {
+                        await roomSetReminder(id, { enabled: false });
+                        reminderLine = '<br/><b>Previous reminder canceled.</b>';
+                        refreshRoomRow(id);
+                    } catch (err) {
+                        console.error('[API] - REMINDER DISABLE ERROR', err);
+                        const message = err.response?.data?.message || err.message;
+                        reminderLine = `<br/><b style="color:#d33">Failed to cancel reminder:</b> ${message}`;
+                    }
+                }
+
                 if (queued > 0) {
                     popupMessage(
                         'success',
@@ -2212,10 +2272,11 @@ function openServerInvitationModal(id) {
                             (invalid ? `Invalid: ${invalid}<br/>` : '') +
                             (blocked ? `Blocked: ${blocked}<br/>` : '') +
                             (duplicates ? `Duplicates: ${duplicates}` : '') +
-                            recurringLine
+                            recurringLine +
+                            reminderLine
                     );
                 } else {
-                    popupMessage('warning', (res.message || 'No invitations queued') + recurringLine);
+                    popupMessage('warning', (res.message || 'No invitations queued') + recurringLine + reminderLine);
                 }
             })
             .catch((err) => {
@@ -2472,6 +2533,38 @@ function disableRecurringInvitation(id, options = {}) {
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
         if (result.isConfirmed) performDisable();
+    });
+}
+
+function formatReminderOffset(offsetMinutes) {
+    if (offsetMinutes === 10) return '10 minutes before the meeting';
+    if (offsetMinutes === 60) return '1 hour before the meeting';
+    return '1 day before the meeting';
+}
+
+function disableRoomReminder(id) {
+    Swal.fire({
+        position: 'top',
+        icon: 'question',
+        title: 'Cancel meeting reminder?',
+        text: 'The scheduled reminder email will not be sent.',
+        showCancelButton: true,
+        confirmButtonText: 'Cancel reminder',
+        cancelButtonText: 'Keep reminder',
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#356df3',
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+        roomSetReminder(id, { enabled: false })
+            .then(() => {
+                if (window.__roomReminder) window.__roomReminder[id] = null;
+                popupMessage('toast', 'Meeting reminder canceled');
+                refreshRoomRow(id);
+            })
+            .catch((err) => {
+                const message = err.response?.data?.message || err.message;
+                popupMessage('error', `Failed to cancel reminder: ${message}`);
+            });
     });
 }
 

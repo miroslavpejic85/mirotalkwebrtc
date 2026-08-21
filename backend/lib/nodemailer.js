@@ -429,6 +429,7 @@ function sendInvitationEmail(name, email, password) {
  * caller (email queue worker) can record the error and schedule a retry.
  */
 function sendRoomInvitationEmail({
+    kind = 'invitation',
     to,
     subject,
     roomUrl,
@@ -463,9 +464,12 @@ function sendRoomInvitationEmail({
     // Cap subject to avoid oversized SMTP headers / DB bloat; nodemailer encodes headers itself.
     const safeSubject = (rawSubject || `You are invited to a MiroTalk ${roomType || ''} meeting`.trim()).slice(0, 200);
 
-    const greeting = safeInviter
-        ? `${safeInviter} has invited you to a meeting.`
-        : 'You have been invited to a meeting.';
+    const isReminder = kind === 'reminder';
+    const greeting = isReminder
+        ? `This is a reminder that your meeting${safeInviter ? ` with ${safeInviter}` : ''} starts soon.`
+        : safeInviter
+          ? `${safeInviter} has invited you to a meeting.`
+          : 'You have been invited to a meeting.';
     const customMessage = message
         ? `<p style="margin: 16px 0; padding: 12px 16px; background-color: #f4f7fb; border-left: 4px solid #376df9; border-radius: 4px; white-space: pre-wrap;">${escapeHtml(
               String(message)
@@ -503,7 +507,7 @@ function sendRoomInvitationEmail({
         attachments,
         html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h1 style="color: #376df9;">MiroTalk Meeting Invitation</h1>
+                <h1 style="color: #376df9;">MiroTalk Meeting ${isReminder ? 'Reminder' : 'Invitation'}</h1>
                 <p>${greeting}</p>
                 ${customMessage}
                 <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">

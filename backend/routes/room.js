@@ -31,6 +31,11 @@ router.post('/room/:id/recurring', auth, requireSubscription, roomInvitationLimi
     controllersInvitations.setRoomRecurring(req, res);
 });
 
+// REMINDER: /api/v1/room/:id/reminder (schedule/cancel a one-shot email reminder)
+router.post('/room/:id/reminder', auth, requireSubscription, roomInvitationLimiter, (req, res) => {
+    controllersInvitations.setRoomReminder(req, res);
+});
+
 //GET: /api/v1/room/findBy/userId
 router.get('/room/findBy/:userId', auth, (req, res) => {
     controllersRooms.roomFindBy(req, res);

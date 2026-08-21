@@ -113,6 +113,11 @@ module.exports = {
             (process.env.EMAIL_INVITATION_SERVER_SIDE === 'true' &&
                 process.env.EMAIL_INVITATION_RECURRING !== 'false') ||
             false,
+        // One-shot reminders sent before a scheduled room starts.
+        reminders:
+            (process.env.EMAIL_INVITATION_SERVER_SIDE === 'true' &&
+                process.env.EMAIL_INVITATION_REMINDERS !== 'false') ||
+            false,
     },
     SAAS: {
         // SaaS (paid subscription) mode. When disabled, the platform behaves

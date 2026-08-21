@@ -2,6 +2,7 @@
 
 const Room = require('../models/room');
 const User = require('../models/users');
+const { computeReminderAt } = require('../lib/roomReminders');
 const utils = require('../common/utils');
 const logs = require('../common/logs');
 
@@ -151,6 +152,17 @@ async function roomUpdate(req, res) {
         }
         if (updatedData.duration !== undefined) {
             updatedData.duration = normalizeDuration(updatedData.duration);
+        }
+        const current = await Room.findById(id).select('date time reminder').lean();
+        if (current.reminder && current.reminder.enabled && (updatedData.date || updatedData.time)) {
+            const reminderAt = computeReminderAt(
+                updatedData.date || current.date,
+                updatedData.time || current.time,
+                current.reminder.offsetMinutes,
+                current.reminder.timezoneOffset
+            );
+            updatedData['reminder.scheduledFor'] = reminderAt;
+            updatedData['reminder.enabled'] = !!(reminderAt && reminderAt.getTime() > Date.now());
         }
         const options = { returnDocument: 'after' };
         const result = await Room.findByIdAndUpdate(id, { $set: updatedData }, options);

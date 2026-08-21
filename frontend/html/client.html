@@ -476,7 +476,7 @@
                                 <th>Time</th>
                                 <th>Duration</th>
                                 <th>Room</th>
-                                <th>Recurring</th>
+                                <th>Automation</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -1221,6 +1221,16 @@
                                 <span class="toggle-slider"></span>
                             </span>
                         </label>
+                    </div>
+                    <div id="srvInvReminderRow" class="srv-inv-reminder-row" hidden>
+                        <label for="srvInvReminder"><i class="uil uil-bell"></i> Meeting reminder</label>
+                        <select id="srvInvReminder">
+                            <option value="">No reminder</option>
+                            <option value="10">10 minutes before</option>
+                            <option value="60">1 hour before</option>
+                            <option value="1440">1 day before</option>
+                        </select>
+                        <small>The same recipients will receive one email before the meeting.</small>
                     </div>
                 </div>
             </template>

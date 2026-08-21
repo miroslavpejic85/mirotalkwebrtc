@@ -48,6 +48,7 @@ async function claimNextJob() {
 async function processJob(job) {
     try {
         const info = await sendRoomInvitationEmail({
+            kind: job.kind,
             to: job.recipient,
             subject: job.subject,
             roomUrl: job.roomUrl,
@@ -63,7 +64,11 @@ async function processJob(job) {
         job.sentAt = new Date();
         job.lastError = undefined;
         await job.save();
-        log.info('Invitation sent', { to: job.recipient, room: job.room, messageId: info?.messageId });
+        log.info(job.kind === 'reminder' ? 'Reminder sent' : 'Invitation sent', {
+            to: job.recipient,
+            room: job.room,
+            messageId: info?.messageId,
+        });
     } catch (err) {
         const reachedMax = job.attempts >= RETRY_MAX;
         job.status = reachedMax ? 'dead' : 'pending';
