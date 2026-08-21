@@ -56,6 +56,15 @@ body {
     background: rgba(255, 255, 255, 0.08);
 }
 
+html[data-theme='light'] .back-login {
+    color: var(--text-light);
+}
+
+html[data-theme='light'] .back-login:hover {
+    color: var(--text-color);
+    background: var(--hover-bg-strong);
+}
+
 .back-login i {
     font-size: 12px;
 }

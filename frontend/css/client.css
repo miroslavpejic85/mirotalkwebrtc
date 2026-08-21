@@ -897,6 +897,15 @@ body.dark #myTable tbody tr:hover {
         border-radius: 0;
     }
 
+    #myTable thead {
+        display: none;
+    }
+
+    #myTable tbody {
+        display: block;
+        width: 100%;
+    }
+
     #myTable tr {
         display: block;
         width: 100%;
@@ -925,7 +934,7 @@ body.dark #myTable tbody tr:hover {
     }
 
     #myTable td {
-        width: 93vw;
+        width: 100%;
         font-size: 14px;
         padding: 8px 12px;
         color: var(--text-color);

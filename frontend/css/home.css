@@ -339,6 +339,10 @@ button:active {
     align-items: center;
 }
 
+.main.single-form button[type='submit'] {
+    color: #fff;
+}
+
 .main.single-form label {
     font-size: 20px;
     margin: 16px 40px 8px;
@@ -1211,6 +1215,11 @@ html[data-theme='light'] .workflow-band {
 
     .hero-features {
         grid-template-columns: 1fr;
+    }
+
+    .hero-actions .hero-cta-primary,
+    .hero-actions .hero-cta-secondary {
+        width: 100%;
     }
 
     .home .main {
