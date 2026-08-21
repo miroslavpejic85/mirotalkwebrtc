@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
     <head>
-        <title>MiroTalk WebRTC admin</title>
+        <title>MiroTalk WebRTC - Meeting workspace</title>
         <link rel="apple-touch-icon" href="../Images/apple-touch-icon.png" />
         <link rel="icon" type="image/x-icon" href="../Images/favicon.ico" />
 
@@ -56,17 +56,18 @@
         <nav>
             <div class="logo-name">
                 <div class="logo-image">
-                    <img id="navLogoImage" src="../Images/logo.png" alt="miroslav-pejic" />
+                    <img id="navLogoImage" src="../Images/logo.png" alt="MiroTalk logo" />
                 </div>
                 <span id="navLogoLabel" class="logo_name">MiroTalk</span>
             </div>
 
             <div class="menu-items">
                 <ul class="nav-links">
+                    <li class="nav-section-label"><span>Workspace</span></li>
                     <li>
                         <a id="navDash" href="javascript:void(0)">
-                            <i class="uil uil-estate"></i>
-                            <span class="link-name">Dashboard</span>
+                            <i class="uil uil-calendar-alt"></i>
+                            <span class="link-name">Meetings</span>
                         </a>
                     </li>
                     <li>
@@ -81,6 +82,7 @@
                             <span class="link-name">Users</span>
                         </a>
                     </li>
+                    <li class="nav-section-label"><span>Meeting apps</span></li>
                     <li>
                         <a id="navP2P" href="javascript:void(0)">
                             <i class="uil uil-rocket"></i>
@@ -138,7 +140,13 @@
 
         <section class="dashboard">
             <div class="top">
-                <i class="uil uil-bars sidebar-toggle" role="button" aria-label="Toggle sidebar"></i>
+                <div class="top-workspace">
+                    <i class="uil uil-bars sidebar-toggle" role="button" aria-label="Toggle sidebar"></i>
+                    <div>
+                        <span>Workspace</span>
+                        <strong>Meeting control center</strong>
+                    </div>
+                </div>
 
                 <div class="top-right-actions">
                     <a id="topModeToggle" class="top-action-btn" aria-label="Toggle theme">
@@ -159,7 +167,13 @@
                     <div class="overview-header">
                         <div class="overview-header-left">
                             <div class="overview-header-icon"><i class="uil uil-chart-line"></i></div>
-                            <h2 class="overview-header-title">Overview</h2>
+                            <div>
+                                <span class="page-eyebrow">Workspace health</span>
+                                <h2 class="overview-header-title">Overview</h2>
+                                <p class="overview-header-copy">
+                                    Activity, adoption and meeting performance at a glance.
+                                </p>
+                            </div>
                         </div>
                         <button id="btnRefreshStats" class="overview-refresh-btn" aria-label="Refresh stats">
                             <i class="uil uil-sync"></i> Refresh
@@ -402,6 +416,14 @@
                 </div>
 
                 <div id="dsRooms" class="dsRooms">
+                    <div class="client-page-header">
+                        <div>
+                            <span class="page-eyebrow">Workspace</span>
+                            <h1>Meetings</h1>
+                            <p>Schedule rooms, manage invitations and keep upcoming calls organized.</p>
+                        </div>
+                        <div class="page-status"><span></span> Ready for your next call</div>
+                    </div>
                     <div class="title">
                         <div id="roomsBtnDiv">
                             <div class="rooms-search-box">
@@ -464,7 +486,10 @@
 
                 <form id="addRowDiv" class="addRowDiv hidden" onsubmit="return false;">
                     <div class="addrow-header">
-                        <h2 class="addrow-title"><i class="uil uil-plus-circle"></i> New Room</h2>
+                        <div class="addrow-heading">
+                            <span class="addrow-eyebrow">Meeting setup</span>
+                            <h2 class="addrow-title"><i class="uil uil-plus-circle"></i> New Room</h2>
+                        </div>
                         <button id="add-close-btn" type="button" class="addrow-close" aria-label="Close panel">
                             <i class="uil uil-times"></i>
                         </button>
@@ -643,12 +668,21 @@
                         </div>
                     </div>
 
-                    <button id="add-row-btn" type="button" class="addrow-submit-btn">
-                        <i class="uil uil-plus"></i> Create Room
-                    </button>
+                    <div class="addrow-actions">
+                        <button id="add-row-btn" type="button" class="addrow-submit-btn">
+                            <i class="uil uil-plus"></i> Create Room
+                        </button>
+                    </div>
                 </form>
 
                 <div id="dsUsers" class="dsUsers">
+                    <div class="client-page-header">
+                        <div>
+                            <span class="page-eyebrow">Administration</span>
+                            <h1>Users</h1>
+                            <p>Manage access, plans and meeting permissions from one place.</p>
+                        </div>
+                    </div>
                     <div class="title">
                         <div id="usersBtnDiv">
                             <div class="users-search-box">
@@ -717,13 +751,13 @@
 
                 <form id="addUserDiv" class="addRowDiv hidden" onsubmit="return false;">
                     <div class="addrow-header">
-                        <h2 class="addrow-title"><i class="uil uil-user-plus"></i> New User</h2>
-                        <i
-                            id="add-user-close-btn"
-                            class="uil uil-times addrow-close"
-                            role="button"
-                            aria-label="Close panel"
-                        ></i>
+                        <div class="addrow-heading">
+                            <span class="addrow-eyebrow">Workspace access</span>
+                            <h2 class="addrow-title"><i class="uil uil-user-plus"></i> New User</h2>
+                        </div>
+                        <button id="add-user-close-btn" type="button" class="addrow-close" aria-label="Close panel">
+                            <i class="uil uil-times"></i>
+                        </button>
                     </div>
 
                     <div class="addrow-section">
@@ -882,20 +916,22 @@
                         </div>
                     </div>
 
-                    <button id="add-user-btn" class="addrow-submit-btn">
-                        <i class="uil uil-user-plus"></i> Create User
-                    </button>
+                    <div class="addrow-actions">
+                        <button id="add-user-btn" class="addrow-submit-btn">
+                            <i class="uil uil-user-plus"></i> Create User
+                        </button>
+                    </div>
                 </form>
 
                 <div id="accountDiv" class="accountDiv hidden">
                     <div class="account-header">
-                        <h2 class="account-title"><i class="uil uil-user"></i> My Account</h2>
-                        <i
-                            id="account-close-btn"
-                            class="uil uil-times account-close"
-                            role="button"
-                            aria-label="Close panel"
-                        ></i>
+                        <div class="account-heading">
+                            <span class="account-eyebrow">Profile and access</span>
+                            <h2 class="account-title"><i class="uil uil-user"></i> Account</h2>
+                        </div>
+                        <button id="account-close-btn" type="button" class="account-close" aria-label="Close panel">
+                            <i class="uil uil-times"></i>
+                        </button>
                     </div>
 
                     <div id="accountAvatarSection" class="account-avatar-section hidden">
@@ -1021,13 +1057,13 @@
 
                 <div id="settingsDiv" class="settingsDiv hidden">
                     <div class="settings-header">
-                        <h2 class="settings-title"><i class="uil uil-setting"></i> Settings</h2>
-                        <i
-                            id="settings-close-btn"
-                            class="uil uil-times settings-close"
-                            role="button"
-                            aria-label="Close panel"
-                        ></i>
+                        <div class="settings-heading">
+                            <span class="settings-eyebrow">Workspace preferences</span>
+                            <h2 class="settings-title"><i class="uil uil-setting"></i> Settings</h2>
+                        </div>
+                        <button id="settings-close-btn" type="button" class="settings-close" aria-label="Close panel">
+                            <i class="uil uil-times"></i>
+                        </button>
                     </div>
 
                     <ul class="settings-ul">

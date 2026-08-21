@@ -40,45 +40,108 @@
         <script defer src="../js/api.js"></script>
         <script defer src="../js/pricing.js"></script>
     </head>
-    <body>
-        <div class="pricing-main">
-            <div class="pricing-header">
-                <h1><i class="uil uil-rocket"></i> Choose your plan</h1>
-                <p>Unlock full access to the MiroTalk platform.</p>
-            </div>
+    <body class="pricing-page">
+        <header class="landing-nav">
+            <a class="brand" href="/">
+                <img src="../Images/logo.png" alt="MiroTalk logo" />
+                <span>MiroTalk</span>
+            </a>
+            <nav class="nav-links">
+                <a href="/#how-it-works"><i class="uil uil-grid"></i> Product</a>
+                <a class="active" href="/pricing"><i class="uil uil-tag-alt"></i> Pricing</a>
+                <a class="pricing-signin" href="/"><i class="uil uil-sign-in-alt"></i> Sign in</a>
+                <a class="pricing-nav-cta" href="/?signup=1">Start free</a>
+            </nav>
+        </header>
+
+        <main class="pricing-main">
+            <header class="pricing-header">
+                <span class="pricing-eyebrow">Straightforward pricing</span>
+                <h1>One workspace. Two simple ways to own it.</h1>
+                <p>
+                    Schedule rooms, invite participants and manage secure browser-based meetings without hidden tiers.
+                </p>
+            </header>
 
             <div class="pricing-cards">
                 <!-- Monthly -->
                 <div class="pricing-card">
-                    <div class="pricing-card-icon"><i class="uil uil-calendar-alt"></i></div>
-                    <h2 class="pricing-card-title">Monthly</h2>
+                    <span class="pricing-card-kicker">Flexible access</span>
+                    <div class="pricing-card-heading">
+                        <div class="pricing-card-icon"><i class="uil uil-calendar-alt"></i></div>
+                        <h2 class="pricing-card-title">Monthly</h2>
+                    </div>
                     <div class="pricing-card-price"><span id="monthlyPrice">$9</span><small>/month</small></div>
+                    <p class="pricing-card-description">For teams that prefer a low monthly commitment.</p>
                     <ul class="pricing-card-features">
-                        <li><i class="uil uil-check"></i> Full platform access</li>
+                        <li><i class="uil uil-check"></i> Complete room scheduling workspace</li>
+                        <li><i class="uil uil-check"></i> Secure browser-based meeting links</li>
+                        <li><i class="uil uil-check"></i> Participant invitations and room management</li>
                         <li><i class="uil uil-check"></i> Cancel anytime</li>
-                        <li><i class="uil uil-check"></i> Billed monthly</li>
                     </ul>
-                    <button id="subscribeMonthly" class="pricing-btn">Subscribe</button>
+                    <button id="subscribeMonthly" class="pricing-btn">Choose monthly</button>
+                    <span class="pricing-card-note">Billed monthly through Stripe</span>
                 </div>
 
                 <!-- Lifetime -->
                 <div class="pricing-card featured">
                     <div class="pricing-badge">Best value</div>
-                    <div class="pricing-card-icon"><i class="uil uil-trophy"></i></div>
-                    <h2 class="pricing-card-title">Lifetime</h2>
+                    <span class="pricing-card-kicker">Permanent access</span>
+                    <div class="pricing-card-heading">
+                        <div class="pricing-card-icon"><i class="uil uil-trophy"></i></div>
+                        <h2 class="pricing-card-title">Lifetime</h2>
+                    </div>
                     <div class="pricing-card-price"><span id="lifetimePrice">$199</span><small>once</small></div>
+                    <p class="pricing-card-description">For long-term users who want one predictable payment.</p>
                     <ul class="pricing-card-features">
-                        <li><i class="uil uil-check"></i> Full platform access</li>
-                        <li><i class="uil uil-check"></i> One-time payment</li>
-                        <li><i class="uil uil-check"></i> Pay once, use forever</li>
+                        <li><i class="uil uil-check"></i> Everything included in Monthly</li>
+                        <li><i class="uil uil-check"></i> No recurring subscription</li>
+                        <li><i class="uil uil-check"></i> Permanent platform access</li>
+                        <li><i class="uil uil-check"></i> One simple payment</li>
                     </ul>
-                    <button id="buyLifetime" class="pricing-btn">Buy Lifetime</button>
+                    <button id="buyLifetime" class="pricing-btn">Get lifetime access</button>
+                    <span class="pricing-card-note">One-time payment through Stripe</span>
                 </div>
             </div>
 
-            <div class="pricing-footer">
-                <a href="/"><i class="uil uil-estate"></i> Back to Home</a>
+            <div class="pricing-assurance" aria-label="Purchase assurances">
+                <span><i class="uil uil-shield-check"></i> Secure Stripe checkout</span>
+                <span><i class="uil uil-lock-access"></i> Private by design</span>
+                <span><i class="uil uil-globe"></i> Works in your browser</span>
             </div>
-        </div>
+
+            <section class="pricing-faq">
+                <div class="pricing-faq-heading">
+                    <span>Before you choose</span>
+                    <h2>Common questions, clear answers.</h2>
+                </div>
+                <div class="pricing-faq-list">
+                    <details>
+                        <summary>Do participants need an account?</summary>
+                        <p>No. Invitees can open the meeting link directly in a supported browser.</p>
+                    </details>
+                    <details>
+                        <summary>Can I cancel the monthly plan?</summary>
+                        <p>Yes. The monthly plan can be canceled through the billing portal.</p>
+                    </details>
+                    <details>
+                        <summary>What does lifetime access mean?</summary>
+                        <p>You make one payment instead of maintaining a recurring subscription.</p>
+                    </details>
+                    <details>
+                        <summary>Is payment handled securely?</summary>
+                        <p>
+                            Yes. Checkout and billing are handled by Stripe; payment details are not entered on
+                            MiroTalk.
+                        </p>
+                    </details>
+                </div>
+            </section>
+
+            <footer class="pricing-footer">
+                <p>Not ready to choose?</p>
+                <a href="/?signup=1">Create your account first <i class="uil uil-arrow-right"></i></a>
+            </footer>
+        </main>
     </body>
 </html>

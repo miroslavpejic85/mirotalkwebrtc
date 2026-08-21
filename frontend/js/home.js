@@ -35,8 +35,25 @@ const brandImage = document.getElementById('brandImage');
 const navPricingBtn = document.getElementById('navPricingBtn');
 const heroPricingBtn = document.getElementById('heroPricingBtn');
 
+// theme
+const homeModeToggle = document.getElementById('homeModeToggle');
+
 // support
 const supportBtn = document.getElementById('supportBtn');
+
+function setHomeTheme(mode) {
+    const isLight = mode === 'light';
+    document.documentElement.dataset.theme = isLight ? 'light' : 'dark';
+    window.localStorage.mode = isLight ? 'light' : 'dark';
+    homeModeToggle.querySelector('i').className = isLight ? 'uil uil-moon' : 'uil uil-sun';
+    homeModeToggle.setAttribute('aria-label', isLight ? 'Switch to dark mode' : 'Switch to light mode');
+    homeModeToggle.title = isLight ? 'Dark mode' : 'Light mode';
+}
+
+setHomeTheme(document.documentElement.dataset.theme);
+homeModeToggle.addEventListener('click', () => {
+    setHomeTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
+});
 
 const config = {
     support: true,

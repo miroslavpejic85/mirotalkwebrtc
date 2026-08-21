@@ -9,6 +9,12 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="color-scheme" content="dark light" />
+        <script>
+            (() => {
+                const mode = localStorage.mode || 'dark';
+                document.documentElement.dataset.theme = mode;
+            })();
+        </script>
         <meta
             name="description"
             content="MiroTalk WebRTC — the all-in-one platform to schedule, manage and launch encrypted video meetings. No downloads, right from your browser."
@@ -51,56 +57,58 @@
                 <span id="brandName">MiroTalk</span>
             </a>
             <nav class="nav-links">
+                <a class="nav-product" href="#how-it-works"><i class="uil uil-grid"></i> Product</a>
                 <a id="navPricingBtn" href="/pricing"><i class="uil uil-tag-alt"></i> Pricing</a>
+                <button id="homeModeToggle" type="button" class="nav-theme" aria-label="Switch to light mode">
+                    <i class="uil uil-sun"></i>
+                </button>
                 <button id="navSignInBtn" type="button" class="nav-signin">Sign in</button>
-                <button id="navSignUpBtn" type="button" class="nav-cta">Get started</button>
+                <button id="navSignUpBtn" type="button" class="nav-cta">Start free</button>
             </nav>
         </header>
 
         <div class="landing-grid">
             <!-- Hero / value proposition -->
             <section class="hero">
-                <span class="hero-eyebrow"><i class="uil uil-shield-check"></i> End-to-end encrypted WebRTC</span>
+                <span class="hero-eyebrow"><i class="uil uil-shield-check"></i> Secure, browser-based meetings</span>
 
                 <h1 class="hero-title">
-                    Secure video meetings,<br />
-                    <span class="accent">scheduled your way.</span>
+                    Schedule meetings.<br />
+                    <span class="accent">Skip the complexity.</span>
                 </h1>
 
                 <p class="hero-subtitle">
-                    <span id="brandNameSubtitle">MiroTalk WEB</span> is your all-in-one platform for scheduling,
-                    managing and organizing encrypted WebRTC video meeting rooms. No downloads, no setup, no friction.
-                    Just share a link and start talking in seconds, right from your browser. Start it today!
+                    <span id="brandNameSubtitle">MiroTalk WEB</span> gives you one place to create meeting rooms, invite
+                    participants and launch secure video calls from any browser.
                 </p>
 
                 <ul class="hero-features">
-                    <li><i class="uil uil-calendar-alt"></i> Schedule &amp; manage meeting rooms</li>
-                    <li><i class="uil uil-desktop"></i> HD video, screen share &amp; recording</li>
-                    <li><i class="uil uil-lock-access"></i> Private &amp; encrypted by design</li>
-                    <li><i class="uil uil-globe"></i> Join from any browser, any device</li>
+                    <li><i class="uil uil-calendar-alt"></i> Schedule and manage rooms</li>
+                    <li><i class="uil uil-link"></i> Invite with a single link</li>
+                    <li><i class="uil uil-lock-access"></i> Private by design</li>
+                    <li><i class="uil uil-globe"></i> No downloads required</li>
                 </ul>
 
                 <div class="hero-actions">
                     <button id="heroDemoBtn" type="button" class="hero-cta-primary" hidden>
-                        <i class="uil uil-play-circle"></i> Try the demo
+                        <i class="uil uil-play-circle"></i> Try live demo
                     </button>
                     <button id="heroSignUpBtn" type="button" class="hero-cta-primary">
-                        <i class="uil uil-rocket"></i> Start today
+                        <i class="uil uil-rocket"></i> Start free
                     </button>
                     <a id="heroPricingBtn" href="/pricing" class="hero-cta-secondary"
-                        ><i class="uil uil-tag-alt"></i> See pricing</a
+                        ><i class="uil uil-tag-alt"></i> View pricing</a
                     >
                 </div>
 
                 <div class="hero-trust">
-                    <div class="trust-stars">
-                        <i class="uil uil-star"></i><i class="uil uil-star"></i><i class="uil uil-star"></i
-                        ><i class="uil uil-star"></i><i class="uil uil-star"></i>
-                    </div>
-                    <span>Loved by thousands of teams &amp; creators worldwide</span>
+                    <span><i class="uil uil-check-circle"></i> Open source</span>
+                    <span><i class="uil uil-check-circle"></i> No media storage</span>
+                    <span><i class="uil uil-check-circle"></i> Self-host ready</span>
                 </div>
 
                 <figure class="hero-mockup">
+                    <figcaption><span></span> Everything you need, in one focused workspace</figcaption>
                     <img
                         id="brandImage"
                         src="../Images/mirotalk-web.png"
@@ -112,8 +120,9 @@
             <!-- Auth card -->
             <div class="main">
                 <div class="auth-intro">
-                    <h2>Welcome 👋</h2>
-                    <p>Create your account or sign in to manage your rooms.</p>
+                    <span class="auth-kicker">Your meeting workspace</span>
+                    <h2>Ready when you are</h2>
+                    <p>Create an account or sign in to manage your rooms.</p>
                 </div>
 
                 <div class="tab-header">
@@ -212,5 +221,43 @@
                 <p id="supportBtn">&copy; 2026 MiroTalk, all rights reserved</p>
             </div>
         </div>
+
+        <section id="how-it-works" class="workflow-band">
+            <div class="section-heading">
+                <span>Simple by design</span>
+                <h2>From idea to meeting in three steps</h2>
+                <p>Spend less time configuring calls and more time having them.</p>
+            </div>
+            <div class="workflow-steps">
+                <article>
+                    <strong>01</strong>
+                    <i class="uil uil-calendar-alt"></i>
+                    <h3>Create a room</h3>
+                    <p>Choose when the meeting starts and keep every room organized in one dashboard.</p>
+                </article>
+                <article>
+                    <strong>02</strong>
+                    <i class="uil uil-envelope-send"></i>
+                    <h3>Invite your people</h3>
+                    <p>Share a secure link so participants can join without installing another app.</p>
+                </article>
+                <article>
+                    <strong>03</strong>
+                    <i class="uil uil-video"></i>
+                    <h3>Meet securely</h3>
+                    <p>Launch the call from your browser with video, screen sharing and recording tools.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="closing-cta">
+            <div>
+                <span>Make your next meeting easier</span>
+                <h2>Your workspace is only a minute away.</h2>
+            </div>
+            <button type="button" class="closing-cta-button" onclick="document.getElementById('heroSignUpBtn').click()">
+                Start free <i class="uil uil-arrow-right"></i>
+            </button>
+        </section>
     </body>
 </html>
