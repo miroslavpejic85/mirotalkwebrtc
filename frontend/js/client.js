@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.45
+ * @version 1.4.46
  */
 
 const userAgent = navigator.userAgent;
@@ -1891,32 +1891,40 @@ function addRowToolTips(id) {
     }
 }
 
-function toggleActionDropdown(triggerBtn) {
+function openActionDropdown(triggerBtn) {
     const wrap = triggerBtn.closest('.action-dropdown-wrap');
     const menu = wrap.querySelector('.action-dropdown-menu');
-    const isOpen = wrap.classList.contains('open');
 
     // Close all other open dropdowns first
     document.querySelectorAll('.action-dropdown-wrap.open').forEach((el) => {
-        el.classList.remove('open');
+        if (el !== wrap) el.classList.remove('open');
     });
 
-    if (!isOpen) {
-        wrap.classList.add('open');
+    wrap.classList.add('open');
 
-        // Position the menu using fixed coordinates
-        const rect = triggerBtn.getBoundingClientRect();
-        menu.style.top = rect.bottom + 4 + 'px';
-        menu.style.left = 'auto';
-        menu.style.right = window.innerWidth - rect.right + 'px';
+    // Position the menu using fixed coordinates
+    const rect = triggerBtn.getBoundingClientRect();
+    menu.style.top = rect.bottom + 4 + 'px';
+    menu.style.left = 'auto';
+    menu.style.right = window.innerWidth - rect.right + 'px';
 
-        // If menu would overflow below viewport, show above instead
-        requestAnimationFrame(() => {
-            const menuRect = menu.getBoundingClientRect();
-            if (menuRect.bottom > window.innerHeight - 8) {
-                menu.style.top = rect.top - menuRect.height - 4 + 'px';
-            }
-        });
+    // If menu would overflow below viewport, show above instead
+    requestAnimationFrame(() => {
+        const menuRect = menu.getBoundingClientRect();
+        if (menuRect.bottom > window.innerHeight - 8) {
+            menu.style.top = rect.top - menuRect.height - 4 + 'px';
+        }
+    });
+}
+
+function toggleActionDropdown(triggerBtn) {
+    const wrap = triggerBtn.closest('.action-dropdown-wrap');
+    const isOpen = wrap.classList.contains('open');
+
+    if (isOpen) {
+        wrap.classList.remove('open');
+    } else {
+        openActionDropdown(triggerBtn);
 
         // Close on outside click
         const closeHandler = (e) => {
@@ -1928,6 +1936,29 @@ function toggleActionDropdown(triggerBtn) {
         setTimeout(() => document.addEventListener('click', closeHandler, true), 0);
     }
 }
+
+const actionDropdownHoverQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+document.addEventListener(
+    'pointerenter',
+    (event) => {
+        if (!actionDropdownHoverQuery.matches || !event.target.matches('.action-dropdown-wrap')) return;
+        openActionDropdown(event.target.querySelector('.action-dropdown-trigger'));
+    },
+    true
+);
+
+document.addEventListener(
+    'pointerleave',
+    (event) => {
+        if (!actionDropdownHoverQuery.matches || !event.target.matches('.action-dropdown-wrap')) return;
+        const wrap = event.target;
+        setTimeout(() => {
+            if (!wrap.matches(':hover')) wrap.classList.remove('open');
+        }, 100);
+    },
+    true
+);
 
 function closeActionDropdown(itemBtn) {
     const wrap = itemBtn.closest('.action-dropdown-wrap');
