@@ -305,15 +305,15 @@ button:active {
 }
 
 #supportBtn {
-    margin: 16px 0;
-    padding: 12px 0;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 24px 5vw;
     color: rgba(255, 255, 255, 0.5);
     font-size: 12px;
     font-weight: 500;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 #supportBtn:hover {
@@ -1032,6 +1032,11 @@ body.home {
     height: 50px;
     margin: 0;
     padding: 0 22px;
+    color: #fff;
+}
+
+.landing-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Light theme shares the dashboard preference stored in localStorage.mode. */
@@ -1130,7 +1135,7 @@ html[data-theme='light'] #supportBtn {
     color: #697386;
 }
 
-html[data-theme='light'] #supportBtn,
+html[data-theme='light'] .landing-footer,
 html[data-theme='light'] .auth-badges span,
 html[data-theme='light'] .hero-mockup,
 html[data-theme='light'] .workflow-band,
