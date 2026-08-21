@@ -3130,6 +3130,29 @@ nav.close .nav-section-label {
     padding-top: 96px;
 }
 
+.dashboard.iframe-view {
+    height: 100vh;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.dashboard.iframe-view .dash-content {
+    max-width: none;
+    margin: 0;
+    padding-top: 64px;
+}
+
+.dashboard.iframe-view .dash-iframe {
+    height: calc(100vh - 64px);
+}
+
+.dashboard.iframe-view iframe {
+    display: block;
+    padding: 0;
+    border-radius: 0;
+}
+
 .client-page-header {
     display: flex;
     align-items: flex-end;

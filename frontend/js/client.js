@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.43
+ * @version 1.4.44
  */
 
 const userAgent = navigator.userAgent;
@@ -1034,6 +1034,8 @@ if (svcCardsContainer) {
 }
 
 function navShow(elements = [], activeNav = null) {
+    const iframeView = elements.some((element) => element.classList.contains('dash-iframe'));
+    document.querySelector('.dashboard').classList.toggle('iframe-view', iframeView);
     elemDisplay(dsOverview, false);
     elemDisplay(dsRooms, false);
     elemDisplay(dsUsers, false);
