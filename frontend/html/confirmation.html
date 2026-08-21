@@ -42,44 +42,57 @@
         <script defer src="../js/confirmation.js"></script>
     </head>
     <body>
+        <noscript>
+            <style>
+                #statusError {
+                    display: flex;
+                }
+            </style>
+        </noscript>
         <div class="main single-form">
             <div class="signup">
                 <!-- Success -->
                 <div id="statusSuccess" class="confirmation-status">
                     <div class="form-icon-circle">
-                        <i class="uil uil-check-circle"></i>
+                        <i class="uil uil-check-circle" aria-hidden="true"></i>
                     </div>
-                    <label>Registration Confirmed!</label>
+                    <h1>Registration Confirmed!</h1>
                     <p class="form-desc">
                         Your email has been verified and your account is now active. You can log in with your
                         credentials.
                     </p>
-                    <a class="back-login" href="/"><i class="uil uil-home"></i> Go to Home Page</a>
+                    <a class="primary-link" href="/"
+                        ><i class="uil uil-sign-in-alt" aria-hidden="true"></i> Continue to Sign in</a
+                    >
                 </div>
 
                 <!-- Already confirmed -->
                 <div id="statusAlready" class="confirmation-status">
                     <div class="form-icon-circle warning">
-                        <i class="uil uil-info-circle"></i>
+                        <i class="uil uil-info-circle" aria-hidden="true"></i>
                     </div>
-                    <label>Already Confirmed</label>
+                    <h1>Already Confirmed</h1>
                     <p class="form-desc">
                         This account has already been confirmed. You can log in with your credentials.
                     </p>
-                    <a class="back-login" href="/"><i class="uil uil-home"></i> Go to Home Page</a>
+                    <a class="primary-link" href="/"
+                        ><i class="uil uil-sign-in-alt" aria-hidden="true"></i> Continue to Sign in</a
+                    >
                 </div>
 
                 <!-- Error -->
                 <div id="statusError" class="confirmation-status">
                     <div class="form-icon-circle error">
-                        <i class="uil uil-exclamation-triangle"></i>
+                        <i class="uil uil-exclamation-triangle" aria-hidden="true"></i>
                     </div>
-                    <label>Confirmation Failed</label>
+                    <h1>Confirmation Failed</h1>
                     <p class="form-desc">
                         Something went wrong during confirmation. The link may be invalid or expired. Please try
                         registering again.
                     </p>
-                    <a class="back-login" href="/"><i class="uil uil-home"></i> Go to Home Page</a>
+                    <a class="primary-link" href="/"
+                        ><i class="uil uil-user-plus" aria-hidden="true"></i> Return to Registration</a
+                    >
                 </div>
             </div>
         </div>
