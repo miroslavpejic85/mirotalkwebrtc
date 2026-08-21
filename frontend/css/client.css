@@ -429,6 +429,12 @@ nav.close ~ .dashboard .top {
     border-color: var(--accent-color);
 }
 
+#topLogout:hover {
+    background: var(--danger-color);
+    color: #fff;
+    border-color: var(--danger-color);
+}
+
 .top-action-btn i {
     font-size: 18px;
 }
@@ -2003,8 +2009,9 @@ body.dark .addRowDiv .service-card.selected:hover .service-card-desc {
     gap: 6px;
 }
 
-.account-change-password-btn:hover {
-    background-color: var(--primary-color);
+.accountDiv .account-change-password-btn:hover {
+    background-color: var(--warning-color);
+    border-color: var(--warning-color);
     color: #fff;
 }
 
@@ -2064,14 +2071,14 @@ body.dark .addRowDiv .service-card.selected:hover .service-card-desc {
     background: var(--border-color);
 }
 
-.account-delete-btn {
+.accountDiv .account-delete-btn {
     flex: 1;
     margin-top: 0;
     padding: 10px;
     border: 1px solid var(--danger-color);
     border-radius: 8px;
-    background-color: transparent;
-    color: var(--danger-color);
+    background-color: var(--danger-color);
+    color: #fff;
     font-size: 13px;
     font-weight: 500;
     font-family: inherit;
@@ -2084,9 +2091,8 @@ body.dark .addRowDiv .service-card.selected:hover .service-card-desc {
     gap: 6px;
 }
 
-.account-delete-btn:hover {
-    background-color: var(--danger-color);
-    color: #fff;
+.accountDiv .account-delete-btn:hover {
+    filter: brightness(0.9);
 }
 
 /* Account field row layout */
