@@ -131,9 +131,6 @@ function loginAsDemo() {
     function loadDemoCredentials(demoCredentials) {
         if (demoCredentials && demoCredentials.enabled) {
             heroDemoBtn.hidden = false;
-            // Demote the sign-up button to secondary so the demo is the primary CTA
-            heroSignUpBtn?.classList.remove('hero-cta-primary');
-            heroSignUpBtn?.classList.add('hero-cta-secondary');
             heroDemoBtn.addEventListener('click', loginAsDemo);
         }
     }
