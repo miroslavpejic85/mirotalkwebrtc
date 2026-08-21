@@ -293,6 +293,39 @@ body.pricing-page {
     text-decoration: none;
 }
 
+/* Light theme uses the same localStorage.mode preference as Home and the dashboard. */
+html[data-theme='light'] body.pricing-page {
+    background:
+        radial-gradient(1000px 520px at 50% -10%, rgba(36, 94, 219, 0.11), transparent 60%), var(--primary-color);
+}
+
+html[data-theme='light'] .pricing-page .nav-links > a.active {
+    color: #172033;
+    background: rgba(36, 94, 219, 0.08);
+}
+
+html[data-theme='light'] .pricing-page .nav-links > a.pricing-signin {
+    border-color: #cdd4df;
+}
+
+html[data-theme='light'] .pricing-header h1,
+html[data-theme='light'] .pricing-card-title,
+html[data-theme='light'] .pricing-card-price,
+html[data-theme='light'] .pricing-faq-heading h2 {
+    color: #172033;
+}
+
+html[data-theme='light'] .pricing-card {
+    background: #fff;
+    border-color: #dce2eb;
+}
+
+html[data-theme='light'] .pricing-card-features,
+html[data-theme='light'] .pricing-faq,
+html[data-theme='light'] .pricing-faq-list details {
+    border-color: #dce2eb;
+}
+
 @media screen and (max-width: 720px) {
     .pricing-page .nav-links > a:not(.pricing-nav-cta) {
         display: none;

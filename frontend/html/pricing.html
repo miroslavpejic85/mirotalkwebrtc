@@ -9,6 +9,12 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="color-scheme" content="dark light" />
+        <script>
+            (() => {
+                const mode = localStorage.mode || 'dark';
+                document.documentElement.dataset.theme = mode;
+            })();
+        </script>
         <meta name="description" content="MiroTalk WebRTC - Pricing & Plans" />
 
         <!-- https://ogp.me -->
@@ -49,6 +55,9 @@
             <nav class="nav-links">
                 <a href="/#how-it-works"><i class="uil uil-grid"></i> Product</a>
                 <a class="active" href="/pricing"><i class="uil uil-tag-alt"></i> Pricing</a>
+                <button id="pricingModeToggle" type="button" class="nav-theme" aria-label="Switch to light mode">
+                    <i class="uil uil-sun"></i>
+                </button>
                 <a class="pricing-signin" href="/"><i class="uil uil-sign-in-alt"></i> Sign in</a>
                 <a class="pricing-nav-cta" href="/?signup=1">Start free</a>
             </nav>
