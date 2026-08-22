@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.55
+ * @version 1.4.56
  */
 
 const userAgent = navigator.userAgent;
@@ -216,6 +216,27 @@ const dataTable = $('#myTable').DataTable({
     responsive: true,
     scrollX: true,
     order: [[4, 'asc']],
+    createdRow(row) {
+        const mobileCellMeta = [
+            ['room-type-cell', 'Meeting type'],
+            ['room-title-cell', 'Meeting title'],
+            ['room-email-cell', 'Email'],
+            ['room-phone-cell', 'Phone'],
+            ['room-date-cell', 'Date'],
+            ['room-time-cell', 'Time'],
+            ['room-duration-cell', 'Duration'],
+            ['room-name-cell', 'Room'],
+            ['recurring-cell', 'Automation'],
+            ['room-actions-cell', 'Actions'],
+        ];
+
+        mobileCellMeta.forEach(([className, label], index) => {
+            const cell = row.cells[index];
+            if (!cell) return;
+            cell.classList.add(className);
+            cell.dataset.label = label;
+        });
+    },
     columnDefs: [
         { width: '8%', targets: 0 },
         { width: '8%', targets: 1 },
@@ -1809,17 +1830,17 @@ function getRow(obj) {
     const inlineIcons = [];
     if (config.BUTTONS.joinInternal && !isPast) {
         inlineIcons.push(
-            `<i id="${obj._id}_joinInternal" onclick="joinRoom('${obj._id}')" class="uil uil-play action-icon" data-tippy="Join here"></i>`
+            `<button id="${obj._id}_joinInternal" type="button" onclick="joinRoom('${obj._id}')" class="action-icon action-primary"><i class="uil uil-play"></i><span class="action-label">Join</span></button>`
         );
     }
     if (config.BUTTONS.updateRow && !isPast) {
         inlineIcons.push(
-            `<i id="${obj._id}_save" onclick="updateRow('${obj._id}')" class="uil uil-save action-icon" data-tippy="Save"></i>`
+            `<button id="${obj._id}_save" type="button" onclick="updateRow('${obj._id}')" class="action-icon" data-tippy="Save" aria-label="Save room"><i class="uil uil-save"></i></button>`
         );
     }
     if (config.BUTTONS.delRow) {
         inlineIcons.push(
-            `<i id="${obj._id}_delete" onclick="delRow('${obj._id}')" class="uil uil-trash-alt action-icon danger" data-tippy="Delete"></i>`
+            `<button id="${obj._id}_delete" type="button" onclick="delRow('${obj._id}')" class="action-icon danger" data-tippy="Delete" aria-label="Delete room"><i class="uil uil-trash-alt"></i></button>`
         );
     }
 
@@ -1908,33 +1929,31 @@ function getRow(obj) {
     );
 
     return [
-        `<td>${buildCustomDropdownHTML(obj._id + '_type', typeOptions, obj.type, false, isPast)}</td>`,
-        `<td><input id="${obj._id}_tag" type="text" name="tag" placeholder="Tag" value="${obj.tag}"${ro}/></td>`,
-        `<td><input id="${obj._id}_email" type="email" name="email" placeholder="Email address" value="${obj.email}"${ro}/></td>`,
-        `<td><input id="${obj._id}_phone" type="text" name="text" placeholder="Phone number" value="${obj.phone}"${ro}/></td>`,
-        `<td><input id="${obj._id}_date" type="text" name="date" placeholder="Date" value="${obj.date}" class="flatpickr-date"${ro}/></td>`,
-        `<td><input id="${obj._id}_time" type="text" name="time" placeholder="Time" value="${obj.time}" class="flatpickr-time"${ro}/></td>`,
-        `<td>${durationCellHtml}</td>`,
-        `<td>${rooms}</td>`,
-        `<td class="recurring-cell">${automationCell}</td>`,
-        `<td>
-            <div class="action-cell">
-                <span class="action-group">${inlineIcons.join('')}</span>
-                ${
-                    actionItems.length > 0
-                        ? `
-                <div class="action-dropdown-wrap">
-                    <button class="action-dropdown-trigger" onclick="toggleActionDropdown(this)" aria-label="More actions">
-                        <i class="uil uil-ellipsis-v"></i>
-                    </button>
-                    <div class="action-dropdown-menu">
-                        ${actionItems.join('\n                        ')}
-                    </div>
-                </div>`
-                        : ''
-                }
-            </div>
-        </td>`,
+        buildCustomDropdownHTML(obj._id + '_type', typeOptions, obj.type, false, isPast),
+        `<input id="${obj._id}_tag" type="text" name="tag" aria-label="Meeting title" placeholder="Meeting title" value="${obj.tag}"${ro}/>`,
+        `<input id="${obj._id}_email" type="email" name="email" aria-label="Email address" placeholder="Email address" value="${obj.email}"${ro}/>`,
+        `<input id="${obj._id}_phone" type="text" name="text" aria-label="Phone number" placeholder="Phone number" value="${obj.phone}"${ro}/>`,
+        `<input id="${obj._id}_date" type="text" name="date" aria-label="Meeting date" placeholder="Date" value="${obj.date}" class="flatpickr-date"${ro}/>`,
+        `<input id="${obj._id}_time" type="text" name="time" aria-label="Meeting time" placeholder="Time" value="${obj.time}" class="flatpickr-time"${ro}/>`,
+        durationCellHtml,
+        rooms,
+        automationCell,
+        `<div class="action-cell">
+            <span class="action-group">${inlineIcons.join('')}</span>
+            ${
+                actionItems.length > 0
+                    ? `
+            <div class="action-dropdown-wrap">
+                <button type="button" class="action-dropdown-trigger" onclick="toggleActionDropdown(this)" aria-label="More room actions">
+                    <i class="uil uil-ellipsis-v"></i>
+                </button>
+                <div class="action-dropdown-menu">
+                    ${actionItems.join('\n                    ')}
+                </div>
+            </div>`
+                    : ''
+            }
+        </div>`,
     ];
 }
 
@@ -1963,11 +1982,6 @@ function addRowToolTips(id) {
         }
     }
     // Join / Save / Delete inline action icons — use tippy for consistency with the badge.
-    const joinEl = document.getElementById(`${id}_joinInternal`);
-    if (joinEl && !joinEl._tippy) {
-        setTippy(joinEl, 'Join', 'top');
-        joinEl.removeAttribute('title');
-    }
     const saveEl = document.getElementById(`${id}_save`);
     if (saveEl && !saveEl._tippy) {
         setTippy(saveEl, 'Save', 'top');

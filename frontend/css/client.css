@@ -947,9 +947,25 @@ body.dark #myTable tbody tr:hover {
 
 /* Responsive table card styling for mobile */
 @media (max-width: 560px) {
+    #myTable_wrapper .dataTables_scrollHead {
+        display: none;
+    }
+
+    #myTable_wrapper .dataTables_scroll,
+    #myTable_wrapper .dataTables_scrollBody {
+        width: 100%;
+        overflow: visible !important;
+    }
+
+    #myTable_wrapper .dataTables_scrollBody {
+        max-height: none !important;
+        border: 0;
+    }
+
     #myTable {
         display: block;
         width: 100%;
+        min-width: 0 !important;
         border: none;
         border-radius: 0;
     }
@@ -964,12 +980,16 @@ body.dark #myTable tbody tr:hover {
     }
 
     #myTable tr {
-        display: block;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         width: 100%;
-        margin-bottom: 12px;
-        border-radius: 10px;
+        margin-bottom: 16px;
+        padding: 10px;
+        border-radius: 8px;
         border: 1px solid var(--border-color);
-        overflow: hidden;
+        background: var(--panel-color);
+        box-shadow: 0 3px 12px rgba(15, 23, 42, 0.06);
+        overflow: visible;
     }
 
     #myTable th,
@@ -993,10 +1013,114 @@ body.dark #myTable tbody tr:hover {
     #myTable td {
         width: 100%;
         font-size: 14px;
-        padding: 8px 12px;
+        padding: 7px;
         color: var(--text-color);
         position: relative;
+        border: 0;
+        min-width: 0;
+    }
+
+    #myTable td::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 5px;
+        color: var(--text-color-light);
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.2;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    #myTable .room-type-cell {
+        order: 1;
+    }
+
+    #myTable .recurring-cell {
+        order: 2;
+        text-align: left;
+    }
+
+    #myTable .room-title-cell {
+        order: 3;
+    }
+
+    #myTable .room-date-cell {
+        order: 4;
+    }
+
+    #myTable .room-time-cell {
+        order: 5;
+    }
+
+    #myTable .room-duration-cell {
+        order: 6;
+    }
+
+    #myTable .room-email-cell {
+        order: 7;
+    }
+
+    #myTable .room-phone-cell {
+        order: 8;
+    }
+
+    #myTable .room-name-cell {
+        order: 9;
+    }
+
+    #myTable .room-actions-cell {
+        order: 10;
+        padding-top: 10px;
+        margin-top: 3px;
         border-top: 1px solid var(--border-color);
+    }
+
+    #myTable .room-title-cell,
+    #myTable .room-email-cell,
+    #myTable .room-phone-cell,
+    #myTable .room-name-cell,
+    #myTable .room-actions-cell {
+        grid-column: 1 / -1;
+    }
+
+    #myTable .room-title-cell input {
+        font-weight: 600;
+    }
+
+    #myTable .action-cell,
+    #myTable .action-group {
+        display: flex;
+        width: 100%;
+    }
+
+    #myTable .action-group {
+        gap: 6px;
+    }
+
+    #myTable .action-icon,
+    #myTable .action-dropdown-trigger {
+        width: 44px;
+        height: 44px;
+    }
+
+    #myTable .action-primary {
+        flex: 1;
+        width: auto;
+        gap: 7px;
+        color: #fff;
+        background: var(--accent-color);
+    }
+
+    #myTable .action-primary:hover {
+        color: #fff;
+        background: var(--color-hover);
+    }
+
+    #myTable .action-label {
+        display: inline;
+        font-size: 14px;
+        font-weight: 600;
     }
 
     .action-dropdown-menu {
@@ -2886,9 +3010,17 @@ td .action-group {
     height: 34px;
     border-radius: 6px;
     font-size: 16px;
+    font-family: inherit;
     color: var(--text-color);
+    border: 0;
+    padding: 0;
+    background: transparent;
     cursor: pointer;
     transition: var(--tran-03);
+}
+
+.action-label {
+    display: none;
 }
 
 .action-icon:hover {
@@ -2899,6 +3031,27 @@ td .action-group {
 .action-icon.danger:hover {
     background-color: var(--danger-bg-light);
     color: var(--danger-color);
+}
+
+.action-icon.action-primary {
+    width: auto;
+    min-width: 68px;
+    padding: 0 12px;
+    gap: 6px;
+    color: #fff;
+    background: var(--accent-color);
+    box-shadow: 0 2px 6px var(--accent-bg);
+}
+
+.action-icon.action-primary:hover {
+    color: #fff;
+    background: var(--color-hover);
+}
+
+.action-icon.action-primary .action-label {
+    display: inline;
+    font-size: 13px;
+    font-weight: 600;
 }
 
 td .action-separator {
