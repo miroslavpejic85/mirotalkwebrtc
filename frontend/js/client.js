@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.50
+ * @version 1.4.51
  */
 
 const userAgent = navigator.userAgent;
@@ -486,6 +486,41 @@ function resolveServerInviteEligibility(role) {
         });
 }
 
+function showDemoAccountPrompt(currentUser) {
+    const promptKey = 'demoAccountPromptShown';
+    if (isOidcMode || sessionStorage.getItem(promptKey)) return;
+
+    userDemoConfig()
+        .then((demo) => {
+            const isDemoUser =
+                demo?.enabled &&
+                currentUser?.email?.toLowerCase() === demo.email?.toLowerCase() &&
+                currentUser?.username === demo.username;
+
+            if (!isDemoUser) return;
+
+            sessionStorage.setItem(promptKey, 'true');
+            Swal.fire({
+                icon: 'info',
+                title: 'You are exploring a shared dashboard',
+                html: `
+                    <p>This live demo is open to everyone, so rooms and changes may be visible to other visitors or reset at any time.</p>
+                    <p><strong>Create your own account for a private dashboard, persistent rooms and a workspace that is entirely yours.</strong></p>
+                `,
+                confirmButtonText: 'Create my free account',
+                cancelButtonText: 'Continue exploring',
+                showCancelButton: true,
+                reverseButtons: true,
+                allowOutsideClick: false,
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+            }).then((result) => {
+                if (result.isConfirmed) openURL('/?signup=1');
+            });
+        })
+        .catch((err) => console.warn('[API] - DEMO CONFIG unavailable', err?.message));
+}
+
 function handleUserRoles() {
     const userPromise = isOidcMode ? userGetMe() : userGet(userId);
     userPromise
@@ -499,6 +534,7 @@ function handleUserRoles() {
                 user.allowedRooms = allowedRooms;
                 user.allowedRoomsALL = allowedRooms.includes('*');
                 resolveServerInviteEligibility(role);
+                showDemoAccountPrompt(res);
                 elemDisplay(addRoom, user.allowedRoomsALL);
                 elemDisplay(genRoom, user.allowedRoomsALL);
                 elemDisplay(selRoomDropdown, !user.allowedRoomsALL);
