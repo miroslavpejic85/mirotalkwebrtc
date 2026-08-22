@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.51
+ * @version 1.4.52
  */
 
 const userAgent = navigator.userAgent;
@@ -23,6 +23,7 @@ console.log('INFO', result);
 const body = document.querySelector('body');
 const modeToggle = body.querySelector('.mode-toggle');
 const topModeToggle = document.getElementById('topModeToggle');
+const demoBadge = document.getElementById('demoBadge');
 const sidebar = body.querySelector('nav');
 const sidebarToggle = body.querySelector('.sidebar-toggle');
 
@@ -488,7 +489,7 @@ function resolveServerInviteEligibility(role) {
 
 function showDemoAccountPrompt(currentUser) {
     const promptKey = 'demoAccountPromptShown';
-    if (isOidcMode || sessionStorage.getItem(promptKey)) return;
+    if (isOidcMode) return;
 
     userDemoConfig()
         .then((demo) => {
@@ -498,6 +499,9 @@ function showDemoAccountPrompt(currentUser) {
                 currentUser?.username === demo.username;
 
             if (!isDemoUser) return;
+
+            demoBadge.hidden = false;
+            if (sessionStorage.getItem(promptKey)) return;
 
             sessionStorage.setItem(promptKey, 'true');
             Swal.fire({
