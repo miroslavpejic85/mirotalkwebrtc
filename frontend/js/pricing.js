@@ -16,10 +16,29 @@ pricingModeToggle.addEventListener('click', () => {
     setPricingTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
 });
 
+function loadPricingAppConfig(config) {
+    if (config?.app?.Name) {
+        document.querySelectorAll('[data-app-name]').forEach((element) => {
+            element.textContent = config.app.Name;
+        });
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const status = params.get('status');
     const sessionId = params.get('session_id');
+
+    if (sessionStorage.getItem('appConfig')) {
+        loadPricingAppConfig(JSON.parse(sessionStorage.getItem('appConfig')));
+    } else {
+        getAppConfig()
+            .then((config) => {
+                sessionStorage.setItem('appConfig', JSON.stringify(config));
+                loadPricingAppConfig(config);
+            })
+            .catch(() => {});
+    }
 
     if (status === 'success') {
         // The Stripe webhook activates the subscription asynchronously, so verify

@@ -1213,7 +1213,27 @@ body.dark .addRowDiv {
 }
 
 .settings-translate-item {
-    padding: 10px 14px;
+    gap: 16px;
+}
+
+.settings-translate-item a {
+    min-width: 0;
+}
+
+.settings-translate-item #google_translate_element {
+    flex: 0 1 160px;
+    min-width: 120px;
+}
+
+.settings-translate-item #google_translate_element select {
+    width: 100%;
+    min-height: 36px;
+    margin: 0 !important;
+    padding: 0 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font: inherit;
+    cursor: pointer;
 }
 
 .accountDiv input,
