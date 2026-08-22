@@ -322,7 +322,11 @@ function loadAppConfig(cfg) {
         brandNameSubtitle.textContent = cfg.app.Name;
         brandName.textContent = cfg.app.Name;
         brandLogo.src = cfg.app.Logo;
-        brandImage.src = cfg.app.Image;
+        brandImage.dataset.themeSrcDark = cfg.app.Image;
+        brandImage.src =
+            document.documentElement.dataset.theme === 'light'
+                ? brandImage.dataset.themeSrcLight
+                : brandImage.dataset.themeSrcDark;
     }
     if (cfg && cfg.saas && !cfg.saas.enabled) {
         elementDisplay(navPricingBtn, false);
