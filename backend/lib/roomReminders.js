@@ -20,7 +20,10 @@ let running = false;
 let stopped = false;
 
 function computeReminderAt(date, time, offsetMinutes, timezoneOffset = 0) {
-    if (!date || !time || ![10, 60, 1440].includes(Number(offsetMinutes))) return null;
+    const normalizedOffset = Number(offsetMinutes);
+    if (!date || !time || !Number.isInteger(normalizedOffset) || normalizedOffset < 1 || normalizedOffset > 10080) {
+        return null;
+    }
     const dateParts = String(date).split('-').map(Number);
     const timeParts = String(time).split(':').map(Number);
     const normalizedTimezoneOffset = Number(timezoneOffset);
@@ -40,7 +43,7 @@ function computeReminderAt(date, time, offsetMinutes, timezoneOffset = 0) {
     if (month < 1 || month > 12 || day < 1 || day > 31 || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
         return null;
     }
-    return new Date(meetingAt.getTime() - Number(offsetMinutes) * 60 * 1000);
+    return new Date(meetingAt.getTime() - normalizedOffset * 60 * 1000);
 }
 
 function buildRoomUrl(room) {
@@ -85,7 +88,8 @@ async function dispatchReminder(room) {
         {
             $set: {
                 'reminder.enabled': false,
-                'reminder.sentAt': new Date(),
+                'reminder.status': 'queued',
+                'reminder.queuedAt': new Date(),
                 'reminder.lastError': null,
             },
         },
@@ -98,6 +102,7 @@ async function dispatchReminder(room) {
 
     const jobs = classified.valid.map((recipient) => ({
         kind: 'reminder',
+        deliveryId: room.reminder.deliveryId,
         userId: room.userId,
         roomId: String(room._id),
         roomType: room.type,
@@ -122,7 +127,8 @@ async function dispatchReminder(room) {
             {
                 $set: {
                     'reminder.enabled': true,
-                    'reminder.sentAt': null,
+                    'reminder.status': 'scheduled',
+                    'reminder.queuedAt': null,
                     'reminder.lastError': String(error && error.message ? error.message : error),
                 },
             }

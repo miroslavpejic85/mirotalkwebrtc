@@ -155,14 +155,21 @@ async function roomUpdate(req, res) {
         }
         const current = await Room.findById(id).select('date time reminder').lean();
         if (current.reminder && current.reminder.enabled && (updatedData.date || updatedData.time)) {
+            const reminderTimezoneOffset = Number.isFinite(Number(req.body.timezoneOffset))
+                ? Number(req.body.timezoneOffset)
+                : current.reminder.timezoneOffset;
             const reminderAt = computeReminderAt(
                 updatedData.date || current.date,
                 updatedData.time || current.time,
                 current.reminder.offsetMinutes,
-                current.reminder.timezoneOffset
+                reminderTimezoneOffset
             );
             updatedData['reminder.scheduledFor'] = reminderAt;
             updatedData['reminder.enabled'] = !!(reminderAt && reminderAt.getTime() > Date.now());
+            updatedData['reminder.timezoneOffset'] = reminderTimezoneOffset;
+            if (typeof req.body.timezone === 'string')
+                updatedData['reminder.timezone'] = req.body.timezone.slice(0, 100);
+            updatedData['reminder.status'] = updatedData['reminder.enabled'] ? 'scheduled' : 'canceled';
         }
         const options = { returnDocument: 'after' };
         const result = await Room.findByIdAndUpdate(id, { $set: updatedData }, options);

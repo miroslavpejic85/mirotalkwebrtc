@@ -19,13 +19,21 @@ const recurringSchema = new mongoose.Schema(
 const reminderSchema = new mongoose.Schema(
     {
         enabled: { type: Boolean, default: false },
-        offsetMinutes: { type: Number, enum: [10, 60, 1440] },
+        offsetMinutes: { type: Number, min: 1, max: 10080 },
         timezoneOffset: { type: Number, min: -840, max: 840, default: 0 },
+        timezone: { type: String },
+        deliveryId: { type: String },
+        status: {
+            type: String,
+            enum: ['scheduled', 'queued', 'retrying', 'sent', 'failed', 'canceled'],
+        },
+        attempts: { type: Number, default: 0 },
         recipients: [{ type: String, lowercase: true, trim: true }],
         subject: { type: String },
         message: { type: String },
         inviterName: { type: String },
         scheduledFor: { type: Date },
+        queuedAt: { type: Date },
         sentAt: { type: Date },
         lastError: { type: String },
     },

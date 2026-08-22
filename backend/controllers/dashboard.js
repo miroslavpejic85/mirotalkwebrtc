@@ -7,6 +7,34 @@ const logs = require('../common/logs');
 
 const log = new logs('Controllers-dashboard');
 
+async function getUpcomingReminders(filter = {}) {
+    const rooms = await Room.find({
+        ...filter,
+        'reminder.enabled': true,
+        'reminder.status': 'scheduled',
+        'reminder.scheduledFor': { $gt: new Date() },
+    })
+        .sort({ 'reminder.scheduledFor': 1 })
+        .limit(8)
+        .select(
+            'room tag type date time reminder.offsetMinutes reminder.scheduledFor reminder.status reminder.recipients'
+        )
+        .lean();
+
+    return rooms.map((room) => ({
+        roomId: String(room._id),
+        room: room.room,
+        tag: room.tag,
+        type: room.type,
+        date: room.date,
+        time: room.time,
+        offsetMinutes: room.reminder.offsetMinutes,
+        scheduledFor: room.reminder.scheduledFor,
+        status: room.reminder.status,
+        recipientCount: Array.isArray(room.reminder.recipients) ? room.reminder.recipients.length : 0,
+    }));
+}
+
 async function getDashboardStats(req, res) {
     try {
         const { email, username, password } = req.user;
@@ -25,6 +53,7 @@ async function getDashboardStats(req, res) {
                 latestUser,
                 monthlySubscribers,
                 lifetimeSubscribers,
+                upcomingReminders,
             ] = await Promise.all([
                 User.countDocuments(),
                 User.countDocuments({ active: true }),
@@ -36,6 +65,7 @@ async function getDashboardStats(req, res) {
                 User.findOne().sort({ createdAt: -1 }).select('username createdAt').lean(),
                 User.countDocuments({ subscriptionType: 'monthly', subscriptionStatus: 'active' }),
                 User.countDocuments({ subscriptionType: 'lifetime', subscriptionStatus: 'active' }),
+                getUpcomingReminders(),
             ]);
 
             const typeCounts = { P2P: 0, SFU: 0, C2C: 0, BRO: 0 };
@@ -60,6 +90,7 @@ async function getDashboardStats(req, res) {
                 latestUserDate: latestUser ? latestUser.createdAt : null,
                 monthlySubscribers,
                 lifetimeSubscribers,
+                upcomingReminders,
             });
         }
 
@@ -71,11 +102,12 @@ async function getDashboardStats(req, res) {
 
         const uId = userDoc._id.toString();
 
-        const [myRooms, myRoomsByType, myUpcomingRooms, myTodayRooms] = await Promise.all([
+        const [myRooms, myRoomsByType, myUpcomingRooms, myTodayRooms, upcomingReminders] = await Promise.all([
             Room.countDocuments({ userId: uId }),
             Room.aggregate([{ $match: { userId: uId } }, { $group: { _id: '$type', count: { $sum: 1 } } }]),
             Room.countDocuments({ userId: uId, date: { $gte: today } }),
             Room.countDocuments({ userId: uId, date: today }),
+            getUpcomingReminders({ userId: uId }),
         ]);
 
         const typeCounts = { P2P: 0, SFU: 0, C2C: 0, BRO: 0 };
@@ -92,6 +124,7 @@ async function getDashboardStats(req, res) {
             myUpcomingRooms,
             myTodayRooms,
             memberSince: userDoc.createdAt,
+            upcomingReminders,
         });
     } catch (error) {
         log.error('Dashboard stats error', error);

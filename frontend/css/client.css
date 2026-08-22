@@ -618,6 +618,57 @@ body.dark .stat-card:hover {
     letter-spacing: 0.5px;
 }
 
+.upcoming-reminders-list {
+    display: grid;
+    gap: 8px;
+}
+
+.upcoming-reminder-item {
+    display: grid;
+    grid-template-columns: minmax(120px, 1fr) minmax(170px, auto) auto auto;
+    align-items: center;
+    gap: 14px;
+    padding: 11px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--box1-color);
+}
+
+.upcoming-reminder-room {
+    min-width: 0;
+}
+
+.upcoming-reminder-room strong,
+.upcoming-reminder-room small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.upcoming-reminder-room strong {
+    color: var(--text-color);
+    font-size: 13px;
+}
+
+.upcoming-reminder-room small,
+.upcoming-reminder-meta {
+    color: var(--black-light-color);
+    font-size: 12px;
+}
+
+.upcoming-reminder-time {
+    color: var(--text-color);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+@media (max-width: 680px) {
+    .upcoming-reminder-item {
+        grid-template-columns: 1fr auto;
+    }
+}
+
 @media (max-width: 1100px) {
     .stat-card {
         flex: 1 1 calc(100% / 3 - 15px);
@@ -4208,6 +4259,23 @@ body.dark #usersTable tr:hover {
     color: var(--text-color);
     color-scheme: var(--input-color-schema);
 }
+.srv-inv-reminder-custom {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+.srv-inv-reminder-custom[hidden] {
+    display: none;
+}
+.srv-inv-reminder-custom input {
+    width: 120px;
+    margin: 0;
+}
+.srv-inv-reminder-custom span {
+    color: var(--black-light-color);
+    font-size: 0.85em;
+}
 .srv-inv-reminder-row small {
     display: block;
     margin-top: 5px;
@@ -4251,6 +4319,25 @@ body.dark #usersTable tr:hover {
 .reminder-badge:hover {
     color: #975a16;
     background: rgba(183, 121, 31, 0.2);
+}
+.reminder-badge-sent {
+    color: #2f9e6b;
+    background: rgba(47, 158, 107, 0.12);
+    border-color: rgba(47, 158, 107, 0.35);
+    cursor: default;
+}
+.reminder-badge-retrying,
+.reminder-badge-failed {
+    color: var(--danger-color);
+    background: var(--danger-bg-light);
+    border-color: var(--danger-color);
+    cursor: default;
+}
+.reminder-badge-queued {
+    color: var(--accent-color);
+    background: var(--accent-bg-light);
+    border-color: var(--accent-color);
+    cursor: default;
 }
 .recurring-cell {
     text-align: center;

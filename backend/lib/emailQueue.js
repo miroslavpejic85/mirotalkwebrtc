@@ -1,6 +1,7 @@
 'use strict';
 
 const EmailInvitation = require('../models/emailInvitation');
+const Room = require('../models/room');
 const { sendRoomInvitationEmail } = require('./nodemailer');
 const logs = require('../common/logs');
 
@@ -45,6 +46,44 @@ async function claimNextJob() {
     );
 }
 
+function summarizeReminderJobs(jobs) {
+    const attempts = jobs.reduce((total, job) => total + (Number(job.attempts) || 0), 0);
+    const active = jobs.filter((job) => job.status === 'pending' || job.status === 'sending');
+    const failed = jobs.filter((job) => job.status === 'dead');
+    const sent = jobs.filter((job) => job.status === 'sent');
+    const latestError = [...jobs].reverse().find((job) => job.lastError)?.lastError;
+
+    if (active.length > 0) {
+        const retrying = active.some((job) => (Number(job.attempts) || 0) > 0 && job.lastError);
+        return { status: retrying ? 'retrying' : 'queued', attempts, lastError: latestError };
+    }
+    if (failed.length > 0) return { status: 'failed', attempts, lastError: latestError };
+    if (sent.length === jobs.length && sent.length > 0) {
+        const sentAt = sent.reduce((latest, job) => {
+            const value = job.sentAt ? new Date(job.sentAt) : null;
+            return value && (!latest || value > latest) ? value : latest;
+        }, null);
+        return { status: 'sent', attempts, sentAt, lastError: null };
+    }
+    return { status: 'queued', attempts, lastError: latestError };
+}
+
+async function syncReminderStatus(job) {
+    if (job.kind !== 'reminder' || !job.deliveryId) return;
+    const jobs = await EmailInvitation.find({ kind: 'reminder', deliveryId: job.deliveryId })
+        .select('status attempts lastError sentAt')
+        .lean();
+    if (jobs.length === 0) return;
+    const summary = summarizeReminderJobs(jobs);
+    const update = {
+        'reminder.status': summary.status,
+        'reminder.attempts': summary.attempts,
+        'reminder.lastError': summary.lastError || null,
+    };
+    if (summary.sentAt) update['reminder.sentAt'] = summary.sentAt;
+    await Room.updateOne({ _id: job.roomId, 'reminder.deliveryId': job.deliveryId }, { $set: update });
+}
+
 async function processJob(job) {
     try {
         const info = await sendRoomInvitationEmail({
@@ -64,6 +103,7 @@ async function processJob(job) {
         job.sentAt = new Date();
         job.lastError = undefined;
         await job.save();
+        await syncReminderStatus(job);
         log.info(job.kind === 'reminder' ? 'Reminder sent' : 'Invitation sent', {
             to: job.recipient,
             room: job.room,
@@ -79,6 +119,7 @@ async function processJob(job) {
             job.nextAttemptAt = new Date(Date.now() + delay);
         }
         await job.save();
+        await syncReminderStatus(job);
         const level = reachedMax ? 'error' : 'warn';
         log[level]('Invitation send failed', {
             to: job.recipient,
@@ -116,10 +157,19 @@ async function tick() {
  */
 async function recoverInflight() {
     try {
+        const inflightReminders = await EmailInvitation.find({ status: 'sending', kind: 'reminder' })
+            .select('roomId deliveryId')
+            .lean();
         const res = await EmailInvitation.updateMany(
             { status: 'sending' },
             { $set: { status: 'pending', nextAttemptAt: new Date() } }
         );
+        for (const reminder of inflightReminders) {
+            await Room.updateOne(
+                { _id: reminder.roomId, 'reminder.deliveryId': reminder.deliveryId },
+                { $set: { 'reminder.status': 'retrying', 'reminder.lastError': 'Delivery interrupted; retrying' } }
+            );
+        }
         if (res.modifiedCount > 0) {
             log.warn('Recovered in-flight invitation jobs', { count: res.modifiedCount });
         }
@@ -157,4 +207,4 @@ function stop() {
     }
 }
 
-module.exports = { enqueue, start, stop };
+module.exports = { enqueue, start, stop, summarizeReminderJobs };

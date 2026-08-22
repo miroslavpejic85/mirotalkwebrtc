@@ -1,6 +1,7 @@
 'use strict';
 
 const Room = require('../models/room');
+const crypto = require('crypto');
 const User = require('../models/users');
 const EmailInvitation = require('../models/emailInvitation');
 const utils = require('../common/utils');
@@ -315,11 +316,12 @@ async function setRoomReminder(req, res) {
         const auth = await ensureOwnerOrAdmin(req, res, room.userId);
         if (!auth.ok) return;
 
-        const { enabled, offsetMinutes, timezoneOffset, recipients, subject, message } = req.body || {};
+        const { enabled, offsetMinutes, timezoneOffset, timezone, recipients, subject, message } = req.body || {};
         if (enabled === false) {
             room.reminder = {
                 ...(room.reminder ? room.reminder.toObject() : {}),
                 enabled: false,
+                status: 'canceled',
             };
             await room.save();
             return res.status(200).json({ message: 'Room reminder disabled', reminder: room.reminder });
@@ -329,6 +331,9 @@ async function setRoomReminder(req, res) {
         }
 
         const normalizedOffset = Number(offsetMinutes);
+        if (!Number.isInteger(normalizedOffset) || normalizedOffset < 1 || normalizedOffset > 10080) {
+            return res.status(400).json({ message: 'Reminder must be between 1 minute and 7 days' });
+        }
         const normalizedTimezoneOffset =
             timezoneOffset === undefined || timezoneOffset === null || timezoneOffset === ''
                 ? new Date().getTimezoneOffset()
@@ -358,6 +363,10 @@ async function setRoomReminder(req, res) {
             enabled: true,
             offsetMinutes: normalizedOffset,
             timezoneOffset: normalizedTimezoneOffset,
+            timezone: typeof timezone === 'string' ? timezone.slice(0, 100) : undefined,
+            deliveryId: crypto.randomUUID(),
+            status: 'scheduled',
+            attempts: 0,
             recipients: classified.valid,
             subject: (
                 (typeof subject === 'string' && subject.trim()) ||
@@ -366,6 +375,7 @@ async function setRoomReminder(req, res) {
             message: typeof message === 'string' ? message.slice(0, 2000) : undefined,
             inviterName: req.user?.username || req.user?.email,
             scheduledFor,
+            queuedAt: null,
             sentAt: null,
             lastError: null,
         };

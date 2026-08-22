@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.47
+ * @version 1.4.50
  */
 
 const userAgent = navigator.userAgent;
@@ -1719,7 +1719,10 @@ function getRow(obj) {
     const recurring = obj.recurring && obj.recurring.enabled ? obj.recurring : null;
     window.__roomRecurring = window.__roomRecurring || {};
     window.__roomRecurring[obj._id] = recurring;
-    const reminder = obj.reminder && obj.reminder.enabled ? obj.reminder : null;
+    const reminder =
+        obj.reminder && (obj.reminder.enabled || (obj.reminder.status && obj.reminder.status !== 'canceled'))
+            ? obj.reminder
+            : null;
     window.__roomReminder = window.__roomReminder || {};
     window.__roomReminder[obj._id] = reminder;
     const automationBadges = [];
@@ -1729,10 +1732,30 @@ function getRow(obj) {
         );
     }
     if (reminder) {
-        const reminderAt = new Date(reminder.scheduledFor).toLocaleString();
-        automationBadges.push(
-            `<button id="${obj._id}_reminder" type="button" class="recurring-badge reminder-badge" onclick="disableRoomReminder('${obj._id}')" data-tippy="Reminder scheduled for ${reminderAt}. Click to cancel"><i class="uil uil-bell"></i>Reminder</button>`
-        );
+        const status = reminder.status || (reminder.enabled ? 'scheduled' : 'sent');
+        const reminderAt = reminder.scheduledFor ? new Date(reminder.scheduledFor).toLocaleString() : '';
+        const attempts = Number(reminder.attempts) || 0;
+        const tooltip =
+            status === 'scheduled'
+                ? `Reminder scheduled for ${reminderAt}. Click to cancel`
+                : status === 'sent'
+                  ? `Reminder sent${reminder.sentAt ? ` at ${new Date(reminder.sentAt).toLocaleString()}` : ''}`
+                  : status === 'retrying'
+                    ? `Reminder delivery retrying after ${attempts} attempt${attempts === 1 ? '' : 's'}`
+                    : status === 'failed'
+                      ? `Reminder delivery failed${reminder.lastError ? `: ${reminder.lastError}` : ''}`
+                      : 'Reminder queued for delivery';
+        if (status === 'scheduled') {
+            automationBadges.push(
+                `<button id="${obj._id}_reminder" type="button" class="recurring-badge reminder-badge" onclick="disableRoomReminder('${obj._id}')" data-tippy="${escapeHtml(tooltip)}"><i class="uil uil-bell"></i>Reminder</button>`
+            );
+        } else if (status !== 'canceled') {
+            const icon =
+                status === 'sent' ? 'uil-check' : status === 'failed' ? 'uil-exclamation-triangle' : 'uil-clock';
+            automationBadges.push(
+                `<span id="${obj._id}_reminder" class="recurring-badge reminder-badge-${status}" data-tippy="${escapeHtml(tooltip)}"><i class="uil ${icon}"></i>${status}</span>`
+            );
+        }
     }
     const automationCell = automationBadges.length
         ? automationBadges.join('')
@@ -1800,6 +1823,13 @@ function getRow(obj) {
                 `<button id="${obj._id}_send_sms" class="action-dropdown-item" onclick="sendSmSInvitation('${obj._id}'); closeActionDropdown(this);"><i class="uil uil-comment-alt-message"></i> Send SMS</button>`
             );
         }
+
+        actionItems.push(`<div class="action-dropdown-divider"></div>`);
+        actionItems.push(
+            `<button class="action-dropdown-item" onclick="addRoomToGoogleCalendar('${obj._id}'); closeActionDropdown(this);"><i class="uil uil-google"></i> Google Calendar</button>`,
+            `<button class="action-dropdown-item" onclick="addRoomToOutlook('${obj._id}'); closeActionDropdown(this);"><i class="uil uil-microsoft"></i> Outlook Calendar</button>`,
+            `<button class="action-dropdown-item" onclick="downloadRoomIcs('${obj._id}'); closeActionDropdown(this);"><i class="uil uil-calendar-alt"></i> Download .ics</button>`
+        );
 
         if (config.BUTTONS.joinExternal) {
             if (actionItems.length > 0) actionItems.push(`<div class="action-dropdown-divider"></div>`);
@@ -2056,6 +2086,88 @@ function sendEmail(id) {
     document.location = 'mailto:' + data.email + '?subject=' + emailSubject + '&body=' + emailBody;
 }
 
+function getRoomCalendarEvent(id) {
+    const data = getRowValues(id);
+    const start = new Date(`${data.date}T${data.time}:00`);
+    if (Number.isNaN(start.getTime())) return null;
+    const end = new Date(start.getTime() + (Number(data.duration) || DEFAULT_DURATION_MIN) * 60000);
+    const roomUrl = getRoomURL(data, false);
+    return {
+        data,
+        start,
+        end,
+        roomUrl,
+        title: `MiroTalk ${data.type} meeting: ${data.tag || data.room}`,
+        description: `Join: ${roomUrl}`,
+    };
+}
+
+function formatCalendarLocal(date) {
+    const pad = (value) => String(value).padStart(2, '0');
+    return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}T${pad(date.getHours())}${pad(date.getMinutes())}00`;
+}
+
+function addRoomToGoogleCalendar(id) {
+    const event = getRoomCalendarEvent(id);
+    if (!event) return popupMessage('warning', 'Save a valid room date and time first');
+    const params = new URLSearchParams({
+        action: 'TEMPLATE',
+        text: event.title,
+        dates: `${formatCalendarLocal(event.start)}/${formatCalendarLocal(event.end)}`,
+        details: event.description,
+        location: event.roomUrl,
+    });
+    openURL(`https://calendar.google.com/calendar/render?${params.toString()}`, true);
+}
+
+function addRoomToOutlook(id) {
+    const event = getRoomCalendarEvent(id);
+    if (!event) return popupMessage('warning', 'Save a valid room date and time first');
+    const localIso = (date) =>
+        `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}T${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:00`;
+    const params = new URLSearchParams({
+        path: '/calendar/action/compose',
+        rru: 'addevent',
+        subject: event.title,
+        startdt: localIso(event.start),
+        enddt: localIso(event.end),
+        body: event.description,
+        location: event.roomUrl,
+    });
+    openURL(`https://outlook.live.com/calendar/0/deeplink/compose?${params.toString()}`, true);
+}
+
+function downloadRoomIcs(id) {
+    const event = getRoomCalendarEvent(id);
+    if (!event) return popupMessage('warning', 'Save a valid room date and time first');
+    const escapeIcs = (value) =>
+        String(value).replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;');
+    const content = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//MiroTalk//Room//EN',
+        'BEGIN:VEVENT',
+        `UID:${event.data.room}-${formatCalendarLocal(event.start)}@mirotalk.local`,
+        `DTSTAMP:${new Date()
+            .toISOString()
+            .replace(/[-:]/g, '')
+            .replace(/\.\d{3}/, '')}`,
+        `DTSTART:${formatCalendarLocal(event.start)}`,
+        `DTEND:${formatCalendarLocal(event.end)}`,
+        `SUMMARY:${escapeIcs(event.title)}`,
+        `DESCRIPTION:${escapeIcs(event.description)}`,
+        `LOCATION:${escapeIcs(event.roomUrl)}`,
+        'END:VEVENT',
+        'END:VCALENDAR',
+    ].join('\r\n');
+    const url = URL.createObjectURL(new Blob([content], { type: 'text/calendar;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${event.data.room || 'mirotalk-meeting'}.ics`;
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
 // Server-side invitation flow (shown only when EMAIL_INVITATION_SERVER_SIDE=true).
 // Opens a Swal modal accepting a single recipient, a comma/newline-separated list,
 // or a CSV upload. Sends to the backend which queues + dispatches via SMTP.
@@ -2110,7 +2222,14 @@ function openServerInvitationModal(id) {
     if (remindersEnabled && data.date && data.time) {
         reminderRow.hidden = false;
         if (existingReminder) {
-            formNode.querySelector('#srvInvReminder').value = String(existingReminder.offsetMinutes || '');
+            const existingOffset = Number(existingReminder.offsetMinutes);
+            if ([10, 60, 1440].includes(existingOffset)) {
+                formNode.querySelector('#srvInvReminder').value = String(existingOffset);
+            } else if (existingOffset) {
+                formNode.querySelector('#srvInvReminder').value = 'custom';
+                formNode.querySelector('#srvInvReminderCustom').value = String(existingOffset);
+                formNode.querySelector('#srvInvReminderCustomRow').hidden = false;
+            }
         }
     }
 
@@ -2131,6 +2250,15 @@ function openServerInvitationModal(id) {
             const recipientsArea = document.getElementById('srvInvRecipients');
             const dropZone = document.getElementById('srvInvDrop');
             const dropFileLabel = document.getElementById('srvInvDropFile');
+            const reminderSelect = document.getElementById('srvInvReminder');
+            const reminderCustomRow = document.getElementById('srvInvReminderCustomRow');
+
+            if (reminderSelect) {
+                reminderSelect.addEventListener('change', () => {
+                    reminderCustomRow.hidden = reminderSelect.value !== 'custom';
+                    if (!reminderCustomRow.hidden) document.getElementById('srvInvReminderCustom').focus();
+                });
+            }
 
             const importCsvFile = (file) => {
                 if (!file) return;
@@ -2186,9 +2314,23 @@ function openServerInvitationModal(id) {
             const recurringEl = document.getElementById('srvInvRecurring');
             const recurring = !!(recurringEl && recurringEl.checked);
             const reminderEl = document.getElementById('srvInvReminder');
-            const reminderOffset = reminderEl && reminderEl.value ? Number(reminderEl.value) : null;
+            const customReminderEl = document.getElementById('srvInvReminderCustom');
+            const reminderOffset =
+                reminderEl && reminderEl.value === 'custom'
+                    ? Number(customReminderEl.value)
+                    : reminderEl && reminderEl.value
+                      ? Number(reminderEl.value)
+                      : null;
             if (!recipients) {
                 Swal.showValidationMessage('Please enter at least one recipient');
+                return false;
+            }
+            if (
+                reminderEl &&
+                reminderEl.value === 'custom' &&
+                (!Number.isInteger(reminderOffset) || reminderOffset < 1 || reminderOffset > 10080)
+            ) {
+                Swal.showValidationMessage('Custom reminder must be between 1 minute and 7 days');
                 return false;
             }
             return { recipients, subject, message, recurring, reminderOffset };
@@ -2242,6 +2384,7 @@ function openServerInvitationModal(id) {
                             enabled: true,
                             offsetMinutes: reminderOffset,
                             timezoneOffset: meetingDate.getTimezoneOffset(),
+                            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                             recipients: payload.recipients,
                             message: payload.message,
                         });
@@ -2539,7 +2682,8 @@ function disableRecurringInvitation(id, options = {}) {
 function formatReminderOffset(offsetMinutes) {
     if (offsetMinutes === 10) return '10 minutes before the meeting';
     if (offsetMinutes === 60) return '1 hour before the meeting';
-    return '1 day before the meeting';
+    if (offsetMinutes === 1440) return '1 day before the meeting';
+    return `${formatDurationLabel(offsetMinutes)} before the meeting`;
 }
 
 function disableRoomReminder(id) {
@@ -2963,6 +3107,42 @@ function renderDashboardStats(data) {
         statC2CVal.textContent = data.myRoomsByType.C2C;
         statBROVal.textContent = data.myRoomsByType.BRO;
     }
+    renderUpcomingReminders(data.upcomingReminders || []);
+}
+
+function renderUpcomingReminders(reminders) {
+    const section = document.getElementById('upcomingRemindersSection');
+    const list = document.getElementById('upcomingRemindersList');
+    if (!section || !list) return;
+    section.hidden = reminders.length === 0;
+    list.replaceChildren();
+
+    reminders.forEach((reminder) => {
+        const item = document.createElement('div');
+        item.className = 'upcoming-reminder-item';
+
+        const room = document.createElement('div');
+        room.className = 'upcoming-reminder-room';
+        const roomName = document.createElement('strong');
+        roomName.textContent = reminder.tag || reminder.room;
+        const roomType = document.createElement('small');
+        roomType.textContent = `${reminder.type} · ${reminder.room}`;
+        room.append(roomName, roomType);
+
+        const delivery = document.createElement('div');
+        delivery.className = 'upcoming-reminder-time';
+        delivery.textContent = new Date(reminder.scheduledFor).toLocaleString();
+
+        const offset = document.createElement('div');
+        offset.className = 'upcoming-reminder-meta';
+        offset.textContent = formatReminderOffset(Number(reminder.offsetMinutes));
+
+        const recipients = document.createElement('div');
+        recipients.className = 'upcoming-reminder-meta';
+        recipients.textContent = `${reminder.recipientCount} recipient${reminder.recipientCount === 1 ? '' : 's'}`;
+        item.append(room, delivery, offset, recipients);
+        list.appendChild(item);
+    });
 }
 
 function openURL(url, blank = false) {
@@ -3004,14 +3184,21 @@ function getRoomURL(data, bro = true) {
 
 function getRowValues(id) {
     const durationEl = document.getElementById(id + '_duration');
+    const date = document.getElementById(id + '_date').value;
+    const time = document.getElementById(id + '_time').value;
+    const meetingDate = new Date(`${date}T${time}:00`);
     return {
         userId: userId,
         type: document.getElementById(id + '_type').value,
         tag: document.getElementById(id + '_tag').value,
         email: document.getElementById(id + '_email').value.toLowerCase(),
         phone: document.getElementById(id + '_phone').value,
-        date: document.getElementById(id + '_date').value,
-        time: document.getElementById(id + '_time').value,
+        date,
+        time,
+        timezoneOffset: Number.isNaN(meetingDate.getTime())
+            ? new Date().getTimezoneOffset()
+            : meetingDate.getTimezoneOffset(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         duration: durationEl && durationEl.value !== '' ? Number(durationEl.value) : null,
         room: document.getElementById(id + '_room').value,
     };

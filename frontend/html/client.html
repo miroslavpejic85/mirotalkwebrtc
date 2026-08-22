@@ -385,6 +385,11 @@
                         </div>
                     </div>
 
+                    <div id="upcomingRemindersSection" class="stats-section" hidden>
+                        <h3 class="stats-section-title"><i class="uil uil-bell"></i> Upcoming Reminders</h3>
+                        <div id="upcomingRemindersList" class="upcoming-reminders-list"></div>
+                    </div>
+
                     <!-- Room Types Section -->
                     <div id="statsTypesSection" class="stats-section">
                         <h3 class="stats-section-title">
@@ -1229,7 +1234,12 @@
                             <option value="10">10 minutes before</option>
                             <option value="60">1 hour before</option>
                             <option value="1440">1 day before</option>
+                            <option value="custom">Custom</option>
                         </select>
+                        <div id="srvInvReminderCustomRow" class="srv-inv-reminder-custom" hidden>
+                            <input id="srvInvReminderCustom" type="number" min="1" max="10080" placeholder="Minutes" />
+                            <span>minutes before</span>
+                        </div>
                         <small>The same recipients will receive one email before the meeting.</small>
                     </div>
                 </div>
