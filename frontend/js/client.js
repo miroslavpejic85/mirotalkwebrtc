@@ -516,6 +516,7 @@ function showDemoAccountPrompt(currentUser) {
                 showCancelButton: true,
                 reverseButtons: true,
                 allowOutsideClick: false,
+                customClass: { cancelButton: 'demo-explore-button' },
                 showClass: { popup: 'animate__animated animate__fadeInDown' },
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             }).then((result) => {

@@ -2468,6 +2468,10 @@ tr:nth-child(even) {
     font-weight: 500 !important;
 }
 
+.swal2-cancel.demo-explore-button {
+    background-color: var(--accent-color) !important;
+}
+
 .swal2-deny {
     border-radius: 8px !important;
     font-size: 14px !important;
