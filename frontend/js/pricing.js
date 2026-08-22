@@ -1,5 +1,29 @@
 'use strict';
 
+function initCursorLight() {
+    const supportsPointerLight = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!supportsPointerLight || prefersReducedMotion) return;
+
+    const light = document.createElement('div');
+    light.className = 'cursor-light pricing-cursor-light';
+    light.setAttribute('aria-hidden', 'true');
+    document.body.prepend(light);
+
+    document.addEventListener(
+        'pointermove',
+        (event) => {
+            light.style.setProperty('--cursor-light-x', `${event.clientX}px`);
+            light.style.setProperty('--cursor-light-y', `${event.clientY}px`);
+            light.classList.add('is-visible');
+        },
+        { passive: true }
+    );
+    document.documentElement.addEventListener('mouseleave', () => light.classList.remove('is-visible'));
+}
+
+initCursorLight();
+
 function loadPricingAppConfig(config) {
     if (config?.app?.Name) {
         document.querySelectorAll('[data-app-name]').forEach((element) => {

@@ -3,11 +3,26 @@
 --------------------------------------------------------------*/
 
 body.pricing-page {
+    --cursor-light-color: rgba(67, 159, 255, 0.055);
     display: block;
     min-height: 100vh;
     background:
         radial-gradient(1000px 520px at 50% -10%, rgba(55, 109, 249, 0.16), transparent 60%), var(--primary-color);
     color: var(--text-color);
+}
+
+.pricing-cursor-light {
+    background: radial-gradient(
+        620px circle at var(--cursor-light-x, 50vw) var(--cursor-light-y, 30vh),
+        var(--cursor-light-color),
+        transparent 72%
+    );
+}
+
+.pricing-page > .landing-nav,
+.pricing-page > .pricing-main {
+    position: relative;
+    z-index: 1;
 }
 
 .pricing-page .nav-links > a.active {
@@ -295,6 +310,7 @@ body.pricing-page {
 
 /* Light theme uses the same localStorage.mode preference as Home and the dashboard. */
 html[data-theme='light'] body.pricing-page {
+    --cursor-light-color: rgba(36, 94, 219, 0.04);
     background:
         radial-gradient(1000px 520px at 50% -10%, rgba(36, 94, 219, 0.11), transparent 60%), var(--primary-color);
 }
