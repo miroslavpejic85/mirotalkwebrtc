@@ -13,6 +13,50 @@ body {
 }
 
 /*--------------------------------------------------------------
+# Page Loading Overlay
+--------------------------------------------------------------*/
+
+.page-loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 15, 28, 0.42);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition:
+        opacity 0.2s ease,
+        visibility 0.2s ease;
+}
+
+.page-loading-overlay[hidden] {
+    display: none;
+}
+
+.page-loading-spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid rgba(255, 255, 255, 0.28);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: page-loading-spin 0.7s linear infinite;
+}
+
+@keyframes page-loading-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .page-loading-spinner {
+        animation-duration: 1.4s;
+    }
+}
+
+/*--------------------------------------------------------------
 # Google Translate
 --------------------------------------------------------------*/
 

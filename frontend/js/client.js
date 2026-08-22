@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.53
+ * @version 1.4.54
  */
 
 const userAgent = navigator.userAgent;
@@ -26,6 +26,7 @@ const topModeToggle = document.getElementById('topModeToggle');
 const demoBadge = document.getElementById('demoBadge');
 const sidebar = body.querySelector('nav');
 const sidebarToggle = body.querySelector('.sidebar-toggle');
+const pageLoadingOverlay = document.getElementById('pageLoadingOverlay');
 
 const navOverview = document.getElementById('navOverview');
 const navDash = document.getElementById('navDash');
@@ -586,8 +587,10 @@ function handleUserRoles() {
             toggleElements();
             hideElements();
             showDataTable();
+            pageLoadingOverlay.hidden = true;
         })
         .catch((err) => {
+            pageLoadingOverlay.hidden = true;
             console.error('[API] - USER ROLES GET ERROR', err);
             popupMessage('error', `USER ROLES GET error: ${err.message}`);
         });

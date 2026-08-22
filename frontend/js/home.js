@@ -18,6 +18,7 @@ const loginUsernameInput = document.getElementById('loginUsernameInput');
 const loginEmailIdInput = document.getElementById('loginEmailIdInput');
 const loginPasswordIdInput = document.getElementById('loginPasswordIdInput');
 const loginBtn = document.getElementById('loginBtn');
+const pageLoadingOverlay = document.getElementById('pageLoadingOverlay');
 
 // tabs
 const tabLogin = document.getElementById('tabLogin');
@@ -267,10 +268,12 @@ function validateInput(...inputs) {
 function signupOrLogin(data) {
     window.localStorage.name = data.username;
     window.localStorage.email = data.email;
+    pageLoadingOverlay.hidden = false;
     userLogin(data)
         .then((res) => {
             console.log('[API] - USER LOGIN RESPONSE', res);
             if (res.message) {
+                pageLoadingOverlay.hidden = true;
                 res.success ? popupMessage('success', res.message) : popupMessage('warning', res.message);
                 if (res.message.includes('Pending') || res.message.includes('CodeCanyon')) {
                     switchTab('login');
@@ -283,6 +286,7 @@ function signupOrLogin(data) {
             }
         })
         .catch((err) => {
+            pageLoadingOverlay.hidden = true;
             console.error('[API] - USER LOGIN ERROR', err);
             popupMessage('error', `⚠️ API USER LOGIN error: ${err.message}`);
         });
