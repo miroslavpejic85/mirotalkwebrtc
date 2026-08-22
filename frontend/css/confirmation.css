@@ -1,3 +1,74 @@
+.auth-page {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    align-items: stretch;
+    justify-items: center;
+    background:
+        radial-gradient(900px 600px at 0% 0%, rgba(55, 109, 249, 0.1), transparent 70%),
+        radial-gradient(800px 600px at 100% 100%, rgba(67, 159, 255, 0.06), transparent 70%), var(--primary-color);
+    color: var(--text-color);
+}
+
+.auth-header {
+    box-sizing: border-box;
+    display: flex;
+    width: min(90vw, 1240px);
+    padding: 20px 0;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.auth-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    font-size: 19px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.auth-brand img {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+}
+
+.auth-theme {
+    box-sizing: border-box;
+    display: inline-flex;
+    width: 38px;
+    height: 38px;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.75);
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 8px;
+    box-shadow: none;
+    cursor: pointer;
+}
+
+.auth-theme:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: none;
+    transform: none;
+}
+
+.auth-page .main.single-form {
+    align-self: center;
+    margin: 24px 0 72px;
+}
+
+.auth-brand:focus-visible,
+.auth-theme:focus-visible {
+    outline: 3px solid var(--hover-ring);
+    outline-offset: 3px;
+}
+
 .confirmation-status {
     display: none;
     flex-direction: column;
@@ -143,6 +214,26 @@ html[data-theme='light'] .primary-link {
     color: var(--text-light);
 }
 
+html[data-theme='light'] .auth-page {
+    background:
+        radial-gradient(900px 600px at 0% 0%, rgba(36, 94, 219, 0.07), transparent 70%),
+        radial-gradient(800px 600px at 100% 100%, rgba(67, 159, 255, 0.04), transparent 70%), var(--primary-color);
+}
+
+html[data-theme='light'] .auth-brand {
+    color: #172033;
+}
+
+html[data-theme='light'] .auth-theme {
+    color: #556176;
+    border-color: #cdd4df;
+}
+
+html[data-theme='light'] .auth-theme:hover {
+    color: #172033;
+    background: rgba(36, 94, 219, 0.07);
+}
+
 html[data-theme='light'] .form-status.success {
     color: #14783d;
 }
@@ -160,6 +251,15 @@ html[data-theme='light'] .form-status.error {
 }
 
 @media screen and (max-width: 480px) {
+    .auth-header {
+        width: 88vw;
+        padding: 16px 0;
+    }
+
+    .auth-page .main.single-form {
+        margin: 16px 0 56px;
+    }
+
     .main.single-form {
         padding: 28px 0;
     }

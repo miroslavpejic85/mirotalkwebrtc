@@ -39,9 +39,10 @@
         <link rel="stylesheet" href="../css/confirmation.css" />
 
         <script async src="../js/stats.js"></script>
+        <script defer src="../js/auth-page.js"></script>
         <script defer src="../js/confirmation.js"></script>
     </head>
-    <body>
+    <body class="auth-page">
         <noscript>
             <style>
                 #statusError {
@@ -49,7 +50,16 @@
                 }
             </style>
         </noscript>
-        <div class="main single-form">
+        <header class="auth-header">
+            <a class="auth-brand" href="/" aria-label="Return to home">
+                <img id="authBrandLogo" src="../Images/logo.png" alt="MiroTalk logo" />
+                <span id="authBrandName">MiroTalk</span>
+            </a>
+            <button id="authModeToggle" type="button" class="auth-theme" aria-label="Switch to light mode">
+                <i class="uil uil-sun" aria-hidden="true"></i>
+            </button>
+        </header>
+        <main class="main single-form">
             <div class="signup">
                 <!-- Success -->
                 <div id="statusSuccess" class="confirmation-status">
@@ -95,6 +105,6 @@
                     >
                 </div>
             </div>
-        </div>
+        </main>
     </body>
 </html>
