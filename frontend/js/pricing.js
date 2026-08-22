@@ -1,21 +1,5 @@
 'use strict';
 
-const pricingModeToggle = document.getElementById('pricingModeToggle');
-
-function setPricingTheme(mode) {
-    const isLight = mode === 'light';
-    document.documentElement.dataset.theme = isLight ? 'light' : 'dark';
-    window.localStorage.mode = isLight ? 'light' : 'dark';
-    pricingModeToggle.querySelector('i').className = isLight ? 'uil uil-moon' : 'uil uil-sun';
-    pricingModeToggle.setAttribute('aria-label', isLight ? 'Switch to dark mode' : 'Switch to light mode');
-    pricingModeToggle.title = isLight ? 'Dark mode' : 'Light mode';
-}
-
-setPricingTheme(document.documentElement.dataset.theme);
-pricingModeToggle.addEventListener('click', () => {
-    setPricingTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
-});
-
 function loadPricingAppConfig(config) {
     if (config?.app?.Name) {
         document.querySelectorAll('[data-app-name]').forEach((element) => {
