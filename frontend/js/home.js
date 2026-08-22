@@ -42,6 +42,46 @@ const homeModeToggle = document.getElementById('homeModeToggle');
 // support
 const supportBtn = document.getElementById('supportBtn');
 
+function initCursorLight() {
+    const supportsPointerLight = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!supportsPointerLight || prefersReducedMotion) return;
+
+    const light = document.createElement('div');
+    light.className = 'cursor-light';
+    light.setAttribute('aria-hidden', 'true');
+    document.body.prepend(light);
+
+    let currentX = window.innerWidth / 2;
+    let currentY = window.innerHeight * 0.35;
+    let targetX = currentX;
+    let targetY = currentY;
+    let animationFrame = null;
+
+    function renderLight() {
+        currentX += (targetX - currentX) * 0.14;
+        currentY += (targetY - currentY) * 0.14;
+        light.style.setProperty('--cursor-light-x', `${currentX}px`);
+        light.style.setProperty('--cursor-light-y', `${currentY}px`);
+
+        if (Math.abs(targetX - currentX) > 0.1 || Math.abs(targetY - currentY) > 0.1) {
+            animationFrame = window.requestAnimationFrame(renderLight);
+        } else {
+            animationFrame = null;
+        }
+    }
+
+    document.addEventListener('pointermove', (event) => {
+        targetX = event.clientX;
+        targetY = event.clientY;
+        light.classList.add('is-visible');
+        if (!animationFrame) animationFrame = window.requestAnimationFrame(renderLight);
+    });
+    document.documentElement.addEventListener('mouseleave', () => light.classList.remove('is-visible'));
+}
+
+initCursorLight();
+
 function setHomeTheme(mode) {
     const isLight = mode === 'light';
     document.documentElement.dataset.theme = isLight ? 'light' : 'dark';

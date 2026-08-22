@@ -524,6 +524,7 @@ button:active {
 --------------------------------------------------------------*/
 
 body.home {
+    --cursor-light-color: rgba(67, 159, 255, 0.1);
     display: block;
     min-height: 100vh;
     padding: 0;
@@ -532,6 +533,29 @@ body.home {
         radial-gradient(1200px 900px at 105% -10%, rgba(67, 159, 255, 0.07), transparent 68%), var(--primary-color);
     background-repeat: no-repeat;
     color: var(--text-color);
+}
+
+.cursor-light {
+    position: fixed;
+    z-index: 0;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(
+        480px circle at var(--cursor-light-x, 50vw) var(--cursor-light-y, 35vh),
+        var(--cursor-light-color),
+        transparent 70%
+    );
+    transition: opacity 0.4s ease;
+}
+
+.cursor-light.is-visible {
+    opacity: 1;
+}
+
+body.home > :not(.cursor-light):not(.page-loading-overlay) {
+    position: relative;
+    z-index: 1;
 }
 
 /* Top navigation */
@@ -1066,9 +1090,16 @@ html[data-theme='light'] ::-webkit-scrollbar-thumb {
 }
 
 html[data-theme='light'] body.home {
+    --cursor-light-color: rgba(36, 94, 219, 0.07);
     background:
         radial-gradient(1400px 900px at 0% -20%, rgba(36, 94, 219, 0.08), transparent 70%),
         radial-gradient(1200px 900px at 105% -10%, rgba(67, 159, 255, 0.05), transparent 68%), var(--primary-color);
+}
+
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+    .cursor-light {
+        display: none;
+    }
 }
 
 html[data-theme='light'] .landing-nav .brand,
