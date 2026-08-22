@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.61
+ * @version 1.4.62
  */
 
 const userAgent = navigator.userAgent;
@@ -537,7 +537,10 @@ function showDemoAccountPrompt(currentUser) {
                 showCancelButton: true,
                 reverseButtons: true,
                 allowOutsideClick: false,
-                customClass: { cancelButton: 'demo-explore-button' },
+                customClass: {
+                    confirmButton: 'demo-account-button',
+                    cancelButton: 'demo-account-button demo-explore-button',
+                },
                 showClass: { popup: 'animate__animated animate__fadeInDown' },
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             }).then((result) => {
