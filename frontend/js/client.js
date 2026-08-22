@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.52
+ * @version 1.4.53
  */
 
 const userAgent = navigator.userAgent;
@@ -1806,7 +1806,7 @@ function getRow(obj) {
     const inlineIcons = [];
     if (config.BUTTONS.joinInternal && !isPast) {
         inlineIcons.push(
-            `<i id="${obj._id}_joinInternal" onclick="joinRoom('${obj._id}')" class="uil uil-play action-icon" data-tippy="Join"></i>`
+            `<i id="${obj._id}_joinInternal" onclick="joinRoom('${obj._id}')" class="uil uil-play action-icon" data-tippy="Join here"></i>`
         );
     }
     if (config.BUTTONS.updateRow && !isPast) {
@@ -1878,7 +1878,7 @@ function getRow(obj) {
 
         if (config.BUTTONS.joinExternal) {
             actionItems.push(
-                `<button id="${obj._id}_joinExternal" class="action-dropdown-item" onclick="joinRoom('${obj._id}', true); closeActionDropdown(this);"><i class="uil uil-external-link-alt"></i> Join External</button>`
+                `<button id="${obj._id}_joinExternal" class="action-dropdown-item" onclick="joinRoom('${obj._id}', true); closeActionDropdown(this);"><i class="uil uil-external-link-alt"></i> Join via link</button>`
             );
         }
     }
