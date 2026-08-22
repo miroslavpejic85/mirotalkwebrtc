@@ -52,31 +52,15 @@ function initCursorLight() {
     light.setAttribute('aria-hidden', 'true');
     document.body.prepend(light);
 
-    let currentX = window.innerWidth / 2;
-    let currentY = window.innerHeight * 0.35;
-    let targetX = currentX;
-    let targetY = currentY;
-    let animationFrame = null;
-
-    function renderLight() {
-        currentX += (targetX - currentX) * 0.14;
-        currentY += (targetY - currentY) * 0.14;
-        light.style.setProperty('--cursor-light-x', `${currentX}px`);
-        light.style.setProperty('--cursor-light-y', `${currentY}px`);
-
-        if (Math.abs(targetX - currentX) > 0.1 || Math.abs(targetY - currentY) > 0.1) {
-            animationFrame = window.requestAnimationFrame(renderLight);
-        } else {
-            animationFrame = null;
-        }
-    }
-
-    document.addEventListener('pointermove', (event) => {
-        targetX = event.clientX;
-        targetY = event.clientY;
-        light.classList.add('is-visible');
-        if (!animationFrame) animationFrame = window.requestAnimationFrame(renderLight);
-    });
+    document.addEventListener(
+        'pointermove',
+        (event) => {
+            light.style.setProperty('--cursor-light-x', `${event.clientX}px`);
+            light.style.setProperty('--cursor-light-y', `${event.clientY}px`);
+            light.classList.add('is-visible');
+        },
+        { passive: true }
+    );
     document.documentElement.addEventListener('mouseleave', () => light.classList.remove('is-visible'));
 }
 
