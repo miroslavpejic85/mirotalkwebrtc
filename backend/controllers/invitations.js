@@ -9,6 +9,7 @@ const emailUtils = require('../common/emailUtils');
 const emailQueue = require('../lib/emailQueue');
 const { computeReminderAt } = require('../lib/roomReminders');
 const { normalizeTimezone, zonedDateTimeToUtc } = require('../common/schedule');
+const { ensureCalendarIdentity } = require('../lib/calendarLifecycle');
 const config = require('../config');
 const { isDemoUser } = require('../middleware/saas');
 const logs = require('../common/logs');
@@ -87,6 +88,7 @@ async function sendRoomInvitation(req, res) {
 
         const auth = await ensureOwnerOrAdmin(req, res, room.userId);
         if (!auth.ok) return; // response already sent
+        await ensureCalendarIdentity(room);
 
         // Parse & validate recipients (single string, comma/newline list, or array).
         const parsed = emailUtils.parseRecipients(recipients);
@@ -154,6 +156,8 @@ async function sendRoomInvitation(req, res) {
             time: room.time,
             timezone: scheduleTimezone,
             startAt,
+            calendarUid: room.calendarUid,
+            calendarSequence: room.calendarSequence,
             duration: room.duration || undefined,
             subject: safeSubject,
             message: safeMessage,

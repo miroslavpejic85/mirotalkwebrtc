@@ -15,7 +15,11 @@ const mongoose = require('mongoose');
  */
 const emailInvitationSchema = new mongoose.Schema(
     {
-        kind: { type: String, enum: ['invitation', 'reminder'], default: 'invitation' },
+        kind: {
+            type: String,
+            enum: ['invitation', 'reminder', 'update', 'cancellation'],
+            default: 'invitation',
+        },
         deliveryId: { type: String, index: true },
         userId: { type: String, required: true, index: true }, // inviter
         roomId: { type: String, required: true },
@@ -26,6 +30,8 @@ const emailInvitationSchema = new mongoose.Schema(
         time: { type: String },
         timezone: { type: String },
         startAt: { type: Date },
+        calendarUid: { type: String, index: true },
+        calendarSequence: { type: Number, min: 0, default: 0 },
         // Per-room meeting duration (minutes); falls back to env default when null/undefined.
         duration: { type: Number },
         subject: { type: String, required: true },
@@ -34,7 +40,7 @@ const emailInvitationSchema = new mongoose.Schema(
         recipient: { type: String, required: true, lowercase: true, trim: true },
         status: {
             type: String,
-            enum: ['pending', 'sending', 'sent', 'failed', 'dead'],
+            enum: ['pending', 'sending', 'sent', 'failed', 'dead', 'superseded'],
             default: 'pending',
             index: true,
         },
@@ -50,5 +56,6 @@ const emailInvitationSchema = new mongoose.Schema(
 emailInvitationSchema.index({ status: 1, nextAttemptAt: 1 });
 // Daily-cap counter: count today's documents per user.
 emailInvitationSchema.index({ userId: 1, createdAt: 1 });
+emailInvitationSchema.index({ roomId: 1, recipient: 1, calendarUid: 1, calendarSequence: 1 });
 
 module.exports = mongoose.model('EmailInvitation', emailInvitationSchema);

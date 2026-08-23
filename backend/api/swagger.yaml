@@ -853,6 +853,15 @@ components:
                     format: date-time
                     description: Authoritative UTC meeting start instant derived by the server.
                     example: '2022-12-30T23:00:00.000Z'
+                calendarUid:
+                    type: string
+                    description: Stable iCalendar event identifier used for updates and cancellations.
+                    example: '550e8400-e29b-41d4-a716-446655440000@mirotalk.local'
+                calendarSequence:
+                    type: integer
+                    description: Monotonic iCalendar revision number.
+                    minimum: 0
+                    example: 2
                 duration:
                     type: integer
                     nullable: true

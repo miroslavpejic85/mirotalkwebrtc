@@ -51,6 +51,7 @@ function summarizeReminderJobs(jobs) {
     const active = jobs.filter((job) => job.status === 'pending' || job.status === 'sending');
     const failed = jobs.filter((job) => job.status === 'dead');
     const sent = jobs.filter((job) => job.status === 'sent');
+    const superseded = jobs.filter((job) => job.status === 'superseded');
     const latestError = [...jobs].reverse().find((job) => job.lastError)?.lastError;
 
     if (active.length > 0) {
@@ -64,6 +65,9 @@ function summarizeReminderJobs(jobs) {
             return value && (!latest || value > latest) ? value : latest;
         }, null);
         return { status: 'sent', attempts, sentAt, lastError: null };
+    }
+    if (superseded.length === jobs.length && superseded.length > 0) {
+        return { status: 'canceled', attempts, lastError: null };
     }
     return { status: 'queued', attempts, lastError: latestError };
 }
@@ -86,6 +90,21 @@ async function syncReminderStatus(job) {
 
 async function processJob(job) {
     try {
+        if (job.calendarUid) {
+            const newerJob = await EmailInvitation.exists({
+                roomId: job.roomId,
+                recipient: job.recipient,
+                calendarUid: job.calendarUid,
+                calendarSequence: { $gt: job.calendarSequence || 0 },
+            });
+            if (newerJob) {
+                job.status = 'superseded';
+                job.lastError = undefined;
+                await job.save();
+                await syncReminderStatus(job);
+                return;
+            }
+        }
         const info = await sendRoomInvitationEmail({
             kind: job.kind,
             to: job.recipient,
@@ -97,6 +116,8 @@ async function processJob(job) {
             time: job.time,
             timezone: job.timezone,
             startAt: job.startAt,
+            calendarUid: job.calendarUid,
+            calendarSequence: job.calendarSequence,
             durationMin: job.duration,
             inviterName: job.inviterName,
             message: job.message,
@@ -105,8 +126,14 @@ async function processJob(job) {
         job.sentAt = new Date();
         job.lastError = undefined;
         await job.save();
+        if (job.kind !== 'cancellation' && job.calendarUid) {
+            await Room.updateOne(
+                { _id: job.roomId, calendarUid: job.calendarUid },
+                { $addToSet: { calendarRecipients: job.recipient } }
+            );
+        }
         await syncReminderStatus(job);
-        log.info(job.kind === 'reminder' ? 'Reminder sent' : 'Invitation sent', {
+        log.info(`${job.kind} email sent`, {
             to: job.recipient,
             room: job.room,
             messageId: info?.messageId,

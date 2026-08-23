@@ -6,6 +6,7 @@ const emailUtils = require('../common/emailUtils');
 const emailQueue = require('./emailQueue');
 const config = require('../config');
 const { computeLastWeeklyOccurrence: computeZonedWeeklyOccurrence, getZonedParts } = require('../common/schedule');
+const { buildLegacyCalendarUid } = require('../common/calendar');
 const logs = require('../common/logs');
 
 const log = new logs('RecurringInvitations');
@@ -136,6 +137,8 @@ async function dispatchOccurrence(room, occurrence) {
         time: room.time,
         timezone: room.timezone,
         startAt: occurrence,
+        calendarUid: buildLegacyCalendarUid(room.room, occurrence, occurrenceDate, room.time),
+        calendarSequence: 0,
         duration: room.duration || undefined,
         subject,
         message,

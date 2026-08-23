@@ -2,6 +2,7 @@
 
 const logs = require('../common/logs');
 const nodemailer = require('nodemailer');
+const { buildLegacyCalendarUid, icsUtcStamp } = require('../common/calendar');
 
 const log = new logs('NodeMailer');
 
@@ -90,21 +91,6 @@ function icsFoldLine(line) {
     return out.map((seg, i) => (i === 0 ? seg : ' ' + seg)).join('\r\n');
 }
 
-// Format a Date as a UTC iCalendar timestamp: 20260520T101500Z
-function icsUtcStamp(date) {
-    const pad = (n) => String(n).padStart(2, '0');
-    return (
-        date.getUTCFullYear() +
-        pad(date.getUTCMonth() + 1) +
-        pad(date.getUTCDate()) +
-        'T' +
-        pad(date.getUTCHours()) +
-        pad(date.getUTCMinutes()) +
-        pad(date.getUTCSeconds()) +
-        'Z'
-    );
-}
-
 /**
  * Build a minimal VCALENDAR (METHOD:REQUEST) for a room invitation.
  *
@@ -118,6 +104,9 @@ function buildInvitationIcs({
     time,
     timezone,
     startAt,
+    calendarUid,
+    calendarSequence = 0,
+    calendarMethod = 'REQUEST',
     durationMin,
     inviterName,
     message,
@@ -147,8 +136,7 @@ function buildInvitationIcs({
     // Using Date.UTC keeps the math TZ-free; we then strip the Z to keep it floating.
     const endMs = hasPersistedStart
         ? persistedStart.getTime() + effectiveDuration * 60 * 1000
-        : Date.UTC(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), 0) +
-          effectiveDuration * 60 * 1000;
+        : Date.UTC(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), 0) + effectiveDuration * 60 * 1000;
     const endDate = new Date(endMs);
     const pad = (n) => String(n).padStart(2, '0');
     const dtEnd = hasPersistedStart
@@ -163,10 +151,10 @@ function buildInvitationIcs({
 
     const dtStamp = icsUtcStamp(new Date());
 
-    // Stable UID per (room + start) so calendar updates replace the prior event.
-    const uidBase = `${room || 'mirotalk'}-${dtStart}`.replace(/[^A-Za-z0-9._-]/g, '-');
-    const uidHost = (EMAIL_FROM && EMAIL_FROM.split('@')[1]) || 'mirotalk.local';
-    const uid = `${uidBase}@${uidHost}`;
+    const uid = calendarUid || buildLegacyCalendarUid(room, persistedStart, date, time);
+    const sequence = Number.isInteger(Number(calendarSequence)) ? Math.max(0, Number(calendarSequence)) : 0;
+    const method = String(calendarMethod).toUpperCase() === 'CANCEL' ? 'CANCEL' : 'REQUEST';
+    const isCancellation = method === 'CANCEL';
 
     const summary = `MiroTalk ${roomType || ''} meeting: ${room || ''}`.trim();
     const descriptionParts = [];
@@ -179,7 +167,9 @@ function buildInvitationIcs({
         ? `ORGANIZER;CN=${icsEscapeText(inviterName || 'MiroTalk')}:mailto:${EMAIL_FROM}`
         : null;
     const attendeeLine = recipient
-        ? `ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:${recipient}`
+        ? isCancellation
+            ? `ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT:mailto:${recipient}`
+            : `ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:${recipient}`
         : null;
 
     const lines = [
@@ -187,9 +177,10 @@ function buildInvitationIcs({
         'VERSION:2.0',
         'PRODID:-//MiroTalk//Invitation//EN',
         'CALSCALE:GREGORIAN',
-        'METHOD:REQUEST',
+        `METHOD:${method}`,
         'BEGIN:VEVENT',
         `UID:${uid}`,
+        `SEQUENCE:${sequence}`,
         `DTSTAMP:${dtStamp}`,
         `DTSTART:${dtStart}`,
         `DTEND:${dtEnd}`,
@@ -199,13 +190,13 @@ function buildInvitationIcs({
         roomUrl ? `URL:${icsEscapeText(roomUrl)}` : null,
         organizerLine,
         attendeeLine,
-        'STATUS:CONFIRMED',
+        `STATUS:${isCancellation ? 'CANCELLED' : 'CONFIRMED'}`,
         'TRANSP:OPAQUE',
-        'BEGIN:VALARM',
-        'ACTION:DISPLAY',
-        `DESCRIPTION:${icsEscapeText(summary)}`,
-        'TRIGGER:-PT15M',
-        'END:VALARM',
+        !isCancellation ? 'BEGIN:VALARM' : null,
+        !isCancellation ? 'ACTION:DISPLAY' : null,
+        !isCancellation ? `DESCRIPTION:${icsEscapeText(summary)}` : null,
+        !isCancellation ? 'TRIGGER:-PT15M' : null,
+        !isCancellation ? 'END:VALARM' : null,
         'END:VEVENT',
         'END:VCALENDAR',
     ]
@@ -452,6 +443,8 @@ function sendRoomInvitationEmail({
     time,
     timezone,
     startAt,
+    calendarUid,
+    calendarSequence,
     durationMin,
     inviterName,
     message,
@@ -481,11 +474,19 @@ function sendRoomInvitationEmail({
     const safeSubject = (rawSubject || `You are invited to a MiroTalk ${roomType || ''} meeting`.trim()).slice(0, 200);
 
     const isReminder = kind === 'reminder';
-    const greeting = isReminder
-        ? `This is a reminder that your meeting${safeInviter ? ` with ${safeInviter}` : ''} starts soon.`
-        : safeInviter
-          ? `${safeInviter} has invited you to a meeting.`
-          : 'You have been invited to a meeting.';
+    const isUpdate = kind === 'update';
+    const isCancellation = kind === 'cancellation';
+    const calendarMethod = isCancellation ? 'CANCEL' : 'REQUEST';
+    const heading = isCancellation ? 'Cancellation' : isUpdate ? 'Updated' : isReminder ? 'Reminder' : 'Invitation';
+    const greeting = isCancellation
+        ? `The meeting${safeInviter ? ` with ${safeInviter}` : ''} has been canceled.`
+        : isUpdate
+          ? `The meeting${safeInviter ? ` with ${safeInviter}` : ''} has been updated.`
+          : isReminder
+            ? `This is a reminder that your meeting${safeInviter ? ` with ${safeInviter}` : ''} starts soon.`
+            : safeInviter
+              ? `${safeInviter} has invited you to a meeting.`
+              : 'You have been invited to a meeting.';
     const customMessage = message
         ? `<p style="margin: 16px 0; padding: 12px 16px; background-color: #f4f7fb; border-left: 4px solid #376df9; border-radius: 4px; white-space: pre-wrap;">${escapeHtml(
               String(message)
@@ -500,30 +501,27 @@ function sendRoomInvitationEmail({
         time,
         timezone,
         startAt,
+        calendarUid,
+        calendarSequence,
+        calendarMethod,
         durationMin,
         inviterName,
         message,
         roomType,
         recipient: to,
     });
-    const attachments = icsContent
-        ? [
-              {
-                  filename: 'invitation.ics',
-                  content: icsContent,
-                  contentType: 'text/calendar; charset=utf-8; method=REQUEST',
-              },
-          ]
+    const icalEvent = icsContent
+        ? { filename: 'invitation.ics', method: calendarMethod, content: icsContent }
         : undefined;
 
     return transport.sendMail({
         from: EMAIL_FROM,
         to,
         subject: safeSubject,
-        attachments,
+        icalEvent,
         html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h1 style="color: #376df9;">MiroTalk Meeting ${isReminder ? 'Reminder' : 'Invitation'}</h1>
+            <h1 style="color: #376df9;">MiroTalk Meeting ${heading}</h1>
                 <p>${greeting}</p>
                 ${customMessage}
                 <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
@@ -564,7 +562,9 @@ function sendRoomInvitationEmail({
                         <td style="border: 1px solid #ddd; padding: 10px;">${safeDuration}</td>
                     </tr>
                 </table>
-                <div style="margin: 30px 0;">
+                ${
+                    !isCancellation
+                        ? `<div style="margin: 30px 0;">
                     <a href="${safeRoomUrlAttr}"
                        style="background-color: #376df9; color: white; padding: 12px 24px;
                               text-decoration: none; border-radius: 5px; display: inline-block;">
@@ -572,7 +572,9 @@ function sendRoomInvitationEmail({
                     </a>
                 </div>
                 <p>Or copy and paste this link into your browser:</p>
-                <p style="color: #666; word-break: break-all;">${safeRoomUrlText}</p>
+                <p style="color: #666; word-break: break-all;">${safeRoomUrlText}</p>`
+                        : ''
+                }
                 <br/>
                 <p>Enjoying our app? Unlock its full potential with a MiroTalk purchase on CodeCanyon.</p>
                 <a href="${SUPPORT}" target="_blank">Purchase from CodeCanyon</a>
@@ -591,6 +593,7 @@ module.exports = {
     sendPasswordChangeConfirmation,
     sendInvitationEmail,
     sendRoomInvitationEmail,
+    buildInvitationIcs,
     EMAIL_VERIFICATION,
     SUPPORT,
 };

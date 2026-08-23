@@ -5,10 +5,7 @@ const assert = require('node:assert/strict');
 const { zonedDateTimeToUtc, computeLastWeeklyOccurrence } = require('../backend/common/schedule');
 
 test('converts an IANA-zone wall time to the correct UTC instant', () => {
-    assert.equal(
-        zonedDateTimeToUtc('2026-08-23', '14:30', 'Europe/Rome').toISOString(),
-        '2026-08-23T12:30:00.000Z'
-    );
+    assert.equal(zonedDateTimeToUtc('2026-08-23', '14:30', 'Europe/Rome').toISOString(), '2026-08-23T12:30:00.000Z');
 });
 
 test('rejects a wall time skipped by the spring DST transition', () => {
@@ -21,10 +18,7 @@ test('rejects calendar dates that JavaScript would otherwise roll over', () => {
 });
 
 test('chooses the earlier instant when fall DST repeats a wall time', () => {
-    assert.equal(
-        zonedDateTimeToUtc('2026-10-25', '02:30', 'Europe/Rome').toISOString(),
-        '2026-10-25T00:30:00.000Z'
-    );
+    assert.equal(zonedDateTimeToUtc('2026-10-25', '02:30', 'Europe/Rome').toISOString(), '2026-10-25T00:30:00.000Z');
 });
 
 test('weekly recurrence preserves local wall time across a DST change', () => {

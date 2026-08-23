@@ -1,6 +1,7 @@
 'use strict';
 
 const mongoose = require('mongoose');
+const { createCalendarUid } = require('../common/calendar');
 
 const recurringSchema = new mongoose.Schema(
     {
@@ -55,6 +56,9 @@ const roomSchema = new mongoose.Schema({
     // overriding the EMAIL_INVITATION_ICS_DURATION_MIN env default.
     duration: { type: Number, min: 5, max: 1440, default: null },
     room: { type: String, index: true },
+    calendarUid: { type: String, default: createCalendarUid, index: true },
+    calendarSequence: { type: Number, min: 0, default: 0 },
+    calendarRecipients: [{ type: String, lowercase: true, trim: true }],
     recurring: { type: recurringSchema, default: () => ({ enabled: false }) },
     reminder: { type: reminderSchema, default: () => ({ enabled: false }) },
 });

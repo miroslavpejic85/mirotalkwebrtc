@@ -119,6 +119,8 @@ async function dispatchReminder(room) {
         time: room.time,
         timezone: room.timezone,
         startAt: room.startAt,
+        calendarUid: room.calendarUid,
+        calendarSequence: room.calendarSequence,
         duration: room.duration || undefined,
         subject: room.reminder.subject || `Reminder: MiroTalk ${room.type} meeting starts soon`,
         message: room.reminder.message,

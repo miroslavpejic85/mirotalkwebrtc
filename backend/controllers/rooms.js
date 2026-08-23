@@ -4,6 +4,7 @@ const Room = require('../models/room');
 const User = require('../models/users');
 const { computeReminderAt } = require('../lib/roomReminders');
 const { normalizeTimezone, zonedDateTimeToUtc } = require('../common/schedule');
+const { hasCalendarChanges, ensureCalendarIdentity, queueCalendarLifecycle } = require('../lib/calendarLifecycle');
 const utils = require('../common/utils');
 const logs = require('../common/logs');
 
@@ -114,20 +115,29 @@ async function roomFindBy(req, res) {
 async function roomDeleteFindBy(req, res) {
     try {
         if (!(await ensureOwnerOrAdmin(req, res, req.params.userId))) return;
-        const hasRecurring = await Room.exists({
-            userId: req.params.userId,
-            'recurring.enabled': true,
-        });
+        const rooms = await Room.find({ userId: req.params.userId });
+        const hasRecurring = rooms.some((room) => room.recurring && room.recurring.enabled);
         if (hasRecurring) {
             return res.status(409).json({
                 code: 'RECURRING_ACTIVE',
                 message: 'Disable recurring invitations before deleting these rooms.',
             });
         }
-        const data = await Room.deleteMany({ userId: req.params.userId });
-        log.debug('deleAllRooms data', data);
-        data.deletedCount > 0
-            ? res.json({ message: `${data.deletedCount} documents has been deleted` })
+        let deletedCount = 0;
+        for (const room of rooms) {
+            await ensureCalendarIdentity(room);
+            const cancellation = await Room.findByIdAndUpdate(
+                room._id,
+                { $inc: { calendarSequence: 1 } },
+                { returnDocument: 'after' }
+            );
+            await queueCalendarLifecycle(cancellation, 'cancellation');
+            const deleted = await Room.findByIdAndDelete(room._id);
+            if (deleted) deletedCount++;
+        }
+        log.debug('deleteAllRooms data', { deletedCount });
+        deletedCount > 0
+            ? res.json({ message: `${deletedCount} documents have been deleted` })
             : res.json({ message: 'No documents found' });
     } catch (error) {
         log.error('Room findByUserId delete error', error);
@@ -165,7 +175,7 @@ async function roomUpdate(req, res) {
         if (updatedData.duration !== undefined) {
             updatedData.duration = normalizeDuration(updatedData.duration);
         }
-        const current = await Room.findById(id).select('date time timezone startAt reminder').lean();
+        const current = await Room.findById(id);
         if (updatedData.date !== undefined || updatedData.time !== undefined || updatedData.timezone !== undefined) {
             const requestedTimezone = updatedData.timezone || current.timezone || 'UTC';
             const scheduleTimezone = normalizeTimezone(requestedTimezone);
@@ -199,8 +209,16 @@ async function roomUpdate(req, res) {
             updatedData['reminder.timezone'] = updatedData.timezone || current.timezone || 'UTC';
             updatedData['reminder.status'] = updatedData['reminder.enabled'] ? 'scheduled' : 'canceled';
         }
+        const calendarChanged = hasCalendarChanges(current, updatedData);
+        if (calendarChanged) await ensureCalendarIdentity(current);
+        const update = { $set: updatedData };
+        if (calendarChanged) update.$inc = { calendarSequence: 1 };
         const options = { returnDocument: 'after' };
-        const result = await Room.findByIdAndUpdate(id, { $set: updatedData }, options);
+        const result = await Room.findByIdAndUpdate(id, update, options);
+        if (calendarChanged) {
+            const queued = await queueCalendarLifecycle(result, 'update');
+            log.info('Calendar updates queued', { roomId: id, sequence: result.calendarSequence, queued });
+        }
         res.send(result);
     } catch (error) {
         log.error('Room update error', error);
@@ -211,7 +229,7 @@ async function roomUpdate(req, res) {
 async function roomDelete(req, res) {
     try {
         const id = req.params.id;
-        const existing = await Room.findById(id).select('userId recurring').lean();
+        const existing = await Room.findById(id);
         if (!existing) {
             return res.status(404).json({ message: 'Room not found' });
         }
@@ -222,7 +240,15 @@ async function roomDelete(req, res) {
                 message: 'Disable recurring invitations before deleting this room.',
             });
         }
+        await ensureCalendarIdentity(existing);
+        const cancellation = await Room.findByIdAndUpdate(
+            id,
+            { $inc: { calendarSequence: 1 } },
+            { returnDocument: 'after' }
+        );
+        const queued = await queueCalendarLifecycle(cancellation, 'cancellation');
         const data = await Room.findByIdAndDelete(id);
+        log.info('Calendar cancellations queued', { roomId: id, sequence: cancellation.calendarSequence, queued });
         res.json({ message: `Document with ${data._id} has been deleted` });
     } catch (error) {
         log.error('Room delete error', error);

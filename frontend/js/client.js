@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.72
+ * @version 1.4.80
  */
 
 const userAgent = navigator.userAgent;
@@ -2156,7 +2156,8 @@ function getRoomCalendarEvent(id) {
     const data = getRowValues(id);
     const savedSchedule = window.__roomSchedule && window.__roomSchedule[id];
     const unchanged = savedSchedule && savedSchedule.date === data.date && savedSchedule.time === data.time;
-    const start = unchanged && savedSchedule.startAt ? new Date(savedSchedule.startAt) : new Date(`${data.date}T${data.time}:00`);
+    const start =
+        unchanged && savedSchedule.startAt ? new Date(savedSchedule.startAt) : new Date(`${data.date}T${data.time}:00`);
     if (Number.isNaN(start.getTime())) return null;
     const end = new Date(start.getTime() + (Number(data.duration) || DEFAULT_DURATION_MIN) * 60000);
     const roomUrl = getRoomURL(data, false);
@@ -2171,7 +2172,10 @@ function getRoomCalendarEvent(id) {
 }
 
 function formatCalendarUtc(date) {
-    return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    return date
+        .toISOString()
+        .replace(/[-:]/g, '')
+        .replace(/\.\d{3}/, '');
 }
 
 function addRoomToGoogleCalendar(id) {
