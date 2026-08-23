@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.70
+ * @version 1.4.71
  */
 
 const userAgent = navigator.userAgent;
@@ -355,9 +355,9 @@ let config = {};
 let user = {
     allowedRooms: ['*'],
     allowedRoomsALL: true,
-    // In SaaS mode, server-side email invitations are reserved for admins and
-    // subscribed plans. Computed in resolveServerInviteEligibility().
-    canServerInvite: true,
+    // In SaaS mode, premium features are reserved for admins and subscribed
+    // plans. Computed in resolvePaidFeatureEligibility().
+    canUsePaidFeatures: true,
 };
 
 let addDuration = document.getElementById('add-duration');
@@ -489,23 +489,23 @@ function handleTokens(cfg) {
     //...
 }
 
-// Decide whether the current user may use server-side email invitations.
+// Decide whether the current user may use paid features.
 // Self-hosted (SAAS off) and admins are always allowed; otherwise an active
 // paid subscription is required (demo/free accounts are nudged to /pricing).
-function resolveServerInviteEligibility(role) {
+function resolvePaidFeatureEligibility(role) {
     const saasEnabled = !!(config && config.SAAS && config.SAAS.enabled);
     if (!saasEnabled || role === 'admin') {
-        user.canServerInvite = true;
+        user.canUsePaidFeatures = true;
         return;
     }
     // Non-admin in SaaS mode: gate on active subscription.
-    user.canServerInvite = false;
+    user.canUsePaidFeatures = false;
     getBilling()
         .then((res) => {
-            user.canServerInvite = !!(res && res.active);
+            user.canUsePaidFeatures = !!(res && res.active);
         })
         .catch(() => {
-            user.canServerInvite = false;
+            user.canUsePaidFeatures = false;
         });
 }
 
@@ -563,7 +563,7 @@ function handleUserRoles() {
                 user.role = role;
                 user.allowedRooms = allowedRooms;
                 user.allowedRoomsALL = allowedRooms.includes('*');
-                resolveServerInviteEligibility(role);
+                resolvePaidFeatureEligibility(role);
                 showDemoAccountPrompt(res);
                 elemDisplay(addRoom, user.allowedRoomsALL);
                 elemDisplay(genRoom, user.allowedRoomsALL);
@@ -2151,6 +2151,25 @@ function sendEmail(id) {
     document.location = 'mailto:' + data.email + '?subject=' + emailSubject + '&body=' + emailBody;
 }
 
+function requirePaidPlan(message) {
+    if (user.canUsePaidFeatures) return true;
+
+    Swal.fire({
+        position: 'top',
+        icon: 'warning',
+        title: 'Upgrade required',
+        text: message,
+        showCancelButton: true,
+        confirmButtonText: '<i class="uil uil-tag-alt"></i> View Plans',
+        cancelButtonText: 'Close',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then((result) => {
+        if (result.isConfirmed) openURL('/pricing');
+    });
+    return false;
+}
+
 function getRoomCalendarEvent(id) {
     const data = getRowValues(id);
     const start = new Date(`${data.date}T${data.time}:00`);
@@ -2173,6 +2192,7 @@ function formatCalendarLocal(date) {
 }
 
 function addRoomToGoogleCalendar(id) {
+    if (!requirePaidPlan('Calendar integrations are available on a paid plan.')) return;
     const event = getRoomCalendarEvent(id);
     if (!event) return popupMessage('warning', 'Save a valid room date and time first');
     const params = new URLSearchParams({
@@ -2186,6 +2206,7 @@ function addRoomToGoogleCalendar(id) {
 }
 
 function addRoomToOutlook(id) {
+    if (!requirePaidPlan('Calendar integrations are available on a paid plan.')) return;
     const event = getRoomCalendarEvent(id);
     if (!event) return popupMessage('warning', 'Save a valid room date and time first');
     const localIso = (date) =>
@@ -2240,22 +2261,7 @@ function downloadRoomIcs(id) {
 function openServerInvitationModal(id) {
     // In SaaS mode, server-side invitations require an active paid plan.
     // Nudge demo/free users to the pricing page instead of opening the form.
-    if (!user.canServerInvite) {
-        Swal.fire({
-            position: 'top',
-            icon: 'warning',
-            title: 'Upgrade required',
-            text: 'Sending invitations directly from the server is available on a paid plan.',
-            showCancelButton: true,
-            confirmButtonText: '<i class="uil uil-tag-alt"></i> View Plans',
-            cancelButtonText: 'Close',
-            showClass: { popup: 'animate__animated animate__fadeInDown' },
-            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-        }).then((result) => {
-            if (result.isConfirmed) openURL('/pricing');
-        });
-        return;
-    }
+    if (!requirePaidPlan('Sending invitations directly from the server is available on a paid plan.')) return;
 
     const data = getRowValues(id);
     const maxRecipients = (config.EMAIL_INVITATION && config.EMAIL_INVITATION.maxRecipients) || 50;
@@ -2491,7 +2497,7 @@ function openServerInvitationModal(id) {
                 console.error('[API] - ROOM INVITATION ERROR', err);
                 const data = err.response?.data || {};
                 if (data.code === 'SUBSCRIPTION_REQUIRED') {
-                    user.canServerInvite = false;
+                    user.canUsePaidFeatures = false;
                     Swal.fire({
                         position: 'top',
                         icon: 'warning',
