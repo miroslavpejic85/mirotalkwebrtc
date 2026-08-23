@@ -77,6 +77,56 @@ function publicBookingUrl() {
     return `${window.location.origin}/book/${encodeURIComponent(document.getElementById('booking-slug').value.trim())}`;
 }
 
+function canOpenPublicBookingPage() {
+    if (!bookingCanPublish) {
+        requirePaidPlan('Publishing a public booking page requires a paid plan.');
+        return false;
+    }
+    const enabled = document.getElementById('booking-enabled').checked;
+    const slug = document.getElementById('booking-slug').value.trim();
+    if (!enabled) {
+        popupMessage('warning', 'Enable Accept bookings and save availability before opening the public page');
+        return false;
+    }
+    if (!bookingProfile?.enabled || slug !== bookingProfile.slug) {
+        popupMessage('warning', 'Save your availability changes before opening the public page');
+        return false;
+    }
+    return true;
+}
+
+async function openBookingShareDialog(bookingUrl) {
+    const content = document.createElement('div');
+    content.className = 'booking-share-dialog';
+    content.innerHTML = `<canvas class="booking-share-qr" aria-label="Booking page QR code"></canvas>
+        <p>Scan the QR code or copy the public booking link.</p>
+        <div class="booking-share-url"><i class="uil uil-link"></i><span></span></div>`;
+    content.querySelector('.booking-share-url span').textContent = bookingUrl;
+
+    const result = await Swal.fire({
+        position: 'top',
+        title: 'Share booking page',
+        html: content,
+        width: 440,
+        showCancelButton: true,
+        confirmButtonText: '<i class="uil uil-copy"></i> Copy URL',
+        cancelButtonText: 'Cancel',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        didOpen: () => {
+            new QRious({
+                element: content.querySelector('.booking-share-qr'),
+                value: bookingUrl,
+                size: 256,
+            });
+        },
+    });
+
+    if (!result.isConfirmed) return;
+    await navigator.clipboard.writeText(bookingUrl);
+    popupMessage('toast', 'Booking link copied');
+}
+
 function populateBookingProfile(profile) {
     bookingProfile = profile;
     document.getElementById('booking-enabled').checked = profile.enabled;
@@ -210,21 +260,28 @@ document.getElementById('availability-form').addEventListener('submit', async ()
 });
 
 document.getElementById('booking-preview').addEventListener('click', () => {
-    if (!bookingCanPublish) {
-        requirePaidPlan('Publishing and previewing a public booking page requires a paid plan.');
-        return;
-    }
-    const enabled = document.getElementById('booking-enabled').checked;
-    const slug = document.getElementById('booking-slug').value.trim();
-    if (!enabled) {
-        popupMessage('warning', 'Enable Accept bookings and save availability before opening the public page');
-        return;
-    }
-    if (!bookingProfile?.enabled || slug !== bookingProfile.slug) {
-        popupMessage('warning', 'Save your availability changes before opening the public page');
-        return;
-    }
+    if (!canOpenPublicBookingPage()) return;
     window.open(publicBookingUrl(), '_blank');
+});
+const bookingShareButton = document.getElementById('booking-share');
+bookingShareButton.addEventListener('click', async () => {
+    if (!canOpenPublicBookingPage()) return;
+    try {
+        if (isMobile && typeof navigator.share === 'function') {
+            await navigator.share({
+                title: bookingProfile.title || 'Book a meeting',
+                text: `Book a meeting with ${bookingProfile.displayName}`,
+                url: publicBookingUrl(),
+            });
+        } else {
+            await openBookingShareDialog(publicBookingUrl());
+        }
+    } catch (error) {
+        if (error.name !== 'AbortError') {
+            console.error('[Web Share] - BOOKING PAGE ERROR', error);
+            popupMessage('error', 'Unable to share the booking page');
+        }
+    }
 });
 document.getElementById('booking-view-plans').addEventListener('click', () => openURL('/pricing'));
 document.getElementById('booking-refresh').addEventListener('click', loadManagedBookings);

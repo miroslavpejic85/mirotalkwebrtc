@@ -502,6 +502,52 @@ button:focus-visible,
     background: var(--panel-color);
 }
 
+.booking-share-dialog {
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    color: var(--text-color);
+}
+
+.booking-share-dialog p {
+    margin: 0;
+    color: var(--black-light-color);
+    font-size: 14px;
+}
+
+.booking-share-qr {
+    width: min(256px, 100%);
+    height: auto;
+    padding: 8px;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.booking-share-url {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--hover-bg-subtle);
+    color: var(--text-color);
+    text-align: left;
+}
+
+.booking-share-url i {
+    flex: 0 0 auto;
+    color: var(--accent-color);
+}
+
+.booking-share-url span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+    font-size: 12px;
+}
+
 .availability-aside {
     position: sticky;
     top: 86px;
