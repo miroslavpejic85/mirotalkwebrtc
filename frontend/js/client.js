@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.22
+ * @version 1.5.23
  */
 
 const userAgent = navigator.userAgent;
@@ -1405,6 +1405,7 @@ function saveUser(id) {
             title: 'Assign admin role',
             text: 'Are you sure you want to assign the admin role to this user?',
             showDenyButton: true,
+            reverseButtons: true,
             confirmButtonText: 'Yes',
             denyButtonText: 'No',
             showClass: { popup: 'animate__animated animate__fadeInDown' },
@@ -1430,6 +1431,7 @@ function deleteUser(id) {
         title: 'Delete user',
         text: 'Are you sure you want to delete this user and all their associated data?',
         showDenyButton: true,
+        reverseButtons: true,
         confirmButtonText: 'Yes',
         denyButtonText: 'No',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
@@ -1525,6 +1527,7 @@ function promptSendInvitation(username, email, password) {
         title: 'User Created',
         html: `Send an invitation email to <strong>${email}</strong> with login credentials?`,
         showCancelButton: true,
+        reverseButtons: true,
         confirmButtonText: '<i class="uil uil-envelope-send"></i> Send Invitation',
         cancelButtonText: 'Skip',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
@@ -1578,6 +1581,7 @@ async function showDataTable() {
                         title: 'Expired rooms found',
                         text: `You have ${pastRooms.length} expired room${pastRooms.length > 1 ? 's' : ''}. Would you like to delete them?`,
                         showDenyButton: true,
+                        reverseButtons: true,
                         confirmButtonText: 'Yes, delete',
                         denyButtonText: 'No, keep',
                         showClass: { popup: 'animate__animated animate__fadeInDown' },
@@ -2161,6 +2165,7 @@ function requirePaidPlan(message) {
         title: 'Upgrade required',
         text: message,
         showCancelButton: true,
+        reverseButtons: true,
         confirmButtonText: '<i class="uil uil-tag-alt"></i> View Plans',
         cancelButtonText: 'Close',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
@@ -2483,6 +2488,7 @@ function openServerInvitationModal(id) {
         title: 'Send Invitation ',
         width: 640,
         showCancelButton: true,
+        reverseButtons: true,
         confirmButtonText: 'Send',
         cancelButtonText: 'Cancel',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
@@ -2676,6 +2682,7 @@ function openServerInvitationModal(id) {
                         title: 'Upgrade required',
                         text: data.message || 'This feature is available on a paid plan.',
                         showCancelButton: true,
+                        reverseButtons: true,
                         confirmButtonText: '<i class="uil uil-tag-alt"></i> View Plans',
                         cancelButtonText: 'Close',
                         showClass: { popup: 'animate__animated animate__fadeInDown' },
@@ -2697,6 +2704,7 @@ function sendSmSInvitation(id) {
         allowOutsideClick: false,
         allowEscapeKey: false,
         showDenyButton: true,
+        reverseButtons: true,
         imageUrl: '../Images/sms.png',
         title: 'SMS Invitation',
         position: 'top',
@@ -2819,6 +2827,7 @@ function delRow(id) {
             text: 'Disable recurring invitations before deleting this room.',
             confirmButtonText: 'Disable recurring',
             showCancelButton: true,
+            reverseButtons: true,
             cancelButtonText: 'Cancel',
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
@@ -2843,6 +2852,7 @@ function confirmDeleteRoom(id) {
         title: 'Delete room',
         text: 'Are you sure you want to delete the room?',
         showDenyButton: true,
+        reverseButtons: true,
         confirmButtonText: `Yes`,
         denyButtonText: `No`,
         showClass: { popup: 'animate__animated animate__fadeInDown' },
@@ -2933,6 +2943,7 @@ function disableRecurringInvitation(id, options = {}) {
         title: 'Disable recurring invitation?',
         text: 'No further weekly invitation emails will be sent for this room.',
         showCancelButton: true,
+        reverseButtons: true,
         confirmButtonText: 'Disable',
         cancelButtonText: 'Cancel',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
@@ -2956,6 +2967,7 @@ function disableRoomReminder(id) {
         title: 'Cancel meeting reminder?',
         text: 'The scheduled reminder email will not be sent.',
         showCancelButton: true,
+        reverseButtons: true,
         confirmButtonText: 'Cancel reminder',
         cancelButtonText: 'Keep reminder',
         confirmButtonColor: '#dc3545',
@@ -3000,6 +3012,7 @@ function delAllRows() {
         title: `Delete ${label} rooms`,
         text: `Are you sure you want to delete ${label} rooms?`,
         showDenyButton: true,
+        reverseButtons: true,
         confirmButtonText: `Yes`,
         denyButtonText: `No`,
         showClass: { popup: 'animate__animated animate__fadeInDown' },
@@ -3160,6 +3173,7 @@ function delMyAccount() {
         title: 'Delete account!',
         text: 'Are you sure to want delete your account and all associated data?',
         showDenyButton: true,
+        reverseButtons: true,
         confirmButtonText: `Yes`,
         denyButtonText: `No`,
         showClass: { popup: 'animate__animated animate__fadeInDown' },
@@ -3220,6 +3234,7 @@ function changeMyPassword() {
             });
         },
         showCancelButton: true,
+        reverseButtons: true,
         confirmButtonText: '<i class="uil uil-check-circle"></i> Change',
         cancelButtonText: 'Cancel',
         showClass: { popup: 'animate__animated animate__fadeInDown' },

@@ -152,6 +152,7 @@ function showAccountRequiredModal({ icon, title, html }) {
         title,
         html,
         showCancelButton: true,
+        reverseButtons: true,
         confirmButtonText: '<i class="uil uil-user-plus"></i> Create account',
         cancelButtonText: 'Cancel',
         allowOutsideClick: false,

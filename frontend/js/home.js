@@ -238,6 +238,7 @@ function handleSignup(e) {
         `,
         icon: 'info',
         showCancelButton: true,
+        reverseButtons: true,
         cancelButtonText: 'Cancel',
         confirmButtonText: 'I Agree',
         focusCancel: true,
