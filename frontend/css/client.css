@@ -621,14 +621,28 @@ button:focus-visible,
     cursor: pointer;
 }
 
-.booking-action:hover {
+.booking-join {
     border-color: var(--accent-color);
-    color: var(--accent-color);
+    color: #fff;
+    background: var(--accent-color);
+}
+
+.booking-join:hover {
+    border-color: var(--color-hover);
+    color: #fff;
+    background: var(--color-hover);
+}
+
+.booking-delete {
+    border-color: var(--danger-color);
+    color: #fff;
+    background: var(--danger-color);
 }
 
 .booking-delete:hover {
-    border-color: var(--danger-color);
-    color: var(--danger-color);
+    border-color: var(--danger-badge-color);
+    color: #fff;
+    background: var(--danger-badge-color);
 }
 
 .booking-action:disabled {
