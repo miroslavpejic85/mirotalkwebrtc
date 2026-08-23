@@ -747,7 +747,7 @@ components:
                     example: '2022-12-23T11:35:05.234Z'
                 allow:
                     type: array
-                    example: '[P2P, SFU, C2C, BRO]'
+                    example: '[P2P, SFU, C2C, BRO, CME]'
                 allowed_rooms:
                     type: array
                     example: '[*]'
@@ -779,7 +779,7 @@ components:
                     example: '63a58459810c58b53246adde'
                 type:
                     type: string
-                    enum: ['P2P', 'SFU', 'C2C', 'BRO']
+                    enum: ['P2P', 'SFU', 'C2C', 'BRO', 'CME']
                     example: 'P2P'
                 tag:
                     type: string
@@ -824,7 +824,7 @@ components:
                     example: '63a58459810c58b53246adde'
                 type:
                     type: string
-                    enum: ['P2P', 'SFU', 'C2C', 'BRO']
+                    enum: ['P2P', 'SFU', 'C2C', 'BRO', 'CME']
                     example: 'P2P'
                 tag:
                     type: string

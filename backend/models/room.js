@@ -42,7 +42,7 @@ const reminderSchema = new mongoose.Schema(
 
 const roomSchema = new mongoose.Schema({
     userId: { type: String, index: true },
-    type: { type: String, enum: ['P2P', 'SFU', 'C2C', 'BRO'] },
+    type: { type: String, enum: ['P2P', 'SFU', 'C2C', 'BRO', 'CME'] },
     tag: { type: String },
     email: { type: String },
     phone: { type: String },

@@ -68,7 +68,7 @@ async function getDashboardStats(req, res) {
                 getUpcomingReminders(),
             ]);
 
-            const typeCounts = { P2P: 0, SFU: 0, C2C: 0, BRO: 0 };
+            const typeCounts = { P2P: 0, SFU: 0, C2C: 0, BRO: 0, CME: 0 };
             roomsByType.forEach((r) => {
                 if (typeCounts.hasOwnProperty(r._id)) {
                     typeCounts[r._id] = r.count;
@@ -110,7 +110,7 @@ async function getDashboardStats(req, res) {
             getUpcomingReminders({ userId: uId }),
         ]);
 
-        const typeCounts = { P2P: 0, SFU: 0, C2C: 0, BRO: 0 };
+        const typeCounts = { P2P: 0, SFU: 0, C2C: 0, BRO: 0, CME: 0 };
         myRoomsByType.forEach((r) => {
             if (typeCounts.hasOwnProperty(r._id)) {
                 typeCounts[r._id] = r.count;

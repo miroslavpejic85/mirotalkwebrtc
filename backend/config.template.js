@@ -77,6 +77,7 @@ module.exports = {
             Visible: true,
             Label: 'MiroTalk CME',
             Home: 'https://cme.mirotalk.com',
+            Room: 'https://cme.mirotalk.com/?room=',
             GitHub: {
                 Visible: true,
                 Repo: 'https://github.com/miroslavpejic85/call-me',

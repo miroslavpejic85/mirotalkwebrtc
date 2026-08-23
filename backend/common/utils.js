@@ -27,7 +27,7 @@ const pathTraversal = new RegExp(/(\.\.(\/|\\))+/);
 const alphanumeric = new RegExp(/^[A-Za-z0-9-_]+$/);
 // Meeting title: letters, numbers, spaces and common punctuation. Max 80 chars.
 const meetingTitle = new RegExp(/^[\p{L}\p{N} \-_.,:;!?'"()&\/]{1,80}$/u);
-const miroTalkType = new RegExp(/^(SFU|P2P|C2C|BRO)$/);
+const miroTalkType = new RegExp(/^(SFU|P2P|C2C|BRO|CME)$/);
 
 async function isAdmin(email, username, password) {
     if (email === ADMIN_EMAIL && username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
@@ -136,7 +136,7 @@ function isValidTag(tag) {
 
 function isValidType(type) {
     if (!type.match(miroTalkType)) {
-        return '⚠️ Type must be one of SFU/P2P/C2C/BRO!';
+        return '⚠️ Type must be one of SFU/P2P/C2C/BRO/CME!';
     }
     return true;
 }

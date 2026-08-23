@@ -19,7 +19,7 @@ const emailInvitationSchema = new mongoose.Schema(
         deliveryId: { type: String, index: true },
         userId: { type: String, required: true, index: true }, // inviter
         roomId: { type: String, required: true },
-        roomType: { type: String, enum: ['P2P', 'SFU', 'C2C', 'BRO'], required: true },
+        roomType: { type: String, enum: ['P2P', 'SFU', 'C2C', 'BRO', 'CME'], required: true },
         room: { type: String, required: true },
         roomUrl: { type: String, required: true },
         date: { type: String },

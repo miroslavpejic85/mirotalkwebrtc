@@ -57,6 +57,8 @@ function buildRoomUrl(room) {
             return `${config.MiroTalk.C2C.Room}${encodedRoom}`;
         case 'BRO':
             return `${config.MiroTalk.BRO.Viewer}${encodedRoom}`;
+        case 'CME':
+            return `${config.MiroTalk.CME.Room}${encodedRoom}`;
         default:
             return '';
     }

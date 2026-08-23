@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.62
+ * @version 1.4.70
  */
 
 const userAgent = navigator.userAgent;
@@ -86,6 +86,7 @@ const statP2PVal = document.getElementById('statP2PVal');
 const statSFUVal = document.getElementById('statSFUVal');
 const statC2CVal = document.getElementById('statC2CVal');
 const statBROVal = document.getElementById('statBROVal');
+const statCMEVal = document.getElementById('statCMEVal');
 
 const statsSubscriptionsSection = document.getElementById('statsSubscriptionsSection');
 const statMonthlySubsVal = document.getElementById('statMonthlySubsVal');
@@ -657,6 +658,7 @@ function toggleElements() {
         else if (val === 'SFU' && !config.MiroTalk.SFU.Visible) card.remove();
         else if (val === 'C2C' && !config.MiroTalk.C2C.Visible) card.remove();
         else if (val === 'BRO' && !config.MiroTalk.BRO.Visible) card.remove();
+        else if (val === 'CME' && !config.MiroTalk.CME?.Visible) card.remove();
     });
     const remaining = addTypeCards.querySelectorAll('.service-card');
     remaining.forEach((c, i) => {
@@ -1282,7 +1284,7 @@ function getUserRow(u) {
     const createdDate = u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-';
     const createdISO = u.createdAt ? new Date(u.createdAt).toISOString().split('T')[0] : '';
 
-    const services = ['ALL', 'P2P', 'SFU', 'C2C', 'BRO'];
+    const services = ['ALL', 'P2P', 'SFU', 'C2C', 'BRO', 'CME'];
 
     const roleOptions = [
         { value: 'admin', label: 'admin' },
@@ -1921,6 +1923,7 @@ function getRow(obj) {
         config.MiroTalk.SFU.Visible && { value: 'SFU', label: 'SFU' },
         config.MiroTalk.C2C.Visible && { value: 'C2C', label: 'C2C' },
         config.MiroTalk.BRO.Visible && { value: 'BRO', label: 'BRO' },
+        config.MiroTalk.CME?.Visible && { value: 'CME', label: 'CME' },
     ].filter(Boolean);
 
     const ro = isPast ? ' readonly' : '';
@@ -2047,6 +2050,7 @@ const actionDropdownHoverQuery = window.matchMedia('(hover: hover) and (pointer:
 document.addEventListener(
     'pointerenter',
     (event) => {
+        if (!(event.target instanceof Element)) return;
         if (!actionDropdownHoverQuery.matches || !event.target.matches('.action-dropdown-wrap')) return;
         openActionDropdown(event.target.querySelector('.action-dropdown-trigger'));
     },
@@ -2056,6 +2060,7 @@ document.addEventListener(
 document.addEventListener(
     'pointerleave',
     (event) => {
+        if (!(event.target instanceof Element)) return;
         if (!actionDropdownHoverQuery.matches || !event.target.matches('.action-dropdown-wrap')) return;
         const wrap = event.target;
         setTimeout(() => {
@@ -2571,6 +2576,10 @@ function joinRoom(id, external = false) {
             case 'BRO':
                 broIframe.setAttribute('src', roomURL);
                 navShow([bro]);
+                break;
+            case 'CME':
+                cmeIframe.setAttribute('src', roomURL);
+                navShow([cme]);
                 break;
             default:
                 break;
@@ -3149,6 +3158,7 @@ function renderDashboardStats(data) {
         statSFUVal.textContent = data.roomsByType.SFU;
         statC2CVal.textContent = data.roomsByType.C2C;
         statBROVal.textContent = data.roomsByType.BRO;
+        if (statCMEVal) statCMEVal.textContent = data.roomsByType.CME;
     } else {
         elemDisplay(statsUsersSection, false);
         elemDisplay(statsSubscriptionsSection, false);
@@ -3166,6 +3176,7 @@ function renderDashboardStats(data) {
         statSFUVal.textContent = data.myRoomsByType.SFU;
         statC2CVal.textContent = data.myRoomsByType.C2C;
         statBROVal.textContent = data.myRoomsByType.BRO;
+        if (statCMEVal) statCMEVal.textContent = data.myRoomsByType.CME;
     }
     renderUpcomingReminders(data.upcomingReminders || []);
 }
@@ -3235,6 +3246,9 @@ function getRoomURL(data, bro = true) {
             roomURL = bro
                 ? `${config.MiroTalk.BRO.Broadcast}${data.room}&name=Broadcast-${getRandomInt(99999)}`
                 : `${config.MiroTalk.BRO.Viewer}${data.room}%26name=Viewer-${getRandomInt(99999)}`;
+            break;
+        case 'CME':
+            roomURL = `${config.MiroTalk.CME.Room}${data.room}`;
             break;
         default:
             break;
