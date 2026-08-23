@@ -3591,6 +3591,33 @@ td .action-group {
     color: var(--accent-color);
 }
 
+.action-icon.has-unsaved-changes {
+    color: #fff;
+    background: var(--warning-color);
+    animation: unsaved-save-pulse 1.4s ease-in-out infinite;
+}
+
+.action-icon.has-unsaved-changes:hover {
+    color: #fff;
+    background: var(--warning-color);
+}
+
+@keyframes unsaved-save-pulse {
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 var(--warning-bg);
+    }
+    50% {
+        box-shadow: 0 0 0 6px transparent;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .action-icon.has-unsaved-changes {
+        animation: none;
+    }
+}
+
 .action-icon.danger:hover {
     background-color: var(--danger-bg-light);
     color: var(--danger-color);

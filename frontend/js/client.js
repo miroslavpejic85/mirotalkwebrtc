@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.20
+ * @version 1.5.21
  */
 
 const userAgent = navigator.userAgent;
@@ -759,7 +759,10 @@ function initCustomDropdowns(container) {
             dd.querySelectorAll('.custom-dropdown-option').forEach((o) => o.classList.remove('selected'));
             opt.classList.add('selected');
             const hidden = dd.querySelector('input[type="hidden"]');
-            if (hidden) hidden.value = opt.dataset.value;
+            if (hidden && hidden.value !== opt.dataset.value) {
+                hidden.value = opt.dataset.value;
+                hidden.dispatchEvent(new Event('change', { bubbles: true }));
+            }
             dd.querySelector('.custom-dropdown-value').textContent = opt.textContent;
             const searchWrapper = dd.closest('[data-search]');
             if (searchWrapper) searchWrapper.dataset.search = opt.textContent;
@@ -2082,6 +2085,7 @@ function initVisibleRowsToolTips() {
 function setRandomRoom(id) {
     const room = document.getElementById(id + '_room');
     room.value = getUUID4();
+    room.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 function copyRoom(id) {
@@ -2764,6 +2768,7 @@ function joinRoom(id, external = false) {
 function updateRow(id) {
     const data = getRowValues(id);
     const saveBtn = document.getElementById(`${id}_save`);
+    let saved = false;
 
     if (saveBtn) btnLoading(saveBtn);
 
@@ -2774,6 +2779,7 @@ function updateRow(id) {
                 popupMessage('warning', `${res.message}`);
             } else {
                 popupMessage('toast', 'Data saved successfully');
+                saved = true;
                 debouncedLoadStats();
                 flashRow(document.getElementById(id));
             }
@@ -2784,9 +2790,23 @@ function updateRow(id) {
             showDataTable();
         })
         .finally(() => {
-            if (saveBtn) btnReset(saveBtn);
+            if (saveBtn) {
+                btnReset(saveBtn);
+                if (saved) saveBtn.classList.remove('has-unsaved-changes');
+            }
         });
 }
+
+function markRoomRowDirty(event) {
+    const field = event.target.closest('#myTableBody input');
+    if (!field || field.readOnly || field.disabled) return;
+    const row = field.closest('tr');
+    if (!row || !row.id) return;
+    document.getElementById(`${row.id}_save`)?.classList.add('has-unsaved-changes');
+}
+
+myTableBody.addEventListener('input', markRoomRowDirty);
+myTableBody.addEventListener('change', markRoomRowDirty);
 
 function delRow(id) {
     const dataTableTR = document.getElementById(id);
