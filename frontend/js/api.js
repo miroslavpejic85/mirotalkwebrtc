@@ -181,6 +181,23 @@ function roomSetReminder(id, data) {
     }).then((response) => response.data);
 }
 
+function roomGetInvitationHistory(id) {
+    return axios({
+        method: 'GET',
+        url: `${apiPath}/room/${id}/invitations`,
+        headers: headers,
+    }).then((response) => response.data);
+}
+
+function roomSetAttendeeStatus(id, data) {
+    return axios({
+        method: 'PATCH',
+        url: `${apiPath}/room/${id}/attendee-status`,
+        headers: headers,
+        data: data,
+    }).then((response) => response.data);
+}
+
 // API SMS
 
 function smsSend(data) {

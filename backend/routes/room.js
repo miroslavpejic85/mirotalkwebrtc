@@ -36,6 +36,16 @@ router.post('/room/:id/reminder', auth, requireSubscription, roomInvitationLimit
     controllersInvitations.setRoomReminder(req, res);
 });
 
+// HISTORY: /api/v1/room/:id/invitations (attendee summary and invitation delivery history)
+router.get('/room/:id/invitations', auth, (req, res) => {
+    controllersInvitations.getRoomInvitationHistory(req, res);
+});
+
+// ATTENDEE STATUS: /api/v1/room/:id/attendee-status (organizer-maintained RSVP state)
+router.patch('/room/:id/attendee-status', auth, requireSubscription, (req, res) => {
+    controllersInvitations.setRoomAttendeeStatus(req, res);
+});
+
 //GET: /api/v1/room/findBy/userId
 router.get('/room/findBy/:userId', auth, (req, res) => {
     controllersRooms.roomFindBy(req, res);

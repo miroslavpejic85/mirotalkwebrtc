@@ -38,6 +38,12 @@ const emailInvitationSchema = new mongoose.Schema(
         message: { type: String },
         inviterName: { type: String },
         recipient: { type: String, required: true, lowercase: true, trim: true },
+        attendeeStatus: {
+            type: String,
+            enum: ['invited', 'accepted', 'tentative', 'declined'],
+            default: 'invited',
+        },
+        attendeeRespondedAt: { type: Date },
         status: {
             type: String,
             enum: ['pending', 'sending', 'sent', 'failed', 'dead', 'superseded'],

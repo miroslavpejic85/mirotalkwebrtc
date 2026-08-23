@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.81
+ * @version 1.4.90
  */
 
 const userAgent = navigator.userAgent;
@@ -1893,6 +1893,13 @@ function getRow(obj) {
         }
     }
 
+    if (config.EMAIL_INVITATION && config.EMAIL_INVITATION.serverSide) {
+        if (actionItems.length > 0) actionItems.push(`<div class="action-dropdown-divider"></div>`);
+        actionItems.push(
+            `<button class="action-dropdown-item" onclick="openInvitationHistory('${obj._id}'); closeActionDropdown(this);"><i class="uil uil-users-alt"></i> Attendees &amp; history</button>`
+        );
+    }
+
     let rooms = `<input id="${obj._id}_room" type="text" placeholder="Room name" name="room" value="${obj.room}"${isPast ? ' readonly' : ''}/>`;
 
     if (!user.allowedRoomsALL) {
@@ -2237,6 +2244,174 @@ function downloadRoomIcs(id) {
     link.download = `${event.data.room || 'mirotalk-meeting'}.ics`;
     link.click();
     URL.revokeObjectURL(url);
+}
+
+function invitationStatusBadge(status) {
+    const badge = document.createElement('span');
+    badge.className = `inv-history-badge inv-history-badge-${status || 'unknown'}`;
+    badge.textContent = status || 'unknown';
+    return badge;
+}
+
+function invitationHistoryDate(value) {
+    if (!value) return '—';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString();
+}
+
+function buildInvitationHistoryContent(data, roomId) {
+    const root = document.createElement('div');
+    root.className = 'inv-history';
+
+    const summary = document.createElement('div');
+    summary.className = 'inv-history-summary';
+    const summaryItems = [
+        ['Attendees', data.counts.attendees],
+        ['Accepted', data.counts.accepted],
+        ['Awaiting', data.counts.invited + data.counts.tentative],
+        ['Delivered', data.counts.sent],
+    ];
+    summaryItems.forEach(([label, value]) => {
+        const item = document.createElement('div');
+        item.className = 'inv-history-stat';
+        const number = document.createElement('strong');
+        number.textContent = value;
+        const text = document.createElement('span');
+        text.textContent = label;
+        item.append(number, text);
+        summary.appendChild(item);
+    });
+    root.appendChild(summary);
+
+    const attendeeSection = document.createElement('section');
+    const attendeeHeading = document.createElement('h3');
+    attendeeHeading.textContent = 'Attendees';
+    attendeeSection.appendChild(attendeeHeading);
+    if (data.attendees.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'inv-history-empty';
+        empty.innerHTML = '<i class="uil uil-envelope-info"></i><span>No server-side invitations yet.</span>';
+        attendeeSection.appendChild(empty);
+    } else {
+        const tableWrap = document.createElement('div');
+        tableWrap.className = 'inv-history-table-wrap';
+        const table = document.createElement('table');
+        table.className = 'inv-history-table';
+        table.innerHTML =
+            '<thead><tr><th>Recipient</th><th>Response</th><th>Delivery</th><th>Last activity</th></tr></thead>';
+        const body = document.createElement('tbody');
+        data.attendees.forEach((attendee) => {
+            const row = document.createElement('tr');
+            const email = document.createElement('td');
+            email.className = 'inv-history-email';
+            email.textContent = attendee.email;
+            const response = document.createElement('td');
+            const select = document.createElement('select');
+            select.className = 'inv-history-response';
+            select.dataset.roomId = roomId;
+            select.dataset.recipient = attendee.email;
+            ['invited', 'accepted', 'tentative', 'declined'].forEach((status) => {
+                const option = document.createElement('option');
+                option.value = status;
+                option.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+                option.selected = status === attendee.attendeeStatus;
+                select.appendChild(option);
+            });
+            response.appendChild(select);
+            const delivery = document.createElement('td');
+            delivery.appendChild(invitationStatusBadge(attendee.deliveryStatus));
+            const activity = document.createElement('td');
+            activity.textContent = invitationHistoryDate(attendee.lastActivityAt);
+            if (attendee.lastError) activity.title = attendee.lastError;
+            row.append(email, response, delivery, activity);
+            body.appendChild(row);
+        });
+        table.appendChild(body);
+        tableWrap.appendChild(table);
+        attendeeSection.appendChild(tableWrap);
+    }
+    root.appendChild(attendeeSection);
+
+    const historySection = document.createElement('details');
+    historySection.className = 'inv-history-events';
+    historySection.open = data.attendees.length === 0;
+    const historySummary = document.createElement('summary');
+    historySummary.textContent = `Delivery history (${data.history.length})`;
+    historySection.appendChild(historySummary);
+    if (data.history.length > 0) {
+        const list = document.createElement('div');
+        list.className = 'inv-history-event-list';
+        data.history.forEach((event) => {
+            const item = document.createElement('div');
+            item.className = 'inv-history-event';
+            const icon = document.createElement('i');
+            icon.className =
+                event.kind === 'cancellation'
+                    ? 'uil uil-calendar-slash'
+                    : event.kind === 'reminder'
+                      ? 'uil uil-bell'
+                      : event.kind === 'update'
+                        ? 'uil uil-calendar-alt'
+                        : 'uil uil-envelope-send';
+            const detail = document.createElement('div');
+            const title = document.createElement('strong');
+            title.textContent = `${event.kind} · ${event.recipient}`;
+            const meta = document.createElement('span');
+            meta.textContent = `${invitationHistoryDate(event.sentAt || event.createdAt)} · ${event.attempts} attempt${event.attempts === 1 ? '' : 's'}`;
+            if (event.lastError) meta.title = event.lastError;
+            detail.append(title, meta);
+            item.append(icon, detail, invitationStatusBadge(event.status));
+            list.appendChild(item);
+        });
+        historySection.appendChild(list);
+    }
+    root.appendChild(historySection);
+    return root;
+}
+
+async function openInvitationHistory(id) {
+    Swal.fire({
+        title: 'Loading invitation history',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+    });
+    try {
+        const data = await roomGetInvitationHistory(id);
+        const content = buildInvitationHistoryContent(data, id);
+        Swal.fire({
+            title: data.room.tag || data.room.name || 'Attendees & history',
+            html: content,
+            width: 900,
+            confirmButtonText: 'Close',
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+            didOpen: () => {
+                document.querySelectorAll('.inv-history-response').forEach((select) => {
+                    select.addEventListener('change', async () => {
+                        const previous = select.dataset.previous || 'invited';
+                        select.disabled = true;
+                        try {
+                            await roomSetAttendeeStatus(select.dataset.roomId, {
+                                recipient: select.dataset.recipient,
+                                status: select.value,
+                            });
+                            select.dataset.previous = select.value;
+                            select.classList.add('is-saved');
+                            setTimeout(() => select.classList.remove('is-saved'), 1200);
+                        } catch (error) {
+                            select.value = previous;
+                            Swal.showValidationMessage(error.response?.data?.message || error.message);
+                        } finally {
+                            select.disabled = false;
+                        }
+                    });
+                    select.dataset.previous = select.value;
+                });
+            },
+        });
+    } catch (error) {
+        popupMessage('error', error.response?.data?.message || 'Unable to load invitation history');
+    }
 }
 
 // Server-side invitation flow (shown only when EMAIL_INVITATION_SERVER_SIDE=true).

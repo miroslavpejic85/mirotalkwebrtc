@@ -18,6 +18,7 @@ const log = new logs('Controllers-invitations');
 
 const MAX_RECIPIENTS = Number(process.env.EMAIL_INVITATION_MAX_RECIPIENTS) || 50;
 const DAILY_CAP = Number(process.env.EMAIL_INVITATION_DAILY_CAP_PER_USER) || 500;
+const ATTENDEE_STATUSES = new Set(['invited', 'accepted', 'tentative', 'declined']);
 
 async function getAuthUserId(req) {
     if (!req.user) return null;
@@ -35,6 +36,125 @@ async function ensureOwnerOrAdmin(req, res, targetUserId) {
         return { ok: false };
     }
     return { ok: true, authUserId, isAdmin: false };
+}
+
+function summarizeInvitationHistory(jobs, calendarUid) {
+    const attendees = new Map();
+    const counts = {
+        attendees: 0,
+        invited: 0,
+        accepted: 0,
+        tentative: 0,
+        declined: 0,
+        pending: 0,
+        sent: 0,
+        failed: 0,
+    };
+
+    for (const job of jobs) {
+        if (calendarUid && job.calendarUid !== calendarUid) continue;
+        if (!attendees.has(job.recipient)) {
+            const deliveryStatus = job.status === 'dead' ? 'failed' : job.status;
+            const attendeeStatus = job.attendeeStatus || 'invited';
+            attendees.set(job.recipient, {
+                email: job.recipient,
+                attendeeStatus,
+                attendeeRespondedAt: job.attendeeRespondedAt || null,
+                deliveryStatus,
+                calendarStatus: job.kind === 'cancellation' && job.status === 'sent' ? 'canceled' : 'active',
+                lastKind: job.kind,
+                lastActivityAt: job.sentAt || job.updatedAt || job.createdAt,
+                lastError: job.lastError || null,
+            });
+        } else if (
+            attendees.get(job.recipient).attendeeStatus === 'invited' &&
+            job.attendeeStatus &&
+            job.attendeeStatus !== 'invited'
+        ) {
+            attendees.get(job.recipient).attendeeStatus = job.attendeeStatus;
+            attendees.get(job.recipient).attendeeRespondedAt = job.attendeeRespondedAt || null;
+        }
+    }
+
+    const attendeeList = [...attendees.values()];
+    counts.attendees = attendeeList.length;
+    for (const attendee of attendeeList) {
+        counts[attendee.attendeeStatus]++;
+        if (attendee.deliveryStatus === 'sent') counts.sent++;
+        else if (['pending', 'sending'].includes(attendee.deliveryStatus)) counts.pending++;
+        else if (attendee.deliveryStatus === 'failed') counts.failed++;
+    }
+
+    return { attendees: attendeeList, counts };
+}
+
+async function getRoomInvitationHistory(req, res) {
+    try {
+        const room = await Room.findById(req.params.id).select('userId room tag calendarUid').lean();
+        if (!room) return res.status(404).json({ message: 'Room not found' });
+        const auth = await ensureOwnerOrAdmin(req, res, room.userId);
+        if (!auth.ok) return;
+
+        const jobs = await EmailInvitation.find({ roomId: String(room._id) })
+            .sort({ createdAt: -1 })
+            .limit(250)
+            .select(
+                'kind recipient attendeeStatus attendeeRespondedAt status attempts lastError createdAt updatedAt sentAt calendarUid calendarSequence subject'
+            )
+            .lean();
+        const summary = summarizeInvitationHistory(jobs, room.calendarUid);
+        return res.status(200).json({
+            room: { id: String(room._id), name: room.room, tag: room.tag },
+            ...summary,
+            history: jobs.map((job) => ({
+                id: String(job._id),
+                kind: job.kind,
+                recipient: job.recipient,
+                status: job.status === 'dead' ? 'failed' : job.status,
+                attempts: job.attempts || 0,
+                lastError: job.lastError || null,
+                subject: job.subject,
+                calendarSequence: job.calendarSequence || 0,
+                createdAt: job.createdAt,
+                sentAt: job.sentAt || null,
+            })),
+        });
+    } catch (error) {
+        log.error('Room invitation history error', error);
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+async function setRoomAttendeeStatus(req, res) {
+    try {
+        const room = await Room.findById(req.params.id).select('userId calendarUid').lean();
+        if (!room) return res.status(404).json({ message: 'Room not found' });
+        const auth = await ensureOwnerOrAdmin(req, res, room.userId);
+        if (!auth.ok) return;
+
+        const recipient = emailUtils.normalizeEmail(req.body && req.body.recipient);
+        const attendeeStatus = req.body && req.body.status;
+        if (!recipient || !ATTENDEE_STATUSES.has(attendeeStatus)) {
+            return res.status(400).json({ message: 'A valid recipient and attendee status are required' });
+        }
+
+        const result = await EmailInvitation.updateMany(
+            { roomId: String(room._id), calendarUid: room.calendarUid, recipient },
+            {
+                $set: {
+                    attendeeStatus,
+                    attendeeRespondedAt: attendeeStatus === 'invited' ? null : new Date(),
+                },
+            }
+        );
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ message: 'Attendee not found for this room invitation' });
+        }
+        return res.status(200).json({ recipient, status: attendeeStatus });
+    } catch (error) {
+        log.error('Set room attendee status error', error);
+        return res.status(400).json({ message: error.message });
+    }
 }
 
 /**
@@ -429,4 +549,11 @@ async function setRoomReminder(req, res) {
     }
 }
 
-module.exports = { sendRoomInvitation, setRoomRecurring, setRoomReminder };
+module.exports = {
+    sendRoomInvitation,
+    setRoomRecurring,
+    setRoomReminder,
+    getRoomInvitationHistory,
+    setRoomAttendeeStatus,
+    summarizeInvitationHistory,
+};

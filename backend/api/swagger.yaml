@@ -516,6 +516,75 @@ paths:
                 '404':
                     description: Room not found
 
+    /room/{id}/invitations:
+        get:
+            security:
+                - authorization: []
+            tags:
+                - room
+            summary: Get room attendees and invitation delivery history
+            description: >
+                Returns the current attendee response state and delivery status for each
+                recipient, plus up to 250 invitation, reminder, update, and cancellation
+                events. Only the room owner or an administrator may access this data.
+            operationId: getRoomInvitationHistory
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '200':
+                    description: Attendee summary and invitation history
+                '403':
+                    description: Access denied
+                '404':
+                    description: Room not found
+
+    /room/{id}/attendee-status:
+        patch:
+            security:
+                - authorization: []
+            tags:
+                - room
+            summary: Record an attendee response status
+            description: >
+                Records an organizer-maintained response status for a recipient. SMTP
+                delivery status remains system-derived and is not changed by this endpoint.
+            operationId: setRoomAttendeeStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - recipient
+                                - status
+                            properties:
+                                recipient:
+                                    type: string
+                                    format: email
+                                status:
+                                    type: string
+                                    enum: [invited, accepted, tentative, declined]
+            responses:
+                '200':
+                    description: Attendee status updated
+                '400':
+                    description: Invalid recipient or status
+                '403':
+                    description: Access denied
+                '404':
+                    description: Room or attendee not found
+
     /room/findBy/{userId}:
         get:
             security:

@@ -4491,6 +4491,179 @@ body.dark #usersTable tr:hover {
     margin-top: 5px;
     opacity: 0.7;
 }
+
+/* Attendee status and invitation history */
+.inv-history {
+    max-height: min(68vh, 680px);
+    overflow-y: auto;
+    padding: 2px 4px 8px;
+    color: var(--text-color);
+    text-align: left;
+}
+.inv-history-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 20px;
+}
+.inv-history-stat {
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--box1-color);
+}
+.inv-history-stat strong,
+.inv-history-stat span {
+    display: block;
+}
+.inv-history-stat strong {
+    color: var(--text-color);
+    font-size: 22px;
+}
+.inv-history-stat span {
+    margin-top: 2px;
+    color: var(--black-light-color);
+    font-size: 12px;
+}
+.inv-history h3 {
+    margin: 0 0 8px;
+    font-size: 15px;
+}
+.inv-history-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+.inv-history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+.inv-history-table th,
+.inv-history-table td {
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+    white-space: nowrap;
+}
+.inv-history-table th {
+    color: var(--black-light-color);
+    font-size: 11px;
+    text-transform: uppercase;
+}
+.inv-history-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+.inv-history-email {
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.inv-history-response {
+    min-width: 112px;
+    padding: 6px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--box1-color);
+    color: var(--text-color);
+    color-scheme: var(--input-color-schema);
+}
+.inv-history-response.is-saved {
+    border-color: #2f9e6b;
+    box-shadow: 0 0 0 2px rgba(47, 158, 107, 0.14);
+}
+.inv-history-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: var(--accent-bg-light);
+    color: var(--accent-color);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.inv-history-badge-sent {
+    background: rgba(47, 158, 107, 0.12);
+    color: #2f9e6b;
+}
+.inv-history-badge-failed,
+.inv-history-badge-dead {
+    background: var(--danger-bg-light);
+    color: var(--danger-color);
+}
+.inv-history-badge-superseded,
+.inv-history-badge-canceled {
+    background: rgba(138, 147, 160, 0.14);
+    color: #8a93a0;
+}
+.inv-history-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 90px;
+    border: 1px dashed var(--border-color);
+    border-radius: 6px;
+    color: var(--black-light-color);
+}
+.inv-history-empty i {
+    font-size: 22px;
+}
+.inv-history-events {
+    margin-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+.inv-history-events summary {
+    padding: 12px 0;
+    color: var(--text-color);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.inv-history-event-list {
+    display: grid;
+    gap: 6px;
+}
+.inv-history-event {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--box1-color);
+}
+.inv-history-event > i {
+    color: var(--accent-color);
+    font-size: 17px;
+}
+.inv-history-event strong,
+.inv-history-event span {
+    display: block;
+}
+.inv-history-event strong {
+    overflow: hidden;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.inv-history-event div > span {
+    margin-top: 2px;
+    color: var(--black-light-color);
+    font-size: 10px;
+}
+@media screen and (max-width: 640px) {
+    .inv-history-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .inv-history-table th,
+    .inv-history-table td {
+        padding: 8px;
+    }
+}
 .recurring-badge {
     display: inline-flex;
     align-items: center;
