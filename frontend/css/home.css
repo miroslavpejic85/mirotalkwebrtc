@@ -553,9 +553,15 @@ body.home {
     opacity: 1;
 }
 
-body.home > :not(.cursor-light):not(.page-loading-overlay) {
+body.home > :not(.cursor-light):not(.page-loading-overlay):not(.swal2-container) {
     position: relative;
     z-index: 1;
+}
+
+body.home > .swal2-container {
+    position: fixed;
+    inset: 0;
+    z-index: 1060;
 }
 
 /* Top navigation */
