@@ -214,6 +214,12 @@ function bookingList() {
     return axios({ method: 'GET', url: `${apiPath}/booking/manage`, headers }).then((response) => response.data);
 }
 
+function bookingDelete(id, reason) {
+    return axios({ method: 'DELETE', url: `${apiPath}/booking/manage/${id}`, headers, data: { reason } }).then(
+        (response) => response.data
+    );
+}
+
 // API SMS
 
 function smsSend(data) {

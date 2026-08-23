@@ -222,8 +222,15 @@ async function listBookings(req, res) {
         .select('-occupiedStarts -cancelTokenHash')
         .sort({ startAt: 1 })
         .limit(250)
+        .populate({ path: 'roomId', select: 'room type' })
         .lean();
-    return res.status(200).json(bookings);
+    return res.status(200).json(
+        bookings.map((booking) => ({
+            ...booking,
+            roomId: booking.roomId ? String(booking.roomId._id) : null,
+            roomUrl: booking.roomId ? roomUrl(booking.roomId) : '',
+        }))
+    );
 }
 
 async function getPublicProfile(req, res) {
@@ -444,6 +451,36 @@ async function cancelBooking(req, res) {
     }
 }
 
+async function deleteManagedBooking(req, res) {
+    try {
+        const user = await authUser(req);
+        if (!user) return res.status(403).json({ message: 'Access denied' });
+        if (req.body?.reason !== undefined && typeof req.body.reason !== 'string') {
+            return res.status(400).json({ message: 'Cancellation reason must be text' });
+        }
+        const reason = String(req.body?.reason || '').trim();
+        if (reason.length > 500) {
+            return res.status(400).json({ message: 'Cancellation reason must be 500 characters or fewer' });
+        }
+        const booking = await Booking.findOneAndUpdate(
+            { _id: req.params.id, userId: String(user._id), status: 'confirmed' },
+            { $set: { status: 'canceled', canceledAt: new Date() }, $unset: { occupiedStarts: 1 } },
+            { returnDocument: 'after' }
+        );
+        if (!booking) return res.status(404).json({ message: 'Active booking not found' });
+        const room = await Room.findById(booking.roomId);
+        if (room) {
+            room.calendarSequence = Number(room.calendarSequence) + 1;
+            await room.save();
+            await queueCalendarLifecycle(room, 'cancellation', reason ? `Cancellation reason: ${reason}` : undefined);
+            await Room.deleteOne({ _id: room._id });
+        }
+        return res.status(200).json({ message: 'Booking deleted' });
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
 module.exports = {
     getProfile,
     updateProfile,
@@ -453,4 +490,5 @@ module.exports = {
     createBooking,
     getCancellation,
     cancelBooking,
+    deleteManagedBooking,
 };

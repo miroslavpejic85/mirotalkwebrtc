@@ -594,6 +594,48 @@ button:focus-visible,
     font-weight: 700;
 }
 
+.booking-item-footer,
+.booking-actions {
+    display: flex;
+    align-items: center;
+}
+
+.booking-item-footer {
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.booking-actions {
+    gap: 6px;
+}
+
+.booking-action {
+    height: 30px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0 10px;
+    color: var(--text-color);
+    background: var(--panel-color);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.booking-action:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.booking-delete:hover {
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+}
+
+.booking-action:disabled {
+    cursor: wait;
+    opacity: 0.55;
+}
+
 .booking-empty {
     display: grid;
     justify-items: center;

@@ -11,6 +11,7 @@ const router = express.Router();
 router.get('/booking/profile', auth, controllers.getProfile);
 router.patch('/booking/profile', auth, requirePaidSubscription, controllers.updateProfile);
 router.get('/booking/manage', auth, controllers.listBookings);
+router.delete('/booking/manage/:id', auth, controllers.deleteManagedBooking);
 router.get('/booking/public/:slug', publicBookingLimiter, controllers.getPublicProfile);
 router.get('/booking/public/:slug/slots', publicBookingLimiter, controllers.getPublicSlots);
 router.post('/booking/public/:slug', publicBookingLimiter, controllers.createBooking);

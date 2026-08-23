@@ -62,7 +62,7 @@ async function getCalendarAudience(room, includePending) {
     return { recipients: [...recipients].filter(Boolean), inviterName };
 }
 
-function buildLifecycleJobs(room, recipients, kind, inviterName) {
+function buildLifecycleJobs(room, recipients, kind, inviterName, message) {
     const roomUrl = buildRoomUrl(room);
     if (!roomUrl) return [];
     const cancellation = kind === 'cancellation';
@@ -84,16 +84,17 @@ function buildLifecycleJobs(room, recipients, kind, inviterName) {
         calendarUid: room.calendarUid,
         calendarSequence: room.calendarSequence,
         subject,
+        message,
         inviterName,
         recipient,
     }));
 }
 
-async function queueCalendarLifecycle(room, kind) {
+async function queueCalendarLifecycle(room, kind, message) {
     await ensureCalendarIdentity(room);
     const { recipients, inviterName } = await getCalendarAudience(room, kind === 'update');
 
-    const jobs = buildLifecycleJobs(room, recipients, kind, inviterName);
+    const jobs = buildLifecycleJobs(room, recipients, kind, inviterName, message);
     const queued = await emailQueue.enqueue(jobs);
     await EmailInvitation.updateMany(
         {

@@ -138,7 +138,13 @@ function renderBookingList(bookings) {
             safeName.textContent = booking.guestName;
             const safeEmail = document.createElement('span');
             safeEmail.textContent = booking.guestEmail;
-            return `<article class="booking-item"><div class="booking-date"><strong>${date}</strong><span>${time}</span></div><div class="booking-guest"><span class="booking-avatar">${initials}</span><div><strong>${safeName.innerHTML}</strong><span>${safeEmail.innerHTML}</span></div></div><span class="booking-confirmed">Confirmed</span></article>`;
+            const safeInitials = document.createElement('span');
+            safeInitials.textContent = initials;
+            const bookingId = escapeHtml(String(booking._id));
+            const joinButton = booking.roomUrl
+                ? `<button type="button" class="booking-action booking-join" data-room-url="${escapeHtml(booking.roomUrl)}"><i class="uil uil-video"></i> Join</button>`
+                : '';
+            return `<article class="booking-item"><div class="booking-date"><strong>${date}</strong><span>${time}</span></div><div class="booking-guest"><span class="booking-avatar">${safeInitials.innerHTML}</span><div><strong>${safeName.innerHTML}</strong><span>${safeEmail.innerHTML}</span></div></div><div class="booking-item-footer"><span class="booking-confirmed">Confirmed</span><div class="booking-actions">${joinButton}<button type="button" class="booking-action booking-delete" data-booking-id="${bookingId}"><i class="uil uil-trash-alt"></i> Delete</button></div></div></article>`;
         })
         .join('');
 }
@@ -222,3 +228,39 @@ document.getElementById('booking-preview').addEventListener('click', () => {
 });
 document.getElementById('booking-view-plans').addEventListener('click', () => openURL('/pricing'));
 document.getElementById('booking-refresh').addEventListener('click', loadManagedBookings);
+document.getElementById('booking-list').addEventListener('click', async (event) => {
+    const joinButton = event.target.closest('.booking-join');
+    if (joinButton) {
+        window.open(joinButton.dataset.roomUrl, '_blank', 'noopener');
+        return;
+    }
+
+    const deleteButton = event.target.closest('.booking-delete');
+    if (!deleteButton) return;
+    const result = await Swal.fire({
+        position: 'top',
+        icon: 'warning',
+        title: 'Cancel and delete booking',
+        text: 'Attendees will receive a cancellation notification.',
+        input: 'textarea',
+        inputLabel: 'Reason for cancellation (optional)',
+        inputPlaceholder: 'Briefly explain why the meeting is being canceled...',
+        inputAttributes: { maxlength: '500', 'aria-label': 'Cancellation reason' },
+        showCancelButton: true,
+        confirmButtonText: '<i class="uil uil-trash-alt"></i> Cancel booking',
+        cancelButtonText: 'Keep booking',
+        confirmButtonColor: '#ff4d4d',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    });
+    if (!result.isConfirmed) return;
+    deleteButton.disabled = true;
+    try {
+        await bookingDelete(deleteButton.dataset.bookingId, result.value.trim());
+        await loadManagedBookings();
+        popupMessage('toast', 'Booking deleted');
+    } catch (error) {
+        deleteButton.disabled = false;
+        popupMessage('error', error.response?.data?.message || 'Unable to delete booking');
+    }
+});
