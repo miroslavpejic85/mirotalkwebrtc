@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="Book a MiroTalk meeting" />
+        <meta name="theme-color" content="#f6f7f3" />
+        <title>Book a meeting | MiroTalk</title>
+        <link rel="icon" href="/Images/favicon.png" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.8/css/line.css" />
+        <link rel="stylesheet" href="/css/booking.css" />
+        <script defer src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script defer src="/js/booking.js"></script>
+    </head>
+    <body>
+        <header class="booking-topbar">
+            <a href="/" class="booking-brand" aria-label="MiroTalk home"
+                ><img src="/Images/logo.png" alt="" /><span>MiroTalk</span></a
+            >
+            <span class="secure-label"><i class="uil uil-shield-check"></i> Secure scheduling</span>
+        </header>
+
+        <main>
+            <div id="booking-loading" class="booking-loading" role="status">
+                <span></span>
+                <p>Finding available times</p>
+            </div>
+            <section id="booking-error" class="booking-message" hidden>
+                <i class="uil uil-calendar-slash"></i>
+                <h1>Booking page unavailable</h1>
+                <p id="booking-error-text"></p>
+            </section>
+
+            <section id="booking-shell" class="booking-shell" hidden>
+                <aside class="host-panel">
+                    <div id="host-avatar" class="host-avatar"></div>
+                    <span id="host-name" class="host-name"></span>
+                    <h1 id="event-title"></h1>
+                    <p id="event-description" class="event-description"></p>
+                    <dl class="event-facts">
+                        <div>
+                            <dt><i class="uil uil-clock"></i></dt>
+                            <dd id="event-duration"></dd>
+                        </div>
+                        <div>
+                            <dt><i class="uil uil-video"></i></dt>
+                            <dd>MiroTalk video meeting</dd>
+                        </div>
+                        <div id="selected-time-fact" hidden>
+                            <dt><i class="uil uil-calendar-alt"></i></dt>
+                            <dd id="selected-time-label"></dd>
+                        </div>
+                    </dl>
+                </aside>
+
+                <div class="booking-panel">
+                    <div id="slot-step">
+                        <div class="panel-heading">
+                            <div>
+                                <span class="step-label">Step 1 of 2</span>
+                                <h2>Choose a time</h2>
+                            </div>
+                            <label class="timezone-select"
+                                ><i class="uil uil-globe"></i
+                                ><select id="guest-timezone" aria-label="Your timezone"></select
+                            ></label>
+                        </div>
+                        <div id="date-rail" class="date-rail" role="tablist" aria-label="Available dates"></div>
+                        <div class="slot-heading">
+                            <strong id="selected-date-label"></strong><span id="slot-count"></span>
+                        </div>
+                        <div id="slot-grid" class="slot-grid"></div>
+                    </div>
+
+                    <form id="details-step" hidden>
+                        <button id="back-to-slots" class="back-button" type="button">
+                            <i class="uil uil-arrow-left"></i> Back to times
+                        </button>
+                        <div class="panel-heading">
+                            <div>
+                                <span class="step-label">Step 2 of 2</span>
+                                <h2>Your details</h2>
+                            </div>
+                        </div>
+                        <div class="guest-fields">
+                            <label
+                                >Name<input id="guest-name" type="text" maxlength="100" autocomplete="name" required
+                            /></label>
+                            <label
+                                >Email<input
+                                    id="guest-email"
+                                    type="email"
+                                    maxlength="254"
+                                    autocomplete="email"
+                                    required
+                            /></label>
+                            <label
+                                >Anything to share? <span>Optional</span
+                                ><textarea
+                                    id="guest-notes"
+                                    rows="4"
+                                    maxlength="2000"
+                                    placeholder="Topics, context, or questions"
+                                ></textarea>
+                            </label>
+                        </div>
+                        <button id="confirm-booking" class="confirm-button" type="submit">
+                            <i class="uil uil-calendar-check"></i> Confirm booking
+                        </button>
+                        <p class="privacy-note">
+                            <i class="uil uil-lock"></i> Your details are shared only with the meeting host.
+                        </p>
+                    </form>
+
+                    <div id="confirmation-step" class="confirmation-step" hidden>
+                        <span class="confirmation-icon"><i class="uil uil-check"></i></span>
+                        <span class="step-label">Booking confirmed</span>
+                        <h2>You’re on the calendar</h2>
+                        <p>A calendar invitation is being sent to <strong id="confirmation-email"></strong>.</p>
+                        <div class="confirmation-summary">
+                            <span id="confirmation-title"></span><strong id="confirmation-time"></strong>
+                        </div>
+                        <a id="join-meeting" class="confirm-button" target="_blank"
+                            ><i class="uil uil-video"></i> Join meeting</a
+                        >
+                        <a id="cancel-booking-link" class="text-link">Need to cancel?</a>
+                    </div>
+                </div>
+            </section>
+
+            <section id="cancellation-shell" class="cancellation-shell" hidden>
+                <div id="cancellation-icon" class="cancellation-icon"><i class="uil uil-calendar-times"></i></div>
+                <span class="step-label">Booking management</span>
+                <h1 id="cancellation-title">Cancel this meeting?</h1>
+                <p id="cancellation-copy"></p>
+                <button id="cancel-confirm" class="cancel-button" type="button">
+                    <i class="uil uil-times-circle"></i> Cancel booking
+                </button>
+            </section>
+        </main>
+
+        <footer>Scheduling and video meetings by <strong>MiroTalk</strong></footer>
+    </body>
+</html>

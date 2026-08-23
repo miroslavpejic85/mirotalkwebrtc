@@ -198,6 +198,22 @@ function roomSetAttendeeStatus(id, data) {
     }).then((response) => response.data);
 }
 
+// API BOOKING
+
+function bookingGetProfile() {
+    return axios({ method: 'GET', url: `${apiPath}/booking/profile`, headers }).then((response) => response.data);
+}
+
+function bookingUpdateProfile(data) {
+    return axios({ method: 'PATCH', url: `${apiPath}/booking/profile`, headers, data }).then(
+        (response) => response.data
+    );
+}
+
+function bookingList() {
+    return axios({ method: 'GET', url: `${apiPath}/booking/manage`, headers }).then((response) => response.data);
+}
+
 // API SMS
 
 function smsSend(data) {

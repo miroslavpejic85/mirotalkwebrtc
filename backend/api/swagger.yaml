@@ -15,8 +15,91 @@ tags:
       description: Operations about user
     - name: room
       description: Operations about room
-
 paths:
+    /booking/public/{slug}:
+        get:
+            tags: [booking]
+            summary: Get a public booking profile
+            parameters:
+                - name: slug
+                  in: path
+                  required: true
+                  schema: { type: string }
+            responses:
+                '200': { description: Public booking profile }
+                '404': { description: Booking page not found }
+        post:
+            tags: [booking]
+            summary: Reserve an available time and create a meeting
+            parameters:
+                - name: slug
+                  in: path
+                  required: true
+                  schema: { type: string }
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: [startAt, name, email]
+                            properties:
+                                startAt: { type: string, format: date-time }
+                                name: { type: string, maxLength: 100 }
+                                email: { type: string, format: email }
+                                notes: { type: string, maxLength: 2000 }
+            responses:
+                '201': { description: Booking confirmed }
+                '409': { description: Time is no longer available }
+
+    /booking/public/{slug}/slots:
+        get:
+            tags: [booking]
+            summary: List available UTC slot starts
+            parameters:
+                - name: slug
+                  in: path
+                  required: true
+                  schema: { type: string }
+                - name: from
+                  in: query
+                  required: true
+                  schema: { type: string, format: date-time }
+                - name: to
+                  in: query
+                  required: true
+                  schema: { type: string, format: date-time }
+            responses:
+                '200': { description: Profile and available slots }
+                '400': { description: Invalid range }
+
+    /booking/profile:
+        get:
+            security: [{ authorization: [] }]
+            tags: [booking]
+            summary: Get or initialize the organizer booking profile
+            responses:
+                '200': { description: Booking profile }
+        patch:
+            security: [{ authorization: [] }]
+            tags: [booking]
+            summary: Update organizer availability and booking rules
+            responses:
+                '200': { description: Updated booking profile }
+                '409': { description: Public slug is already used }
+
+    /booking/cancel/{token}:
+        get:
+            tags: [booking]
+            summary: Inspect a guest cancellation link
+            responses:
+                '200': { description: Booking cancellation state }
+        post:
+            tags: [booking]
+            summary: Cancel a booking and its calendar event
+            responses:
+                '200': { description: Booking canceled }
+
     /user:
         post:
             tags:

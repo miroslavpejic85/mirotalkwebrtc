@@ -48,4 +48,18 @@ const roomInvitationLimiter = rateLimit({
     validate: false,
 });
 
-module.exports = { loginLimiter, passwordResetLimiter, registrationLimiter, roomInvitationLimiter };
+const publicBookingLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 120,
+    message: 'Too many booking requests, please try again later.',
+    keyGenerator: ipKeyGenerator,
+    validate: false,
+});
+
+module.exports = {
+    loginLimiter,
+    passwordResetLimiter,
+    registrationLimiter,
+    roomInvitationLimiter,
+    publicBookingLimiter,
+};

@@ -81,8 +81,35 @@ const requireSubscription = async (req, res, next) => {
     }
 };
 
+/**
+ * Paid-feature guard without the shared-demo exemption.
+ * Intended for resource-consuming SaaS features such as public booking and email delivery.
+ */
+const requirePaidSubscription = async (req, res, next) => {
+    if (!SAAS_ENABLED) return next();
+
+    try {
+        const reqUser = req.user || {};
+        if (await utils.isAdmin(reqUser.email, reqUser.username, reqUser.password)) return next();
+
+        const dbUser = await User.findOne({ email: reqUser.email }).select(
+            'subscriptionType subscriptionStatus subscriptionExpiresAt'
+        );
+        if (isSubscriptionActive(dbUser)) return next();
+
+        return res.status(403).json({
+            code: 'SUBSCRIPTION_REQUIRED',
+            message: 'An active paid plan is required to publish public booking availability.',
+        });
+    } catch (error) {
+        log.error('requirePaidSubscription', error);
+        return res.status(500).json({ message: 'Subscription verification error' });
+    }
+};
+
 module.exports = {
     requireSubscription,
+    requirePaidSubscription,
     isSubscriptionActive,
     isDemoUser,
 };

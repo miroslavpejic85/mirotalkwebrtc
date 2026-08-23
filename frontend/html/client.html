@@ -50,6 +50,7 @@
         <script defer src="../js/swal.js"></script>
         <script defer src="../js/api.js"></script>
         <script defer src="../js/client.js"></script>
+        <script defer src="../js/booking-manage.js"></script>
         <script defer src="../js/translate.js"></script>
     </head>
 
@@ -73,6 +74,12 @@
                         <a id="navDash" href="javascript:void(0)">
                             <i class="uil uil-calendar-alt"></i>
                             <span class="link-name">Meetings</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a id="navAvailability" href="javascript:void(0)">
+                            <i class="uil uil-clock"></i>
+                            <span class="link-name">Availability</span>
                         </a>
                     </li>
                     <li>
@@ -498,6 +505,178 @@
                         </thead>
                         <tbody id="myTableBody"></tbody>
                     </table>
+                </div>
+
+                <div id="dsAvailability" class="dsAvailability">
+                    <div class="client-page-header availability-header">
+                        <div>
+                            <span class="page-eyebrow">Public booking <span class="premium-badge">Premium</span></span>
+                            <h1>Availability</h1>
+                            <p>Define when guests can book and how each meeting should run.</p>
+                        </div>
+                        <label class="availability-publish">
+                            <input id="booking-enabled" type="checkbox" />
+                            <span class="availability-switch" aria-hidden="true"></span>
+                            <span>Accept bookings</span>
+                        </label>
+                    </div>
+
+                    <div id="booking-premium-notice" class="booking-premium-notice" hidden>
+                        <div class="booking-premium-icon"><i class="uil uil-star"></i></div>
+                        <div>
+                            <strong>Publish your booking page with a paid plan</strong>
+                            <span
+                                >Accept reservations, create meeting rooms, and send email calendar invitations
+                                automatically.</span
+                            >
+                        </div>
+                        <button id="booking-view-plans" type="button">
+                            <i class="uil uil-tag-alt"></i> View plans
+                        </button>
+                    </div>
+
+                    <div id="availability-loading" class="availability-loading">
+                        <span class="page-loading-spinner" aria-hidden="true"></span>
+                    </div>
+
+                    <div id="availability-content" class="availability-layout" hidden>
+                        <form id="availability-form" class="availability-main" onsubmit="return false;">
+                            <section class="availability-section">
+                                <div class="availability-section-heading">
+                                    <i class="uil uil-link"></i>
+                                    <div>
+                                        <h2>Booking page</h2>
+                                        <p>Your public identity and event details.</p>
+                                    </div>
+                                </div>
+                                <div class="availability-grid two-columns">
+                                    <label
+                                        >Display name<input
+                                            id="booking-display-name"
+                                            type="text"
+                                            maxlength="100"
+                                            required
+                                    /></label>
+                                    <label
+                                        >Event title<input id="booking-title" type="text" maxlength="120" required
+                                    /></label>
+                                    <label class="full-width"
+                                        >Public link<span class="availability-url-field"
+                                            ><span id="booking-url-prefix"></span
+                                            ><input id="booking-slug" type="text" maxlength="50" required /></span
+                                    ></label>
+                                    <label class="full-width"
+                                        >Description<textarea
+                                            id="booking-description"
+                                            rows="3"
+                                            maxlength="1000"
+                                        ></textarea>
+                                    </label>
+                                </div>
+                            </section>
+
+                            <section class="availability-section">
+                                <div class="availability-section-heading">
+                                    <i class="uil uil-setting"></i>
+                                    <div>
+                                        <h2>Meeting rules</h2>
+                                        <p>Set timing, notice, and the meeting service.</p>
+                                    </div>
+                                </div>
+                                <div class="availability-grid three-columns">
+                                    <label>Timezone<select id="booking-timezone"></select></label>
+                                    <label
+                                        >Service<select id="booking-room-type">
+                                            <option>P2P</option>
+                                            <option>SFU</option>
+                                            <option>C2C</option>
+                                            <option>BRO</option>
+                                            <option>CME</option>
+                                        </select></label
+                                    >
+                                    <label
+                                        >Duration<select id="booking-duration">
+                                            <option value="15">15 minutes</option>
+                                            <option value="30">30 minutes</option>
+                                            <option value="45">45 minutes</option>
+                                            <option value="60">1 hour</option>
+                                            <option value="90">1 hour 30 minutes</option>
+                                        </select></label
+                                    >
+                                    <label
+                                        >Buffer before<select id="booking-buffer-before">
+                                            <option value="0">None</option>
+                                            <option value="5">5 minutes</option>
+                                            <option value="10">10 minutes</option>
+                                            <option value="15">15 minutes</option>
+                                            <option value="30">30 minutes</option>
+                                        </select></label
+                                    >
+                                    <label
+                                        >Buffer after<select id="booking-buffer-after">
+                                            <option value="0">None</option>
+                                            <option value="5">5 minutes</option>
+                                            <option value="10">10 minutes</option>
+                                            <option value="15">15 minutes</option>
+                                            <option value="30">30 minutes</option>
+                                        </select></label
+                                    >
+                                    <label
+                                        >Minimum notice<select id="booking-minimum-notice">
+                                            <option value="0">None</option>
+                                            <option value="60">1 hour</option>
+                                            <option value="240">4 hours</option>
+                                            <option value="720">12 hours</option>
+                                            <option value="1440">1 day</option>
+                                            <option value="2880">2 days</option>
+                                        </select></label
+                                    >
+                                    <label
+                                        >Booking window<select id="booking-window">
+                                            <option value="14">14 days</option>
+                                            <option value="30">30 days</option>
+                                            <option value="60">60 days</option>
+                                            <option value="90">90 days</option>
+                                            <option value="180">180 days</option>
+                                        </select></label
+                                    >
+                                </div>
+                            </section>
+
+                            <section class="availability-section">
+                                <div class="availability-section-heading">
+                                    <i class="uil uil-calendar-alt"></i>
+                                    <div>
+                                        <h2>Weekly hours</h2>
+                                        <p>Guests see open times in their own timezone.</p>
+                                    </div>
+                                </div>
+                                <div id="booking-weekly-hours" class="weekly-hours"></div>
+                            </section>
+
+                            <div class="availability-actions">
+                                <button id="booking-preview" type="button" class="availability-secondary">
+                                    <i class="uil uil-external-link-alt"></i> Preview page
+                                </button>
+                                <button id="booking-save" type="submit" class="availability-primary">
+                                    <i class="uil uil-check"></i> Save availability
+                                </button>
+                            </div>
+                        </form>
+
+                        <aside class="availability-aside">
+                            <div class="availability-aside-heading">
+                                <div>
+                                    <span>Scheduled</span>
+                                    <h2>Upcoming bookings</h2>
+                                </div>
+                                <button id="booking-refresh" type="button" aria-label="Refresh bookings">
+                                    <i class="uil uil-sync"></i>
+                                </button>
+                            </div>
+                            <div id="booking-list" class="booking-list"></div>
+                        </aside>
+                    </div>
                 </div>
 
                 <form id="addRowDiv" class="addRowDiv hidden" onsubmit="return false;">

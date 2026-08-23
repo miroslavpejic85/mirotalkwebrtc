@@ -34,8 +34,10 @@ class HtmlInjector {
         try {
             const content = fs.readFileSync(filePath, 'utf-8');
             this.cache[filePath] = content; // Store the content in cache
+            return true;
         } catch (err) {
             log.error(`Error reading file: ${filePath}`, err);
+            return false;
         }
     }
 
@@ -64,7 +66,7 @@ class HtmlInjector {
     injectHtml(filePath, res) {
         // return res.send(this.cache[filePath]);
 
-        if (!this.cache[filePath]) {
+        if (!this.cache[filePath] && !this.loadFileToCache(filePath)) {
             log.error(`File not cached: ${filePath}`);
             if (!res.headersSent) {
                 return res.status(500).send('Server Error');
