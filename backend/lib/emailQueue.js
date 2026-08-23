@@ -95,6 +95,8 @@ async function processJob(job) {
             room: job.room,
             date: job.date,
             time: job.time,
+            timezone: job.timezone,
+            startAt: job.startAt,
             durationMin: job.duration,
             inviterName: job.inviterName,
             message: job.message,

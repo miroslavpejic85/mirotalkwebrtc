@@ -24,6 +24,8 @@ const emailInvitationSchema = new mongoose.Schema(
         roomUrl: { type: String, required: true },
         date: { type: String },
         time: { type: String },
+        timezone: { type: String },
+        startAt: { type: Date },
         // Per-room meeting duration (minutes); falls back to env default when null/undefined.
         duration: { type: Number },
         subject: { type: String, required: true },

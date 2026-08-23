@@ -8,6 +8,7 @@ const utils = require('../common/utils');
 const emailUtils = require('../common/emailUtils');
 const emailQueue = require('../lib/emailQueue');
 const { computeReminderAt } = require('../lib/roomReminders');
+const { normalizeTimezone, zonedDateTimeToUtc } = require('../common/schedule');
 const config = require('../config');
 const { isDemoUser } = require('../middleware/saas');
 const logs = require('../common/logs');
@@ -137,6 +138,11 @@ async function sendRoomInvitation(req, res) {
         ).slice(0, 200);
         const safeMessage = typeof message === 'string' ? message.slice(0, 2000) : undefined;
         const inviterName = req.user?.username || req.user?.email;
+        const scheduleTimezone = normalizeTimezone(room.timezone || 'UTC');
+        if (!scheduleTimezone) {
+            return res.status(400).json({ message: 'Room has an invalid timezone' });
+        }
+        const startAt = room.startAt || zonedDateTimeToUtc(room.date, room.time, scheduleTimezone);
 
         const jobs = classified.valid.map((to) => ({
             userId: auth.authUserId,
@@ -146,6 +152,8 @@ async function sendRoomInvitation(req, res) {
             roomUrl,
             date: room.date,
             time: room.time,
+            timezone: scheduleTimezone,
+            startAt,
             duration: room.duration || undefined,
             subject: safeSubject,
             message: safeMessage,
@@ -233,6 +241,17 @@ async function setRoomRecurring(req, res) {
                 message: 'Room must have a date and time before enabling recurring invitations',
             });
         }
+
+        const scheduleTimezone = normalizeTimezone(room.timezone || 'UTC');
+        if (!scheduleTimezone) {
+            return res.status(400).json({ message: 'Room has an invalid timezone' });
+        }
+        const startAt = zonedDateTimeToUtc(room.date, room.time, scheduleTimezone);
+        if (!startAt) {
+            return res.status(400).json({ message: 'Room has an invalid meeting date, time, or timezone' });
+        }
+        room.timezone = scheduleTimezone;
+        room.startAt = startAt;
 
         const parsed = emailUtils.parseRecipients(recipients);
         if (parsed.length === 0) {
@@ -336,11 +355,13 @@ async function setRoomReminder(req, res) {
         if (!Number.isInteger(normalizedOffset) || normalizedOffset < 1 || normalizedOffset > 10080) {
             return res.status(400).json({ message: 'Reminder must be between 1 minute and 7 days' });
         }
-        const normalizedTimezoneOffset =
-            timezoneOffset === undefined || timezoneOffset === null || timezoneOffset === ''
-                ? new Date().getTimezoneOffset()
-                : Number(timezoneOffset);
-        const scheduledFor = computeReminderAt(room.date, room.time, normalizedOffset, normalizedTimezoneOffset);
+        const scheduleTimezone = normalizeTimezone(room.timezone || timezone || 'UTC');
+        if (!scheduleTimezone) {
+            return res.status(400).json({ message: 'Room has an invalid timezone' });
+        }
+        const startAt = zonedDateTimeToUtc(room.date, room.time, scheduleTimezone);
+        const normalizedTimezoneOffset = Number.isFinite(Number(timezoneOffset)) ? Number(timezoneOffset) : 0;
+        const scheduledFor = computeReminderAt(room.date, room.time, normalizedOffset, scheduleTimezone);
         if (!scheduledFor) {
             return res.status(400).json({ message: 'Select a valid reminder time for a scheduled room' });
         }
@@ -365,7 +386,7 @@ async function setRoomReminder(req, res) {
             enabled: true,
             offsetMinutes: normalizedOffset,
             timezoneOffset: normalizedTimezoneOffset,
-            timezone: typeof timezone === 'string' ? timezone.slice(0, 100) : undefined,
+            timezone: scheduleTimezone,
             deliveryId: crypto.randomUUID(),
             status: 'scheduled',
             attempts: 0,
@@ -381,6 +402,8 @@ async function setRoomReminder(req, res) {
             sentAt: null,
             lastError: null,
         };
+        room.timezone = scheduleTimezone;
+        room.startAt = startAt;
         await room.save();
 
         log.info('Room reminder enabled', {

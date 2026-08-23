@@ -108,13 +108,22 @@ function icsUtcStamp(date) {
 /**
  * Build a minimal VCALENDAR (METHOD:REQUEST) for a room invitation.
  *
- * The room date/time are persisted as plain strings (YYYY-MM-DD and HH:mm,
- * no timezone), so we emit them as RFC 5545 "floating" local times — every
- * calendar client interprets them in the recipient's own timezone, which
- * matches how the inviter entered them. Returns null if date/time are
- * missing or malformed (caller will simply skip the attachment).
+ * New jobs carry the authoritative UTC start instant. The floating local-time
+ * fallback is retained only for invitations queued before timezone support.
  */
-function buildInvitationIcs({ room, roomUrl, date, time, durationMin, inviterName, message, roomType, recipient }) {
+function buildInvitationIcs({
+    room,
+    roomUrl,
+    date,
+    time,
+    timezone,
+    startAt,
+    durationMin,
+    inviterName,
+    message,
+    roomType,
+    recipient,
+}) {
     const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(date || '').trim());
     const timeMatch = /^(\d{2}):(\d{2})$/.exec(String(time || '').trim());
     if (!dateMatch || !timeMatch) return null;
@@ -122,8 +131,9 @@ function buildInvitationIcs({ room, roomUrl, date, time, durationMin, inviterNam
     const [, y, mo, d] = dateMatch;
     const [, h, mi] = timeMatch;
 
-    // Floating local-time DTSTART (no TZID, no Z): clients render in viewer's local TZ.
-    const dtStart = `${y}${mo}${d}T${h}${mi}00`;
+    const persistedStart = startAt ? new Date(startAt) : null;
+    const hasPersistedStart = persistedStart && !Number.isNaN(persistedStart.getTime());
+    const dtStart = hasPersistedStart ? icsUtcStamp(persistedStart) : `${y}${mo}${d}T${h}${mi}00`;
 
     // Per-room duration (minutes) takes precedence over the env default.
     // Clamp to the same 5..1440 bounds the schema enforces to defend against bad inputs.
@@ -135,18 +145,21 @@ function buildInvitationIcs({ room, roomUrl, date, time, durationMin, inviterNam
 
     // Compute DTEND by adding the effective duration to the local wall-clock value.
     // Using Date.UTC keeps the math TZ-free; we then strip the Z to keep it floating.
-    const endMs =
-        Date.UTC(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), 0) + effectiveDuration * 60 * 1000;
+    const endMs = hasPersistedStart
+        ? persistedStart.getTime() + effectiveDuration * 60 * 1000
+        : Date.UTC(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), 0) +
+          effectiveDuration * 60 * 1000;
     const endDate = new Date(endMs);
     const pad = (n) => String(n).padStart(2, '0');
-    const dtEnd =
-        endDate.getUTCFullYear() +
-        pad(endDate.getUTCMonth() + 1) +
-        pad(endDate.getUTCDate()) +
-        'T' +
-        pad(endDate.getUTCHours()) +
-        pad(endDate.getUTCMinutes()) +
-        '00';
+    const dtEnd = hasPersistedStart
+        ? icsUtcStamp(endDate)
+        : endDate.getUTCFullYear() +
+          pad(endDate.getUTCMonth() + 1) +
+          pad(endDate.getUTCDate()) +
+          'T' +
+          pad(endDate.getUTCHours()) +
+          pad(endDate.getUTCMinutes()) +
+          '00';
 
     const dtStamp = icsUtcStamp(new Date());
 
@@ -437,6 +450,8 @@ function sendRoomInvitationEmail({
     room,
     date,
     time,
+    timezone,
+    startAt,
     durationMin,
     inviterName,
     message,
@@ -448,6 +463,7 @@ function sendRoomInvitationEmail({
     const safeRoom = escapeHtml(room);
     const safeDate = escapeHtml(date);
     const safeTime = escapeHtml(time);
+    const safeTimezone = escapeHtml(timezone);
     const safeRoomUrlAttr = safeUrlAttr(roomUrl);
     const safeRoomUrlText = escapeHtml(roomUrl);
     const safeInviter = escapeHtml(inviterName);
@@ -476,14 +492,14 @@ function sendRoomInvitationEmail({
           )}</p>`
         : '';
 
-    // Attach a calendar invite (.ics) when the room has a date+time, so recipients
-    // can add the meeting to their calendar in one click. Built as RFC 5545
-    // floating local time to match how the inviter entered it.
+    // Attach a calendar invite (.ics) when the room has a valid schedule.
     const icsContent = buildInvitationIcs({
         room,
         roomUrl,
         date,
         time,
+        timezone,
+        startAt,
         durationMin,
         inviterName,
         message,
@@ -532,6 +548,14 @@ function sendRoomInvitationEmail({
                             ? `<tr>
                         <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Time</td>
                         <td style="border: 1px solid #ddd; padding: 10px;">${safeTime}</td>
+                    </tr>`
+                            : ''
+                    }
+                    ${
+                        safeTimezone
+                            ? `<tr>
+                        <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Timezone</td>
+                        <td style="border: 1px solid #ddd; padding: 10px;">${safeTimezone}</td>
                     </tr>`
                             : ''
                     }

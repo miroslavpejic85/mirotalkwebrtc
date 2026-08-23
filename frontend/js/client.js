@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.71
+ * @version 1.4.72
  */
 
 const userAgent = navigator.userAgent;
@@ -1667,22 +1667,15 @@ function addRow() {
 function recurringBadgeTooltip(obj, recurring) {
     try {
         if (!obj || !obj.date || !obj.time) return 'Recurring weekly invitation active';
-        const base = new Date(`${obj.date}T${obj.time}:00`);
-        if (isNaN(base.getTime())) return 'Recurring weekly invitation active';
-        const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-        const now = Date.now();
-        let next = base.getTime();
-        if (next <= now) {
-            const weeks = Math.floor((now - next) / WEEK_MS) + 1;
-            next = next + weeks * WEEK_MS;
-        }
-        const d = new Date(next);
-        const day = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-        const hm = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+        const day = new Date(`${obj.date}T00:00:00Z`).toLocaleDateString(undefined, {
+            weekday: 'short',
+            timeZone: 'UTC',
+        });
+        const zone = obj.timezone || 'UTC';
         const recipients = recurring && Array.isArray(recurring.recipients) ? recurring.recipients.length : 0;
         const recLabel = recipients ? ` • ${recipients} recipient${recipients === 1 ? '' : 's'}` : '';
         const durLabel = obj && obj.duration ? ` • ${formatDurationLabel(obj.duration)}` : '';
-        return `Recurring weekly • Next: ${day} ${hm}${durLabel}${recLabel}`;
+        return `Recurring weekly • ${day} ${obj.time} (${zone})${durLabel}${recLabel}`;
     } catch (_) {
         return 'Recurring weekly invitation active';
     }
@@ -1692,31 +1685,13 @@ function recurringBadgeTooltip(obj, recurring) {
 // and fills the data-slot placeholders. Returns the populated outerHTML for tippy (allowHTML).
 function recurringBadgeTooltipHTML(obj, recurring) {
     let nextLabel = '—';
-    let countdown = '';
     try {
         if (obj && obj.date && obj.time) {
-            const base = new Date(`${obj.date}T${obj.time}:00`);
-            if (!isNaN(base.getTime())) {
-                const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-                const now = Date.now();
-                let nextMs = base.getTime();
-                if (nextMs <= now) {
-                    const weeks = Math.floor((now - nextMs) / WEEK_MS) + 1;
-                    nextMs = nextMs + weeks * WEEK_MS;
-                }
-                const d = new Date(nextMs);
-                const day = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-                const hm = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-                nextLabel = `${day} • ${hm}`;
-
-                const diff = Math.max(0, nextMs - now);
-                const days = Math.floor(diff / 86400000);
-                const hours = Math.floor((diff % 86400000) / 3600000);
-                const mins = Math.floor((diff % 3600000) / 60000);
-                if (days > 0) countdown = `in ${days}d ${hours}h`;
-                else if (hours > 0) countdown = `in ${hours}h ${mins}m`;
-                else countdown = `in ${mins}m`;
-            }
+            const day = new Date(`${obj.date}T00:00:00Z`).toLocaleDateString(undefined, {
+                weekday: 'short',
+                timeZone: 'UTC',
+            });
+            nextLabel = `${day} • ${obj.time} • ${obj.timezone || 'UTC'}`;
         }
     } catch (_) {}
 
@@ -1748,8 +1723,8 @@ function recurringBadgeTooltipHTML(obj, recurring) {
     };
 
     setSlot('next', nextLabel);
-    const cdEl = setSlot('countdown', countdown);
-    if (cdEl) cdEl.hidden = !countdown;
+    const cdEl = setSlot('countdown', '');
+    if (cdEl) cdEl.hidden = true;
 
     setSlot('recipients', recipientsLine);
 
@@ -1794,6 +1769,13 @@ function getRow(obj) {
             : null;
     window.__roomReminder = window.__roomReminder || {};
     window.__roomReminder[obj._id] = reminder;
+    window.__roomSchedule = window.__roomSchedule || {};
+    window.__roomSchedule[obj._id] = {
+        date: obj.date,
+        time: obj.time,
+        timezone: obj.timezone || 'UTC',
+        startAt: obj.startAt,
+    };
     const automationBadges = [];
     if (recurring) {
         automationBadges.push(
@@ -2172,7 +2154,9 @@ function requirePaidPlan(message) {
 
 function getRoomCalendarEvent(id) {
     const data = getRowValues(id);
-    const start = new Date(`${data.date}T${data.time}:00`);
+    const savedSchedule = window.__roomSchedule && window.__roomSchedule[id];
+    const unchanged = savedSchedule && savedSchedule.date === data.date && savedSchedule.time === data.time;
+    const start = unchanged && savedSchedule.startAt ? new Date(savedSchedule.startAt) : new Date(`${data.date}T${data.time}:00`);
     if (Number.isNaN(start.getTime())) return null;
     const end = new Date(start.getTime() + (Number(data.duration) || DEFAULT_DURATION_MIN) * 60000);
     const roomUrl = getRoomURL(data, false);
@@ -2186,9 +2170,8 @@ function getRoomCalendarEvent(id) {
     };
 }
 
-function formatCalendarLocal(date) {
-    const pad = (value) => String(value).padStart(2, '0');
-    return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}T${pad(date.getHours())}${pad(date.getMinutes())}00`;
+function formatCalendarUtc(date) {
+    return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
 }
 
 function addRoomToGoogleCalendar(id) {
@@ -2198,7 +2181,7 @@ function addRoomToGoogleCalendar(id) {
     const params = new URLSearchParams({
         action: 'TEMPLATE',
         text: event.title,
-        dates: `${formatCalendarLocal(event.start)}/${formatCalendarLocal(event.end)}`,
+        dates: `${formatCalendarUtc(event.start)}/${formatCalendarUtc(event.end)}`,
         details: event.description,
         location: event.roomUrl,
     });
@@ -2209,14 +2192,12 @@ function addRoomToOutlook(id) {
     if (!requirePaidPlan('Calendar integrations are available on a paid plan.')) return;
     const event = getRoomCalendarEvent(id);
     if (!event) return popupMessage('warning', 'Save a valid room date and time first');
-    const localIso = (date) =>
-        `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}T${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:00`;
     const params = new URLSearchParams({
         path: '/calendar/action/compose',
         rru: 'addevent',
         subject: event.title,
-        startdt: localIso(event.start),
-        enddt: localIso(event.end),
+        startdt: event.start.toISOString(),
+        enddt: event.end.toISOString(),
         body: event.description,
         location: event.roomUrl,
     });
@@ -2233,13 +2214,13 @@ function downloadRoomIcs(id) {
         'VERSION:2.0',
         'PRODID:-//MiroTalk//Room//EN',
         'BEGIN:VEVENT',
-        `UID:${event.data.room}-${formatCalendarLocal(event.start)}@mirotalk.local`,
+        `UID:${event.data.room}-${formatCalendarUtc(event.start)}@mirotalk.local`,
         `DTSTAMP:${new Date()
             .toISOString()
             .replace(/[-:]/g, '')
             .replace(/\.\d{3}/, '')}`,
-        `DTSTART:${formatCalendarLocal(event.start)}`,
-        `DTEND:${formatCalendarLocal(event.end)}`,
+        `DTSTART:${formatCalendarUtc(event.start)}`,
+        `DTEND:${formatCalendarUtc(event.end)}`,
         `SUMMARY:${escapeIcs(event.title)}`,
         `DESCRIPTION:${escapeIcs(event.description)}`,
         `LOCATION:${escapeIcs(event.roomUrl)}`,
@@ -3267,6 +3248,11 @@ function getRowValues(id) {
     const date = document.getElementById(id + '_date').value;
     const time = document.getElementById(id + '_time').value;
     const meetingDate = new Date(`${date}T${time}:00`);
+    const savedSchedule = window.__roomSchedule && window.__roomSchedule[id];
+    const timezone =
+        savedSchedule && savedSchedule.date === date && savedSchedule.time === time
+            ? savedSchedule.timezone
+            : Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
     return {
         userId: userId,
         type: document.getElementById(id + '_type').value,
@@ -3278,7 +3264,7 @@ function getRowValues(id) {
         timezoneOffset: Number.isNaN(meetingDate.getTime())
             ? new Date().getTimezoneOffset()
             : meetingDate.getTimezoneOffset(),
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        timezone,
         duration: durationEl && durationEl.value !== '' ? Number(durationEl.value) : null,
         room: document.getElementById(id + '_room').value,
     };
@@ -3296,6 +3282,7 @@ function getFormValues() {
         phone: addPhone.value,
         date: addDate.value,
         time: addTime.value,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
         duration: addDuration && addDuration.value !== '' ? Number(addDuration.value) : null,
         room: roomValue,
     };

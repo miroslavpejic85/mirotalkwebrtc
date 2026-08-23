@@ -23,6 +23,14 @@ test('computeReminderAt converts browser-local meeting time to UTC', () => {
     assert.equal(reminderAt.toISOString(), '2026-08-21T19:00:00.000Z');
 });
 
+test('computeReminderAt uses an IANA timezone at the meeting date', () => {
+    const winter = computeReminderAt('2026-01-22', '10:00', 60, 'Europe/Rome');
+    const summer = computeReminderAt('2026-07-22', '10:00', 60, 'Europe/Rome');
+
+    assert.equal(winter.toISOString(), '2026-01-22T08:00:00.000Z');
+    assert.equal(summer.toISOString(), '2026-07-22T07:00:00.000Z');
+});
+
 test('computeReminderAt accepts an omitted timezone offset for older clients', () => {
     const reminderAt = computeReminderAt('2026-08-21', '21:30', 10);
 

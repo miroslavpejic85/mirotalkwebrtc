@@ -5,6 +5,7 @@ const EmailInvitation = require('../models/emailInvitation');
 const emailUtils = require('../common/emailUtils');
 const emailQueue = require('./emailQueue');
 const config = require('../config');
+const { computeLastWeeklyOccurrence: computeZonedWeeklyOccurrence, getZonedParts } = require('../common/schedule');
 const logs = require('../common/logs');
 
 const log = new logs('RecurringInvitations');
@@ -15,24 +16,15 @@ const POLL_MS = Math.max(15000, Number(process.env.EMAIL_INVITATION_RECURRING_PO
 const MAX_RECIPIENTS = Number(process.env.EMAIL_INVITATION_MAX_RECIPIENTS) || 50;
 const DAILY_CAP = Number(process.env.EMAIL_INVITATION_DAILY_CAP_PER_USER) || 500;
 
-const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-
 let timer = null;
 let running = false;
 let stopped = false;
 
-/**
- * Compute the most recent weekly occurrence of `date`+`time` at or before `now`.
- * Returns null if the base date is invalid or still in the future.
- */
-function computeLastWeeklyOccurrence(date, time, now = new Date()) {
-    if (!date || !time) return null;
-    const base = new Date(`${date}T${time}:00`);
-    const baseMs = base.getTime();
-    if (Number.isNaN(baseMs)) return null;
-    if (now.getTime() < baseMs) return null;
-    const weeks = Math.floor((now.getTime() - baseMs) / WEEK_MS);
-    return new Date(baseMs + weeks * WEEK_MS);
+function computeLastWeeklyOccurrence(date, time, timezoneOrNow = 'UTC', now = new Date()) {
+    if (timezoneOrNow instanceof Date) {
+        return computeZonedWeeklyOccurrence(date, time, 'UTC', timezoneOrNow);
+    }
+    return computeZonedWeeklyOccurrence(date, time, timezoneOrNow || 'UTC', now);
 }
 
 function buildRoomUrl(room) {
@@ -130,6 +122,9 @@ async function dispatchOccurrence(room, occurrence) {
         `Please join our MiroTalk ${room.type} Video Chat Meeting`
     ).slice(0, 200);
     const message = typeof room.recurring.message === 'string' ? room.recurring.message.slice(0, 2000) : undefined;
+    const occurrenceParts = getZonedParts(occurrence, room.timezone || 'UTC');
+    const pad = (value) => String(value).padStart(2, '0');
+    const occurrenceDate = `${occurrenceParts.year}-${pad(occurrenceParts.month)}-${pad(occurrenceParts.day)}`;
 
     const jobs = classified.valid.map((to) => ({
         userId: room.userId,
@@ -137,8 +132,10 @@ async function dispatchOccurrence(room, occurrence) {
         roomType: room.type,
         room: room.room,
         roomUrl,
-        date: room.date,
+        date: occurrenceDate,
         time: room.time,
+        timezone: room.timezone,
+        startAt: occurrence,
         duration: room.duration || undefined,
         subject,
         message,
@@ -189,7 +186,7 @@ async function tick() {
 
         for (const room of rooms) {
             try {
-                const occurrence = computeLastWeeklyOccurrence(room.date, room.time, now);
+                const occurrence = computeLastWeeklyOccurrence(room.date, room.time, room.timezone || 'UTC', now);
                 if (!occurrence) continue;
                 const enabledAt = room.recurring && room.recurring.enabledAt;
                 if (enabledAt && occurrence.getTime() < new Date(enabledAt).getTime()) continue;

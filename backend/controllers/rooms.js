@@ -3,6 +3,7 @@
 const Room = require('../models/room');
 const User = require('../models/users');
 const { computeReminderAt } = require('../lib/roomReminders');
+const { normalizeTimezone, zonedDateTimeToUtc } = require('../common/schedule');
 const utils = require('../common/utils');
 const logs = require('../common/logs');
 
@@ -43,12 +44,21 @@ function normalizeDuration(value) {
 
 async function roomCreate(req, res) {
     try {
-        const { type, tag, email, phone, date, time, duration, room } = req.body;
+        const { type, tag, email, phone, date, time, timezone, duration, room } = req.body;
 
         // Derive userId server-side from authenticated user — never trust req.body.userId
         const authUserId = await getAuthUserId(req);
         if (!authUserId) {
             return res.status(403).json({ message: 'Access denied' });
+        }
+
+        const normalizedTimezone = timezone ? normalizeTimezone(timezone) : 'UTC';
+        if (!normalizedTimezone) {
+            return res.status(400).json({ message: 'Select a valid IANA timezone' });
+        }
+        const startAt = zonedDateTimeToUtc(date, time, normalizedTimezone);
+        if (!startAt) {
+            return res.status(400).json({ message: 'Select a valid meeting date, time, and timezone' });
         }
 
         const data = new Room({
@@ -59,6 +69,8 @@ async function roomCreate(req, res) {
             phone: phone,
             date: date,
             time: time,
+            timezone: normalizedTimezone,
+            startAt,
             duration: normalizeDuration(duration),
             room: room,
         });
@@ -145,7 +157,7 @@ async function roomUpdate(req, res) {
             return res.status(404).json({ message: 'Room not found' });
         }
         if (!(await ensureOwnerOrAdmin(req, res, existing.userId))) return;
-        const allowedFields = ['type', 'tag', 'email', 'phone', 'date', 'time', 'duration', 'room'];
+        const allowedFields = ['type', 'tag', 'email', 'phone', 'date', 'time', 'timezone', 'duration', 'room'];
         const updatedData = {};
         for (const field of allowedFields) {
             if (req.body[field] !== undefined) updatedData[field] = req.body[field];
@@ -153,22 +165,38 @@ async function roomUpdate(req, res) {
         if (updatedData.duration !== undefined) {
             updatedData.duration = normalizeDuration(updatedData.duration);
         }
-        const current = await Room.findById(id).select('date time reminder').lean();
-        if (current.reminder && current.reminder.enabled && (updatedData.date || updatedData.time)) {
-            const reminderTimezoneOffset = Number.isFinite(Number(req.body.timezoneOffset))
-                ? Number(req.body.timezoneOffset)
-                : current.reminder.timezoneOffset;
+        const current = await Room.findById(id).select('date time timezone startAt reminder').lean();
+        if (updatedData.date !== undefined || updatedData.time !== undefined || updatedData.timezone !== undefined) {
+            const requestedTimezone = updatedData.timezone || current.timezone || 'UTC';
+            const scheduleTimezone = normalizeTimezone(requestedTimezone);
+            if (!scheduleTimezone) {
+                return res.status(400).json({ message: 'Select a valid IANA timezone' });
+            }
+            const startAt = zonedDateTimeToUtc(
+                updatedData.date || current.date,
+                updatedData.time || current.time,
+                scheduleTimezone
+            );
+            if (!startAt) {
+                return res.status(400).json({ message: 'Select a valid meeting date, time, and timezone' });
+            }
+            updatedData.timezone = scheduleTimezone;
+            updatedData.startAt = startAt;
+        }
+        if (
+            current.reminder &&
+            current.reminder.enabled &&
+            (updatedData.date !== undefined || updatedData.time !== undefined || updatedData.timezone !== undefined)
+        ) {
             const reminderAt = computeReminderAt(
                 updatedData.date || current.date,
                 updatedData.time || current.time,
                 current.reminder.offsetMinutes,
-                reminderTimezoneOffset
+                updatedData.timezone || current.timezone || 'UTC'
             );
             updatedData['reminder.scheduledFor'] = reminderAt;
             updatedData['reminder.enabled'] = !!(reminderAt && reminderAt.getTime() > Date.now());
-            updatedData['reminder.timezoneOffset'] = reminderTimezoneOffset;
-            if (typeof req.body.timezone === 'string')
-                updatedData['reminder.timezone'] = req.body.timezone.slice(0, 100);
+            updatedData['reminder.timezone'] = updatedData.timezone || current.timezone || 'UTC';
             updatedData['reminder.status'] = updatedData['reminder.enabled'] ? 'scheduled' : 'canceled';
         }
         const options = { returnDocument: 'after' };

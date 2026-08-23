@@ -5,6 +5,7 @@ const EmailInvitation = require('../models/emailInvitation');
 const emailUtils = require('../common/emailUtils');
 const emailQueue = require('./emailQueue');
 const config = require('../config');
+const { zonedDateTimeToUtc } = require('../common/schedule');
 const logs = require('../common/logs');
 
 const log = new logs('RoomReminders');
@@ -19,14 +20,18 @@ let timer = null;
 let running = false;
 let stopped = false;
 
-function computeReminderAt(date, time, offsetMinutes, timezoneOffset = 0) {
+function computeReminderAt(date, time, offsetMinutes, timezone = 0) {
     const normalizedOffset = Number(offsetMinutes);
     if (!date || !time || !Number.isInteger(normalizedOffset) || normalizedOffset < 1 || normalizedOffset > 10080) {
         return null;
     }
+    if (typeof timezone === 'string') {
+        const meetingAt = zonedDateTimeToUtc(date, time, timezone);
+        return meetingAt ? new Date(meetingAt.getTime() - normalizedOffset * 60 * 1000) : null;
+    }
     const dateParts = String(date).split('-').map(Number);
     const timeParts = String(time).split(':').map(Number);
-    const normalizedTimezoneOffset = Number(timezoneOffset);
+    const normalizedTimezoneOffset = Number(timezone);
     if (
         dateParts.length !== 3 ||
         timeParts.length < 2 ||
@@ -112,6 +117,8 @@ async function dispatchReminder(room) {
         roomUrl,
         date: room.date,
         time: room.time,
+        timezone: room.timezone,
+        startAt: room.startAt,
         duration: room.duration || undefined,
         subject: room.reminder.subject || `Reminder: MiroTalk ${room.type} meeting starts soon`,
         message: room.reminder.message,

@@ -796,6 +796,10 @@ components:
                 time:
                     type: string
                     example: '00:00'
+                timezone:
+                    type: string
+                    description: IANA timezone for the meeting wall time. Defaults to UTC when omitted.
+                    example: 'Europe/Rome'
                 duration:
                     type: integer
                     description: Meeting duration in minutes (5..1440). Falls back to EMAIL_INVITATION_ICS_DURATION_MIN when unset.
@@ -841,6 +845,14 @@ components:
                 time:
                     type: string
                     example: '00:00'
+                timezone:
+                    type: string
+                    example: 'Europe/Rome'
+                startAt:
+                    type: string
+                    format: date-time
+                    description: Authoritative UTC meeting start instant derived by the server.
+                    example: '2022-12-30T23:00:00.000Z'
                 duration:
                     type: integer
                     nullable: true
