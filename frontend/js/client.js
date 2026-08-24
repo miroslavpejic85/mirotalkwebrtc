@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.25
+ * @version 1.5.26
  */
 
 const userAgent = navigator.userAgent;
@@ -37,6 +37,7 @@ const navP2P = document.getElementById('navP2P');
 const navSFU = document.getElementById('navSFU');
 const navBRO = document.getElementById('navBRO');
 const navCME = document.getElementById('navCME');
+const navAbout = document.getElementById('navAbout');
 const navSup = document.getElementById('navSup');
 const navAcc = document.getElementById('navAcc');
 const navSet = document.getElementById('navSet');
@@ -346,6 +347,7 @@ const tokens = {
 };
 
 let html = {
+    about: true,
     support: true,
     profile: true,
     projects: true,
@@ -680,6 +682,7 @@ function hideElements() {
         elemDisplay(statsProjectsSection, false);
     }
     !html.profile && elemDisplay(myProfile, false);
+    !html.about && elemDisplay(navAbout, false);
     !html.support && elemDisplay(navSup, false);
     //...
 }
@@ -945,6 +948,10 @@ navBRO.addEventListener('click', () => {
 navCME.addEventListener('click', () => {
     navShow([cme], navCME);
     //cmeIframe.setAttribute('src', config.MiroTalk.CME.Home);
+});
+
+navAbout.addEventListener('click', () => {
+    openURL(config.Author.About, true);
 });
 
 navSup.addEventListener('click', () => {

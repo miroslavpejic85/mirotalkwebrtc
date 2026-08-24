@@ -18,7 +18,8 @@ module.exports = {
     Author: {
         Email: 'miroslav.pejic.85@gmail.com',
         Profile: 'https://www.linkedin.com/in/miroslav-pejic-976a07101/',
-        Support: 'https://github.com/sponsors/miroslavpejic85',
+        About: 'https://github.com/sponsors/miroslavpejic85',
+        Support: 'https://discord.gg/rgGYfeYW3N',
     },
     MiroTalk: {
         P2P: {
@@ -87,6 +88,7 @@ module.exports = {
         },
     },
     HTML: {
+        about: true,
         support: true,
         profile: true,
         projects: true,
