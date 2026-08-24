@@ -414,6 +414,11 @@ button:focus-visible,
     overflow: hidden;
 }
 
+.availability-url-field:focus-within {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
 .availability-url-field > span {
     padding-left: 11px;
     color: var(--black-light-color);
@@ -424,6 +429,10 @@ button:focus-visible,
 .availability-url-field input {
     border: 0;
     padding-left: 3px;
+}
+
+.availability-url-field input:focus-visible {
+    outline: none;
 }
 
 .weekly-hours {
