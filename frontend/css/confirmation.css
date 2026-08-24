@@ -220,6 +220,11 @@ html[data-theme='light'] .auth-page {
         radial-gradient(800px 600px at 100% 100%, rgba(67, 159, 255, 0.04), transparent 70%), var(--primary-color);
 }
 
+html[data-theme='light'] .auth-brand img {
+    background-color: #172033;
+    border-radius: 50%;
+}
+
 html[data-theme='light'] .auth-brand {
     color: #172033;
 }

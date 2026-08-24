@@ -1102,6 +1102,11 @@ html[data-theme='light'] body.home {
         radial-gradient(1200px 900px at 105% -10%, rgba(67, 159, 255, 0.05), transparent 68%), var(--primary-color);
 }
 
+html[data-theme='light'] .landing-nav .brand img {
+    background-color: #172033;
+    border-radius: 50%;
+}
+
 @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
     .cursor-light {
         display: none;

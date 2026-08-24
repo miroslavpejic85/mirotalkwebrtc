@@ -65,6 +65,8 @@ a {
 .booking-brand img {
     width: 34px;
     height: 34px;
+    background-color: #172033;
+    border-radius: 50%;
     object-fit: contain;
 }
 .secure-label {

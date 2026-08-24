@@ -3878,6 +3878,7 @@ nav .logo-name {
 nav .logo-image img {
     width: 36px;
     height: 36px;
+    background-color: #172033;
     border-radius: 8px;
 }
 
