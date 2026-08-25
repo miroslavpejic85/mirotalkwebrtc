@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.27
+ * @version 1.5.28
  */
 
 const userAgent = navigator.userAgent;
@@ -37,8 +37,10 @@ const navP2P = document.getElementById('navP2P');
 const navSFU = document.getElementById('navSFU');
 const navBRO = document.getElementById('navBRO');
 const navCME = document.getElementById('navCME');
+const navResources = document.getElementById('navResources');
 const navAbout = document.getElementById('navAbout');
 const navSup = document.getElementById('navSup');
+const navFeedback = document.getElementById('navFeedback');
 const navAcc = document.getElementById('navAcc');
 const navSet = document.getElementById('navSet');
 
@@ -347,10 +349,23 @@ const tokens = {
 };
 
 let html = {
-    about: true,
-    support: true,
-    profile: true,
-    projects: true,
+    about: {
+        enabled: false,
+        url: 'https://github.com/sponsors/miroslavpejic85',
+    },
+    support: {
+        enabled: false,
+        url: 'https://discord.gg/rgGYfeYW3N',
+    },
+    feedback: {
+        enabled: false,
+        url: '',
+    },
+    profile: {
+        enabled: false,
+        url: 'https://www.linkedin.com/in/miroslav-pejic-976a07101/',
+    },
+    projects: false,
     //...
 };
 
@@ -365,6 +380,10 @@ let user = {
 };
 
 let addDuration = document.getElementById('add-duration');
+
+function getEnabledUrl(item) {
+    return item?.enabled && typeof item.url === 'string' ? item.url.trim() : '';
+}
 
 $(document).ready(async function () {
     // Strip token from URL to prevent leakage via browser history/referrer
@@ -444,7 +463,8 @@ function loadConfig(cfg) {
     console.log('Config', config);
     const appName = config?.App?.Name || 'MiroTalk';
     const appLogo = config?.App?.Logo || '../Images/logo.png';
-    myProfile.setAttribute('href', config.Author.Profile);
+    const profileUrl = getEnabledUrl(html.profile);
+    if (profileUrl) myProfile.setAttribute('href', profileUrl);
     repoP2P.setAttribute('href', config.MiroTalk.P2P.GitHub.Repo);
     starP2P.setAttribute('href', config.MiroTalk.P2P.GitHub.Star);
     shieldsP2P.setAttribute('src', config.MiroTalk.P2P.GitHub.Shields);
@@ -677,13 +697,19 @@ function toggleElements() {
 }
 
 function hideElements() {
+    const aboutEnabled = Boolean(getEnabledUrl(html.about));
+    const supportEnabled = Boolean(getEnabledUrl(html.support));
+    const feedbackEnabled = Boolean(getEnabledUrl(html.feedback));
+    const profileEnabled = Boolean(getEnabledUrl(html.profile));
     if (!html.projects) {
         elemDisplay(boxesDS, false);
         elemDisplay(statsProjectsSection, false);
     }
-    !html.profile && elemDisplay(myProfile, false);
-    !html.about && elemDisplay(navAbout, false);
-    !html.support && elemDisplay(navSup, false);
+    elemDisplay(myProfile, profileEnabled);
+    elemDisplay(navAbout, aboutEnabled);
+    elemDisplay(navSup, supportEnabled);
+    elemDisplay(navFeedback, feedbackEnabled);
+    elemDisplay(navResources, aboutEnabled || supportEnabled || feedbackEnabled);
     //...
 }
 
@@ -951,11 +977,18 @@ navCME.addEventListener('click', () => {
 });
 
 navAbout.addEventListener('click', () => {
-    openURL(config.Author.About, true);
+    const aboutUrl = getEnabledUrl(html.about);
+    if (aboutUrl) openURL(aboutUrl, true);
 });
 
 navSup.addEventListener('click', () => {
-    openURL(config.Author.Support, true);
+    const supportUrl = getEnabledUrl(html.support);
+    if (supportUrl) openURL(supportUrl, true);
+});
+
+navFeedback.addEventListener('click', () => {
+    const feedbackUrl = getEnabledUrl(html.feedback);
+    if (feedbackUrl) openURL(feedbackUrl, true);
 });
 
 navAcc.addEventListener('click', () => {

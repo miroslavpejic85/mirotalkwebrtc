@@ -17,9 +17,6 @@ module.exports = {
     },
     Author: {
         Email: 'miroslav.pejic.85@gmail.com',
-        Profile: 'https://www.linkedin.com/in/miroslav-pejic-976a07101/',
-        About: 'https://github.com/sponsors/miroslavpejic85',
-        Support: 'https://discord.gg/rgGYfeYW3N',
     },
     MiroTalk: {
         P2P: {
@@ -88,10 +85,23 @@ module.exports = {
         },
     },
     HTML: {
-        about: true,
-        support: true,
-        profile: true,
-        projects: true,
+        about: {
+            enabled: false,
+            url: 'https://docs.mirotalk.com/mirotalk-ultimate/',
+        },
+        support: {
+            enabled: false,
+            url: 'https://discord.gg/rgGYfeYW3N',
+        },
+        feedback: {
+            enabled: false,
+            url: '',
+        },
+        profile: {
+            enabled: false,
+            url: 'https://www.linkedin.com/in/miroslav-pejic-976a07101/',
+        },
+        projects: false,
         //...
     },
     BUTTONS: {
