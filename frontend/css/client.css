@@ -3678,6 +3678,10 @@ td .action-group {
     color: var(--danger-color);
 }
 
+.action-icon.danger i {
+    color: inherit;
+}
+
 @keyframes unsaved-save-pulse {
     0%,
     100% {
@@ -3695,8 +3699,8 @@ td .action-group {
 }
 
 .action-icon.danger:hover {
-    background-color: var(--hover-bg-light);
-    color: var(--accent-color);
+    background-color: var(--danger-bg-light);
+    color: var(--danger-color);
 }
 
 .action-icon.action-primary {
