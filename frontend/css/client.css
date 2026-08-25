@@ -5770,6 +5770,17 @@ body.dark #usersTable tr:hover {
         padding: 18px 12px 14px;
         border-right: 1px solid var(--border-color);
     }
+
+    nav.close .nav-section-label {
+        height: 1px;
+        margin: 14px 8px 8px;
+        padding: 0;
+        background-color: var(--border-color);
+    }
+
+    nav.close .nav-section-label span {
+        display: none;
+    }
 }
 
 /* Creation drawers */
