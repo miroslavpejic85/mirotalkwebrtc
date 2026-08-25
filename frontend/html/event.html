@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="MiroTalk event" />
+        <meta name="theme-color" content="#f6f7f3" />
+        <title>Event | MiroTalk</title>
+        <link rel="icon" href="/Images/favicon.png" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.8/css/line.css" />
+        <link rel="stylesheet" href="/css/booking.css" />
+        <link rel="stylesheet" href="/css/event.css" />
+        <script defer src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script defer src="/js/event.js"></script>
+    </head>
+    <body>
+        <header class="booking-topbar">
+            <a href="/" class="booking-brand" aria-label="MiroTalk home"
+                ><img src="/Images/logo.png" alt="" /><span>MiroTalk</span></a
+            >
+            <span class="secure-label"><i class="uil uil-shield-check"></i> Secure video event</span>
+        </header>
+
+        <main>
+            <div id="event-loading" class="booking-loading" role="status">
+                <span></span>
+                <p>Loading event</p>
+            </div>
+            <section id="event-error" class="booking-message" hidden>
+                <i class="uil uil-calendar-slash"></i>
+                <h1>Event unavailable</h1>
+                <p id="event-error-text"></p>
+            </section>
+
+            <section id="event-shell" class="booking-shell event-shell" hidden>
+                <figure id="event-media" class="event-media" hidden>
+                    <img id="event-image" alt="" referrerpolicy="no-referrer" />
+                </figure>
+                <aside class="host-panel event-host-panel">
+                    <div id="event-avatar" class="host-avatar"></div>
+                    <span id="event-organizer" class="host-name"></span>
+                    <h1 id="event-title"></h1>
+                    <p id="event-description" class="event-description"></p>
+                </aside>
+                <div class="booking-panel event-detail-panel">
+                    <span class="step-label">Live video event</span>
+                    <h2>Event details</h2>
+                    <dl class="event-detail-list">
+                        <div>
+                            <dt><i class="uil uil-calendar-alt"></i></dt>
+                            <dd><strong id="event-date"></strong><span id="event-time"></span></dd>
+                        </div>
+                        <div>
+                            <dt><i class="uil uil-clock"></i></dt>
+                            <dd><strong id="event-duration"></strong><span id="event-timezone"></span></dd>
+                        </div>
+                        <div>
+                            <dt><i class="uil uil-video"></i></dt>
+                            <dd><strong>MiroTalk meeting</strong><span id="event-service"></span></dd>
+                        </div>
+                    </dl>
+                    <div class="event-public-actions">
+                        <a id="event-join" class="confirm-button" target="_blank" rel="noopener"
+                            ><i class="uil uil-video"></i> Join event</a
+                        >
+                        <button id="event-calendar" class="event-secondary-button" type="button">
+                            <i class="uil uil-calendar-plus"></i> Add to calendar
+                        </button>
+                        <button
+                            id="event-share"
+                            class="event-icon-button"
+                            type="button"
+                            title="Copy event link"
+                            aria-label="Copy event link"
+                        >
+                            <i class="uil uil-share-alt"></i>
+                        </button>
+                    </div>
+                    <p id="event-copy-status" class="event-copy-status" role="status"></p>
+                </div>
+            </section>
+        </main>
+        <footer>Events and video meetings by <strong>MiroTalk</strong></footer>
+    </body>
+</html>

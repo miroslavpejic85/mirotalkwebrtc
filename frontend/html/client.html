@@ -51,6 +51,7 @@
         <script defer src="../js/api.js"></script>
         <script defer src="../js/client.js"></script>
         <script defer src="../js/booking-manage.js"></script>
+        <script defer src="../js/events-manage.js"></script>
         <script defer src="../js/translate.js"></script>
     </head>
 
@@ -80,6 +81,12 @@
                         <a id="navAvailability" href="javascript:void(0)">
                             <i class="uil uil-clock"></i>
                             <span class="link-name">Availability</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a id="navEvents" href="javascript:void(0)">
+                            <i class="uil uil-calendar-alt"></i>
+                            <span class="link-name">Events</span>
                         </a>
                     </li>
                     <li>
@@ -692,6 +699,124 @@
                             </div>
                             <div id="booking-list" class="booking-list"></div>
                         </aside>
+                    </div>
+                </div>
+
+                <div id="dsEvents" class="dsEvents">
+                    <div class="client-page-header events-header">
+                        <div>
+                            <span class="page-eyebrow">Shareable schedule</span>
+                            <h1>Events</h1>
+                            <p>Create a public event page connected to a MiroTalk meeting room.</p>
+                        </div>
+                        <button id="event-new" type="button" class="availability-primary">
+                            <i class="uil uil-plus"></i> New event
+                        </button>
+                    </div>
+
+                    <div id="events-premium-notice" class="booking-premium-notice" hidden>
+                        <div class="booking-premium-icon"><i class="uil uil-star"></i></div>
+                        <div>
+                            <strong>Create shareable events with a paid plan</strong>
+                            <span>Publish event pages and connect them to dedicated MiroTalk meeting rooms.</span>
+                        </div>
+                        <button id="events-view-plans" type="button"><i class="uil uil-tag-alt"></i> View plans</button>
+                    </div>
+
+                    <div class="events-layout">
+                        <form id="event-form" class="availability-section" onsubmit="return false;">
+                            <div class="availability-section-heading">
+                                <i class="uil uil-calendar-alt"></i>
+                                <div>
+                                    <h2 id="event-form-title">Create event</h2>
+                                    <p>Set what guests see and when the meeting starts.</p>
+                                </div>
+                            </div>
+                            <input id="event-id" type="hidden" />
+                            <div class="availability-grid two-columns">
+                                <label class="full-width"
+                                    >Title<input id="event-name" type="text" maxlength="120" required
+                                /></label>
+                                <label class="full-width"
+                                    >Description<textarea id="event-description" rows="4" maxlength="4000"></textarea>
+                                </label>
+                                <label class="full-width"
+                                    >Image URL<input
+                                        id="event-image-url"
+                                        type="url"
+                                        maxlength="2048"
+                                        placeholder="https://example.com/event-cover.jpg"
+                                    /><small class="event-field-hint">Optional external HTTP(S) image.</small></label
+                                >
+                                <label
+                                    >Date<input
+                                        id="event-date"
+                                        class="flatpickr-date"
+                                        type="text"
+                                        placeholder="Date"
+                                        required
+                                /></label>
+                                <label
+                                    >Time<input
+                                        id="event-time"
+                                        class="flatpickr-time"
+                                        type="text"
+                                        placeholder="Time"
+                                        required
+                                /></label>
+                                <label>Timezone<select id="event-timezone" required></select></label>
+                                <label
+                                    >Duration<select id="event-duration">
+                                        <option value="15">15 minutes</option>
+                                        <option value="30">30 minutes</option>
+                                        <option value="45">45 minutes</option>
+                                        <option value="60" selected>1 hour</option>
+                                        <option value="90">1 hour 30 minutes</option>
+                                        <option value="120">2 hours</option>
+                                    </select></label
+                                >
+                                <label
+                                    >Service<select id="event-room-type">
+                                        <option>P2P</option>
+                                        <option selected>SFU</option>
+                                        <option>C2C</option>
+                                        <option>BRO</option>
+                                        <option>CME</option>
+                                    </select></label
+                                >
+                                <label class="event-publish-field"
+                                    ><input id="event-published" type="checkbox" checked />
+                                    <span
+                                        ><strong>Public event</strong
+                                        ><small>Anyone with the link can view and join.</small></span
+                                    >
+                                </label>
+                            </div>
+                            <div class="events-form-actions">
+                                <button id="event-cancel" type="button" class="availability-secondary" hidden>
+                                    Cancel
+                                </button>
+                                <button id="event-save" type="submit" class="availability-primary">
+                                    <i class="uil uil-check"></i> Create event
+                                </button>
+                            </div>
+                        </form>
+
+                        <section class="events-list-panel">
+                            <div class="events-list-heading">
+                                <div>
+                                    <span>Schedule</span>
+                                    <h2>Your events</h2>
+                                </div>
+                                <button id="event-refresh" type="button" aria-label="Refresh events">
+                                    <i class="uil uil-sync"></i>
+                                </button>
+                            </div>
+                            <div id="events-loading" class="availability-loading" hidden>
+                                <span class="page-loading-spinner" aria-hidden="true"></span>
+                            </div>
+                            <div id="events-list" class="events-list"></div>
+                        </section>
                     </div>
                 </div>
 

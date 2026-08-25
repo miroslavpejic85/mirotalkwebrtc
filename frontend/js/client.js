@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.28
+ * @version 1.5.40
  */
 
 const userAgent = navigator.userAgent;
@@ -31,6 +31,7 @@ const pageLoadingOverlay = document.getElementById('pageLoadingOverlay');
 const navOverview = document.getElementById('navOverview');
 const navDash = document.getElementById('navDash');
 const navAvailability = document.getElementById('navAvailability');
+const navEvents = document.getElementById('navEvents');
 const navUsers = document.getElementById('navUsers');
 const navC2C = document.getElementById('navC2C');
 const navP2P = document.getElementById('navP2P');
@@ -61,6 +62,7 @@ const myProfile = document.getElementById('myProfile');
 const dsOverview = document.getElementById('dsOverview');
 const dsRooms = document.getElementById('dsRooms');
 const dsAvailability = document.getElementById('dsAvailability');
+const dsEvents = document.getElementById('dsEvents');
 const dsUsers = document.getElementById('dsUsers');
 
 const dsDashStats = document.getElementById('dsDashStats');
@@ -946,6 +948,11 @@ navAvailability.addEventListener('click', () => {
     window.loadBookingAvailability?.();
 });
 
+navEvents.addEventListener('click', () => {
+    navShow([dsEvents], navEvents);
+    window.loadEvents?.();
+});
+
 navUsers.addEventListener('click', () => {
     navShow([dsUsers], navUsers);
     loadUsers();
@@ -1158,6 +1165,7 @@ function navShow(elements = [], activeNav = null) {
     elemDisplay(dsOverview, false);
     elemDisplay(dsRooms, false);
     elemDisplay(dsAvailability, false);
+    elemDisplay(dsEvents, false);
     elemDisplay(dsUsers, false);
     elemDisplay(p2p, false);
     elemDisplay(sfu, false);

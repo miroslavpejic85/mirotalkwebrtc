@@ -21,6 +21,7 @@ const users = require('./routes/users');
 const password = require('./routes/password');
 const dashboard = require('./routes/dashboard');
 const booking = require('./routes/booking');
+const events = require('./routes/events');
 const oidc = require('./routes/oidc');
 const stripe = require('./routes/stripe');
 const controllersStripe = require('./controllers/stripe');
@@ -67,9 +68,10 @@ const passwordReset = path.join(__dirname, '../', 'frontend/html/password-reset.
 const confirmation = path.join(__dirname, '../', 'frontend/html/confirmation.html');
 const pricing = path.join(__dirname, '../', 'frontend/html/pricing.html');
 const bookingPage = path.join(__dirname, '../', 'frontend/html/booking.html');
+const eventPage = path.join(__dirname, '../', 'frontend/html/event.html');
 
 // File to cache and inject custom HTML data like OG tags and any other elements.
-const filesPath = [login, client, passwordForgot, passwordReset, confirmation, pricing, bookingPage];
+const filesPath = [login, client, passwordForgot, passwordReset, confirmation, pricing, bookingPage, eventPage];
 const htmlInjector = new HtmlInjector(filesPath, config || null);
 
 mongoose.set('strictQuery', true);
@@ -137,6 +139,7 @@ mongoose
         app.use(apiPath, password);
         app.use(apiPath, dashboard);
         app.use(apiPath, booking);
+        app.use(apiPath, events);
         app.use(apiPath, stripe);
         app.use('/oidc', oidc);
 
@@ -180,6 +183,10 @@ mongoose
 
         app.get('/book/:slug', (req, res) => {
             htmlInjector.injectHtml(bookingPage, res);
+        });
+
+        app.get('/event/:slug', (req, res) => {
+            htmlInjector.injectHtml(eventPage, res);
         });
 
         app.get('/config', isOidcEnabled() ? requiresAuth() : auth, (req, res) => {

@@ -220,6 +220,24 @@ function bookingDelete(id, reason) {
     );
 }
 
+// API EVENTS
+
+function eventList() {
+    return axios({ method: 'GET', url: `${apiPath}/events`, headers }).then((response) => response.data);
+}
+
+function eventCreate(data) {
+    return axios({ method: 'POST', url: `${apiPath}/events`, headers, data }).then((response) => response.data);
+}
+
+function eventUpdate(id, data) {
+    return axios({ method: 'PATCH', url: `${apiPath}/events/${id}`, headers, data }).then((response) => response.data);
+}
+
+function eventDelete(id) {
+    return axios({ method: 'DELETE', url: `${apiPath}/events/${id}`, headers }).then((response) => response.data);
+}
+
 // API SMS
 
 function smsSend(data) {

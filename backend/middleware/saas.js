@@ -99,7 +99,7 @@ const requirePaidSubscription = async (req, res, next) => {
 
         return res.status(403).json({
             code: 'SUBSCRIPTION_REQUIRED',
-            message: 'An active paid plan is required to publish public booking availability.',
+            message: 'An active paid plan is required to use this feature.',
         });
     } catch (error) {
         log.error('requirePaidSubscription', error);
