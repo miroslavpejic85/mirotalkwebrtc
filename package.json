@@ -1,6 +1,6 @@
 {
     "name": "mirotalkwebrtc",
-    "version": "1.5.41",
+    "version": "1.5.42",
     "description": "MiroTalk WebRTC admin",
     "main": "server.js",
     "scripts": {
@@ -37,7 +37,7 @@
     "dependencies": {
         "@ngrok/ngrok": "1.7.0",
         "@sentry/node": "^10.71.0",
-        "axios": "^1.19.0",
+        "axios": "^1.20.0",
         "bcryptjs": "^3.0.3",
         "colors": "1.4.0",
         "compression": "^1.8.1",

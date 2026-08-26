@@ -1765,6 +1765,51 @@ body.dark #myTable tbody tr:hover {
     background-color: var(--hover-bg-subtle);
 }
 
+/* Keep row controls reachable while wide editable tables scroll horizontally. */
+@media (min-width: 561px) {
+    #myTable_wrapper #myTable,
+    #usersTable_wrapper #usersTable {
+        overflow: visible;
+    }
+
+    #myTable_wrapper .dataTables_scrollBody,
+    #usersTable_wrapper .dataTables_scrollBody {
+        overscroll-behavior-inline: contain;
+        scrollbar-gutter: stable;
+    }
+
+    #myTable th:last-child,
+    #myTable td:last-child,
+    #usersTable th:last-child,
+    #usersTable td:last-child {
+        position: sticky;
+        right: 0;
+        z-index: 2;
+        box-shadow: -10px 0 14px -14px rgba(15, 23, 42, 0.55);
+    }
+
+    #myTable th:last-child,
+    #usersTable th:last-child {
+        z-index: 3;
+        background-color: var(--box1-color);
+    }
+
+    #myTable td:last-child,
+    #usersTable td:last-child {
+        background-color: var(--panel-color);
+    }
+
+    #myTable tbody tr:nth-child(even) td:last-child,
+    #usersTable tbody tr:nth-child(even) td:last-child {
+        background-color: var(--tr-child-color);
+    }
+
+    #myTable tbody tr:hover td:last-child,
+    #usersTable tbody tr:hover td:last-child {
+        background-color: color-mix(in srgb, var(--panel-color) 94%, var(--color-hover));
+    }
+}
+
 /* Responsive table card styling for mobile */
 @media (max-width: 560px) {
     #myTable_wrapper .dataTables_scrollHead {
