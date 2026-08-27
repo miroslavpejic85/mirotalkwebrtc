@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.42
+ * @version 1.5.43
  */
 
 const userAgent = navigator.userAgent;
@@ -2054,6 +2054,8 @@ function addRowToolTips(id) {
 function openActionDropdown(triggerBtn) {
     const wrap = triggerBtn.closest('.action-dropdown-wrap');
     const menu = wrap.querySelector('.action-dropdown-menu');
+    const viewportGap = 8;
+    const menuGap = 4;
 
     // Close all other open dropdowns first
     document.querySelectorAll('.action-dropdown-wrap.open').forEach((el) => {
@@ -2064,16 +2066,25 @@ function openActionDropdown(triggerBtn) {
 
     // Position the menu using fixed coordinates
     const rect = triggerBtn.getBoundingClientRect();
-    menu.style.top = rect.bottom + 4 + 'px';
+    menu.style.maxHeight = 'none';
+    menu.style.top = rect.bottom + menuGap + 'px';
     menu.style.left = 'auto';
     menu.style.right = window.innerWidth - rect.right + 'px';
 
-    // If menu would overflow below viewport, show above instead
     requestAnimationFrame(() => {
-        const menuRect = menu.getBoundingClientRect();
-        if (menuRect.bottom > window.innerHeight - 8) {
-            menu.style.top = rect.top - menuRect.height - 4 + 'px';
-        }
+        const topBar = document.querySelector('.dashboard .top');
+        const visibleTop = Math.max(viewportGap, (topBar?.getBoundingClientRect().bottom || 0) + viewportGap);
+        const visibleBottom = window.innerHeight - viewportGap;
+        const spaceAbove = Math.max(0, rect.top - menuGap - visibleTop);
+        const spaceBelow = Math.max(0, visibleBottom - rect.bottom - menuGap);
+        const menuHeight = menu.getBoundingClientRect().height;
+        const openAbove = menuHeight > spaceBelow && spaceAbove > spaceBelow;
+        const availableHeight = openAbove ? spaceAbove : spaceBelow;
+
+        menu.style.maxHeight = availableHeight + 'px';
+        menu.style.top = openAbove
+            ? rect.top - menuGap - Math.min(menuHeight, availableHeight) + 'px'
+            : rect.bottom + menuGap + 'px';
     });
 }
 

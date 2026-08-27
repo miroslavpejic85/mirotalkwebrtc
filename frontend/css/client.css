@@ -1799,6 +1799,10 @@ body.dark #myTable tbody tr:hover {
         background-color: var(--panel-color);
     }
 
+    #myTable td:last-child:has(.action-dropdown-wrap.open) {
+        z-index: 4;
+    }
+
     #myTable tbody tr:nth-child(even) td:last-child,
     #usersTable tbody tr:nth-child(even) td:last-child {
         background-color: var(--tr-child-color);
@@ -4003,6 +4007,9 @@ td .action-separator {
     display: none;
     position: fixed;
     min-width: 200px;
+    max-height: calc(100vh - 16px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
     background: var(--panel-color);
     border: 1px solid var(--border-color);
     border-radius: 10px;
