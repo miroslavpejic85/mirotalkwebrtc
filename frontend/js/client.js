@@ -361,7 +361,7 @@ let html = {
     },
     feedback: {
         enabled: false,
-        url: '',
+        url: 'https://mirotalk.questionpro.com/t/AUs7VZ9lb8',
     },
     profile: {
         enabled: false,
