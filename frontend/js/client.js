@@ -618,11 +618,15 @@ function handleUserRoles() {
                     elemDisplay(navC2C, true);
                     elemDisplay(navBRO, true);
 
+                    navUsers.click();
+
                     config.MiroTalk.P2P.Visible = true;
                     config.MiroTalk.SFU.Visible = true;
                     config.MiroTalk.C2C.Visible = true;
                     config.MiroTalk.BRO.Visible = true;
                 } else {
+                    navDash.click();
+
                     const allowP2P = config.MiroTalk.P2P.Visible && (allow.includes('P2P') || allow.includes('ALL'));
                     const allowSFU = config.MiroTalk.SFU.Visible && (allow.includes('SFU') || allow.includes('ALL'));
                     const allowC2C = config.MiroTalk.C2C.Visible && (allow.includes('C2C') || allow.includes('ALL'));
@@ -1599,8 +1603,6 @@ function promptSendInvitation(username, email, password) {
 }
 
 async function showDataTable() {
-    navDash.click();
-
     roomFindBy(userId)
         .then((res) => {
             console.log('[API] - GET ALL ROOMS RESPONSE', res);
