@@ -1799,10 +1799,6 @@ body.dark #myTable tbody tr:hover {
         background-color: var(--panel-color);
     }
 
-    #myTable td:last-child:has(.action-dropdown-wrap.open) {
-        z-index: 4;
-    }
-
     #myTable tbody tr:nth-child(even) td:last-child,
     #usersTable tbody tr:nth-child(even) td:last-child {
         background-color: var(--tr-child-color);
@@ -4023,7 +4019,8 @@ body.dark .action-dropdown-menu {
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
 }
 
-.action-dropdown-wrap.open .action-dropdown-menu {
+/* The open menu is portaled to <body>, so it is no longer a descendant of the wrapper. */
+.action-dropdown-menu.is-open {
     display: block;
 }
 

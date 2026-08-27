@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.43
+ * @version 1.5.44
  */
 
 const userAgent = navigator.userAgent;
@@ -2051,18 +2051,50 @@ function addRowToolTips(id) {
     }
 }
 
+// Safari keeps `position: fixed` menus inside the sticky actions cell clipped by the table's
+// horizontal scroll container, so the open menu is moved to <body> and restored on close.
+function portalActionDropdown(wrap, menu) {
+    if (wrap._dropdownMenu) return;
+    wrap._dropdownMenu = menu;
+    menu._dropdownWrap = wrap;
+    menu.classList.add('is-open');
+    document.body.appendChild(menu);
+}
+
+function closeActionDropdownWrap(wrap) {
+    if (!wrap) return;
+    wrap.classList.remove('open');
+    const menu = wrap._dropdownMenu;
+    if (!menu) return;
+    menu.classList.remove('is-open');
+    menu.removeAttribute('style');
+    delete menu._dropdownWrap;
+    delete wrap._dropdownMenu;
+    wrap.appendChild(menu);
+}
+
+function closeAllActionDropdowns(except) {
+    document.querySelectorAll('.action-dropdown-menu.is-open').forEach((menu) => {
+        const wrap = menu._dropdownWrap;
+        // Drop menus whose row was re-rendered by DataTables while the menu was portaled.
+        if (!wrap || !wrap.isConnected) {
+            menu.remove();
+            return;
+        }
+        if (wrap !== except) closeActionDropdownWrap(wrap);
+    });
+}
+
 function openActionDropdown(triggerBtn) {
     const wrap = triggerBtn.closest('.action-dropdown-wrap');
-    const menu = wrap.querySelector('.action-dropdown-menu');
+    const menu = wrap._dropdownMenu || wrap.querySelector('.action-dropdown-menu');
     const viewportGap = 8;
     const menuGap = 4;
 
-    // Close all other open dropdowns first
-    document.querySelectorAll('.action-dropdown-wrap.open').forEach((el) => {
-        if (el !== wrap) el.classList.remove('open');
-    });
+    closeAllActionDropdowns(wrap);
 
     wrap.classList.add('open');
+    portalActionDropdown(wrap, menu);
 
     // Position the menu using fixed coordinates
     const rect = triggerBtn.getBoundingClientRect();
@@ -2093,14 +2125,14 @@ function toggleActionDropdown(triggerBtn) {
     const isOpen = wrap.classList.contains('open');
 
     if (isOpen) {
-        wrap.classList.remove('open');
+        closeActionDropdownWrap(wrap);
     } else {
         openActionDropdown(triggerBtn);
 
         // Close on outside click
         const closeHandler = (e) => {
-            if (!wrap.contains(e.target)) {
-                wrap.classList.remove('open');
+            if (!wrap.contains(e.target) && !wrap._dropdownMenu?.contains(e.target)) {
+                closeActionDropdownWrap(wrap);
                 document.removeEventListener('click', closeHandler, true);
             }
         };
@@ -2124,18 +2156,36 @@ document.addEventListener(
     'pointerleave',
     (event) => {
         if (!(event.target instanceof Element)) return;
-        if (!actionDropdownHoverQuery.matches || !event.target.matches('.action-dropdown-wrap')) return;
-        const wrap = event.target;
+        if (!actionDropdownHoverQuery.matches) return;
+        const target = event.target;
+        const wrap = target.matches('.action-dropdown-wrap')
+            ? target
+            : target.matches('.action-dropdown-menu.is-open')
+              ? target._dropdownWrap
+              : null;
+        if (!wrap) return;
         setTimeout(() => {
-            if (!wrap.matches(':hover')) wrap.classList.remove('open');
+            if (wrap.matches(':hover') || wrap._dropdownMenu?.matches(':hover')) return;
+            closeActionDropdownWrap(wrap);
         }, 100);
     },
     true
 );
 
+// The portaled menu is position:fixed, so any scroll/resize detaches it from its trigger.
+window.addEventListener(
+    'scroll',
+    (event) => {
+        if (event.target instanceof Element && event.target.closest('.action-dropdown-menu')) return;
+        closeAllActionDropdowns();
+    },
+    true
+);
+window.addEventListener('resize', () => closeAllActionDropdowns());
+
 function closeActionDropdown(itemBtn) {
-    const wrap = itemBtn.closest('.action-dropdown-wrap');
-    if (wrap) wrap.classList.remove('open');
+    const menu = itemBtn.closest('.action-dropdown-menu');
+    closeActionDropdownWrap(menu?._dropdownWrap || itemBtn.closest('.action-dropdown-wrap'));
 }
 
 function initVisibleRowsToolTips() {
