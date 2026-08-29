@@ -45,6 +45,41 @@ body.pricing-page {
     background: var(--hover-color);
 }
 
+.pricing-account-modal .pricing-account-actions,
+.pricing-confirm-modal .pricing-modal-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, 170px);
+    gap: 12px;
+}
+
+.pricing-account-modal .pricing-account-action,
+.pricing-confirm-modal .pricing-modal-action {
+    box-sizing: border-box;
+    width: 170px;
+    height: 48px;
+    margin: 0 !important;
+    padding: 0 16px;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+    .pricing-account-modal .pricing-account-actions,
+    .pricing-confirm-modal .pricing-modal-actions {
+        width: 100%;
+        grid-template-columns: 1fr;
+        padding: 0 20px;
+    }
+
+    .pricing-account-modal .pricing-account-action,
+    .pricing-confirm-modal .pricing-modal-action {
+        width: 100%;
+    }
+}
+
 .pricing-main {
     width: 100%;
     box-sizing: border-box;
@@ -58,6 +93,154 @@ body.pricing-page {
 .pricing-header {
     max-width: 760px;
     text-align: center;
+}
+
+.checkout-status {
+    width: min(620px, 100%);
+    min-height: 360px;
+    box-sizing: border-box;
+    padding: 56px 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.checkout-status.hidden,
+.pricing-account-status.hidden,
+.checkout-status-actions.hidden,
+.checkout-status-spinner.hidden {
+    display: none;
+}
+
+.pricing-main.is-activating > :not(.checkout-status) {
+    display: none;
+}
+
+.checkout-status-spinner {
+    width: 42px;
+    height: 42px;
+    margin-bottom: 28px;
+    border: 3px solid rgba(255, 255, 255, 0.16);
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: pricing-spin 0.8s linear infinite;
+}
+
+.checkout-status h1 {
+    margin: 12px 0 14px;
+    color: #fff;
+    font-size: 34px;
+    letter-spacing: 0;
+}
+
+.checkout-status p {
+    max-width: 520px;
+    margin: 0;
+    color: var(--text-light);
+    line-height: 1.65;
+}
+
+.checkout-status-actions {
+    width: min(320px, 100%);
+    margin-top: 28px;
+    display: grid;
+    gap: 14px;
+}
+
+.checkout-status-actions a {
+    color: var(--hover-color);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+@keyframes pricing-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.pricing-account-status {
+    width: min(900px, 100%);
+    box-sizing: border-box;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    background: rgba(78, 211, 162, 0.08);
+    border: 1px solid rgba(78, 211, 162, 0.3);
+    border-radius: 8px;
+}
+
+.pricing-account-status > div {
+    display: grid;
+    gap: 3px;
+}
+
+.pricing-account-status span,
+.pricing-account-status small {
+    color: var(--text-light);
+    font-size: 12px;
+}
+
+.pricing-account-status strong {
+    color: var(--text-color);
+    font-size: 15px;
+}
+
+.pricing-secondary-btn {
+    min-height: 40px;
+    padding: 0 14px;
+    color: var(--text-color);
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.pricing-steps {
+    width: min(760px, 100%);
+    margin: -12px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    list-style: none;
+}
+
+.pricing-steps li {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--text-light);
+    font-size: 12px;
+}
+
+.pricing-steps li:not(:last-child)::after {
+    content: '';
+    height: 1px;
+    flex: 1;
+    margin: 0 14px;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.pricing-steps span {
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: var(--accent-color);
+    border-radius: 50%;
+    font-weight: 700;
+}
+
+.pricing-steps strong {
+    white-space: nowrap;
 }
 
 .pricing-eyebrow,
@@ -227,6 +410,14 @@ body.pricing-page {
     text-align: center;
 }
 
+.pricing-total-note {
+    max-width: 680px;
+    margin: -30px 0 0;
+    color: var(--text-muted);
+    font-size: 11px;
+    text-align: center;
+}
+
 .pricing-assurance {
     width: 100%;
     max-width: 760px;
@@ -325,6 +516,7 @@ html[data-theme='light'] .pricing-page .nav-links > a.pricing-signin {
 }
 
 html[data-theme='light'] .pricing-header h1,
+html[data-theme='light'] .checkout-status h1,
 html[data-theme='light'] .pricing-card-title,
 html[data-theme='light'] .pricing-card-price,
 html[data-theme='light'] .pricing-faq-heading h2 {
@@ -360,6 +552,24 @@ html[data-theme='light'] .pricing-faq-list details {
         grid-template-columns: 1fr;
     }
 
+    .pricing-account-status {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .pricing-steps {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .pricing-steps li:not(:last-child)::after {
+        display: none;
+    }
+
+    .pricing-steps strong {
+        white-space: normal;
+    }
+
     .pricing-faq {
         gap: 36px;
     }
@@ -372,9 +582,31 @@ html[data-theme='light'] .pricing-faq-list details {
 }
 
 @media screen and (max-width: 420px) {
+    .pricing-account-modal .pricing-account-actions {
+        width: min(100%, 280px);
+        grid-template-columns: 1fr;
+    }
+
+    .pricing-account-modal .pricing-account-action {
+        width: 100%;
+    }
+
     .pricing-card,
     .pricing-card.featured {
         padding: 26px 22px;
+    }
+
+    .pricing-card.featured .pricing-card-kicker {
+        padding-right: 120px;
+    }
+
+    .pricing-card-price {
+        font-size: 38px;
+    }
+
+    .pricing-card-price small {
+        margin-left: 3px;
+        font-size: 12px;
     }
 
     .pricing-header h1 {

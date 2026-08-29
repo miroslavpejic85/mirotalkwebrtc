@@ -7,8 +7,13 @@ const demo = require('../middleware/demo');
 const router = express.Router();
 const controllersStripe = require('../controllers/stripe');
 
+//PLANS: /api/v1/stripe/plans
+router.get('/stripe/plans', (req, res) => {
+    controllersStripe.getPlans(req, res);
+});
+
 //CHECKOUT: /api/v1/stripe/checkout
-router.post('/stripe/checkout', demo, auth, (req, res) => {
+router.post('/stripe/checkout', auth, demo, (req, res) => {
     controllersStripe.createCheckout(req, res);
 });
 

@@ -352,6 +352,13 @@ function stripeCheckout(plan) {
     }).then((response) => response.data);
 }
 
+function getStripePlans() {
+    return axios({
+        method: 'GET',
+        url: `${apiPath}/stripe/plans`,
+    }).then((response) => response.data);
+}
+
 function stripePortal() {
     return axios({
         method: 'POST',

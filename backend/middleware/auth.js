@@ -44,6 +44,9 @@ async function findOrCreateOidcUser(oidcUser) {
 }
 
 const auth = async (req, res, next) => {
+    const requestPath = req.originalUrl || req.path;
+    const isApiRequest = requestPath === '/api' || requestPath.startsWith('/api/');
+
     // OIDC authentication: check session first when enabled
     if (isOidcEnabled() && req.oidc && req.oidc.isAuthenticated()) {
         try {
@@ -70,7 +73,7 @@ const auth = async (req, res, next) => {
         req?.headers['Authorization'];
 
     if (!token) {
-        if (req.accepts('html')) {
+        if (!isApiRequest && req.accepts('html')) {
             return res.redirect('/');
         }
         return res.status(404).json({ message: 'Token not found' });
@@ -89,7 +92,7 @@ const auth = async (req, res, next) => {
         //log.debug('jwt auth decoded', decoded);
         req.user = decoded;
     } catch (err) {
-        if (req.accepts('html')) {
+        if (!isApiRequest && req.accepts('html')) {
             return res.redirect('/');
         }
         return res.status(401).json({ message: 'Token invalid or expired' });

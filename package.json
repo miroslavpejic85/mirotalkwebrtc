@@ -1,6 +1,6 @@
 {
     "name": "mirotalkwebrtc",
-    "version": "1.5.46",
+    "version": "1.5.50",
     "description": "MiroTalk WebRTC admin",
     "main": "server.js",
     "scripts": {

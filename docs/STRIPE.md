@@ -18,6 +18,9 @@ When `SAAS=true`, **demo and admin accounts are always exempt** from payment che
 3. After payment they return to the app, the subscription is activated, and they land directly in the dashboard (`/client`).
 4. Renewals and cancellations are kept in sync through **Stripe webhooks**.
 
+The pricing page reads the amount and currency from the configured Stripe Price objects. Active customers see their
+current plan instead of another purchase prompt, and duplicate subscriptions are rejected server-side.
+
 ### Plans
 
 | Plan         | Price        | Stripe type      | Access                                              |
@@ -112,7 +115,9 @@ Use Stripe **test mode** (keys starting with `sk_test_` / `pk_test_`).
 5. Verify the flow:
     - Lifetime → `subscriptionType = lifetime`, permanent access.
     - Monthly → `subscriptionType = monthly`, renewal date shown in **Account → Billing**.
-    - Cancel via **Manage Subscription** (Stripe Billing Portal) → access is revoked and `/client` redirects back to `/pricing`.
+    - Cancel via **Manage Subscription** (Stripe Billing Portal) → the account shows **Cancels on** while access remains
+      available through the paid period, then `/client` redirects to `/pricing` after expiration.
+    - Upgrade Monthly to Lifetime → the recurring subscription is canceled automatically after Lifetime payment activates.
 
 > 💡 To test admin/demo bypass, log in with the `ADMIN_*` or `USER_DEMO_*` credentials — they always have full access regardless of subscription.
 

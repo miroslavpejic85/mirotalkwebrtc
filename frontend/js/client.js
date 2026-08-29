@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.46
+ * @version 1.5.50
  */
 
 const userAgent = navigator.userAgent;
@@ -3227,29 +3227,56 @@ function loadBilling() {
             accountBillingSection.classList.remove('hidden');
 
             if (res.subscriptionType === 'lifetime') {
-                accountPlan.value = 'Lifetime License';
-                accountSubStatus.value = res.active ? 'Active' : capitalize(res.subscriptionStatus) || 'Inactive';
+                accountPlan.textContent = 'Lifetime License';
+                setBillingStatus(
+                    res.active ? 'Active' : capitalize(res.subscriptionStatus) || 'Inactive',
+                    res.active ? 'active' : 'inactive'
+                );
                 accountRenewalField.classList.add('hidden');
             } else if (res.subscriptionType === 'monthly') {
-                accountPlan.value = 'Monthly';
-                accountSubStatus.value = res.active ? 'Active' : capitalize(res.subscriptionStatus) || 'Inactive';
+                const canceled = res.subscriptionStatus === 'canceled';
+                accountPlan.textContent = 'Monthly';
+                setBillingStatus(
+                    res.subscriptionCancelAtPeriodEnd
+                        ? 'Ending'
+                        : canceled
+                          ? 'Canceled'
+                          : res.active
+                            ? 'Active'
+                            : capitalize(res.subscriptionStatus) || 'Inactive',
+                    res.subscriptionCancelAtPeriodEnd ? 'ending' : res.active ? 'active' : 'inactive'
+                );
                 accountRenewalField.classList.remove('hidden');
-                accountRenewal.value = res.subscriptionExpiresAt
+                document.getElementById('account-renewal-label').textContent = res.subscriptionCancelAtPeriodEnd
+                    ? 'Cancels on'
+                    : canceled
+                      ? 'Ended on'
+                      : 'Renews on';
+                accountRenewal.textContent = res.subscriptionExpiresAt
                     ? new Date(res.subscriptionExpiresAt).toLocaleDateString()
                     : '-';
             } else {
-                accountPlan.value = 'No active plan';
-                accountSubStatus.value = 'Inactive';
+                accountPlan.textContent = 'No active plan';
+                setBillingStatus('Inactive', 'inactive');
                 accountRenewalField.classList.add('hidden');
             }
 
-            // Only subscription customers can use the Stripe Billing Portal.
+            accountManageSubscription.innerHTML =
+                res.subscriptionType === 'lifetime'
+                    ? '<i class="uil uil-receipt"></i> Billing and invoices'
+                    : '<i class="uil uil-cog"></i> Manage subscription';
             accountManageSubscription.classList.toggle('hidden', !res.hasBillingAccount);
         })
         .catch((err) => {
             console.error('[API] - BILLING GET ERROR', err);
             accountBillingSection.classList.add('hidden');
         });
+}
+
+function setBillingStatus(label, state) {
+    accountSubStatus.textContent = label;
+    accountSubStatus.classList.remove('is-active', 'is-ending', 'is-inactive');
+    accountSubStatus.classList.add(`is-${state}`);
 }
 
 function capitalize(value) {

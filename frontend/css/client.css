@@ -3081,6 +3081,125 @@ body.dark .addRowDiv .service-card.selected:hover .service-card-desc {
     color: #fff;
 }
 
+.account-billing-summary {
+    margin-bottom: 10px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--panel-color) 55%, var(--box1-color));
+    border: 1px solid color-mix(in srgb, var(--border-color) 84%, var(--accent-color));
+    border-radius: 8px;
+    box-shadow: inset 3px 0 0 var(--accent-color);
+}
+
+.account-billing-primary {
+    min-height: 72px;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 11px;
+}
+
+.account-billing-plan-icon {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    color: var(--accent-color);
+    background: var(--accent-bg-light);
+    border-radius: 7px;
+    font-size: 18px;
+}
+
+.account-billing-plan {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+}
+
+.account-billing-plan span,
+.account-billing-meta span {
+    color: var(--black-light-color);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.account-billing-plan strong {
+    overflow: hidden;
+    color: var(--text-color);
+    font-size: 15px;
+    font-weight: 650;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.account-billing-status {
+    min-height: 26px;
+    box-sizing: border-box;
+    padding: 5px 9px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.account-billing-status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    flex: 0 0 6px;
+    background: currentColor;
+    border-radius: 50%;
+}
+
+.account-billing-status.is-active {
+    color: #f4fff9;
+    background: #147a57;
+    border-color: #2aa97e;
+}
+
+.account-billing-status.is-ending {
+    color: #fffaf0;
+    background: #9a5a00;
+    border-color: #c27a16;
+}
+
+.account-billing-status.is-inactive {
+    color: #fff7f8;
+    background: #9b3f49;
+    border-color: #c25a65;
+}
+
+.account-billing-meta {
+    min-height: 42px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-top: 1px solid var(--border-color);
+}
+
+.account-billing-meta i {
+    color: var(--accent-color);
+    font-size: 15px;
+}
+
+.account-billing-meta strong {
+    margin-left: auto;
+    color: var(--text-color);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.account-billing-action {
+    width: 100%;
+    min-height: 42px;
+}
+
 .change-password-form {
     display: flex;
     flex-direction: column;
@@ -6162,6 +6281,19 @@ body.dark #usersTable tr:hover {
         margin-left: -18px;
         padding-right: 18px;
         padding-left: 18px;
+    }
+
+    .account-billing-primary {
+        grid-template-columns: 38px minmax(0, 1fr);
+    }
+
+    .account-billing-status {
+        grid-column: 2;
+        justify-self: start;
+    }
+
+    .account-billing-meta span {
+        white-space: nowrap;
     }
 
     .account-field-row {

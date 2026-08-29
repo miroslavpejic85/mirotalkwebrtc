@@ -54,11 +54,22 @@
                     <i class="uil uil-sun"></i>
                 </button>
                 <a class="pricing-signin" href="/"><i class="uil uil-sign-in-alt"></i> Sign in</a>
-                <a class="pricing-nav-cta" href="/?signup=1">Start free</a>
+                <a class="pricing-nav-cta" href="/?signup=1">Create account</a>
             </nav>
         </header>
 
         <main class="pricing-main">
+            <section id="checkoutStatus" class="checkout-status hidden" aria-live="polite">
+                <div class="checkout-status-spinner" aria-hidden="true"></div>
+                <span class="pricing-eyebrow">Payment received</span>
+                <h1 id="checkoutStatusTitle">Activating your access</h1>
+                <p id="checkoutStatusMessage">We are confirming your plan. Keep this page open for a moment.</p>
+                <div id="checkoutStatusActions" class="checkout-status-actions hidden">
+                    <button id="retryActivation" type="button" class="pricing-btn">Try again</button>
+                    <a href="/pricing">Return to plans</a>
+                </div>
+            </section>
+
             <header class="pricing-header">
                 <span class="pricing-eyebrow">Straightforward pricing</span>
                 <h1>One workspace. Two simple ways to own it.</h1>
@@ -66,6 +77,23 @@
                     Schedule rooms, invite participants and manage secure browser-based meetings without hidden tiers.
                 </p>
             </header>
+
+            <section id="pricingAccountStatus" class="pricing-account-status hidden" aria-live="polite">
+                <div>
+                    <span>Your account</span>
+                    <strong id="pricingAccountPlan"></strong>
+                    <small id="pricingAccountDetail"></small>
+                </div>
+                <button id="pricingManageBilling" type="button" class="pricing-secondary-btn">
+                    <i class="uil uil-cog"></i> Manage billing
+                </button>
+            </section>
+
+            <ol class="pricing-steps" aria-label="How subscribing works">
+                <li><span>1</span><strong>Create your account</strong></li>
+                <li><span>2</span><strong>Pay securely with Stripe</strong></li>
+                <li><span>3</span><strong>Open your dashboard</strong></li>
+            </ol>
 
             <div class="pricing-cards">
                 <!-- Monthly -->
@@ -84,7 +112,7 @@
                         <li><i class="uil uil-check"></i> Cancel anytime</li>
                     </ul>
                     <button id="subscribeMonthly" class="pricing-btn">Choose monthly</button>
-                    <span class="pricing-card-note">Billed monthly through Stripe</span>
+                    <span id="monthlyNote" class="pricing-card-note">Billed monthly through Stripe</span>
                 </div>
 
                 <!-- Lifetime -->
@@ -104,9 +132,13 @@
                         <li><i class="uil uil-check"></i> One simple payment</li>
                     </ul>
                     <button id="buyLifetime" class="pricing-btn">Get lifetime access</button>
-                    <span class="pricing-card-note">One-time payment through Stripe</span>
+                    <span id="lifetimeNote" class="pricing-card-note">One-time payment through Stripe</span>
                 </div>
             </div>
+
+            <p class="pricing-total-note">
+                Your final total and charge currency are confirmed in Stripe before payment.
+            </p>
 
             <div class="pricing-assurance" aria-label="Purchase assurances">
                 <span><i class="uil uil-shield-check"></i> Secure Stripe checkout</span>
@@ -130,7 +162,11 @@
                     </details>
                     <details>
                         <summary>What does lifetime access mean?</summary>
-                        <p>You make one payment instead of maintaining a recurring subscription.</p>
+                        <p>
+                            You make one payment for permanent access to this hosted workspace instead of maintaining a
+                            recurring subscription. Separate support or service agreements are not included unless
+                            stated at checkout.
+                        </p>
                     </details>
                     <details>
                         <summary>Is payment handled securely?</summary>
@@ -143,8 +179,8 @@
             </section>
 
             <footer class="pricing-footer">
-                <p>Not ready to choose?</p>
-                <a href="/?signup=1">Create your account first <i class="uil uil-arrow-right"></i></a>
+                <p>Choose later from the same account.</p>
+                <a href="/?signup=1">Create your account <i class="uil uil-arrow-right"></i></a>
             </footer>
         </main>
     </body>

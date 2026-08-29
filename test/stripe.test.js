@@ -74,6 +74,10 @@ function loadStripeLib({ saasEnabled = true, env = {} } = {}) {
         },
         subscriptions: {
             retrieve: async (id) => ({ id, status: 'active', __retrieved: true }),
+            cancel: async (id) => ({ id, status: 'canceled' }),
+        },
+        prices: {
+            retrieve: async (id) => ({ id, unit_amount: 900, currency: 'usd' }),
         },
     };
 
@@ -254,4 +258,29 @@ test('createBillingPortal forwards the customer id and return url', async () => 
 
     assert.equal(portal.__params.customer, 'cus_existing');
     assert.equal(portal.__params.return_url, 'https://return');
+});
+
+test('cancelSubscription cancels the recurring Stripe subscription', async () => {
+    const { lib, fakeStripe } = loadStripeLib({ saasEnabled: true });
+
+    let canceledId;
+    fakeStripe.subscriptions.cancel = async (id) => {
+        canceledId = id;
+        return { id, status: 'canceled' };
+    };
+
+    const subscription = await lib.cancelSubscription('sub_monthly');
+
+    assert.equal(canceledId, 'sub_monthly');
+    assert.equal(subscription.status, 'canceled');
+});
+
+test('retrievePrice loads the configured Stripe Price object', async () => {
+    const { lib } = loadStripeLib({ saasEnabled: true });
+
+    const price = await lib.retrievePrice('price_monthly');
+
+    assert.equal(price.id, 'price_monthly');
+    assert.equal(price.unit_amount, 900);
+    assert.equal(price.currency, 'usd');
 });

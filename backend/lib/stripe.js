@@ -103,10 +103,21 @@ async function retrieveSubscription(subscriptionId) {
 }
 
 /**
+ * Cancel a recurring subscription immediately.
+ */
+async function cancelSubscription(subscriptionId) {
+    return stripe.subscriptions.cancel(subscriptionId);
+}
+
+/**
  * Retrieve a Checkout Session by id (used to verify payment on the success page).
  */
 async function retrieveCheckoutSession(sessionId) {
     return stripe.checkout.sessions.retrieve(sessionId);
+}
+
+async function retrievePrice(priceId) {
+    return stripe.prices.retrieve(priceId);
 }
 
 /**
@@ -151,6 +162,8 @@ module.exports = {
     createBillingPortal,
     constructEvent,
     retrieveSubscription,
+    cancelSubscription,
     retrieveCheckoutSession,
+    retrievePrice,
     cleanupUserBilling,
 };
