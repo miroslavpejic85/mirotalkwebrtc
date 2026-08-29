@@ -87,7 +87,7 @@ module.exports = {
     HTML: {
         about: {
             enabled: false,
-            url: 'https://docs.mirotalk.com/mirotalk-ultimate/',
+            url: 'https://docs.mirotalk.com/sites/web.html',
         },
         support: {
             enabled: false,
