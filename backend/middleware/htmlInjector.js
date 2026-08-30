@@ -20,9 +20,10 @@ class HtmlInjector {
         return {
             OG_TYPE: this.config?.OG?.type || 'app-webrtc',
             OG_SITE_NAME: this.config?.OG?.siteName || 'MiroTalk WEB',
-            OG_TITLE: this.config?.OG?.title || 'Click the link to schedule the Meeting',
+            OG_TITLE: this.config?.OG?.title || 'MiroTalk WEB - Open Source WebRTC Video SaaS Platform',
             OG_DESCRIPTION:
-                this.config?.OG?.description || 'MiroTalk WEB Easy Room Scheduler for Meetings & Video Conferencing.',
+                this.config?.OG?.description ||
+                'Build your own video SaaS with MiroTalk WEB, an open-source self-hosted WebRTC platform for user accounts, meeting scheduling, dashboards, subscription plans, customer management and branded video communication.',
             OG_IMAGE: this.config?.OG?.image || 'https://webrtc.mirotalk.com/Images/mirotalk-web.png',
             OG_URL: this.config?.OG?.url || 'https://webrtc.mirotalk.com',
             // Add more data here as needed with fallbacks

@@ -10,8 +10,9 @@ module.exports = {
     OG: {
         type: 'app-webrtc',
         siteName: 'MiroTalk WebRTC',
-        title: 'Click the link to schedule the Meeting',
-        description: 'MiroTalk WEB Easy Room Scheduler for Meetings & Video Conferencing.',
+        title: 'MiroTalk WEB - Open Source WebRTC Video SaaS Platform',
+        description:
+            'Build your own video SaaS with MiroTalk WEB, an open-source self-hosted WebRTC platform for user accounts, meeting scheduling, dashboards, subscription plans, customer management and branded video communication.',
         image: 'https://webrtc.mirotalk.com/Images/mirotalk-web.png',
         url: 'https://webrtc.mirotalk.com',
     },
