@@ -5,9 +5,7 @@ const userEmail = window.localStorage.email;
 let userId = window.sessionStorage.userId;
 let userToken = window.sessionStorage.userToken;
 
-const headers = {
-    'x-access-token': `${userToken}`,
-};
+const headers = userToken ? { 'x-access-token': userToken } : {};
 
 let isOidcMode = false;
 

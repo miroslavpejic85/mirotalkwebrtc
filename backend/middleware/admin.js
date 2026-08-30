@@ -4,6 +4,7 @@ const utils = require('../common/utils');
 const logs = require('../common/logs');
 const { isOidcEnabled } = require('./oidc');
 const User = require('../models/users');
+const { getAuthToken } = require('../common/authCookie');
 
 const log = new logs('Admin');
 
@@ -42,12 +43,7 @@ const admin = async (req, res, next) => {
     }
 
     // JWT token authentication (standard mode)
-    let token =
-        req?.body?.token ||
-        req?.query?.token ||
-        req?.headers['x-access-token'] ||
-        req?.headers['authorization'] ||
-        req?.headers['Authorization'];
+    let token = getAuthToken(req);
 
     if (!token) {
         return res.status(404).json({ message: 'Token not found' });

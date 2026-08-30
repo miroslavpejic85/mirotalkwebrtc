@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.51
+ * @version 1.5.52
  */
 
 const userAgent = navigator.userAgent;
@@ -3321,7 +3321,7 @@ function delMyAccount() {
             userDelete(userId)
                 .then((res) => {
                     console.log('[API] - USER DELETE RESPONSE', res);
-                    openURL(isOidcMode ? '/logout' : '/');
+                    openURL('/logout');
                 })
                 .catch((err) => {
                     console.log('[API] - USER DELETE ERROR', err);

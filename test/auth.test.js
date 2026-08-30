@@ -8,7 +8,9 @@ const AUTH_PATH = path.resolve(__dirname, '../backend/middleware/auth.js');
 const UTILS_PATH = path.resolve(__dirname, '../backend/common/utils.js');
 const OIDC_PATH = path.resolve(__dirname, '../backend/middleware/oidc.js');
 
-function loadAuth() {
+function loadAuth(tokenDecode = () => {
+    throw new Error('Invalid token');
+}) {
     const previousUtils = require.cache[UTILS_PATH];
     const previousOidc = require.cache[OIDC_PATH];
 
@@ -17,9 +19,7 @@ function loadAuth() {
         filename: UTILS_PATH,
         loaded: true,
         exports: {
-            tokenDecode: () => {
-                throw new Error('Invalid token');
-            },
+            tokenDecode,
         },
     };
     require.cache[OIDC_PATH] = {
@@ -107,4 +107,32 @@ test('HTML page request with an invalid token still redirects to login', async (
 
     assert.equal(res.redirectedTo, '/');
     assert.equal(res.body, undefined);
+});
+
+test('HTML page request accepts the authentication cookie', async (t) => {
+    const decodedUser = { email: 'user@example.com', username: 'user' };
+    const harness = loadAuth((token) => {
+        assert.equal(token, 'valid-cookie-token');
+        return decodedUser;
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+    let nextCalled = false;
+    const req = {
+        path: '/client',
+        originalUrl: '/client',
+        body: {},
+        query: {},
+        headers: {},
+        cookies: { mirotalk_auth: 'valid-cookie-token' },
+        accepts: () => 'html',
+    };
+
+    await harness.auth(req, res, () => {
+        nextCalled = true;
+    });
+
+    assert.equal(nextCalled, true);
+    assert.deepEqual(req.user, decodedUser);
+    assert.equal(res.redirectedTo, undefined);
 });

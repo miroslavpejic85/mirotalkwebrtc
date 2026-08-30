@@ -7,6 +7,7 @@ const stripeLib = require('../lib/stripe');
 const utils = require('../common/utils');
 const logs = require('../common/logs');
 const bcrypt = require('bcryptjs');
+const { setAuthCookie } = require('../common/authCookie');
 
 const log = new logs('Controllers-users');
 
@@ -135,6 +136,7 @@ async function userLogin(req, res) {
                     userFindOne.updatedAt = dateNow;
                     const saveUserFindOne = await userFindOne.save();
                     log.debug('User login OK', saveUserFindOne);
+                    setAuthCookie(res, token);
                     res.status(201).json(saveUserFindOne);
                 } else {
                     log.debug('User found, wrong password!');

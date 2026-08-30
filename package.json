@@ -1,6 +1,6 @@
 {
     "name": "mirotalkwebrtc",
-    "version": "1.5.51",
+    "version": "1.5.52",
     "description": "MiroTalk WebRTC admin",
     "main": "server.js",
     "scripts": {
@@ -41,6 +41,7 @@
         "bcryptjs": "^3.0.3",
         "colors": "1.4.0",
         "compression": "^1.8.1",
+        "cookie-parser": "^1.4.7",
         "cors": "^2.8.6",
         "crypto-js": "^4.2.0",
         "dotenv": "^17.4.2",

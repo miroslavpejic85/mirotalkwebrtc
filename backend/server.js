@@ -35,6 +35,8 @@ const recurringInvitations = require('./lib/recurringInvitations');
 const roomReminders = require('./lib/roomReminders');
 const path = require('path');
 const packageJson = require('../package.json');
+const cookieParser = require('cookie-parser');
+const { clearAuthCookie } = require('./common/authCookie');
 
 const log = new logs('Server');
 
@@ -102,6 +104,7 @@ mongoose
 
         app.use(express.urlencoded({ extended: true, limit: '10kb' }));
         app.use(express.json({ limit: '10kb' }));
+        app.use(cookieParser());
 
         // OIDC middleware (when enabled, handles /login, /logout, /callback routes)
         const oidcAuth = getOidcAuth();
@@ -142,6 +145,11 @@ mongoose
         app.use(apiPath, events);
         app.use(apiPath, stripe);
         app.use('/oidc', oidc);
+
+        app.get('/logout', (req, res) => {
+            clearAuthCookie(res);
+            res.redirect('/');
+        });
 
         if (isOidcEnabled()) {
             // OIDC mode: redirect home to /client (OIDC middleware handles login redirect)

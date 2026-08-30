@@ -6,6 +6,7 @@ const { isOidcEnabled } = require('./oidc');
 const User = require('../models/users');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const { getAuthToken } = require('../common/authCookie');
 
 const log = new logs('Auth');
 
@@ -65,12 +66,7 @@ const auth = async (req, res, next) => {
     }
 
     // JWT token authentication (standard mode, or API access in OIDC mode)
-    let token =
-        req?.body?.token ||
-        req?.query?.token ||
-        req?.headers['x-access-token'] ||
-        req?.headers['authorization'] ||
-        req?.headers['Authorization'];
+    let token = getAuthToken(req);
 
     if (!token) {
         if (!isApiRequest && req.accepts('html')) {
