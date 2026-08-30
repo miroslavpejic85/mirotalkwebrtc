@@ -4,10 +4,10 @@
     </a>
 </div>
 
-<h1 align="center">MiroTalk WEB</h1>
+<h1 align="center">MiroTalk WEB - Open Source Self-Hosted WebRTC SaaS & Meeting Scheduler</h1>
 
 <h3 align="center">
-Self-hosted open-source WebRTC platform for scheduling and managing video meeting rooms across MiroTalk instances.
+Self-hosted, open-source WebRTC platform for scheduling and managing video meetings across MiroTalk instances.
 </h3>
 
 <br />
