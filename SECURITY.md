@@ -19,8 +19,8 @@ Thanks in advance for your support to make our products safer!
 
 We would like to extend our gratitude to the following individuals for their responsible disclosure of security vulnerabilities:
 
-| Name            | Contact       |
-| --------------- | ------------- |
-| `Onur Alp Akin` | onur@otuva.io |
+| Name            | Contact                               |
+| --------------- | ------------------------------------- |
+| `Onur Alp Akin` | [onur@otuva.io](mailto:onur@otuva.io) |
 
 Their dedication to security has contributed to the continuous improvement of our systems, ensuring the safety and privacy of our users and data.
