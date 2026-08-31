@@ -8,9 +8,11 @@ const AUTH_PATH = path.resolve(__dirname, '../backend/middleware/auth.js');
 const UTILS_PATH = path.resolve(__dirname, '../backend/common/utils.js');
 const OIDC_PATH = path.resolve(__dirname, '../backend/middleware/oidc.js');
 
-function loadAuth(tokenDecode = () => {
-    throw new Error('Invalid token');
-}) {
+function loadAuth(
+    tokenDecode = () => {
+        throw new Error('Invalid token');
+    }
+) {
     const previousUtils = require.cache[UTILS_PATH];
     const previousOidc = require.cache[OIDC_PATH];
 
