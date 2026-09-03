@@ -156,7 +156,7 @@ mongoose
             app.get('/', (req, res) => {
                 res.redirect('/client');
             });
-            app.get('/client', requiresAuth(), requireSubscription, (req, res) => {
+            app.get('/client', requiresAuth(), auth, requireSubscription, (req, res) => {
                 htmlInjector.injectHtml(client, res);
             });
         } else {
