@@ -22,5 +22,6 @@ We would like to extend our gratitude to the following individuals for their res
 | Name            | Contact                               |
 | --------------- | ------------------------------------- |
 | `Onur Alp Akin` | [onur@otuva.io](mailto:onur@otuva.io) |
+| `quxaa`         | [GitHub](https://github.com/quxaa)    |
 
 Their dedication to security has contributed to the continuous improvement of our systems, ensuring the safety and privacy of our users and data.
