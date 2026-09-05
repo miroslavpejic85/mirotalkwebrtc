@@ -219,8 +219,7 @@ async function userLogin(req, res) {
                     <div class="container">
                         <h1>Account created!</h1>
                         <p>Click on Login and enjoy!</p>
-                        <p>If you find this application useful and want to take it to the next level, consider purchasing the full source code. You'll get a license for private projects or commercial business use, along with direct support to help you succeed. It's the best way to ensure continued improvements and updates!</p>
-                        <a href="${nodemailer.SUPPORT}" target="_blank">Purchase on CodeCanyon</a>
+                        ${nodemailer.getUpgradeMessage('/pricing')}
                     </div>`,
                 });
             }

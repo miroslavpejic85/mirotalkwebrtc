@@ -3,6 +3,7 @@
 const logs = require('../common/logs');
 const nodemailer = require('nodemailer');
 const { buildLegacyCalendarUid, icsUtcStamp } = require('../common/calendar');
+const config = require('../config');
 
 const log = new logs('NodeMailer');
 
@@ -217,7 +218,23 @@ const transport = nodemailer.createTransport({
     },
 });
 
+function getUpgradeMessage(pricingUrl = `${SERVER_URL}/pricing`) {
+    if (config.SAAS.enabled) {
+        return `<p>Ready to unlock the full MiroTalk experience?</p>
+            <p>Choose the plan that fits your needs from our pricing page.</p>
+            <a href="${safeUrlAttr(pricingUrl)}" target="_blank">View pricing options</a>
+            <br/>`;
+    }
+
+    return `<p>Enjoying our app? Unlock its full potential with a MiroTalk purchase on CodeCanyon.</p>
+        <p>Get <strong>License</strong>, <strong>Full Source Code</strong>, and <strong>Priority Support</strong>, plus access to all updates. Your purchase fuels future improvements!</p>
+        <p>Ready to upgrade? Click below to choose your MiroTalk package.</p>
+        <a href="${SUPPORT}" target="_blank">Purchase from CodeCanyon</a>
+        <br/>`;
+}
+
 function sendConfirmationEmail(name, email, confirmationCode) {
+    const confirmationUrl = `${SERVER_URL}/api/v1/user/confirmation/${confirmationCode}`;
     transport
         .sendMail({
             from: EMAIL_USERNAME,
@@ -225,10 +242,10 @@ function sendConfirmationEmail(name, email, confirmationCode) {
             subject: 'MiroTalk WEB - Please confirm your email',
             html: `
                 <h1>Email Confirmation</h1>
-                <h2>Hello ${name}</h2>
-                <p>Thank you for subscribing. Please confirm your email by clicking on the following link</p>
-                <a href=${SERVER_URL}/api/v1/user/confirmation/${confirmationCode}> Click here to confirm</a>
-                <p>If it wasn't you, please ignore this email.</p>
+                <h2>Hello ${escapeHtml(name)}</h2>
+                <p>Thank you for creating your MiroTalk account. Please confirm your email address to activate it.</p>
+                <a href="${safeUrlAttr(confirmationUrl)}" style="background-color: #376df9; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Confirm email</a>
+                <p>If you did not create this account, you can safely ignore this email.</p>
             `,
         })
         .catch((err) => log.error(err));
@@ -300,11 +317,7 @@ function sendConfirmationOkEmail(name, toEmail, credential) {
                 <p>Home page</p>
                 <a href="${SERVER_URL}" target="_blank">${SERVER_URL}</a>
                 <br/> 
-                <p>Enjoying our app? Unlock its full potential with a MiroTalk purchase on CodeCanyon.</p> 
-                <p>Get <strong>License</strong>, <strong>Full Source Code</strong>, and <strong>Priority Support</strong>, plus access to all updates. Your purchase fuels future improvements!</p> 
-                <p>Ready to upgrade? Click below to choose your MiroTalk package.</p> 
-                <a href="${SUPPORT}" target="_blank">Purchase from CodeCanyon</a> 
-                <br/> 
+                ${getUpgradeMessage()}
                 <p>Thank you for your support!</p> 
                 <p>MiroTalk Team</p>
             `,
@@ -337,9 +350,7 @@ function sendPasswordResetEmail(name, email, resetUrl) {
                         If you didn't request this, please ignore this email.
                     </p>
                     <br/>
-                    <p>Enjoying our app? Unlock its full potential with a MiroTalk purchase on CodeCanyon.</p>
-                    <a href="${SUPPORT}" target="_blank">Purchase from CodeCanyon</a>
-                    <br/>
+                    ${getUpgradeMessage()}
                     <p>Thank you for your support!</p>
                     <p>MiroTalk Team</p>
                 </div>
@@ -415,9 +426,7 @@ function sendInvitationEmail(name, email, password) {
                         </p>
                     </div>
                     <br/>
-                    <p>Enjoying our app? Unlock its full potential with a MiroTalk purchase on CodeCanyon.</p>
-                    <a href="${SUPPORT}" target="_blank">Purchase from CodeCanyon</a>
-                    <br/>
+                    ${getUpgradeMessage()}
                     <p>Thank you for your support!</p>
                     <p>MiroTalk Team</p>
                 </div>
@@ -576,9 +585,7 @@ function sendRoomInvitationEmail({
                         : ''
                 }
                 <br/>
-                <p>Enjoying our app? Unlock its full potential with a MiroTalk purchase on CodeCanyon.</p>
-                <a href="${SUPPORT}" target="_blank">Purchase from CodeCanyon</a>
-                <br/>
+                ${getUpgradeMessage()}
                 <p>Thank you for your support!</p>
                 <p>MiroTalk Team</p>
             </div>
@@ -594,6 +601,6 @@ module.exports = {
     sendInvitationEmail,
     sendRoomInvitationEmail,
     buildInvitationIcs,
+    getUpgradeMessage,
     EMAIL_VERIFICATION,
-    SUPPORT,
 };
