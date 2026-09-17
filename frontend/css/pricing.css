@@ -59,7 +59,6 @@ body.pricing-page {
     height: 48px;
     margin: 0 !important;
     padding: 0 16px;
-    display: inline-flex !important;
     align-items: center;
     justify-content: center;
     gap: 7px;
