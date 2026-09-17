@@ -350,6 +350,15 @@ function stripeCheckout(plan) {
     }).then((response) => response.data);
 }
 
+function stripeChangePlan(plan) {
+    return axios({
+        method: 'POST',
+        url: `${apiPath}/stripe/change-plan`,
+        headers: headers,
+        data: { plan: plan },
+    }).then((response) => response.data);
+}
+
 function getStripePlans() {
     return axios({
         method: 'GET',

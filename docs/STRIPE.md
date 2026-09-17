@@ -21,6 +21,11 @@ When `SAAS=true`, **demo and admin accounts are always exempt** from payment che
 The pricing page reads the amount and currency from the configured Stripe Price objects. Active customers see their
 current plan instead of another purchase prompt, and duplicate subscriptions are rejected server-side.
 
+Plan changes only move upward: Monthly can upgrade to Annual or Lifetime, Annual can upgrade to Lifetime, and Lifetime
+cannot move back to a recurring plan. Monthly-to-Annual upgrades take effect immediately and Stripe invoices the prorated
+difference. In Stripe Dashboard → Customer portal settings, keep subscription plan switching disabled so the general
+billing portal remains limited to payment methods, invoices, and cancellation; plan upgrades are controlled by the app.
+
 ### Plans
 
 | Plan         | Price        | Stripe type      | Access                                              |
@@ -123,6 +128,7 @@ Use Stripe **test mode** (keys starting with `sk_test_` / `pk_test_`).
     - Lifetime → `subscriptionType = lifetime`, permanent access.
     - Monthly → `subscriptionType = monthly`, renewal date shown in **Account → Billing**.
     - Annual → `subscriptionType = yearly`, annual renewal date shown in **Account → Billing**.
+    - Upgrade Monthly to Annual → the existing subscription changes to Annual and the prorated difference is invoiced.
     - Cancel via **Manage Subscription** (Stripe Billing Portal) → the account shows **Cancels on** while access remains
       available through the paid period, then `/client` redirects to `/pricing` after expiration.
     - Upgrade Monthly to Lifetime → the recurring subscription is canceled automatically after Lifetime payment activates.

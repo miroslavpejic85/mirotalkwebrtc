@@ -122,6 +122,22 @@ async function retrieveSubscription(subscriptionId) {
 }
 
 /**
+ * Upgrade an existing recurring subscription to the yearly price.
+ */
+async function upgradeSubscriptionToYearly(subscriptionId) {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const subscriptionItem = subscription.items?.data?.[0];
+    if (!subscriptionItem?.id) throw new Error('Subscription item not found');
+
+    return stripe.subscriptions.update(subscriptionId, {
+        items: [{ id: subscriptionItem.id, price: STRIPE_YEARLY_PRICE_ID }],
+        metadata: { plan: 'yearly' },
+        proration_behavior: 'always_invoice',
+        cancel_at_period_end: false,
+    });
+}
+
+/**
  * Cancel a recurring subscription immediately.
  */
 async function cancelSubscription(subscriptionId) {
@@ -182,6 +198,7 @@ module.exports = {
     createBillingPortal,
     constructEvent,
     retrieveSubscription,
+    upgradeSubscriptionToYearly,
     cancelSubscription,
     retrieveCheckoutSession,
     retrievePrice,

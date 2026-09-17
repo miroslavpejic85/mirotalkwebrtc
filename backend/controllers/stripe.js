@@ -62,6 +62,59 @@ async function createCheckout(req, res) {
     }
 }
 
+/**
+ * Upgrade an active monthly subscription to yearly billing.
+ * Downgrades and changes away from Lifetime are intentionally not supported.
+ */
+async function changePlan(req, res) {
+    try {
+        if (!stripeLib.isEnabled()) {
+            return res.status(400).json({ message: 'SaaS mode is not enabled' });
+        }
+
+        const { plan } = req.body;
+        if (!['monthly', 'yearly'].includes(plan)) {
+            return res.status(400).json({ message: 'Invalid plan change' });
+        }
+
+        const user = await User.findOne({ email: req.user.email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (
+            plan !== 'yearly' ||
+            user.subscriptionType !== 'monthly' ||
+            !isSubscriptionActive(user) ||
+            !user.stripeSubscriptionId
+        ) {
+            return res.status(409).json({
+                code: 'PLAN_CHANGE_NOT_ALLOWED',
+                message: 'Only an active monthly subscription can be upgraded to annual billing.',
+            });
+        }
+
+        const subscription = await stripeLib.upgradeSubscriptionToYearly(user.stripeSubscriptionId);
+        user.subscriptionType = getRecurringPlan(subscription);
+        user.subscriptionStatus = mapSubscriptionStatus(subscription.status);
+        user.subscriptionExpiresAt = subscriptionEndToDate(subscription);
+        user.subscriptionCancelAtPeriodEnd = isSubscriptionEnding(subscription);
+        user.updatedAt = new Date().toISOString();
+        await user.save();
+
+        log.debug('Subscription upgraded', { email: user.email, plan: user.subscriptionType });
+        return res.status(200).json({
+            subscriptionType: user.subscriptionType,
+            subscriptionStatus: user.subscriptionStatus,
+            subscriptionExpiresAt: user.subscriptionExpiresAt,
+            active: isSubscriptionActive(user),
+        });
+    } catch (error) {
+        log.error('changePlan', error);
+        return res.status(400).json({ message: error.message });
+    }
+}
+
 async function getPlans(req, res) {
     try {
         if (!stripeLib.isEnabled()) {
@@ -154,6 +207,7 @@ async function reconcileMonthlySubscription(user) {
 
     try {
         const subscription = await stripeLib.retrieveSubscription(user.stripeSubscriptionId);
+        user.subscriptionType = getRecurringPlan(subscription);
         user.subscriptionStatus = mapSubscriptionStatus(subscription.status);
         user.subscriptionExpiresAt = subscriptionEndToDate(subscription);
         user.subscriptionCancelAtPeriodEnd = isSubscriptionEnding(subscription);
@@ -339,11 +393,11 @@ function isRecurringPlan(plan) {
 }
 
 function getRecurringPlan(subscription, checkoutPlan) {
-    const plan = checkoutPlan || subscription.metadata?.plan;
-    if (isRecurringPlan(plan)) return plan;
-
     const priceId = subscription.items?.data?.[0]?.price?.id;
-    return priceId && priceId === config.SAAS.yearlyPriceId ? 'yearly' : 'monthly';
+    if (priceId) return priceId === config.SAAS.yearlyPriceId ? 'yearly' : 'monthly';
+
+    const plan = checkoutPlan || subscription.metadata?.plan;
+    return isRecurringPlan(plan) ? plan : 'monthly';
 }
 
 /**
@@ -398,6 +452,7 @@ async function activateLifetimeByCustomer(customerId) {
 module.exports = {
     getPlans,
     createCheckout,
+    changePlan,
     createPortal,
     getBilling,
     verifySession,

@@ -17,6 +17,11 @@ router.post('/stripe/checkout', auth, demo, (req, res) => {
     controllersStripe.createCheckout(req, res);
 });
 
+//CHANGE PLAN: /api/v1/stripe/change-plan
+router.post('/stripe/change-plan', auth, demo, (req, res) => {
+    controllersStripe.changePlan(req, res);
+});
+
 //PORTAL: /api/v1/stripe/portal
 router.post('/stripe/portal', auth, (req, res) => {
     controllersStripe.createPortal(req, res);

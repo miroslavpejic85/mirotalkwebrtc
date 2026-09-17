@@ -11,7 +11,7 @@ const CONFIG_PATH = path.resolve(__dirname, '../backend/config.js');
 const SAAS_PATH = path.resolve(__dirname, '../backend/middleware/saas.js');
 
 function loadController({ user, stripeOverrides = {} }) {
-    const calls = { checkout: [], canceled: [], updated: [] };
+    const calls = { checkout: [], canceled: [], planChanges: [], updated: [] };
     const stripe = {
         isEnabled: () => true,
         createSubscriptionCheckout: async () => {
@@ -40,6 +40,17 @@ function loadController({ user, stripeOverrides = {} }) {
             current_period_end: Math.floor(Date.now() / 1000) + 3600,
             cancel_at_period_end: false,
         }),
+        upgradeSubscriptionToYearly: async (id) => {
+            calls.planChanges.push(id);
+            return {
+                id,
+                status: 'active',
+                current_period_end: Math.floor(Date.now() / 1000) + 31536000,
+                cancel_at_period_end: false,
+                items: { data: [{ price: { id: 'price_yearly' } }] },
+                metadata: { plan: 'yearly' },
+            };
+        },
         retrievePrice: async (id) => {
             if (id === 'price_monthly') return { unit_amount: 900, currency: 'usd', recurring: { interval: 'month' } };
             if (id === 'price_yearly') return { unit_amount: 7900, currency: 'usd', recurring: { interval: 'year' } };
@@ -151,6 +162,34 @@ test('createCheckout allows an active monthly user to upgrade to Lifetime', asyn
     assert.equal(res.statusCode, 200);
     assert.equal(res.body.url, 'https://stripe.test/lifetime');
     assert.deepEqual(harness.calls.checkout, ['lifetime']);
+});
+
+test('changePlan upgrades an active monthly subscription to yearly', async (t) => {
+    const user = activeMonthlyUser();
+    const harness = loadController({ user });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.changePlan({ body: { plan: 'yearly' }, user: { email: user.email } }, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.body.subscriptionType, 'yearly');
+    assert.equal(user.subscriptionType, 'yearly');
+    assert.deepEqual(harness.calls.planChanges, ['sub_monthly']);
+});
+
+test('changePlan rejects yearly to monthly downgrades', async (t) => {
+    const user = activeMonthlyUser();
+    user.subscriptionType = 'yearly';
+    const harness = loadController({ user });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.changePlan({ body: { plan: 'monthly' }, user: { email: user.email } }, res);
+
+    assert.equal(res.statusCode, 409);
+    assert.equal(res.body.code, 'PLAN_CHANGE_NOT_ALLOWED');
+    assert.deepEqual(harness.calls.planChanges, []);
 });
 
 test('createCheckout creates a yearly subscription for a user without an active plan', async (t) => {
@@ -293,6 +332,35 @@ test('subscription webhook stores yearly plan metadata', async (t) => {
 
     assert.equal(res.statusCode, 200);
     assert.equal(harness.calls.updated.length, 1);
+    assert.equal(harness.calls.updated[0].update.$set.subscriptionType, 'yearly');
+});
+
+test('subscription update webhook trusts the yearly price over stale monthly metadata', async (t) => {
+    const user = activeMonthlyUser();
+    const harness = loadController({
+        user,
+        stripeOverrides: {
+            constructEvent: () => ({
+                type: 'customer.subscription.updated',
+                data: {
+                    object: {
+                        id: 'sub_monthly',
+                        customer: 'cus_test',
+                        status: 'active',
+                        current_period_end: Math.floor(Date.now() / 1000) + 31536000,
+                        metadata: { plan: 'monthly' },
+                        items: { data: [{ price: { id: 'price_yearly' } }] },
+                    },
+                },
+            }),
+        },
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.handleWebhook({ headers: {}, body: Buffer.from('{}') }, res);
+
+    assert.equal(res.statusCode, 200);
     assert.equal(harness.calls.updated[0].update.$set.subscriptionType, 'yearly');
 });
 

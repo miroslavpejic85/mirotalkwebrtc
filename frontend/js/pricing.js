@@ -159,8 +159,8 @@ function renderPricingBilling(billing) {
         const alternateButton = isYearly ? monthlyButton : yearlyButton;
         currentButton.textContent = 'Current plan';
         currentButton.disabled = true;
-        alternateButton.textContent = 'Manage billing to switch';
-        alternateButton.disabled = true;
+        alternateButton.textContent = isYearly ? 'Monthly unavailable' : 'Upgrade to annual';
+        alternateButton.disabled = isYearly;
         lifetimeButton.textContent = 'Upgrade to lifetime';
         document.getElementById('lifetimeNote').textContent =
             `Your ${planName.toLowerCase()} subscription is canceled after Lifetime activates`;
@@ -284,6 +284,10 @@ function showAccountRequiredModal({ icon, title, html, requireFullAccount = fals
 }
 
 async function startCheckout(plan, button) {
+    if (plan === 'yearly' && currentBilling?.subscriptionType === 'monthly' && currentBilling.active) {
+        return upgradeToYearly(button);
+    }
+
     if (
         plan === 'lifetime' &&
         ['monthly', 'yearly'].includes(currentBilling?.subscriptionType) &&
@@ -350,6 +354,40 @@ async function startCheckout(plan, button) {
             button.textContent = originalText;
             if (response?.data?.code === 'PLAN_ALREADY_ACTIVE') loadPricingBilling();
         });
+}
+
+async function upgradeToYearly(button) {
+    const result = await Swal.fire({
+        position: 'top',
+        icon: 'question',
+        title: 'Upgrade to Annual?',
+        text: 'Your annual plan starts now. Stripe will immediately invoice the prorated difference.',
+        showCancelButton: true,
+        reverseButtons: true,
+        confirmButtonText: 'Upgrade now',
+        customClass: {
+            popup: 'pricing-confirm-modal',
+            actions: 'pricing-modal-actions',
+            confirmButton: 'pricing-modal-action',
+            cancelButton: 'pricing-modal-action',
+        },
+    });
+    if (!result.isConfirmed) return;
+
+    button.disabled = true;
+    const originalText = button.textContent;
+    button.textContent = 'Upgrading...';
+    try {
+        const billing = await stripeChangePlan('yearly');
+        currentBilling = { ...currentBilling, ...billing };
+        renderPricingBilling(currentBilling);
+        popupMessage('success', 'Your annual plan is now active.');
+    } catch (error) {
+        popupMessage('error', error?.response?.data?.message || 'Unable to upgrade your plan. Please try again.');
+        button.disabled = false;
+        button.textContent = originalText;
+        loadPricingBilling();
+    }
 }
 
 function openBillingPortal() {

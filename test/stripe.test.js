@@ -74,6 +74,7 @@ function loadStripeLib({ saasEnabled = true, env = {} } = {}) {
         },
         subscriptions: {
             retrieve: async (id) => ({ id, status: 'active', __retrieved: true }),
+            update: async (id, params) => ({ id, status: 'active', __params: params }),
             cancel: async (id) => ({ id, status: 'canceled' }),
         },
         prices: {
@@ -293,6 +294,22 @@ test('cancelSubscription cancels the recurring Stripe subscription', async () =>
 
     assert.equal(canceledId, 'sub_monthly');
     assert.equal(subscription.status, 'canceled');
+});
+
+test('upgradeSubscriptionToYearly replaces the existing item and invoices the proration', async () => {
+    const { lib, fakeStripe } = loadStripeLib({ saasEnabled: true });
+    fakeStripe.subscriptions.retrieve = async (id) => ({
+        id,
+        items: { data: [{ id: 'si_monthly' }] },
+    });
+
+    const subscription = await lib.upgradeSubscriptionToYearly('sub_monthly');
+
+    assert.equal(subscription.id, 'sub_monthly');
+    assert.deepEqual(subscription.__params.items, [{ id: 'si_monthly', price: 'price_yearly' }]);
+    assert.deepEqual(subscription.__params.metadata, { plan: 'yearly' });
+    assert.equal(subscription.__params.proration_behavior, 'always_invoice');
+    assert.equal(subscription.__params.cancel_at_period_end, false);
 });
 
 test('retrievePrice loads the configured Stripe Price object', async () => {
