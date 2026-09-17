@@ -11,18 +11,23 @@ const CONFIG_PATH = path.resolve(__dirname, '../backend/config.js');
 const SAAS_PATH = path.resolve(__dirname, '../backend/middleware/saas.js');
 
 function loadController({ user, stripeOverrides = {} }) {
-    const calls = { checkout: [], canceled: [] };
+    const calls = { checkout: [], canceled: [], updated: [] };
     const stripe = {
         isEnabled: () => true,
         createSubscriptionCheckout: async () => {
             calls.checkout.push('monthly');
             return { url: 'https://stripe.test/monthly' };
         },
+        createYearlySubscriptionCheckout: async () => {
+            calls.checkout.push('yearly');
+            return { url: 'https://stripe.test/yearly' };
+        },
         createLifetimeCheckout: async () => {
             calls.checkout.push('lifetime');
             return { url: 'https://stripe.test/lifetime' };
         },
         cancelSubscription: async (id) => calls.canceled.push(id),
+        constructEvent: () => ({ type: 'unhandled', data: { object: {} } }),
         retrieveCheckoutSession: async () => ({
             mode: 'payment',
             payment_status: 'paid',
@@ -35,20 +40,22 @@ function loadController({ user, stripeOverrides = {} }) {
             current_period_end: Math.floor(Date.now() / 1000) + 3600,
             cancel_at_period_end: false,
         }),
-        retrievePrice: async (id) =>
-            id === 'price_monthly'
-                ? { unit_amount: 900, currency: 'usd', recurring: { interval: 'month' } }
-                : { unit_amount: 19900, currency: 'usd' },
+        retrievePrice: async (id) => {
+            if (id === 'price_monthly') return { unit_amount: 900, currency: 'usd', recurring: { interval: 'month' } };
+            if (id === 'price_yearly') return { unit_amount: 7900, currency: 'usd', recurring: { interval: 'year' } };
+            return { unit_amount: 19900, currency: 'usd' };
+        },
         ...stripeOverrides,
     };
     const User = {
         findOne: () => user,
-        updateOne: async () => {},
+        updateOne: async (filter, update) => calls.updated.push({ filter, update }),
     };
     const config = {
         SAAS: {
             enabled: true,
             monthlyPriceId: 'price_monthly',
+            yearlyPriceId: 'price_yearly',
             lifetimePriceId: 'price_lifetime',
         },
     };
@@ -85,7 +92,7 @@ function loadController({ user, stripeOverrides = {} }) {
 function isSubscriptionActive(user) {
     if (user.subscriptionType === 'lifetime') return user.subscriptionStatus === 'active';
     return (
-        user.subscriptionType === 'monthly' &&
+        ['monthly', 'yearly'].includes(user.subscriptionType) &&
         user.subscriptionStatus === 'active' &&
         new Date(user.subscriptionExpiresAt).getTime() > Date.now()
     );
@@ -144,6 +151,21 @@ test('createCheckout allows an active monthly user to upgrade to Lifetime', asyn
     assert.equal(res.statusCode, 200);
     assert.equal(res.body.url, 'https://stripe.test/lifetime');
     assert.deepEqual(harness.calls.checkout, ['lifetime']);
+});
+
+test('createCheckout creates a yearly subscription for a user without an active plan', async (t) => {
+    const user = activeMonthlyUser();
+    user.subscriptionType = null;
+    user.subscriptionStatus = null;
+    const harness = loadController({ user });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.createCheckout({ body: { plan: 'yearly' }, user: { email: user.email } }, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.body.url, 'https://stripe.test/yearly');
+    assert.deepEqual(harness.calls.checkout, ['yearly']);
 });
 
 test('createCheckout rejects every new purchase when Lifetime is active', async (t) => {
@@ -216,7 +238,62 @@ test('getPlans returns Stripe amounts, currency, and interval', async (t) => {
     await harness.controller.getPlans({}, res);
 
     assert.deepEqual(res.body.monthly, { unitAmount: 900, currency: 'usd', interval: 'month' });
+    assert.deepEqual(res.body.yearly, { unitAmount: 7900, currency: 'usd', interval: 'year' });
     assert.deepEqual(res.body.lifetime, { unitAmount: 19900, currency: 'usd' });
+});
+
+test('verifySession activates the yearly plan from Checkout metadata', async (t) => {
+    const user = activeMonthlyUser();
+    user.subscriptionType = null;
+    user.subscriptionStatus = null;
+    const harness = loadController({
+        user,
+        stripeOverrides: {
+            retrieveCheckoutSession: async () => ({
+                mode: 'subscription',
+                subscription: 'sub_yearly',
+                customer: 'cus_test',
+                metadata: { userId: String(user._id), plan: 'yearly' },
+            }),
+        },
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.verifySession({ query: { session_id: 'cs_yearly' }, user: { email: user.email } }, res);
+
+    assert.equal(res.body.active, true);
+    assert.equal(user.subscriptionType, 'yearly');
+    assert.equal(user.stripeSubscriptionId, 'sub_new');
+});
+
+test('subscription webhook stores yearly plan metadata', async (t) => {
+    const user = activeMonthlyUser();
+    const harness = loadController({
+        user,
+        stripeOverrides: {
+            constructEvent: () => ({
+                type: 'customer.subscription.created',
+                data: {
+                    object: {
+                        id: 'sub_yearly',
+                        customer: 'cus_test',
+                        status: 'active',
+                        current_period_end: Math.floor(Date.now() / 1000) + 86400,
+                        metadata: { plan: 'yearly' },
+                    },
+                },
+            }),
+        },
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.handleWebhook({ headers: {}, body: Buffer.from('{}') }, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(harness.calls.updated.length, 1);
+    assert.equal(harness.calls.updated[0].update.$set.subscriptionType, 'yearly');
 });
 
 test('getBilling reconciles a scheduled cancellation without marking access inactive', async (t) => {

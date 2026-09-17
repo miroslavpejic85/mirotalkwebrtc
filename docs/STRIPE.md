@@ -26,6 +26,7 @@ current plan instead of another purchase prompt, and duplicate subscriptions are
 | Plan         | Price        | Stripe type      | Access                                              |
 | ------------ | ------------ | ---------------- | --------------------------------------------------- |
 | **Monthly**  | `$9 / month` | Subscription     | While `subscriptionStatus = active` and not expired |
+| **Annual**   | `$79 / year` | Subscription     | While `subscriptionStatus = active` and not expired |
 | **Lifetime** | `$199 once`  | One-time payment | Permanent (`subscriptionExpiresAt = null`)          |
 
 ### Protected when `SAAS=true`
@@ -50,6 +51,7 @@ STRIPE_SECRET_KEY=sk_...           # Stripe secret key (sk_live_... / sk_test_..
 STRIPE_PUBLISHABLE_KEY=pk_...      # Stripe publishable key (pk_live_... / pk_test_...)
 STRIPE_WEBHOOK_SECRET=whsec_...    # Signing secret of your webhook endpoint
 STRIPE_MONTHLY_PRICE_ID=price_...  # Price ID of the $9/month recurring price
+STRIPE_YEARLY_PRICE_ID=price_...   # Price ID of the $79/year recurring price
 STRIPE_LIFETIME_PRICE_ID=price_... # Price ID of the $199 one-time price
 ```
 
@@ -61,14 +63,16 @@ STRIPE_LIFETIME_PRICE_ID=price_... # Price ID of the $199 one-time price
 | `STRIPE_PUBLISHABLE_KEY`   | Developers → API keys → _Publishable key_                |
 | `STRIPE_WEBHOOK_SECRET`    | Developers → Webhooks → your endpoint → _Signing secret_ |
 | `STRIPE_MONTHLY_PRICE_ID`  | Product catalog → your monthly product → _Price ID_      |
+| `STRIPE_YEARLY_PRICE_ID`   | Product catalog → your annual product → _Price ID_       |
 | `STRIPE_LIFETIME_PRICE_ID` | Product catalog → your lifetime product → _Price ID_     |
 
 ---
 
 ## 🛠️ One-time Stripe setup
 
-1. Create two **Products** in the Stripe Dashboard:
+1. Create three prices in the Stripe Dashboard (they may belong to one product or separate products):
     - _Monthly_ → recurring price `$9 / month` → copy its **Price ID** into `STRIPE_MONTHLY_PRICE_ID`.
+    - _Annual_ → recurring price `$79 / year` → copy its **Price ID** into `STRIPE_YEARLY_PRICE_ID`.
     - _Lifetime_ → one-time price `$199` → copy its **Price ID** into `STRIPE_LIFETIME_PRICE_ID`.
 2. Copy your **API keys** into `STRIPE_SECRET_KEY` and `STRIPE_PUBLISHABLE_KEY`.
 3. Configure the **webhook** (see below) and copy its signing secret into `STRIPE_WEBHOOK_SECRET`.
@@ -78,6 +82,9 @@ STRIPE_LIFETIME_PRICE_ID=price_... # Price ID of the $199 one-time price
     npx migrate-mongo up
     ```
 5. Set `SAAS=true` and restart the app.
+
+Stripe Payment Links are not required. The application creates a customer-specific Checkout Session for the selected
+Price ID and uses its metadata to activate the correct plan.
 
 ### Webhook endpoint
 
@@ -115,6 +122,7 @@ Use Stripe **test mode** (keys starting with `sk_test_` / `pk_test_`).
 5. Verify the flow:
     - Lifetime → `subscriptionType = lifetime`, permanent access.
     - Monthly → `subscriptionType = monthly`, renewal date shown in **Account → Billing**.
+    - Annual → `subscriptionType = yearly`, annual renewal date shown in **Account → Billing**.
     - Cancel via **Manage Subscription** (Stripe Billing Portal) → the account shows **Cancels on** while access remains
       available through the paid period, then `/client` redirects to `/pricing` after expiration.
     - Upgrade Monthly to Lifetime → the recurring subscription is canceled automatically after Lifetime payment activates.

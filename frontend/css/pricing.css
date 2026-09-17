@@ -270,10 +270,10 @@ body.pricing-page {
 
 .pricing-cards {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 20px;
     width: 100%;
-    max-width: 900px;
+    max-width: 1180px;
 }
 
 .pricing-card {
@@ -441,7 +441,7 @@ body.pricing-page {
 
 .pricing-faq {
     width: 100%;
-    max-width: 900px;
+    max-width: 1180px;
     padding-top: 66px;
     display: grid;
     grid-template-columns: 0.8fr 1.2fr;

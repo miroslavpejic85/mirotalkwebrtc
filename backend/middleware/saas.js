@@ -25,7 +25,7 @@ function isDemoUser(user) {
 /**
  * Determine whether a user has an active subscription.
  * - Lifetime: type=lifetime && status=active (no expiry).
- * - Monthly: status=active && subscriptionExpiresAt in the future.
+ * - Monthly/yearly: status=active && subscriptionExpiresAt in the future.
  */
 function isSubscriptionActive(user) {
     if (!user) return false;
@@ -34,7 +34,7 @@ function isSubscriptionActive(user) {
         return true;
     }
 
-    if (user.subscriptionType === 'monthly' && user.subscriptionStatus === 'active') {
+    if (['monthly', 'yearly'].includes(user.subscriptionType) && user.subscriptionStatus === 'active') {
         return !!user.subscriptionExpiresAt && new Date(user.subscriptionExpiresAt).getTime() > Date.now();
     }
 

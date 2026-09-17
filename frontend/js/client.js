@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.60
+ * @version 1.5.61
  */
 
 const userAgent = navigator.userAgent;
@@ -97,6 +97,7 @@ const statCMEVal = document.getElementById('statCMEVal');
 
 const statsSubscriptionsSection = document.getElementById('statsSubscriptionsSection');
 const statMonthlySubsVal = document.getElementById('statMonthlySubsVal');
+const statYearlySubsVal = document.getElementById('statYearlySubsVal');
 const statLifetimeSubsVal = document.getElementById('statLifetimeSubsVal');
 const statTotalSubsVal = document.getElementById('statTotalSubsVal');
 
@@ -1408,6 +1409,9 @@ function getUserPlan(u) {
     }
     if (u.subscriptionType === 'monthly' && isActive && notExpired) {
         return { label: 'Monthly', className: 'monthly' };
+    }
+    if (u.subscriptionType === 'yearly' && isActive && notExpired) {
+        return { label: 'Annual', className: 'yearly' };
     }
     return { label: 'None', className: 'none' };
 }
@@ -3246,9 +3250,9 @@ function loadBilling() {
                     res.active ? 'active' : 'inactive'
                 );
                 accountRenewalField.classList.add('hidden');
-            } else if (res.subscriptionType === 'monthly') {
+            } else if (['monthly', 'yearly'].includes(res.subscriptionType)) {
                 const canceled = res.subscriptionStatus === 'canceled';
-                accountPlan.textContent = 'Monthly';
+                accountPlan.textContent = res.subscriptionType === 'yearly' ? 'Annual' : 'Monthly';
                 setBillingStatus(
                     res.subscriptionCancelAtPeriodEnd
                         ? 'Ending'
@@ -3502,10 +3506,12 @@ function renderDashboardStats(data) {
         elemDisplay(statsSubscriptionsSection, saasEnabled);
         if (saasEnabled) {
             const monthly = data.monthlySubscribers || 0;
+            const yearly = data.yearlySubscribers || 0;
             const lifetime = data.lifetimeSubscribers || 0;
             statMonthlySubsVal.textContent = monthly;
+            statYearlySubsVal.textContent = yearly;
             statLifetimeSubsVal.textContent = lifetime;
-            statTotalSubsVal.textContent = monthly + lifetime;
+            statTotalSubsVal.textContent = monthly + yearly + lifetime;
         }
         statTotalRoomsLabel.textContent = 'Total Rooms';
         statTodayVal.textContent = data.todayRooms;

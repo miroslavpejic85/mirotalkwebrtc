@@ -142,9 +142,11 @@ module.exports = {
         enabled: process.env.SAAS === 'true' || false,
         stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY || '',
         monthlyPriceId: process.env.STRIPE_MONTHLY_PRICE_ID || '',
+        yearlyPriceId: process.env.STRIPE_YEARLY_PRICE_ID || '',
         lifetimePriceId: process.env.STRIPE_LIFETIME_PRICE_ID || '',
         pricing: {
             monthly: '$9',
+            yearly: '$79',
             lifetime: '$199',
         },
     },

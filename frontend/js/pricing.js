@@ -65,23 +65,29 @@ document.addEventListener('DOMContentLoaded', () => {
     getStripePlans()
         .then((plans) => {
             document.getElementById('monthlyPrice').textContent = formatStripePrice(plans.monthly);
+            document.getElementById('yearlyPrice').textContent = formatStripePrice(plans.yearly);
             document.getElementById('lifetimePrice').textContent = formatStripePrice(plans.lifetime);
         })
         .catch(() => {
             document.getElementById('monthlyPrice').textContent = 'Unavailable';
+            document.getElementById('yearlyPrice').textContent = 'Unavailable';
             document.getElementById('lifetimePrice').textContent = 'Unavailable';
             document.getElementById('subscribeMonthly').disabled = true;
+            document.getElementById('subscribeYearly').disabled = true;
             document.getElementById('buyLifetime').disabled = true;
             document.getElementById('monthlyNote').textContent = 'Price is temporarily unavailable';
+            document.getElementById('yearlyNote').textContent = 'Price is temporarily unavailable';
             document.getElementById('lifetimeNote').textContent = 'Price is temporarily unavailable';
         });
 
     loadPricingBilling();
 
     const subscribeMonthly = document.getElementById('subscribeMonthly');
+    const subscribeYearly = document.getElementById('subscribeYearly');
     const buyLifetime = document.getElementById('buyLifetime');
 
     subscribeMonthly.addEventListener('click', () => startCheckout('monthly', subscribeMonthly));
+    subscribeYearly.addEventListener('click', () => startCheckout('yearly', subscribeYearly));
     buyLifetime.addEventListener('click', () => startCheckout('lifetime', buyLifetime));
     document.getElementById('pricingManageBilling').addEventListener('click', openBillingPortal);
     document.getElementById('retryActivation').addEventListener('click', () => {
@@ -119,6 +125,7 @@ function renderPricingBilling(billing) {
     const detail = document.getElementById('pricingAccountDetail');
     const manage = document.getElementById('pricingManageBilling');
     const monthlyButton = document.getElementById('subscribeMonthly');
+    const yearlyButton = document.getElementById('subscribeYearly');
     const lifetimeButton = document.getElementById('buyLifetime');
 
     status.classList.remove('hidden');
@@ -129,26 +136,34 @@ function renderPricingBilling(billing) {
         detail.textContent = 'There are no recurring access charges.';
         monthlyButton.textContent = 'Included in lifetime';
         monthlyButton.disabled = true;
+        yearlyButton.textContent = 'Included in lifetime';
+        yearlyButton.disabled = true;
         lifetimeButton.textContent = 'Current plan';
         lifetimeButton.disabled = true;
         return;
     }
 
-    if (billing.subscriptionType === 'monthly' && billing.active) {
+    if (['monthly', 'yearly'].includes(billing.subscriptionType) && billing.active) {
+        const isYearly = billing.subscriptionType === 'yearly';
+        const planName = isYearly ? 'Annual' : 'Monthly';
         const endDate = billing.subscriptionExpiresAt
             ? new Date(billing.subscriptionExpiresAt).toLocaleDateString()
             : '';
         plan.textContent = billing.subscriptionCancelAtPeriodEnd
-            ? 'Monthly access is ending'
-            : 'Monthly plan is active';
+            ? `${planName} access is ending`
+            : `${planName} plan is active`;
         detail.textContent = billing.subscriptionCancelAtPeriodEnd
             ? `Access continues until ${endDate}.`
             : `Next renewal: ${endDate}.`;
-        monthlyButton.textContent = 'Current plan';
-        monthlyButton.disabled = true;
+        const currentButton = isYearly ? yearlyButton : monthlyButton;
+        const alternateButton = isYearly ? monthlyButton : yearlyButton;
+        currentButton.textContent = 'Current plan';
+        currentButton.disabled = true;
+        alternateButton.textContent = 'Manage billing to switch';
+        alternateButton.disabled = true;
         lifetimeButton.textContent = 'Upgrade to lifetime';
         document.getElementById('lifetimeNote').textContent =
-            'Your monthly subscription is canceled after Lifetime activates';
+            `Your ${planName.toLowerCase()} subscription is canceled after Lifetime activates`;
         return;
     }
 
@@ -262,12 +277,17 @@ function showAccountRequiredModal({ icon, title, html }) {
 }
 
 async function startCheckout(plan, button) {
-    if (plan === 'lifetime' && currentBilling?.subscriptionType === 'monthly' && currentBilling.active) {
+    if (
+        plan === 'lifetime' &&
+        ['monthly', 'yearly'].includes(currentBilling?.subscriptionType) &&
+        currentBilling.active
+    ) {
+        const planName = currentBilling.subscriptionType === 'yearly' ? 'annual' : 'monthly';
         const result = await Swal.fire({
             position: 'top',
             icon: 'question',
             title: 'Upgrade to Lifetime?',
-            text: 'After Lifetime access is confirmed, your monthly subscription will be canceled automatically.',
+            text: `After Lifetime access is confirmed, your ${planName} subscription will be canceled automatically.`,
             showCancelButton: true,
             reverseButtons: true,
             confirmButtonText: 'Continue to Stripe',

@@ -9,6 +9,7 @@ const SAAS_ENABLED = config.SAAS.enabled;
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const STRIPE_MONTHLY_PRICE_ID = process.env.STRIPE_MONTHLY_PRICE_ID;
+const STRIPE_YEARLY_PRICE_ID = process.env.STRIPE_YEARLY_PRICE_ID;
 const STRIPE_LIFETIME_PRICE_ID = process.env.STRIPE_LIFETIME_PRICE_ID;
 
 let stripe = null;
@@ -20,6 +21,7 @@ if (SAAS_ENABLED) {
         stripe = require('stripe')(STRIPE_SECRET_KEY, { apiVersion: '2026-08-26.dahlia' });
         log.info('Stripe initialized', {
             monthlyPrice: !!STRIPE_MONTHLY_PRICE_ID,
+            yearlyPrice: !!STRIPE_YEARLY_PRICE_ID,
             lifetimePrice: !!STRIPE_LIFETIME_PRICE_ID,
             webhookSecret: !!STRIPE_WEBHOOK_SECRET,
         });
@@ -60,6 +62,23 @@ async function createSubscriptionCheckout(user, successUrl, cancelUrl) {
         success_url: successUrl,
         cancel_url: cancelUrl,
         metadata: { userId: String(user._id), plan: 'monthly' },
+        subscription_data: { metadata: { userId: String(user._id), plan: 'monthly' } },
+    });
+}
+
+/**
+ * Create a Stripe Checkout session for the yearly subscription plan.
+ */
+async function createYearlySubscriptionCheckout(user, successUrl, cancelUrl) {
+    const customerId = await getOrCreateCustomer(user);
+    return stripe.checkout.sessions.create({
+        mode: 'subscription',
+        customer: customerId,
+        line_items: [{ price: STRIPE_YEARLY_PRICE_ID, quantity: 1 }],
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        metadata: { userId: String(user._id), plan: 'yearly' },
+        subscription_data: { metadata: { userId: String(user._id), plan: 'yearly' } },
     });
 }
 
@@ -158,6 +177,7 @@ module.exports = {
     isEnabled,
     getOrCreateCustomer,
     createSubscriptionCheckout,
+    createYearlySubscriptionCheckout,
     createLifetimeCheckout,
     createBillingPortal,
     constructEvent,

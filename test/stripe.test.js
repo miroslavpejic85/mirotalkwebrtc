@@ -92,8 +92,9 @@ function loadStripeLib({ saasEnabled = true, env = {} } = {}) {
             enabled: saasEnabled,
             stripePublishableKey: 'pk_test',
             monthlyPriceId: 'price_monthly',
+            yearlyPriceId: 'price_yearly',
             lifetimePriceId: 'price_lifetime',
-            pricing: { monthly: '$9', lifetime: '$199' },
+            pricing: { monthly: '$9', yearly: '$79', lifetime: '$199' },
         },
     };
 
@@ -106,6 +107,7 @@ function loadStripeLib({ saasEnabled = true, env = {} } = {}) {
     process.env.STRIPE_SECRET_KEY = 'sk_test_load';
     process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test';
     process.env.STRIPE_MONTHLY_PRICE_ID = 'price_monthly';
+    process.env.STRIPE_YEARLY_PRICE_ID = 'price_yearly';
     process.env.STRIPE_LIFETIME_PRICE_ID = 'price_lifetime';
     Object.assign(process.env, env);
 
@@ -185,6 +187,24 @@ test('createSubscriptionCheckout creates a subscription-mode session for the mon
     assert.equal(session.__params.cancel_url, 'https://cancel');
     assert.equal(session.__params.metadata.plan, 'monthly');
     assert.equal(session.__params.metadata.userId, 'u1');
+});
+
+test('createYearlySubscriptionCheckout creates a subscription-mode session for the yearly price', async () => {
+    const { lib } = loadStripeLib({ saasEnabled: true });
+
+    const user = {
+        _id: 'u-yearly',
+        email: 'yearly@example.com',
+        username: 'yearly-user',
+        stripeCustomerId: 'cus_existing',
+        save: async () => {},
+    };
+    const session = await lib.createYearlySubscriptionCheckout(user, 'https://ok', 'https://cancel');
+
+    assert.equal(session.__params.mode, 'subscription');
+    assert.deepEqual(session.__params.line_items, [{ price: 'price_yearly', quantity: 1 }]);
+    assert.equal(session.__params.metadata.plan, 'yearly');
+    assert.equal(session.__params.subscription_data.metadata.plan, 'yearly');
 });
 
 test('createLifetimeCheckout creates a payment-mode session for the lifetime price', async () => {

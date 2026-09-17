@@ -12,7 +12,7 @@ const SERVER_URL = process.env.SERVER_URL;
 
 /**
  * Create a Stripe Checkout session for the requested plan.
- * Body: { plan: 'monthly' | 'lifetime' }
+ * Body: { plan: 'monthly' | 'yearly' | 'lifetime' }
  */
 async function createCheckout(req, res) {
     try {
@@ -21,7 +21,7 @@ async function createCheckout(req, res) {
         }
 
         const { plan } = req.body;
-        if (plan !== 'monthly' && plan !== 'lifetime') {
+        if (!['monthly', 'yearly', 'lifetime'].includes(plan)) {
             return res.status(400).json({ message: 'Invalid plan' });
         }
 
@@ -31,13 +31,13 @@ async function createCheckout(req, res) {
         }
 
         if (isSubscriptionActive(user)) {
-            if (user.subscriptionType === 'lifetime' || plan === 'monthly') {
+            if (user.subscriptionType === 'lifetime' || plan !== 'lifetime') {
                 return res.status(409).json({
                     code: 'PLAN_ALREADY_ACTIVE',
                     message:
                         user.subscriptionType === 'lifetime'
                             ? 'Lifetime access is already active on this account.'
-                            : 'A monthly subscription is already active. Manage it from your billing settings.',
+                            : 'A recurring subscription is already active. Manage it from your billing settings.',
                 });
             }
         }
@@ -45,10 +45,14 @@ async function createCheckout(req, res) {
         const successUrl = `${SERVER_URL}/pricing?status=success&session_id={CHECKOUT_SESSION_ID}`;
         const cancelUrl = `${SERVER_URL}/pricing?status=cancel`;
 
-        const session =
-            plan === 'monthly'
-                ? await stripeLib.createSubscriptionCheckout(user, successUrl, cancelUrl)
-                : await stripeLib.createLifetimeCheckout(user, successUrl, cancelUrl);
+        let session;
+        if (plan === 'monthly') {
+            session = await stripeLib.createSubscriptionCheckout(user, successUrl, cancelUrl);
+        } else if (plan === 'yearly') {
+            session = await stripeLib.createYearlySubscriptionCheckout(user, successUrl, cancelUrl);
+        } else {
+            session = await stripeLib.createLifetimeCheckout(user, successUrl, cancelUrl);
+        }
 
         log.debug('Checkout session created', { plan, email: user.email });
         return res.status(200).json({ url: session.url });
@@ -64,8 +68,9 @@ async function getPlans(req, res) {
             return res.status(400).json({ message: 'SaaS mode is not enabled' });
         }
 
-        const [monthly, lifetime] = await Promise.all([
+        const [monthly, yearly, lifetime] = await Promise.all([
             stripeLib.retrievePrice(config.SAAS.monthlyPriceId),
+            stripeLib.retrievePrice(config.SAAS.yearlyPriceId),
             stripeLib.retrievePrice(config.SAAS.lifetimePriceId),
         ]);
 
@@ -74,6 +79,11 @@ async function getPlans(req, res) {
                 unitAmount: monthly.unit_amount,
                 currency: monthly.currency,
                 interval: monthly.recurring?.interval || 'month',
+            },
+            yearly: {
+                unitAmount: yearly.unit_amount,
+                currency: yearly.currency,
+                interval: yearly.recurring?.interval || 'year',
             },
             lifetime: {
                 unitAmount: lifetime.unit_amount,
@@ -140,7 +150,7 @@ async function getBilling(req, res) {
 }
 
 async function reconcileMonthlySubscription(user) {
-    if (!stripeLib.isEnabled() || user.subscriptionType !== 'monthly' || !user.stripeSubscriptionId) return;
+    if (!stripeLib.isEnabled() || !isRecurringPlan(user.subscriptionType) || !user.stripeSubscriptionId) return;
 
     try {
         const subscription = await stripeLib.retrieveSubscription(user.stripeSubscriptionId);
@@ -204,7 +214,7 @@ async function verifySession(req, res) {
         }
 
         if (session.mode === 'payment' && session.payment_status === 'paid') {
-            if (user.subscriptionType === 'monthly' && user.stripeSubscriptionId) {
+            if (isRecurringPlan(user.subscriptionType) && user.stripeSubscriptionId) {
                 await stripeLib.cancelSubscription(user.stripeSubscriptionId);
             }
             user.subscriptionType = 'lifetime';
@@ -220,14 +230,17 @@ async function verifySession(req, res) {
                 return res.status(200).json({ active: true });
             }
             const subscription = await stripeLib.retrieveSubscription(session.subscription);
-            user.subscriptionType = 'monthly';
+            user.subscriptionType = getRecurringPlan(subscription, session.metadata?.plan);
             user.subscriptionStatus = mapSubscriptionStatus(subscription.status);
             user.stripeSubscriptionId = subscription.id;
             user.subscriptionExpiresAt = subscriptionEndToDate(subscription);
             user.subscriptionCancelAtPeriodEnd = isSubscriptionEnding(subscription);
             user.updatedAt = new Date().toISOString();
             await user.save();
-            log.debug('Monthly subscription activated via verifySession', { email: user.email });
+            log.debug('Recurring subscription activated via verifySession', {
+                email: user.email,
+                plan: user.subscriptionType,
+            });
         } else {
             // Payment not completed yet.
             await user.save();
@@ -272,18 +285,19 @@ async function handleWebhook(req, res) {
             case 'customer.subscription.created': {
                 const subscription = event.data.object;
                 await updateUserByCustomer(subscription.customer, {
-                    subscriptionType: 'monthly',
+                    subscriptionType: getRecurringPlan(subscription),
                     subscriptionStatus: mapSubscriptionStatus(subscription.status),
                     stripeSubscriptionId: subscription.id,
                     subscriptionExpiresAt: subscriptionEndToDate(subscription),
                     subscriptionCancelAtPeriodEnd: isSubscriptionEnding(subscription),
                 });
-                log.debug('Monthly subscription created', { customer: subscription.customer });
+                log.debug('Recurring subscription created', { customer: subscription.customer });
                 break;
             }
             case 'customer.subscription.updated': {
                 const subscription = event.data.object;
                 await updateUserByCustomer(subscription.customer, {
+                    subscriptionType: getRecurringPlan(subscription),
                     subscriptionStatus: mapSubscriptionStatus(subscription.status),
                     subscriptionExpiresAt: subscriptionEndToDate(subscription),
                     subscriptionCancelAtPeriodEnd: isSubscriptionEnding(subscription),
@@ -318,6 +332,18 @@ function mapSubscriptionStatus(status) {
     if (status === 'active' || status === 'trialing') return 'active';
     if (status === 'canceled' || status === 'unpaid' || status === 'incomplete_expired') return 'canceled';
     return 'inactive';
+}
+
+function isRecurringPlan(plan) {
+    return plan === 'monthly' || plan === 'yearly';
+}
+
+function getRecurringPlan(subscription, checkoutPlan) {
+    const plan = checkoutPlan || subscription.metadata?.plan;
+    if (isRecurringPlan(plan)) return plan;
+
+    const priceId = subscription.items?.data?.[0]?.price?.id;
+    return priceId && priceId === config.SAAS.yearlyPriceId ? 'yearly' : 'monthly';
 }
 
 /**
@@ -356,7 +382,7 @@ async function activateLifetimeByCustomer(customerId) {
     const user = await User.findOne({ stripeCustomerId: customerId });
     if (!user) return;
 
-    if (user.subscriptionType === 'monthly' && user.stripeSubscriptionId) {
+    if (isRecurringPlan(user.subscriptionType) && user.stripeSubscriptionId) {
         await stripeLib.cancelSubscription(user.stripeSubscriptionId);
     }
 

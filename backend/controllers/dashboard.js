@@ -52,6 +52,7 @@ async function getDashboardStats(req, res) {
                 todayRooms,
                 latestUser,
                 monthlySubscribers,
+                yearlySubscribers,
                 lifetimeSubscribers,
                 upcomingReminders,
             ] = await Promise.all([
@@ -64,6 +65,7 @@ async function getDashboardStats(req, res) {
                 Room.countDocuments({ date: today }),
                 User.findOne().sort({ createdAt: -1 }).select('username createdAt').lean(),
                 User.countDocuments({ subscriptionType: 'monthly', subscriptionStatus: 'active' }),
+                User.countDocuments({ subscriptionType: 'yearly', subscriptionStatus: 'active' }),
                 User.countDocuments({ subscriptionType: 'lifetime', subscriptionStatus: 'active' }),
                 getUpcomingReminders(),
             ]);
@@ -89,6 +91,7 @@ async function getDashboardStats(req, res) {
                 latestUser: latestUser ? latestUser.username : '-',
                 latestUserDate: latestUser ? latestUser.createdAt : null,
                 monthlySubscribers,
+                yearlySubscribers,
                 lifetimeSubscribers,
                 upcomingReminders,
             });

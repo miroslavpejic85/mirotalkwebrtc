@@ -5284,6 +5284,11 @@ body.dark #usersTable tr:hover {
     color: var(--success-color);
 }
 
+#usersTable td .user-plan-badge.yearly {
+    background-color: var(--success-badge-bg);
+    color: var(--success-color);
+}
+
 #usersTable td .user-plan-badge.none {
     background-color: var(--danger-badge-bg);
     color: var(--danger-badge-color);
