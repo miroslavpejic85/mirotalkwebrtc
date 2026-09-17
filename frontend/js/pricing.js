@@ -250,20 +250,25 @@ function pollBilling(onDone) {
     poll();
 }
 
-function showAccountRequiredModal({ icon, title, html }) {
+function showAccountRequiredModal({ icon, title, html, requireFullAccount = false }) {
     return Swal.fire({
         position: 'top',
         icon,
         title,
         html,
         showCancelButton: true,
+        showDenyButton: !requireFullAccount,
         reverseButtons: true,
-        confirmButtonText: '<i class="uil uil-user-plus"></i> Create account',
+        confirmButtonText: requireFullAccount
+            ? '<i class="uil uil-user-plus"></i> Create account'
+            : '<i class="uil uil-sign-in-alt"></i> Sign in',
+        denyButtonText: '<i class="uil uil-user-plus"></i> Create account',
         cancelButtonText: 'Cancel',
         customClass: {
             popup: 'pricing-account-modal',
             actions: 'pricing-account-actions',
             confirmButton: 'pricing-account-action',
+            denyButton: 'pricing-account-action',
             cancelButton: 'pricing-account-action',
         },
         allowOutsideClick: false,
@@ -271,6 +276,8 @@ function showAccountRequiredModal({ icon, title, html }) {
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
         if (result.isConfirmed) {
+            window.location.href = requireFullAccount ? '/?signup=1' : '/';
+        } else if (result.isDenied) {
             window.location.href = '/?signup=1';
         }
     });
@@ -329,10 +336,11 @@ async function startCheckout(plan, button) {
                 button.textContent = originalText;
                 return showAccountRequiredModal({
                     icon: 'info',
-                    title: isDemoAccount ? 'Create a full account' : 'Create your account first',
+                    title: isDemoAccount ? 'Create a full account' : 'Sign in to continue',
                     html: isDemoAccount
                         ? 'Demo accounts cannot purchase plans.<br/>Create your own account to continue to checkout.'
-                        : 'Your account connects the purchase to your private dashboard and meeting rooms.',
+                        : 'Sign in to connect the purchase to your account, or create an account if you are new.',
+                    requireFullAccount: isDemoAccount,
                 });
             }
             const message =
