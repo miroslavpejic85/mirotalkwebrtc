@@ -265,7 +265,7 @@ function showAccountRequiredModal({ icon, title, html, requireFullAccount = fals
         denyButtonText: '<i class="uil uil-user-plus"></i> Create account',
         cancelButtonText: 'Cancel',
         customClass: {
-            popup: 'pricing-account-modal',
+            popup: requireFullAccount ? 'pricing-account-modal pricing-account-modal-single' : 'pricing-account-modal',
             actions: 'pricing-account-actions',
             confirmButton: 'pricing-account-action',
             denyButton: 'pricing-account-action',
