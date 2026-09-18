@@ -415,6 +415,30 @@ button:active {
     color: var(--text-color) !important;
 }
 
+.pending-email-copy,
+.pending-email-hint {
+    margin: 0 auto;
+    line-height: 1.55;
+}
+
+.pending-email-copy {
+    max-width: 420px;
+    color: var(--text-color);
+    font-size: 15px;
+}
+
+.pending-email-copy strong {
+    color: var(--hover-color);
+    overflow-wrap: anywhere;
+}
+
+.pending-email-hint {
+    max-width: 400px;
+    margin-top: 12px;
+    color: var(--text-light);
+    font-size: 13px;
+}
+
 /* Body text */
 .swal2-html-container {
     font-size: 14px !important;

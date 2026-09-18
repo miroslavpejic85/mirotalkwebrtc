@@ -58,7 +58,7 @@ function loadController(overrides = {}) {
         [BOOKING_PROFILE_PATH, BookingProfile],
         [EVENT_PATH, Event],
         [EMAIL_INVITATION_PATH, EmailInvitation],
-        [NODEMAILER_PATH, { getUpgradeMessage: () => '' }],
+        [NODEMAILER_PATH, overrides.nodemailer || { getUpgradeMessage: () => '' }],
         [STRIPE_PATH, overrides.stripeLib || { cleanupUserBilling: async () => {} }],
         [
             UTILS_PATH,
@@ -214,6 +214,33 @@ test('userCreate persists server-timestamped legal consent', async (t) => {
     assert.equal(harness.createdUsers[0].termsVersion, '2026-09-18');
     assert.equal(harness.createdUsers[0].privacyPolicyVersion, '2026-09-18');
     assert.ok(harness.createdUsers[0].termsAcceptedAt instanceof Date);
+});
+
+test('userCreate returns a clear pending state when email confirmation is required', async (t) => {
+    let confirmation;
+    const harness = loadController({
+        nodemailer: {
+            EMAIL_VERIFICATION: true,
+            sendConfirmationEmail(username, email, code) {
+                confirmation = { username, email, code };
+            },
+        },
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.userCreate(createRequest(), res);
+
+    assert.equal(res.statusCode, 201);
+    assert.deepEqual(res.body, {
+        pending: true,
+        message: 'Check your inbox to confirm your account.',
+    });
+    assert.deepEqual(confirmation, {
+        username: 'new-user',
+        email: 'new@example.com',
+        code: '?token=token',
+    });
 });
 
 test('userLogin persists consent when it auto-registers a new user', async (t) => {

@@ -76,6 +76,11 @@
     padding: 40px 0;
 }
 
+.confirmation-status .form-icon-circle.success {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+}
+
 .confirmation-status .form-icon-circle.warning {
     background: rgba(255, 193, 7, 0.15);
     color: #ffc107;
@@ -207,6 +212,31 @@ button:disabled {
 .primary-link {
     margin-top: 4px;
     padding: 10px 16px;
+}
+
+.confirmation-cta {
+    box-sizing: border-box;
+    width: 72%;
+    min-height: 44px;
+    margin-top: 8px;
+    color: #fff;
+    background: var(--accent-color);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px var(--hover-ring);
+}
+
+.confirmation-cta:hover {
+    color: #fff;
+    background: var(--hover-color);
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+html[data-theme='light'] .confirmation-cta,
+html[data-theme='light'] .confirmation-cta:hover {
+    color: #fff;
 }
 
 html[data-theme='light'] .form-links a,

@@ -239,10 +239,16 @@ function signupOrLogin(data) {
     userLogin(data)
         .then((res) => {
             console.log('[API] - USER LOGIN RESPONSE', res);
+            if (res.pending) {
+                pageLoadingOverlay.hidden = true;
+                showPendingConfirmation(data.email);
+                switchTab('login');
+                return;
+            }
             if (res.message) {
                 pageLoadingOverlay.hidden = true;
                 res.success ? popupMessage('success', res.message) : popupMessage('warning', res.message);
-                if (res.message.includes('Pending') || res.message.includes('CodeCanyon')) {
+                if (res.message.includes('CodeCanyon')) {
                     switchTab('login');
                 }
             } else {
@@ -257,6 +263,29 @@ function signupOrLogin(data) {
             console.error('[API] - USER LOGIN ERROR', err);
             popupMessage('error', `⚠️ API USER LOGIN error: ${err.message}`);
         });
+}
+
+function showPendingConfirmation(email) {
+    Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        position: 'top',
+        icon: 'success',
+        title: 'Check your inbox',
+        html: `
+            <p class="pending-email-copy">We sent a confirmation link to <strong>${escapeHtml(email)}</strong>.</p>
+            <p class="pending-email-hint">Open the link to activate your account. If it is not there, check your spam or junk folder.</p>
+        `,
+        confirmButtonText: 'Got it',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    });
+}
+
+function escapeHtml(value) {
+    const element = document.createElement('span');
+    element.textContent = value;
+    return element.innerHTML;
 }
 
 function elementDisplay(elem, display) {
