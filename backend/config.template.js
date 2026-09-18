@@ -105,6 +105,20 @@ module.exports = {
         projects: false,
         //...
     },
+    LEGAL: {
+        policyVersion: process.env.LEGAL_POLICY_VERSION || '2026-09-18',
+        operatorName: process.env.LEGAL_OPERATOR_NAME || 'MiroTalk WEB deployment operator',
+        contactEmail: process.env.LEGAL_CONTACT_EMAIL || 'miroslav.pejic.85@gmail.com',
+        forumUrl: process.env.LEGAL_FORUM_URL || 'https://discord.gg/rgGYfeYW3N',
+        governingLaw:
+            process.env.LEGAL_GOVERNING_LAW ||
+            'the laws applicable in the jurisdiction where the deployment operator is established',
+    },
+    ANALYTICS: {
+        enabled: process.env.UMAMI_ENABLED !== 'false',
+        scriptUrl: process.env.UMAMI_SCRIPT_URL || 'https://stats.mirotalk.com/script.js',
+        websiteId: process.env.UMAMI_WEBSITE_ID || 'fbaf621d-b2da-4b33-a2f2-43f8f0037663',
+    },
     BUTTONS: {
         setRandomRoom: true,
         copyRoom: true,

@@ -821,6 +821,14 @@ components:
                 password:
                     type: string
                     example: 'Test@123'
+                legalConsent:
+                    type: boolean
+                    description: Must be true when creating a new account; not required for an existing-user login.
+                    example: true
+                legalVersion:
+                    type: string
+                    description: Current Terms of Service and Privacy Policy version, required for account creation.
+                    example: '2026-09-18'
         UserIsAuthReq:
             type: object
             properties:

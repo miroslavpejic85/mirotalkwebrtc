@@ -69,11 +69,24 @@ const passwordForgot = path.join(__dirname, '../', 'frontend/html/password-forgo
 const passwordReset = path.join(__dirname, '../', 'frontend/html/password-reset.html');
 const confirmation = path.join(__dirname, '../', 'frontend/html/confirmation.html');
 const pricing = path.join(__dirname, '../', 'frontend/html/pricing.html');
+const privacy = path.join(__dirname, '../', 'frontend/html/privacy.html');
+const terms = path.join(__dirname, '../', 'frontend/html/terms.html');
 const bookingPage = path.join(__dirname, '../', 'frontend/html/booking.html');
 const eventPage = path.join(__dirname, '../', 'frontend/html/event.html');
 
 // File to cache and inject custom HTML data like OG tags and any other elements.
-const filesPath = [login, client, passwordForgot, passwordReset, confirmation, pricing, bookingPage, eventPage];
+const filesPath = [
+    login,
+    client,
+    passwordForgot,
+    passwordReset,
+    confirmation,
+    pricing,
+    privacy,
+    terms,
+    bookingPage,
+    eventPage,
+];
 const htmlInjector = new HtmlInjector(filesPath, config || null);
 
 mongoose.set('strictQuery', true);
@@ -173,6 +186,14 @@ mongoose
             htmlInjector.injectHtml(pricing, res);
         });
 
+        app.get('/privacy', (req, res) => {
+            htmlInjector.injectHtml(privacy, res);
+        });
+
+        app.get('/terms', (req, res) => {
+            htmlInjector.injectHtml(terms, res);
+        });
+
         app.get('/password-forgot', (req, res) => {
             htmlInjector.injectHtml(passwordForgot, res);
         });
@@ -206,6 +227,10 @@ mongoose
             log.debug('Send app-config', config.App);
             res.status(200).json({
                 app: config.App,
+                analytics: config.ANALYTICS,
+                legal: {
+                    policyVersion: config.LEGAL.policyVersion,
+                },
                 saas: {
                     enabled: config?.SAAS?.enabled,
                 },

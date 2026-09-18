@@ -44,7 +44,14 @@ function isDemo(email, username, password) {
 function tokenEncode(token) {
     if (!token) return '';
 
-    const { username = 'username', email = 'email', password = 'password' } = token;
+    const {
+        username = 'username',
+        email = 'email',
+        password = 'password',
+        termsAcceptedAt,
+        termsVersion,
+        privacyPolicyVersion,
+    } = token;
 
     // Constructing payload
     const payload = {
@@ -52,6 +59,9 @@ function tokenEncode(token) {
         email: String(email),
         password: String(password),
     };
+    if (termsAcceptedAt) payload.termsAcceptedAt = new Date(termsAcceptedAt).toISOString();
+    if (termsVersion) payload.termsVersion = String(termsVersion);
+    if (privacyPolicyVersion) payload.privacyPolicyVersion = String(privacyPolicyVersion);
 
     // Encrypt payload using AES encryption
     const payloadString = JSON.stringify(payload);

@@ -304,22 +304,6 @@ button:active {
     text-decoration: underline;
 }
 
-#supportBtn {
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 24px 5vw;
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 12px;
-    font-weight: 500;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-#supportBtn:hover {
-    color: #fff;
-}
-
 /*--------------------------------------------------------------
 # Single Form Pages (forgot / reset password)
 --------------------------------------------------------------*/
@@ -371,29 +355,44 @@ button:active {
 }
 
 /*--------------------------------------------------------------
-# Terms & Conditions (SweetAlert)
+# Signup consent
 --------------------------------------------------------------*/
 
-.terms-conditions {
-    text-align: left;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    font-family: var(--font-sans);
-    max-height: 400px;
-    overflow-y: auto;
+.legal-consent {
+    width: 72%;
+    margin: 2px auto 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    box-sizing: border-box;
+    color: var(--text-light);
+    font-size: 12px;
+    line-height: 1.55;
+    cursor: pointer;
 }
 
-.terms-conditions h3 {
-    margin-bottom: 15px;
-    color: var(--hover-color);
-    font-weight: 600;
+.legal-consent input {
+    width: 16px;
+    height: 16px;
+    margin: 2px 0 0;
+    flex: 0 0 16px;
+    accent-color: var(--accent-color);
+    cursor: pointer;
 }
 
-.terms-conditions p {
-    margin-bottom: 15px;
-    line-height: 1.6;
+.legal-consent span {
+    min-width: 0;
+    flex: 1;
+}
+
+.legal-consent a {
     color: var(--text-color);
+    font-weight: 600;
+    text-underline-offset: 2px;
+}
+
+.legal-consent a:hover {
+    color: var(--hover-color);
 }
 
 /*--------------------------------------------------------------
@@ -1073,6 +1072,42 @@ body.home > .swal2-container {
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.landing-footer-inner {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 24px 5vw;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.landing-footer-inner p {
+    margin: 0;
+}
+
+.landing-footer-inner nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 18px;
+}
+
+.landing-footer-inner a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.landing-footer-inner a:hover {
+    color: #fff;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
 /* Light theme shares the dashboard preference stored in localStorage.mode. */
 html[data-theme='light'] {
     color-scheme: light;
@@ -1177,7 +1212,7 @@ html[data-theme='light'] .input-group input:-webkit-autofill:active {
 }
 
 html[data-theme='light'] #forgotPasswordLink,
-html[data-theme='light'] #supportBtn {
+html[data-theme='light'] .landing-footer-inner {
     color: #697386;
 }
 
@@ -1300,5 +1335,15 @@ html[data-theme='light'] .workflow-band {
     .closing-cta {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .landing-footer-inner {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .landing-footer-inner nav {
+        justify-content: flex-start;
+        gap: 12px 18px;
     }
 }

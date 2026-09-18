@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>MiroTalk WEB - Privacy Policy</title>
+        <link rel="apple-touch-icon" href="../Images/apple-touch-icon.png" />
+        <link rel="icon" type="image/x-icon" href="../Images/favicon.ico" />
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="color-scheme" content="dark light" />
+        <meta name="description" content="Privacy Policy for MiroTalk WEB" />
+        <script src="../js/theme.js"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
+        />
+        <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
+        <link rel="stylesheet" href="../css/home.css" />
+        <link rel="stylesheet" href="../css/common.css" />
+        <link rel="stylesheet" href="../css/legal.css" />
+    </head>
+    <body class="legal-page">
+        <header class="landing-nav">
+            <a class="brand" href="/">
+                <img src="../Images/logo.png" alt="MiroTalk logo" />
+                <span>MiroTalk WEB</span>
+            </a>
+            <nav class="nav-links">
+                <a href="/terms">Terms of Service</a>
+                <button type="button" class="nav-theme" data-theme-toggle aria-label="Switch to light mode">
+                    <i class="uil uil-sun"></i>
+                </button>
+            </nav>
+        </header>
+
+        <main class="legal-main">
+            <header class="legal-header">
+                <span class="legal-eyebrow">Legal</span>
+                <h1>Privacy Policy</h1>
+                <p>Version {{LEGAL_POLICY_VERSION}}</p>
+            </header>
+
+            <section class="legal-section">
+                <h2>Who operates this service</h2>
+                <p>
+                    MiroTalk WEB is self-hostable software. The person or organization operating this deployment is
+                    responsible for the personal data it collects and determines how that data is handled. This
+                    deployment identifies its operator as <strong>{{LEGAL_OPERATOR_NAME}}</strong>. Privacy questions
+                    and requests may be sent to <a href="mailto:{{LEGAL_CONTACT_EMAIL}}">{{LEGAL_CONTACT_EMAIL}}</a>.
+                </p>
+            </section>
+
+            <section class="legal-section">
+                <h2>Data we process</h2>
+                <p>Depending on the features enabled by the operator, this service may process:</p>
+                <ul>
+                    <li>Account information such as your username, email address, and hashed password.</li>
+                    <li>Meeting rooms, events, availability, invitations, reminders, and scheduling preferences.</li>
+                    <li>Guest names, email addresses, notes, phone numbers, and invitation messages you provide.</li>
+                    <li>
+                        Identity-provider profile details when OpenID Connect is enabled, including name, email, and
+                        profile image.
+                    </li>
+                    <li>
+                        Technical data such as IP address, browser information, request and error logs, authentication
+                        cookies, and browser storage used for session and interface preferences.
+                    </li>
+                    <li>Billing identifiers and subscription status when paid plans are enabled.</li>
+                </ul>
+            </section>
+
+            <section class="legal-section">
+                <h2>Calls and messages</h2>
+                <p>
+                    The MiroTalk WEB scheduling service does not intentionally store the video, audio, or in-call chat
+                    content of live meetings. Meetings open in separately configured P2P, SFU, C2C, broadcast, or other
+                    communication services. Those services process media and may offer recording, messaging, or storage
+                    features under their own configuration and privacy terms. Obtain any required participant consent
+                    before recording.
+                </p>
+            </section>
+
+            <section class="legal-section">
+                <h2>How data is used</h2>
+                <p>
+                    Data is used to provide and secure accounts, schedule and run meetings, send requested
+                    notifications, process subscriptions, prevent abuse, troubleshoot errors, and comply with legal
+                    obligations.
+                </p>
+            </section>
+
+            <section class="legal-section">
+                <h2>Legal bases</h2>
+                <p>
+                    Where data-protection law requires a legal basis, the operator processes data as needed to provide
+                    the service and perform its agreement with you, comply with legal obligations, protect the service
+                    and its users, and pursue legitimate interests such as security and service improvement. Consent is
+                    used where required and may be withdrawn without affecting earlier lawful processing.
+                </p>
+            </section>
+
+            <section class="legal-section">
+                <h2>Analytics</h2>
+                <p>
+                    When enabled by the operator, this service uses Umami Analytics through the configured analytics
+                    server at {{ANALYTICS_ORIGIN}}. Umami processes usage information such as visited pages, referral
+                    source, browser, device type, approximate location, and selected interface events. This information
+                    is used to understand and improve the service. Umami does not use advertising cookies. The operator
+                    does not sell analytics data or share it for targeted advertising. An operator must disable
+                    analytics or obtain consent before loading it where applicable law requires prior consent.
+                </p>
+            </section>
+
+            <section class="legal-section">
+                <h2>Service providers</h2>
+                <p>
+                    The operator may configure third-party services for email, SMS, identity, payments, error reporting,
+                    hosting, or network connectivity. Those providers process data under their own terms and the
+                    operator's configuration. Payment card details are handled by Stripe when Stripe billing is enabled
+                    and are not entered into MiroTalk WEB.
+                </p>
+                <p>
+                    Providers may process data in countries other than your own. The operator is responsible for using
+                    appropriate contractual or other safeguards when applicable law restricts international transfers.
+                </p>
+            </section>
+
+            <section class="legal-section">
+                <h2>Storage, retention, and security</h2>
+                <p>
+                    The service does not impose one universal retention period. The deployment operator controls
+                    retention for account data, scheduling data, delivery history, logs, and backups according to its
+                    operational and legal requirements. Deleting an account removes the active account, rooms, events,
+                    bookings, booking profile, invitation queue/history, and configured Stripe customer and subscription
+                    from this deployment and requests cleanup from configured billing services. Limited information may
+                    remain temporarily in backups, logs, or third-party provider records where required for security,
+                    billing, fraud prevention, or legal compliance. No internet service can guarantee absolute security.
+                </p>
+            </section>
+
+            <section class="legal-section">
+                <h2>Your choices</h2>
+                <p>
+                    You may ask the deployment operator to access, correct, export, or delete your personal data,
+                    restrict or object to processing, or withdraw consent, subject to applicable law. You may also have
+                    the right to complain to your local data-protection authority. Registered users may delete their
+                    account from Account settings. You can manage browser cookies and storage, although disabling them
+                    may prevent authentication or preferences from working. Contact
+                    <a href="mailto:{{LEGAL_CONTACT_EMAIL}}">{{LEGAL_CONTACT_EMAIL}}</a> to exercise a privacy right or
+                    ask about retention.
+                </p>
+            </section>
+
+            <section class="legal-section">
+                <h2>Children's privacy</h2>
+                <p>
+                    This service is not directed to children who cannot lawfully consent to its use. A parent, guardian,
+                    school, or other responsible organization must provide any authorization required by applicable law
+                    before a minor uses the service. Contact the operator if you believe a child provided personal data
+                    without the required authorization.
+                </p>
+            </section>
+
+            <section class="legal-section">
+                <h2>Policy updates</h2>
+                <p>
+                    This policy may change as the service or legal requirements evolve. Updates will be posted on this
+                    page and may also be announced through the
+                    <a href="{{LEGAL_FORUM_URL}}" target="_blank" rel="noopener">official community forum</a>. The
+                    version above will be revised when this policy changes.
+                </p>
+            </section>
+
+            <div class="legal-actions">
+                <a href="/">Return home</a>
+                <a href="/terms">Read Terms of Service</a>
+            </div>
+        </main>
+    </body>
+</html>

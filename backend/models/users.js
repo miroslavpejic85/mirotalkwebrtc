@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema({
     stripeSubscriptionId: { type: String, default: undefined },
     subscriptionExpiresAt: { type: Date, default: null },
     subscriptionCancelAtPeriodEnd: { type: Boolean, default: false },
+    termsAcceptedAt: { type: Date, default: null },
+    termsVersion: { type: String, default: null },
+    privacyPolicyVersion: { type: String, default: null },
     createdAt: { type: Date, default: new Date().toISOString() },
     updatedAt: { type: Date, default: new Date().toISOString() },
 });

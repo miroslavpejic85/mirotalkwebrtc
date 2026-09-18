@@ -2,6 +2,10 @@
 
 const User = require('../models/users');
 const Room = require('../models/room');
+const Booking = require('../models/booking');
+const BookingProfile = require('../models/bookingProfile');
+const Event = require('../models/event');
+const EmailInvitation = require('../models/emailInvitation');
 const nodemailer = require('../lib/nodemailer');
 const stripeLib = require('../lib/stripe');
 const utils = require('../common/utils');
@@ -12,6 +16,7 @@ const { setAuthCookie } = require('../common/authCookie');
 const log = new logs('Controllers-users');
 
 const USER_REGISTRATION_MODE = process.env.USER_REGISTRATION_MODE == 'true';
+const LEGAL_POLICY_VERSION = process.env.LEGAL_POLICY_VERSION || '2026-09-18';
 
 const USER_DEMO = {
     enabled: process.env.USER_DEMO_MODE == 'true',
@@ -20,13 +25,26 @@ const USER_DEMO = {
     email: process.env.USER_DEMO_EMAIL,
 };
 
+function getLegalConsent(body) {
+    if (body.legalConsent !== true || body.legalVersion !== LEGAL_POLICY_VERSION) return null;
+    return {
+        termsAcceptedAt: new Date(),
+        termsVersion: LEGAL_POLICY_VERSION,
+        privacyPolicyVersion: LEGAL_POLICY_VERSION,
+    };
+}
+
 async function userCreate(req, res) {
     try {
         const { email, username, password } = req.body;
+        const legalConsent = getLegalConsent(req.body);
+        if (!legalConsent) {
+            return res.status(400).json({ message: 'Current Terms of Service and Privacy Policy must be accepted' });
+        }
         const userFindOne = await User.findOne({ email: email, username: username });
         log.debug('No user found in the storage');
         if (Object.is(userFindOne, null) || Object.keys(userFindOne).length === 0) {
-            const payload = { username: username, email: email, password: password };
+            const payload = { username: username, email: email, password: password, ...legalConsent };
             const token = utils.tokenEncode(payload);
 
             if (nodemailer.EMAIL_VERIFICATION) {
@@ -48,6 +66,7 @@ async function userCreate(req, res) {
                     role: isUserAdmin ? 'admin' : 'guest',
                     token: token,
                     active: true,
+                    ...legalConsent,
                     createdAt: new Date().toISOString(),
                 });
                 const userSaveData = await userData.save();
@@ -159,10 +178,22 @@ async function userLogin(req, res) {
                     .status(201)
                     .json({ message: '⚠️ Invalid credentials. <br/> Please check your email, username and password.' });
             }
+            const legalConsent = isUserDemo ? {} : getLegalConsent(req.body);
+            if (!isUserDemo && !legalConsent) {
+                return res
+                    .status(400)
+                    .json({ message: 'Current Terms of Service and Privacy Policy must be accepted' });
+            }
             log.debug(`User demo: ${isUserDemo}`);
             if (!isUserDemo && nodemailer.EMAIL_VERIFICATION) {
+                const confirmationToken = utils.tokenEncode({
+                    username,
+                    email,
+                    password,
+                    ...legalConsent,
+                });
                 log.debug('New user, send email confirmation');
-                const confirmationCode = `?token=${token}`;
+                const confirmationCode = `?token=${confirmationToken}`;
                 nodemailer.sendConfirmationEmail(username, email, confirmationCode);
                 log.debug('User login, sent email confirmation');
                 return res.status(201).send({
@@ -179,6 +210,7 @@ async function userLogin(req, res) {
                     role: isUserAdmin ? 'admin' : 'guest',
                     token: token,
                     active: true,
+                    ...legalConsent,
                     createdAt: new Date().toISOString(),
                 });
                 const userSaveData = await userData.save();
@@ -336,6 +368,9 @@ async function userConfirmation(req, res) {
                 role: isUserAdmin ? 'admin' : 'guest',
                 token: token,
                 active: true,
+                termsAcceptedAt: decoded.termsAcceptedAt || null,
+                termsVersion: decoded.termsVersion || null,
+                privacyPolicyVersion: decoded.privacyPolicyVersion || null,
                 createdAt: new Date().toISOString(),
             });
             const userSaveData = await userData.save();
@@ -475,30 +510,38 @@ async function userUpdate(req, res) {
 async function userDelete(req, res) {
     try {
         const id = req.params.id;
+        const dataUser = await User.findById(id);
+        if (!dataUser) return res.status(404).json({ message: 'User not found' });
 
         const isAdmin = await utils.isAdmin(req.user.email, req.user.username, req.user.password);
 
-        if (!isAdmin) {
-            const targetUser = await User.findById(id).select('email').lean();
-            if (!targetUser || targetUser.email !== req.user.email) {
-                return res.status(403).json({ message: 'You can only delete your own account' });
-            }
+        if (!isAdmin && dataUser.email !== req.user.email) {
+            return res.status(403).json({ message: 'You can only delete your own account' });
         }
 
-        const dataUser = await User.findByIdAndDelete(id);
-        if (dataUser && dataUser._id == id) {
-            // Cancel any active Stripe subscription and remove the customer so the
-            // user is not billed after their account is gone (no-op when Stripe is disabled).
-            await stripeLib.cleanupUserBilling(dataUser);
-            const deleteRooms = await Room.deleteMany({ userId: dataUser._id });
-            log.debug(
-                `Going to delete User with id ${dataUser._id} and all associated rooms (${deleteRooms.deletedCount})`
-            );
-            return res.json({
-                message: `The User with id ${dataUser._id} and all associated rooms (${deleteRooms.deletedCount}) has been deleted`,
-            });
-        }
-        return res.json({ message: `The User with id ${dataUser._id} has been deleted (no associated rooms found)` });
+        const userId = String(dataUser._id);
+        const [rooms, bookings, bookingProfiles, events, emailInvitations] = await Promise.all([
+            Room.deleteMany({ userId }),
+            Booking.deleteMany({ userId }),
+            BookingProfile.deleteMany({ userId }),
+            Event.deleteMany({ userId }),
+            EmailInvitation.deleteMany({ userId }),
+        ]);
+        await stripeLib.cleanupUserBilling(dataUser);
+        await User.findByIdAndDelete(id);
+
+        const deleted = {
+            rooms: rooms.deletedCount,
+            bookings: bookings.deletedCount,
+            bookingProfiles: bookingProfiles.deletedCount,
+            events: events.deletedCount,
+            emailInvitations: emailInvitations.deletedCount,
+        };
+        log.debug(`Deleted user ${userId} and associated data`, deleted);
+        return res.json({
+            message: `The user with id ${userId} and all associated data has been deleted`,
+            deleted,
+        });
     } catch (error) {
         log.error('deleteUser', error);
         res.status(400).json({ message: error.message });

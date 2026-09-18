@@ -4,6 +4,23 @@ const logs = require('../common/logs');
 
 const log = new logs('HtmlInjector');
 
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
+
+function getUrlOrigin(value) {
+    try {
+        return new URL(value).origin;
+    } catch {
+        return '';
+    }
+}
+
 class HtmlInjector {
     constructor(filesPath, config) {
         this.filesPath = filesPath; // Array of file paths to cache
@@ -17,6 +34,8 @@ class HtmlInjector {
 
     // Function to get dynamic data for injection (e.g., OG data, title, etc.)
     getInjectData() {
+        const legal = this.config?.LEGAL || {};
+        const analytics = this.config?.ANALYTICS || {};
         return {
             OG_TYPE: this.config?.OG?.type || 'app-webrtc',
             OG_SITE_NAME: this.config?.OG?.siteName || 'MiroTalk WEB',
@@ -26,7 +45,15 @@ class HtmlInjector {
                 'Build your own video SaaS with MiroTalk WEB, an open-source self-hosted WebRTC platform for user accounts, meeting scheduling, dashboards, subscription plans, customer management and branded video communication.',
             OG_IMAGE: this.config?.OG?.image || 'https://webrtc.mirotalk.com/Images/mirotalk-web.png',
             OG_URL: this.config?.OG?.url || 'https://webrtc.mirotalk.com',
-            // Add more data here as needed with fallbacks
+            LEGAL_POLICY_VERSION: escapeHtml(legal.policyVersion || '2026-09-18'),
+            LEGAL_OPERATOR_NAME: escapeHtml(legal.operatorName || 'MiroTalk WEB deployment operator'),
+            LEGAL_CONTACT_EMAIL: escapeHtml(legal.contactEmail || 'miroslav.pejic.85@gmail.com'),
+            LEGAL_FORUM_URL: escapeHtml(legal.forumUrl || 'https://discord.gg/rgGYfeYW3N'),
+            LEGAL_GOVERNING_LAW: escapeHtml(
+                legal.governingLaw ||
+                    'the laws applicable in the jurisdiction where the deployment operator is established'
+            ),
+            ANALYTICS_ORIGIN: escapeHtml(getUrlOrigin(analytics.scriptUrl)),
         };
     }
 
@@ -76,11 +103,10 @@ class HtmlInjector {
         }
 
         try {
-            // Replace placeholders with dynamic data (OG, TITLE, etc.)
-            const modifiedHTML = this.cache[filePath].replace(
-                /{{(OG_[A-Z_]+)}}/g,
-                (_, key) => this.injectData[key] || ''
-            );
+            // Replace configured metadata and legal placeholders.
+            const modifiedHTML = this.cache[filePath].replace(/{{((?:OG|LEGAL|ANALYTICS)_[A-Z_]+)}}/g, (_, key) => {
+                return this.injectData[key] || '';
+            });
 
             if (!res.headersSent) {
                 res.send(modifiedHTML);

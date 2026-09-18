@@ -72,7 +72,6 @@
                 <button id="navSignUpBtn" type="button" class="nav-cta">Start free</button>
             </nav>
         </header>
-
         <div class="landing-grid">
             <!-- Hero / value proposition -->
             <section class="hero">
@@ -212,6 +211,19 @@
                                 <i class="uil uil-eye"></i>
                             </button>
                         </div>
+                        <label class="legal-consent" for="signupConsentInput">
+                            <input
+                                id="signupConsentInput"
+                                type="checkbox"
+                                data-legal-version="{{LEGAL_POLICY_VERSION}}"
+                                required
+                            />
+                            <span>
+                                I agree to the
+                                <a href="/terms" target="_blank" rel="noopener">Terms of Service</a> and
+                                <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.
+                            </span>
+                        </label>
                         <button id="signupBtn"><i class="uil uil-user-plus"></i> Create account</button>
                         <p class="auth-switch-hint">
                             Already have an account?
@@ -267,7 +279,16 @@
         </section>
 
         <footer class="landing-footer">
-            <p id="supportBtn">&copy; 2026 MiroTalk, all rights reserved</p>
+            <div class="landing-footer-inner">
+                <p>&copy; 2026 MiroTalk, all rights reserved</p>
+                <nav aria-label="Legal and support">
+                    <a href="/privacy">Privacy Policy</a>
+                    <a href="/terms">Terms of Service</a>
+                    <a id="supportBtn" href="https://codecanyon.net/user/miroslavpejic85" target="_blank" rel="noopener"
+                        >Support</a
+                    >
+                </nav>
+            </div>
         </footer>
     </body>
 </html>
