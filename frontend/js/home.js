@@ -180,11 +180,7 @@ signupBtn.addEventListener('click', handleSignup);
 function handleLogin(e) {
     e.preventDefault();
     cleanSignUpInput();
-    const validationError = validateInput(loginUsernameInput, loginEmailIdInput, loginPasswordIdInput);
-    if (validationError) {
-        popupMessage('warning', validationError);
-        return false;
-    }
+    if (!validateInputs(loginUsernameInput, loginEmailIdInput, loginPasswordIdInput)) return false;
     const data = gatherInputData(loginUsernameInput, loginEmailIdInput, loginPasswordIdInput);
     signupOrLogin(data);
 }
@@ -192,18 +188,16 @@ function handleLogin(e) {
 function handleSignup(e) {
     e.preventDefault();
     cleanLoginInput();
-    const validationError = validateInput(
+    const fieldsValid = validateInputs(
         signupUsernameInput,
         signupEmailIdInput,
         signupPasswordIdInput,
         signupRepeatPasswordIdInput
     );
-    if (validationError) {
-        popupMessage('warning', validationError);
-        return false;
-    }
-    if (!signupConsentInput.checked) {
-        popupMessage('warning', 'Please accept the Terms of Service and acknowledge the Privacy Policy.');
+    const passwordsMatch = validateMatchingPasswords();
+    const consentValid = validateConsent();
+    if (!fieldsValid || !passwordsMatch || !consentValid) {
+        signupPanel.querySelector('[aria-invalid="true"]')?.focus();
         return false;
     }
     const data = gatherInputData(signupUsernameInput, signupEmailIdInput, signupPasswordIdInput);
@@ -220,17 +214,101 @@ function gatherInputData(usernameInput, emailInput, passwordInput) {
     };
 }
 
-function validateInput(...inputs) {
+function validateInputs(...inputs) {
+    let isValid = true;
     for (const input of inputs) {
         if (input.value.trim() === '') {
-            return `⚠️ ${input.name} field empty!`;
+            setFieldError(input, `${input.name} is required.`);
+            isValid = false;
+        } else if (input.type === 'email' && !input.validity.valid) {
+            setFieldError(input, 'Enter a valid email address.');
+            isValid = false;
+        } else {
+            clearFieldError(input);
         }
     }
-    if (signupRepeatPasswordIdInput && signupPasswordIdInput.value !== signupRepeatPasswordIdInput.value) {
-        return '⚠️ Repeat password field does not match!';
-    }
-    return null;
+    if (!isValid) inputs.find((input) => input.getAttribute('aria-invalid') === 'true')?.focus();
+    return isValid;
 }
+
+function validateMatchingPasswords() {
+    if (!signupPasswordIdInput.value || !signupRepeatPasswordIdInput.value) return true;
+    if (signupPasswordIdInput.value !== signupRepeatPasswordIdInput.value) {
+        setFieldError(signupRepeatPasswordIdInput, 'Passwords do not match.');
+        return false;
+    }
+    clearFieldError(signupRepeatPasswordIdInput);
+    return true;
+}
+
+function validateConsent() {
+    const errorId = 'signupConsentInputError';
+    let error = document.getElementById(errorId);
+    signupConsentInput.setAttribute('aria-invalid', String(!signupConsentInput.checked));
+    signupConsentInput.closest('.legal-consent')?.classList.toggle('invalid', !signupConsentInput.checked);
+
+    if (signupConsentInput.checked) {
+        clearConsentError();
+        return true;
+    }
+
+    if (!error) {
+        error = document.createElement('p');
+        error.id = errorId;
+        error.className = 'field-error consent-error';
+        signupConsentInput.closest('.legal-consent')?.insertAdjacentElement('afterend', error);
+    }
+    error.textContent = 'Accept the Terms of Service and Privacy Policy to continue.';
+    signupConsentInput.setAttribute('aria-describedby', errorId);
+    return false;
+}
+
+function setFieldError(input, message) {
+    const errorId = `${input.id}Error`;
+    let error = document.getElementById(errorId);
+    input.setAttribute('aria-invalid', 'true');
+    input.closest('.input-group')?.classList.add('invalid');
+
+    if (!error) {
+        error = document.createElement('p');
+        error.id = errorId;
+        error.className = 'field-error';
+        input.closest('.input-group')?.insertAdjacentElement('afterend', error);
+    }
+    error.textContent = message;
+    input.setAttribute('aria-describedby', errorId);
+}
+
+function clearFieldError(input) {
+    document.getElementById(`${input.id}Error`)?.remove();
+    input.removeAttribute('aria-invalid');
+    input.removeAttribute('aria-describedby');
+    input.closest('.input-group')?.classList.remove('invalid');
+}
+
+function clearConsentError() {
+    document.getElementById('signupConsentInputError')?.remove();
+    signupConsentInput.removeAttribute('aria-invalid');
+    signupConsentInput.removeAttribute('aria-describedby');
+    signupConsentInput.closest('.legal-consent')?.classList.remove('invalid');
+}
+
+[
+    loginUsernameInput,
+    loginEmailIdInput,
+    loginPasswordIdInput,
+    signupUsernameInput,
+    signupEmailIdInput,
+    signupPasswordIdInput,
+    signupRepeatPasswordIdInput,
+].forEach((input) => input.addEventListener('input', () => clearFieldError(input)));
+
+signupPasswordIdInput.addEventListener('input', () => {
+    if (signupPasswordIdInput.value === signupRepeatPasswordIdInput.value) {
+        clearFieldError(signupRepeatPasswordIdInput);
+    }
+});
+signupConsentInput.addEventListener('change', validateConsent);
 
 function signupOrLogin(data) {
     window.localStorage.name = data.username;
@@ -297,6 +375,7 @@ function cleanLoginInput() {
     loginUsernameInput.value = '';
     loginEmailIdInput.value = '';
     loginPasswordIdInput.value = '';
+    [loginUsernameInput, loginEmailIdInput, loginPasswordIdInput].forEach(clearFieldError);
 }
 
 function cleanSignUpInput() {
@@ -304,6 +383,10 @@ function cleanSignUpInput() {
     signupEmailIdInput.value = '';
     signupPasswordIdInput.value = '';
     signupRepeatPasswordIdInput.value = '';
+    [signupUsernameInput, signupEmailIdInput, signupPasswordIdInput, signupRepeatPasswordIdInput].forEach(
+        clearFieldError
+    );
+    clearConsentError();
 }
 
 function loadAppConfig(cfg) {

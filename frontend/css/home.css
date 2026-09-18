@@ -12,6 +12,8 @@
     --text-muted: #888;
     --text-placeholder: #999;
     --text-light: #bbb;
+    --error-color: #ff6b6b;
+    --error-ring: rgba(255, 107, 107, 0.18);
 }
 
 /*--------------------------------------------------------------
@@ -149,6 +151,24 @@ body {
 .input-group:focus-within {
     border-color: var(--hover-color);
     box-shadow: 0 0 0 3px var(--hover-bg-strong);
+}
+
+.input-group.invalid,
+.input-group.invalid:focus-within {
+    border-color: var(--error-color);
+    box-shadow: 0 0 0 3px var(--error-ring);
+}
+
+.input-group.invalid > i {
+    color: var(--error-color);
+}
+
+.field-error {
+    width: 72%;
+    margin: -4px auto 8px;
+    color: var(--error-color);
+    font-size: 12px;
+    line-height: 1.4;
 }
 
 .input-group > i {
@@ -378,6 +398,15 @@ button:active {
     flex: 0 0 16px;
     accent-color: var(--accent-color);
     cursor: pointer;
+}
+
+.legal-consent.invalid input {
+    outline: 2px solid var(--error-color);
+    outline-offset: 2px;
+}
+
+.consent-error {
+    margin-top: -4px;
 }
 
 .legal-consent span {
