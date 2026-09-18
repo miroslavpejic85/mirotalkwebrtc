@@ -85,6 +85,7 @@ form.addEventListener('submit', async (e) => {
             setFormStatus('success', 'Your password has been reset. You can now sign in.');
             form.reset();
             resetFields.hidden = true;
+            form.classList.add('reset-complete');
             document.getElementById('signInLink').focus();
         }
     } catch (err) {

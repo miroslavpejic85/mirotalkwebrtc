@@ -209,6 +209,15 @@ button:disabled {
     text-decoration: underline;
 }
 
+.reset-complete #signInLink {
+    color: var(--hover-color);
+    font-weight: 600;
+}
+
+.reset-complete #signInLink:hover {
+    color: #fff;
+}
+
 .primary-link {
     margin-top: 4px;
     padding: 10px 16px;
@@ -242,6 +251,11 @@ html[data-theme='light'] .confirmation-cta:hover {
 html[data-theme='light'] .form-links a,
 html[data-theme='light'] .primary-link {
     color: var(--text-light);
+}
+
+html[data-theme='light'] .reset-complete #signInLink,
+html[data-theme='light'] .reset-complete #signInLink:hover {
+    color: var(--accent-color);
 }
 
 html[data-theme='light'] .auth-page {
