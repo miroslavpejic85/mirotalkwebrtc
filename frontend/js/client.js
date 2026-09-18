@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.11
+ * @version 1.6.12
  */
 
 const userAgent = navigator.userAgent;
@@ -1330,6 +1330,9 @@ function loadUsers() {
                 toggleUsersList(true);
                 initUsersToolTips(users);
                 initCustomDropdowns(document.getElementById('usersTable'));
+                document.querySelectorAll('#usersTable input[id^="uplan_"]').forEach((input) => {
+                    input.addEventListener('change', () => updateUserPlanExpiry(input.id.replace('uplan_', '')));
+                });
             } else {
                 document.getElementById('usersCountAll').textContent = '(0)';
                 document.getElementById('usersCountToday').textContent = '(0)';
@@ -1369,6 +1372,26 @@ function getUserRow(u) {
     ];
     const allowDropdownOptions = services.map((s) => ({ value: s, label: s }));
     const selectedAllow = userAllow[0] || 'ALL';
+    const planOptions = [
+        { value: 'none', label: 'None' },
+        { value: 'monthly', label: 'Monthly' },
+        { value: 'yearly', label: 'Annual' },
+        { value: 'lifetime', label: 'Lifetime' },
+    ];
+    const selectedPlan = ['monthly', 'yearly', 'lifetime'].includes(u.subscriptionType) ? u.subscriptionType : 'none';
+    const subscriptionExpires = u.subscriptionExpiresAt
+        ? new Date(u.subscriptionExpiresAt).toISOString().split('T')[0]
+        : '';
+    const plan = getUserPlan(u);
+    const planEditor = u.subscriptionManagedByStripe
+        ? `<div class="user-plan-editor" data-user-plan="${selectedPlan}">
+            <span class="user-plan-badge ${plan.className}" title="Managed by Stripe">${plan.label}</span>
+            <span class="user-plan-managed"><i class="uil uil-lock"></i> Stripe managed</span>
+        </div>`
+        : `<div class="user-plan-editor" data-user-plan="${selectedPlan}">
+            ${buildCustomDropdownHTML('uplan_' + u._id, planOptions, selectedPlan, false)}
+            <input id="uexpires_${u._id}" class="user-plan-expiry" type="date" value="${subscriptionExpires}" aria-label="Subscription expiry" ${['monthly', 'yearly'].includes(selectedPlan) ? '' : 'hidden'} />
+        </div>`;
 
     const userInlineIcons = [];
     userInlineIcons.push(
@@ -1382,8 +1405,6 @@ function getUserRow(u) {
 
     const actionsHtml = `<span class="action-group">${userInlineIcons.join('')}</span>`;
 
-    const plan = getUserPlan(u);
-
     return [
         `<input id="uname_${u._id}" type="text" value="${escapeHtml(u.username)}" readonly />`,
         `<input id="uemail_${u._id}" type="email" value="${escapeHtml(u.email)}" readonly />`,
@@ -1394,7 +1415,7 @@ function getUserRow(u) {
             <input id="uactive_${u._id}" type="checkbox" ${activeChecked} ${selfDisabled} onchange="this.parentElement.className='user-active-badge '+(this.checked?'active':'inactive');this.parentElement.querySelector('span').textContent=this.checked?'Active':'Inactive'" />
             <span>${u.active ? 'Active' : 'Inactive'}</span>
         </label>`,
-        `<span class="user-plan-badge ${plan.className}">${plan.label}</span>`,
+        planEditor,
         `<span data-date="${createdISO}">${createdDate}</span>`,
         actionsHtml,
     ];
@@ -1416,6 +1437,23 @@ function getUserPlan(u) {
     return { label: 'None', className: 'none' };
 }
 
+function updateUserPlanExpiry(id) {
+    const plan = document.getElementById(`uplan_${id}`).value;
+    const expiry = document.getElementById(`uexpires_${id}`);
+    expiry.hidden = !['monthly', 'yearly'].includes(plan);
+}
+
+function markUserRowDirty(event) {
+    const field = event.target.closest('#usersTableBody input');
+    if (!field || field.readOnly || field.disabled) return;
+    const row = field.closest('tr');
+    if (!row || !row.id) return;
+    document.getElementById(`usave_${row.id.replace('user_', '')}`)?.classList.add('has-unsaved-changes');
+}
+
+document.getElementById('usersTableBody').addEventListener('input', markUserRowDirty);
+document.getElementById('usersTableBody').addEventListener('change', markUserRowDirty);
+
 function escapeHtml(str) {
     if (!str) return '';
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -1429,6 +1467,7 @@ function saveUser(id) {
     const role = document.getElementById(`urole_${id}`).value;
     const roomsRaw = document.getElementById(`urooms_${id}`).value.trim();
     const active = document.getElementById(`uactive_${id}`).checked;
+    const subscriptionTypeInput = document.getElementById(`uplan_${id}`);
 
     const allow = [document.getElementById(`uallow_${id}`).value];
     const allowedRooms = roomsRaw
@@ -1438,8 +1477,23 @@ function saveUser(id) {
 
     const data = { role, allow, allowedRooms, active };
 
+    if (subscriptionTypeInput) {
+        const subscriptionType = subscriptionTypeInput.value;
+        const subscriptionExpiry = document.getElementById(`uexpires_${id}`).value;
+        const isRecurringPlan = ['monthly', 'yearly'].includes(subscriptionType);
+        if (isRecurringPlan && (!subscriptionExpiry || new Date(`${subscriptionExpiry}T23:59:59.999Z`) <= new Date())) {
+            popupMessage('warning', 'Select a future expiry date for recurring plans');
+            return;
+        }
+
+        data.subscriptionType = subscriptionType === 'none' ? null : subscriptionType;
+        data.subscriptionStatus = subscriptionType === 'none' ? null : 'active';
+        data.subscriptionExpiresAt = isRecurringPlan ? `${subscriptionExpiry}T23:59:59.999Z` : null;
+    }
+
     function doSave() {
         const saveBtn = document.getElementById(`usave_${id}`);
+        let saved = false;
         if (saveBtn) btnLoading(saveBtn);
 
         userUpdate(id, data)
@@ -1449,6 +1503,7 @@ function saveUser(id) {
                     popupMessage('warning', res.message);
                 } else {
                     popupMessage('toast', 'User updated successfully');
+                    saved = true;
                     loadUsers();
                     loadDashboardStats();
                     setTimeout(() => {
@@ -1461,7 +1516,10 @@ function saveUser(id) {
                 popupMessage('error', `Failed to update user: ${err.message}`);
             })
             .finally(() => {
-                if (saveBtn) btnReset(saveBtn);
+                if (saveBtn) {
+                    btnReset(saveBtn);
+                    if (saved) saveBtn.classList.remove('has-unsaved-changes');
+                }
             });
     }
 
@@ -4069,8 +4127,8 @@ if (usersPlanFilterEl) {
             const filterFn = function (settings, data, dataIndex) {
                 if (settings.nTable.id !== 'usersTable') return true;
                 const row = usersDataTable.row(dataIndex).node();
-                const badge = row ? row.querySelector('.user-plan-badge') : null;
-                return !!badge && badge.classList.contains(plan);
+                const planEditor = row ? row.querySelector('[data-user-plan]') : null;
+                return !!planEditor && planEditor.dataset.userPlan === plan;
             };
             filterFn._isUserPlanFilter = true;
             $.fn.dataTable.ext.search.push(filterFn);

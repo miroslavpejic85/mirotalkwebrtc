@@ -1,6 +1,6 @@
 {
     "name": "mirotalkwebrtc",
-    "version": "1.6.11",
+    "version": "1.6.12",
     "description": "MiroTalk WebRTC admin",
     "main": "server.js",
     "scripts": {
@@ -59,6 +59,6 @@
     },
     "devDependencies": {
         "nodemon": "^3.1.14",
-        "prettier": "3.9.7"
+        "prettier": "3.9.8"
     }
 }

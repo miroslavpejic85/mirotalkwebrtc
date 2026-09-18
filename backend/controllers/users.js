@@ -366,11 +366,16 @@ async function userGetAll(req, res) {
     try {
         const users = await User.find()
             .select(
-                '_id email username role allow allowedRooms active subscriptionType subscriptionStatus subscriptionExpiresAt createdAt updatedAt'
+                '_id email username role allow allowedRooms active subscriptionType subscriptionStatus subscriptionExpiresAt stripeCustomerId stripeSubscriptionId createdAt updatedAt'
             )
             .sort({ createdAt: -1 })
             .lean();
-        res.json(users);
+        res.json(
+            users.map(({ stripeCustomerId, stripeSubscriptionId, ...user }) => ({
+                ...user,
+                subscriptionManagedByStripe: !!(stripeCustomerId || stripeSubscriptionId),
+            }))
+        );
     } catch (error) {
         log.error('getAllUsers', error);
         res.status(400).json({ message: error.message });
@@ -416,7 +421,7 @@ async function userUpdate(req, res) {
         } = req.body;
         const options = { returnDocument: 'after' };
 
-        const user = await User.findById(id).select('email').lean();
+        const user = await User.findById(id).select('email stripeCustomerId stripeSubscriptionId').lean();
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -439,6 +444,13 @@ async function userUpdate(req, res) {
 
         // Administrative fields
         if (isAdmin) {
+            const hasSubscriptionUpdate =
+                subscriptionType !== undefined ||
+                subscriptionStatus !== undefined ||
+                subscriptionExpiresAt !== undefined;
+            if (hasSubscriptionUpdate && (user.stripeCustomerId || user.stripeSubscriptionId)) {
+                return res.status(409).json({ message: 'Stripe-managed subscriptions must be changed through Stripe' });
+            }
             if (email !== undefined) updatedFields.email = email;
             if (role !== undefined) updatedFields.role = role;
             if (active !== undefined) updatedFields.active = active;

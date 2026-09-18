@@ -5210,6 +5210,31 @@ body.dark #usersTable tr:hover {
     font-size: 14px;
 }
 
+#usersTable td .user-plan-editor {
+    display: grid;
+    gap: 4px;
+    min-width: 120px;
+}
+
+#usersTable td .user-plan-expiry {
+    min-width: 120px;
+    font-size: 12px;
+}
+
+#usersTable td .user-plan-expiry[hidden] {
+    display: none;
+}
+
+#usersTable td .user-plan-managed {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-color);
+    font-size: 11px;
+    opacity: 0.65;
+    white-space: nowrap;
+}
+
 .svc-chips {
     display: flex;
     flex-wrap: wrap;
@@ -5275,8 +5300,8 @@ body.dark #usersTable tr:hover {
 }
 
 #usersTable td .user-plan-badge.lifetime {
-    background-color: var(--primary-color);
-    color: #fff;
+    background-color: rgba(212, 160, 23, 0.18);
+    color: #7a5600;
 }
 
 #usersTable td .user-plan-badge.monthly {
@@ -5285,13 +5310,21 @@ body.dark #usersTable tr:hover {
 }
 
 #usersTable td .user-plan-badge.yearly {
-    background-color: var(--success-badge-bg);
-    color: var(--success-color);
+    background-color: var(--accent-bg);
+    color: var(--accent-color);
 }
 
 #usersTable td .user-plan-badge.none {
-    background-color: var(--danger-badge-bg);
-    color: var(--danger-badge-color);
+    background-color: rgba(112, 112, 112, 0.14);
+    color: var(--black-light-color);
+}
+
+body.dark #usersTable td .user-plan-badge.lifetime {
+    color: #ffd166;
+}
+
+body.dark #usersTable td .user-plan-badge.yearly {
+    color: #74b9ff;
 }
 
 /* Multi-select variant of service-cards (used for "Services Allowed" in Add User) */
