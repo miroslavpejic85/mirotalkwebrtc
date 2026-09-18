@@ -537,9 +537,21 @@ async function userGetMe(req, res) {
 
 async function userAdminCreate(req, res) {
     try {
-        const { email, username, password } = req.body;
+        const { email, username, password, allow, allowedRooms, subscriptionType, subscriptionExpiresAt } = req.body;
         if (!email || !username || !password) {
             return res.status(400).json({ message: 'Email, username, and password are required' });
+        }
+        const normalizedSubscriptionType = subscriptionType === 'none' ? null : subscriptionType || null;
+        if (normalizedSubscriptionType && !['monthly', 'yearly', 'lifetime'].includes(normalizedSubscriptionType)) {
+            return res.status(400).json({ message: 'Invalid subscription type' });
+        }
+
+        let normalizedSubscriptionExpiry = null;
+        if (['monthly', 'yearly'].includes(normalizedSubscriptionType)) {
+            normalizedSubscriptionExpiry = new Date(subscriptionExpiresAt);
+            if (Number.isNaN(normalizedSubscriptionExpiry.getTime()) || normalizedSubscriptionExpiry <= new Date()) {
+                return res.status(400).json({ message: 'A future expiry date is required for recurring plans' });
+            }
         }
         const userFindOne = await User.findOne({ email: email, username: username });
         if (!Object.is(userFindOne, null) && Object.keys(userFindOne).length > 0) {
@@ -557,6 +569,11 @@ async function userAdminCreate(req, res) {
             role: isUserAdmin ? 'admin' : 'guest',
             token: token,
             active: true,
+            allow: Array.isArray(allow) && allow.length ? allow : ['ALL'],
+            allowedRooms: Array.isArray(allowedRooms) && allowedRooms.length ? allowedRooms : ['*'],
+            subscriptionType: normalizedSubscriptionType,
+            subscriptionStatus: normalizedSubscriptionType ? 'active' : null,
+            subscriptionExpiresAt: normalizedSubscriptionExpiry,
             createdAt: new Date().toISOString(),
         });
         const userSaveData = await userData.save();

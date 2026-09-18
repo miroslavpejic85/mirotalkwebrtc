@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.13
+ * @version 1.6.14
  */
 
 const userAgent = navigator.userAgent;
@@ -199,6 +199,9 @@ const addUserEmail = document.getElementById('add-user-email');
 const addUserPassword = document.getElementById('add-user-password');
 const addUserGeneratePassword = document.getElementById('add-user-generate-password');
 const addUserRooms = document.getElementById('add-user-rooms');
+const addUserPlan = document.getElementById('add-user-plan');
+const addUserExpiry = document.getElementById('add-user-expiry');
+const addUserExpiryField = document.getElementById('add-user-expiry-field');
 const addUserBtn = document.getElementById('add-user-btn');
 const refreshUsersBtn = document.getElementById('refresh-users-btn');
 
@@ -1091,6 +1094,12 @@ closeAddUserBtn.addEventListener('click', () => {
 addUserBtn.addEventListener('click', () => {
     createUser();
 });
+addUserPlan.addEventListener('change', () => {
+    const requiresExpiry = ['monthly', 'yearly'].includes(addUserPlan.value);
+    addUserExpiryField.classList.toggle('hidden', !requiresExpiry);
+    addUserExpiry.required = requiresExpiry;
+    if (!requiresExpiry) addUserExpiry.value = '';
+});
 refreshUsersBtn.addEventListener('click', () => {
     loadUsers();
     popupMessage('toast', 'Users refreshed');
@@ -1275,10 +1284,17 @@ panelBackdrop.addEventListener('click', () => {
 });
 
 function resetAddUserForm() {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
     addUserUsername.value = '';
     addUserEmail.value = '';
     addUserPassword.value = '';
     addUserRooms.value = '*';
+    addUserPlan.value = 'none';
+    addUserExpiry.value = '';
+    addUserExpiry.min = tomorrow.toISOString().split('T')[0];
+    addUserExpiry.required = false;
+    addUserExpiryField.classList.add('hidden');
     resetAddUserSvcCards();
     [addUserUsername, addUserEmail, addUserPassword].forEach((el) => {
         const field = el.closest('.addrow-field');
@@ -1589,6 +1605,8 @@ function createUser() {
     const email = addUserEmail.value.trim().toLowerCase();
     const password = addUserPassword.value;
     const roomsRaw = addUserRooms.value.trim();
+    const subscriptionType = addUserPlan.value;
+    const subscriptionExpiry = addUserExpiry.value;
 
     if (!username || !email || !password) {
         [addUserUsername, addUserEmail, addUserPassword].forEach((el) => {
@@ -1606,6 +1624,12 @@ function createUser() {
     const allow = getSelectedSvcValues();
     if (allow.length === 0) allow.push('ALL');
 
+    const isRecurringPlan = ['monthly', 'yearly'].includes(subscriptionType);
+    if (isRecurringPlan && (!subscriptionExpiry || new Date(`${subscriptionExpiry}T23:59:59.999Z`) <= new Date())) {
+        popupMessage('warning', 'Select a future expiry date for recurring plans');
+        return;
+    }
+
     const allowedRooms = roomsRaw
         ? roomsRaw
               .split(',')
@@ -1613,7 +1637,15 @@ function createUser() {
               .filter(Boolean)
         : ['*'];
 
-    const data = { username, email, password };
+    const data = {
+        username,
+        email,
+        password,
+        allow,
+        allowedRooms,
+        subscriptionType: subscriptionType === 'none' ? null : subscriptionType,
+        subscriptionExpiresAt: isRecurringPlan ? `${subscriptionExpiry}T23:59:59.999Z` : null,
+    };
 
     btnLoading(addUserBtn, 'Creating...');
 
@@ -1623,20 +1655,10 @@ function createUser() {
             if (res && res.message && !res._id) {
                 popupMessage('info', res.message);
             } else if (res && res._id) {
-                // Update the user with allow and allowedRooms
-                userUpdate(res._id, { username, allow, allowedRooms })
-                    .then(() => {
-                        toggleAddUserPanel();
-                        loadUsers();
-                        loadDashboardStats();
-                        promptSendInvitation(username, email, password);
-                    })
-                    .catch((err) => {
-                        console.error('[API] - USER UPDATE AFTER CREATE ERROR', err);
-                        popupMessage('warning', 'User created but permissions update failed');
-                        toggleAddUserPanel();
-                        loadUsers();
-                    });
+                toggleAddUserPanel();
+                loadUsers();
+                loadDashboardStats();
+                promptSendInvitation(username, email, password);
             }
         })
         .catch((err) => {

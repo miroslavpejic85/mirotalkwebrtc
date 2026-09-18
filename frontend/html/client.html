@@ -1282,6 +1282,32 @@
                         </div>
                     </div>
 
+                    <div class="addrow-section">
+                        <span class="addrow-section-label">Access plan</span>
+                        <div class="addrow-field-row">
+                            <div class="addrow-field addrow-field-half">
+                                <div class="addrow-field-icon"><i class="uil uil-award"></i></div>
+                                <div class="addrow-field-content">
+                                    <label for="add-user-plan" class="addrow-field-label">Subscription</label>
+                                    <select id="add-user-plan" name="subscription">
+                                        <option value="none">None</option>
+                                        <option value="monthly">Monthly</option>
+                                        <option value="yearly">Annual</option>
+                                        <option value="lifetime">Lifetime</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="add-user-expiry-field" class="addrow-field addrow-field-half hidden">
+                                <div class="addrow-field-icon"><i class="uil uil-calendar-alt"></i></div>
+                                <div class="addrow-field-content">
+                                    <label for="add-user-expiry" class="addrow-field-label">Access expires</label>
+                                    <input id="add-user-expiry" type="date" name="subscriptionExpiry" />
+                                </div>
+                            </div>
+                        </div>
+                        <span class="addrow-field-help-text">Assigned plans grant access without Stripe checkout.</span>
+                    </div>
+
                     <div class="addrow-actions">
                         <button id="add-user-btn" class="addrow-submit-btn">
                             <i class="uil uil-user-plus"></i> Create User
