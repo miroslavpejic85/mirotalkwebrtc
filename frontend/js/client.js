@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.12
+ * @version 1.6.13
  */
 
 const userAgent = navigator.userAgent;
@@ -160,6 +160,7 @@ const accountPlan = document.getElementById('account-plan');
 const accountSubStatus = document.getElementById('account-sub-status');
 const accountRenewal = document.getElementById('account-renewal');
 const accountRenewalField = document.getElementById('account-renewal-field');
+const accountUpgradeSubscription = document.getElementById('account-upgrade-subscription');
 const accountManageSubscription = document.getElementById('account-manage-subscription');
 
 const settingsDiv = document.getElementById('settingsDiv');
@@ -1058,6 +1059,9 @@ accountDelete.addEventListener('click', () => {
 });
 accountChangePassword.addEventListener('click', () => {
     changeMyPassword();
+});
+accountUpgradeSubscription.addEventListener('click', () => {
+    openURL('/pricing');
 });
 accountManageSubscription.addEventListener('click', () => {
     manageSubscription();
@@ -3339,7 +3343,11 @@ function loadBilling() {
             accountManageSubscription.innerHTML =
                 res.subscriptionType === 'lifetime'
                     ? '<i class="uil uil-receipt"></i> Billing and invoices'
-                    : '<i class="uil uil-cog"></i> Manage subscription';
+                    : '<i class="uil uil-cog"></i> Manage billing';
+            accountUpgradeSubscription.classList.toggle(
+                'hidden',
+                !res.active || !['monthly', 'yearly'].includes(res.subscriptionType)
+            );
             accountManageSubscription.classList.toggle('hidden', !res.hasBillingAccount);
         })
         .catch((err) => {

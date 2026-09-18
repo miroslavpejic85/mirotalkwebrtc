@@ -195,6 +195,7 @@ async function getBilling(req, res) {
             subscriptionCancelAtPeriodEnd: !!user.subscriptionCancelAtPeriodEnd,
             active: isSubscriptionActive(user),
             hasBillingAccount: !!user.stripeCustomerId,
+            hasRecurringSubscription: !!user.stripeSubscriptionId,
         });
     } catch (error) {
         log.error('getBilling', error);

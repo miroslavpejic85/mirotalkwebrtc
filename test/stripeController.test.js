@@ -385,6 +385,7 @@ test('getBilling reconciles a scheduled cancellation without marking access inac
     await harness.controller.getBilling({ user: { email: 'user@example.com' } }, res);
 
     assert.equal(res.body.active, true);
+    assert.equal(res.body.hasRecurringSubscription, true);
     assert.equal(res.body.subscriptionCancelAtPeriodEnd, true);
     assert.equal(res.body.subscriptionStatus, 'active');
     assert.equal(user.subscriptionCancelAtPeriodEnd, true);
@@ -408,6 +409,7 @@ test('getBilling marks a deleted Stripe subscription as canceled', async (t) => 
     await harness.controller.getBilling({ user: { email: 'user@example.com' } }, res);
 
     assert.equal(res.body.active, false);
+    assert.equal(res.body.hasRecurringSubscription, false);
     assert.equal(res.body.subscriptionStatus, 'canceled');
     assert.equal(res.body.subscriptionCancelAtPeriodEnd, false);
     assert.equal(user.stripeSubscriptionId, undefined);

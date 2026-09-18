@@ -159,8 +159,12 @@ function renderPricingBilling(billing) {
         const alternateButton = isYearly ? monthlyButton : yearlyButton;
         currentButton.textContent = 'Current plan';
         currentButton.disabled = true;
-        alternateButton.textContent = isYearly ? 'Monthly unavailable' : 'Upgrade to annual';
-        alternateButton.disabled = isYearly;
+        alternateButton.textContent = isYearly
+            ? 'Monthly unavailable'
+            : billing.hasRecurringSubscription
+              ? 'Upgrade to annual'
+              : 'Annual unavailable';
+        alternateButton.disabled = isYearly || !billing.hasRecurringSubscription;
         lifetimeButton.textContent = 'Upgrade to lifetime';
         document.getElementById('lifetimeNote').textContent =
             `Your ${planName.toLowerCase()} subscription is canceled after Lifetime activates`;
@@ -284,14 +288,20 @@ function showAccountRequiredModal({ icon, title, html, requireFullAccount = fals
 }
 
 async function startCheckout(plan, button) {
-    if (plan === 'yearly' && currentBilling?.subscriptionType === 'monthly' && currentBilling.active) {
+    if (
+        plan === 'yearly' &&
+        currentBilling?.subscriptionType === 'monthly' &&
+        currentBilling.active &&
+        currentBilling.hasRecurringSubscription
+    ) {
         return upgradeToYearly(button);
     }
 
     if (
         plan === 'lifetime' &&
         ['monthly', 'yearly'].includes(currentBilling?.subscriptionType) &&
-        currentBilling.active
+        currentBilling.active &&
+        currentBilling.hasRecurringSubscription
     ) {
         const planName = currentBilling.subscriptionType === 'yearly' ? 'annual' : 'monthly';
         const result = await Swal.fire({

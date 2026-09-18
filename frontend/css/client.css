@@ -3218,6 +3218,28 @@ body.dark .addRowDiv .service-card.selected:hover .service-card-desc {
     min-height: 42px;
 }
 
+.account-billing-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.account-billing-actions .account-billing-action {
+    margin-top: 0;
+}
+
+.accountDiv .account-billing-upgrade {
+    color: #fff;
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.accountDiv .account-billing-upgrade:hover {
+    color: #fff;
+    background: var(--color-hover);
+    border-color: var(--color-hover);
+}
+
 .change-password-form {
     display: flex;
     flex-direction: column;
