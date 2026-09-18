@@ -5403,11 +5403,36 @@ body.dark #usersTable td .user-plan-badge.yearly {
 }
 
 @media (max-width: 560px) {
+    #usersTable_wrapper .dataTables_scrollHead {
+        display: none;
+    }
+
+    #usersTable_wrapper .dataTables_scroll,
+    #usersTable_wrapper .dataTables_scrollBody {
+        width: 100%;
+        overflow: visible !important;
+    }
+
+    #usersTable_wrapper .dataTables_scrollBody {
+        max-height: none !important;
+        border: 0;
+    }
+
     #usersTable {
         display: block;
         width: 100%;
+        min-width: 0 !important;
         border: none;
         border-radius: 0;
+    }
+
+    #usersTable thead {
+        display: none;
+    }
+
+    #usersTable tbody {
+        display: block;
+        width: 100%;
     }
 
     #usersTable tr {
