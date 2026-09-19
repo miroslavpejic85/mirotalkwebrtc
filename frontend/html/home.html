@@ -132,82 +132,142 @@
                     <p>Create an account or sign in to manage your rooms.</p>
                 </div>
 
-                <div class="tab-header">
-                    <button id="tabLogin" class="tab-btn active" type="button">Sign in</button>
-                    <button id="tabSignup" class="tab-btn" type="button">Sign up</button>
+                <div class="tab-header" role="tablist" aria-label="Account access">
+                    <button
+                        id="tabLogin"
+                        class="tab-btn active"
+                        type="button"
+                        role="tab"
+                        aria-selected="true"
+                        aria-controls="loginPanel"
+                    >
+                        Sign in
+                    </button>
+                    <button
+                        id="tabSignup"
+                        class="tab-btn"
+                        type="button"
+                        role="tab"
+                        aria-selected="false"
+                        aria-controls="signupPanel"
+                        tabindex="-1"
+                    >
+                        Sign up
+                    </button>
                 </div>
 
                 <div class="tab-content">
-                    <div id="loginPanel" class="tab-panel active">
+                    <form id="loginPanel" class="tab-panel active" role="tabpanel" aria-labelledby="tabLogin">
                         <div class="input-group">
                             <i class="uil uil-user"></i>
+                            <label class="sr-only" for="loginUsernameInput">User name</label>
                             <input
                                 id="loginUsernameInput"
                                 type="text"
                                 name="User name"
                                 placeholder="User name"
+                                autocomplete="username"
                                 required
                             />
                         </div>
                         <div class="input-group">
                             <i class="uil uil-envelope"></i>
-                            <input id="loginEmailIdInput" type="email" name="Email" placeholder="Email" required />
+                            <label class="sr-only" for="loginEmailIdInput">Email</label>
+                            <input
+                                id="loginEmailIdInput"
+                                type="email"
+                                name="Email"
+                                placeholder="Email"
+                                autocomplete="email"
+                                required
+                            />
                         </div>
                         <div class="input-group">
                             <i class="uil uil-lock"></i>
+                            <label class="sr-only" for="loginPasswordIdInput">Password</label>
                             <input
                                 id="loginPasswordIdInput"
                                 type="password"
                                 name="Password"
                                 placeholder="Password"
+                                autocomplete="current-password"
                                 required
                             />
-                            <button type="button" class="password-toggle" tabindex="-1">
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                aria-label="Show password"
+                                aria-pressed="false"
+                            >
                                 <i class="uil uil-eye"></i>
                             </button>
                         </div>
-                        <button id="loginBtn"><i class="uil uil-sign-in-alt"></i> Sign in</button>
+                        <button id="loginBtn" type="submit"><i class="uil uil-sign-in-alt"></i> Sign in</button>
                         <a id="forgotPasswordLink" href="/password-forgot">Forgot Password?</a>
-                    </div>
+                    </form>
 
-                    <div id="signupPanel" class="tab-panel">
+                    <form id="signupPanel" class="tab-panel" role="tabpanel" aria-labelledby="tabSignup" hidden>
                         <div class="input-group">
                             <i class="uil uil-user"></i>
+                            <label class="sr-only" for="signupUsernameInput">User name</label>
                             <input
                                 id="signupUsernameInput"
                                 type="text"
                                 name="User name"
                                 placeholder="User name"
+                                autocomplete="username"
                                 required
                             />
                         </div>
                         <div class="input-group">
                             <i class="uil uil-envelope"></i>
-                            <input id="signupEmailIdInput" type="email" name="Email" placeholder="Email" required />
+                            <label class="sr-only" for="signupEmailIdInput">Email</label>
+                            <input
+                                id="signupEmailIdInput"
+                                type="email"
+                                name="Email"
+                                placeholder="Email"
+                                autocomplete="email"
+                                required
+                            />
                         </div>
                         <div class="input-group">
                             <i class="uil uil-lock"></i>
+                            <label class="sr-only" for="signupPasswordIdInput">Password</label>
                             <input
                                 id="signupPasswordIdInput"
                                 type="password"
                                 name="Password"
                                 placeholder="Password"
+                                autocomplete="new-password"
                                 required
                             />
-                            <button type="button" class="password-toggle" tabindex="-1">
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                aria-label="Show password"
+                                aria-pressed="false"
+                            >
                                 <i class="uil uil-eye"></i>
                             </button>
                         </div>
                         <div class="input-group">
                             <i class="uil uil-lock"></i>
+                            <label class="sr-only" for="signupRepeatPasswordIdInput">Confirm password</label>
                             <input
                                 id="signupRepeatPasswordIdInput"
                                 type="password"
                                 name="Confirm password"
                                 placeholder="Confirm password"
+                                autocomplete="new-password"
                                 required
                             />
-                            <button type="button" class="password-toggle" tabindex="-1">
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                aria-label="Show password"
+                                aria-pressed="false"
+                            >
                                 <i class="uil uil-eye"></i>
                             </button>
                         </div>
@@ -224,12 +284,12 @@
                                 <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.
                             </span>
                         </label>
-                        <button id="signupBtn"><i class="uil uil-user-plus"></i> Create account</button>
+                        <button id="signupBtn" type="submit"><i class="uil uil-user-plus"></i> Create account</button>
                         <p class="auth-switch-hint">
                             Already have an account?
                             <button id="switchToLoginLink" type="button">Sign in</button>
                         </p>
-                    </div>
+                    </form>
                 </div>
 
                 <div class="auth-badges">

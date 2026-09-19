@@ -72,108 +72,111 @@
                 <ul class="nav-links">
                     <li class="nav-section-label"><span>Workspace</span></li>
                     <li>
-                        <a id="navUsers" href="javascript:void(0)">
+                        <button id="navUsers" type="button">
                             <i class="uil uil-users-alt"></i>
                             <span class="link-name">Users</span>
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a id="navDash" href="javascript:void(0)">
+                        <button id="navDash" type="button">
                             <i class="uil uil-calendar-alt"></i>
                             <span class="link-name">Meetings</span>
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a id="navAvailability" href="javascript:void(0)">
+                        <button id="navAvailability" type="button">
                             <i class="uil uil-clock"></i>
                             <span class="link-name">Availability</span>
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a id="navEvents" href="javascript:void(0)">
+                        <button id="navEvents" type="button">
                             <i class="uil uil-calendar-alt"></i>
                             <span class="link-name">Events</span>
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a id="navOverview" href="javascript:void(0)">
+                        <button id="navOverview" type="button">
                             <i class="uil uil-chart-line"></i>
                             <span class="link-name">Overview</span>
-                        </a>
+                        </button>
                     </li>
                     <li class="nav-section-label"><span>Meeting apps</span></li>
                     <li>
-                        <a id="navP2P" href="javascript:void(0)">
+                        <button id="navP2P" type="button">
                             <i class="uil uil-rocket"></i>
                             <span id="navP2PLabel" class="link-name">MiroTalk P2P</span>
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a id="navSFU" href="javascript:void(0)">
+                        <button id="navSFU" type="button">
                             <i class="uil uil-trophy"></i>
                             <span id="navSFULabel" class="link-name">MiroTalk SFU</span>
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a id="navC2C" href="javascript:void(0)">
+                        <button id="navC2C" type="button">
                             <i class="uil uil-star"></i>
                             <span id="navC2CLabel" class="link-name">MiroTalk C2C</span>
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a id="navBRO" href="javascript:void(0)">
+                        <button id="navBRO" type="button">
                             <i class="uil uil-wifi"></i>
                             <span id="navBROLabel" class="link-name">MiroTalk BRO</span>
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a id="navCME" href="javascript:void(0)">
+                        <button id="navCME" type="button">
                             <i class="uil uil-phone"></i>
                             <span id="navCMELabel" class="link-name">MiroTalk CME</span>
-                        </a>
+                        </button>
                     </li>
                     <li id="navResources" class="nav-section-label"><span>Resources</span></li>
                     <li>
-                        <a id="navAbout" data-umami-event="About button" href="javascript:void(0)">
+                        <button id="navAbout" type="button" data-umami-event="About button">
                             <i class="uil uil-info-circle"></i>
                             <span class="link-name">About</span>
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a id="navSup" data-umami-event="Support button" href="javascript:void(0)">
+                        <button id="navSup" type="button" data-umami-event="Support button">
                             <i class="uil uil-discord"></i>
                             <span class="link-name">Support</span>
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a id="navFeedback" data-umami-event="Feedback button" href="javascript:void(0)">
+                        <button id="navFeedback" type="button" data-umami-event="Feedback button">
                             <i class="uil uil-comment-alt-message"></i>
                             <span class="link-name">Feedback</span>
-                        </a>
+                        </button>
                     </li>
                 </ul>
 
                 <ul class="logout-mode">
                     <li>
-                        <a id="navAcc" href="javascript:void(0)">
+                        <button id="navAcc" type="button">
                             <i class="uil uil-user"></i>
                             <span class="link-name">Account</span>
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a id="navSet" href="javascript:void(0)">
+                        <button id="navSet" type="button">
                             <i class="uil uil-setting"></i>
                             <span class="link-name">Settings</span>
-                        </a>
+                        </button>
                     </li>
                 </ul>
             </div>
         </nav>
+        <button id="mobileNavBackdrop" class="mobile-nav-backdrop" type="button" aria-label="Close navigation"></button>
 
         <section class="dashboard">
             <div class="top">
                 <div class="top-workspace">
-                    <i class="uil uil-bars sidebar-toggle" role="button" aria-label="Toggle sidebar"></i>
+                    <button type="button" class="sidebar-toggle" aria-label="Toggle sidebar" aria-expanded="true">
+                        <i class="uil uil-bars"></i>
+                    </button>
                     <div>
                         <span>Workspace</span>
                         <strong>Meeting control center</strong>
@@ -182,12 +185,12 @@
                 </div>
 
                 <div class="top-right-actions">
-                    <a id="topModeToggle" class="top-action-btn" aria-label="Toggle theme">
+                    <button id="topModeToggle" type="button" class="top-action-btn" aria-label="Toggle theme">
                         <i class="uil uil-moon"></i>
-                    </a>
-                    <a id="myProfile" href="javascript:void(0)" target="_blank">
-                        <img src="../Images/profile.png" />
-                    </a>
+                    </button>
+                    <button id="myProfile" type="button" aria-label="Open account">
+                        <img src="../Images/profile.png" alt="" />
+                    </button>
                     <a id="topLogout" href="/logout" class="top-action-btn" aria-label="Logout">
                         <i class="uil uil-sign-out-alt"></i>
                     </a>
@@ -510,7 +513,10 @@
                     <div id="emptyState" class="empty-state">
                         <i class="uil uil-calendar-alt"></i>
                         <h3>No rooms scheduled</h3>
-                        <p>Click "Add New Room" to create your first room.</p>
+                        <p>Create your first room to schedule a meeting.</p>
+                        <button id="empty-add-room" type="button" class="custom-button">
+                            <i class="uil uil-plus"></i> Add New Room
+                        </button>
                     </div>
 
                     <table id="myTable">
@@ -825,11 +831,19 @@
                     </div>
                 </div>
 
-                <form id="addRowDiv" class="addRowDiv hidden" onsubmit="return false;">
+                <form
+                    id="addRowDiv"
+                    class="addRowDiv hidden"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="addrow-title"
+                    aria-hidden="true"
+                    onsubmit="return false;"
+                >
                     <div class="addrow-header">
                         <div class="addrow-heading">
                             <span class="addrow-eyebrow">Meeting setup</span>
-                            <h2 class="addrow-title"><i class="uil uil-plus-circle"></i> New Room</h2>
+                            <h2 id="addrow-title" class="addrow-title"><i class="uil uil-plus-circle"></i> New Room</h2>
                         </div>
                         <button id="add-close-btn" type="button" class="addrow-close" aria-label="Close panel">
                             <i class="uil uil-times"></i>
@@ -1103,11 +1117,19 @@
                     </table>
                 </div>
 
-                <form id="addUserDiv" class="addRowDiv hidden" onsubmit="return false;">
+                <form
+                    id="addUserDiv"
+                    class="addRowDiv hidden"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="add-user-title"
+                    aria-hidden="true"
+                    onsubmit="return false;"
+                >
                     <div class="addrow-header">
                         <div class="addrow-heading">
                             <span class="addrow-eyebrow">Workspace access</span>
-                            <h2 class="addrow-title"><i class="uil uil-user-plus"></i> New User</h2>
+                            <h2 id="add-user-title" class="addrow-title"><i class="uil uil-user-plus"></i> New User</h2>
                         </div>
                         <button id="add-user-close-btn" type="button" class="addrow-close" aria-label="Close panel">
                             <i class="uil uil-times"></i>
@@ -1315,11 +1337,18 @@
                     </div>
                 </form>
 
-                <div id="accountDiv" class="accountDiv hidden">
+                <div
+                    id="accountDiv"
+                    class="accountDiv hidden"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="account-title"
+                    aria-hidden="true"
+                >
                     <div class="account-header">
                         <div class="account-heading">
                             <span class="account-eyebrow">Profile and access</span>
-                            <h2 class="account-title"><i class="uil uil-user"></i> Account</h2>
+                            <h2 id="account-title" class="account-title"><i class="uil uil-user"></i> Account</h2>
                         </div>
                         <button id="account-close-btn" type="button" class="account-close" aria-label="Close panel">
                             <i class="uil uil-times"></i>
@@ -1450,11 +1479,18 @@
                     </div>
                 </div>
 
-                <div id="settingsDiv" class="settingsDiv hidden">
+                <div
+                    id="settingsDiv"
+                    class="settingsDiv hidden"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="settings-title"
+                    aria-hidden="true"
+                >
                     <div class="settings-header">
                         <div class="settings-heading">
                             <span class="settings-eyebrow">Workspace preferences</span>
-                            <h2 class="settings-title"><i class="uil uil-setting"></i> Settings</h2>
+                            <h2 id="settings-title" class="settings-title"><i class="uil uil-setting"></i> Settings</h2>
                         </div>
                         <button id="settings-close-btn" type="button" class="settings-close" aria-label="Close panel">
                             <i class="uil uil-times"></i>

@@ -82,6 +82,13 @@ loginPasswordIdInput.value = '';
 // Tab switching
 tabLogin.addEventListener('click', () => switchTab('login'));
 tabSignup.addEventListener('click', () => switchTab('signup'));
+document.querySelector('.tab-header').addEventListener('keydown', (event) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const nextTab = event.key === 'ArrowLeft' || event.key === 'Home' ? tabLogin : tabSignup;
+    switchTab(nextTab === tabLogin ? 'login' : 'signup');
+    nextTab.focus();
+});
 
 // Landing CTA buttons -> switch to the proper auth tab and scroll the card into view
 const heroSignUpBtn = document.getElementById('heroSignUpBtn');
@@ -146,36 +153,27 @@ function loginAsDemo() {
 })();
 
 function switchTab(tab) {
-    if (tab === 'login') {
-        tabLogin.classList.add('active');
-        tabSignup.classList.remove('active');
-        loginPanel.classList.add('active');
-        signupPanel.classList.remove('active');
+    const showLogin = tab === 'login';
+    tabLogin.classList.toggle('active', showLogin);
+    tabSignup.classList.toggle('active', !showLogin);
+    tabLogin.setAttribute('aria-selected', String(showLogin));
+    tabSignup.setAttribute('aria-selected', String(!showLogin));
+    tabLogin.tabIndex = showLogin ? 0 : -1;
+    tabSignup.tabIndex = showLogin ? -1 : 0;
+    loginPanel.classList.toggle('active', showLogin);
+    signupPanel.classList.toggle('active', !showLogin);
+    loginPanel.hidden = !showLogin;
+    signupPanel.hidden = showLogin;
+
+    if (showLogin) {
         cleanSignUpInput();
     } else {
-        tabSignup.classList.add('active');
-        tabLogin.classList.remove('active');
-        signupPanel.classList.add('active');
-        loginPanel.classList.remove('active');
         cleanLoginInput();
     }
 }
 
-loginBtn.addEventListener('click', handleLogin);
-
-[loginUsernameInput, loginEmailIdInput, loginPasswordIdInput].forEach((input) => {
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') handleLogin(e);
-    });
-});
-
-signupBtn.addEventListener('click', handleSignup);
-
-[signupUsernameInput, signupEmailIdInput, signupPasswordIdInput, signupRepeatPasswordIdInput].forEach((input) => {
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') handleSignup(e);
-    });
-});
+loginPanel.addEventListener('submit', handleLogin);
+signupPanel.addEventListener('submit', handleSignup);
 
 function handleLogin(e) {
     e.preventDefault();
@@ -411,13 +409,16 @@ document.querySelectorAll('.password-toggle').forEach((btn) => {
     btn.addEventListener('click', function () {
         const input = this.parentElement.querySelector('input');
         const icon = this.querySelector('i');
-        if (input.type === 'password') {
+        const showPassword = input.type === 'password';
+        if (showPassword) {
             input.type = 'text';
             icon.classList.replace('uil-eye', 'uil-eye-slash');
         } else {
             input.type = 'password';
             icon.classList.replace('uil-eye-slash', 'uil-eye');
         }
+        this.setAttribute('aria-pressed', String(showPassword));
+        this.setAttribute('aria-label', showPassword ? 'Hide password' : 'Show password');
     });
 });
 

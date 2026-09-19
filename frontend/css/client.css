@@ -98,7 +98,6 @@ body.dark::-webkit-scrollbar-thumb:hover {
     background: var(--primary-color);
 }
 
-/* Focus-visible for keyboard accessibility */
 :focus-visible {
     outline: 2px solid var(--accent-color);
     outline-offset: 2px;
@@ -1033,26 +1032,33 @@ nav .menu-items {
     list-style: none;
 }
 
-.menu-items li a {
+.menu-items li button {
     display: flex;
+    width: 100%;
     height: 44px;
     align-items: center;
+    border: 0;
     text-decoration: none;
+    color: inherit;
+    background: transparent;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
     border-radius: 8px;
     transition:
         background-color 0.2s ease,
         color 0.2s ease;
 }
 
-.nav-links li a:hover {
+.nav-links li button:hover {
     background-color: var(--hover-bg-light);
 }
 
-body.dark .nav-links li a:hover {
+body.dark .nav-links li button:hover {
     background-color: var(--hover-bg-strong);
 }
 
-.menu-items li a i {
+.menu-items li button i {
     display: flex;
     min-width: 45px;
     height: 100%;
@@ -1073,20 +1079,20 @@ body.dark .nav-links li a:hover {
     color: var(--accent-color);
 }
 
-.menu-items li a .link-name {
+.menu-items li button .link-name {
     color: var(--black-light-color);
     font-size: 14px;
     font-weight: 500;
     transition: var(--tran-05);
 }
 
-nav.close li a .link-name {
+nav.close li button .link-name {
     opacity: 0;
     pointer-events: none;
 }
 
-.nav-links li a:hover i,
-.nav-links li a:hover .link-name {
+.nav-links li button:hover i,
+.nav-links li button:hover .link-name {
     color: var(--color-hover);
 }
 
@@ -1095,16 +1101,16 @@ nav.close li a .link-name {
     border-top: 1px solid var(--border-color);
 }
 
-.menu-items .logout-mode li a:hover {
+.menu-items .logout-mode li button:hover {
     background-color: var(--hover-bg-light);
 }
 
-body.dark .menu-items .logout-mode li a:hover {
+body.dark .menu-items .logout-mode li button:hover {
     background-color: var(--hover-bg-strong);
 }
 
-.menu-items .logout-mode li a:hover i,
-.menu-items .logout-mode li a:hover .link-name {
+.menu-items .logout-mode li button:hover i,
+.menu-items .logout-mode li button:hover .link-name {
     color: var(--color-hover);
 }
 
@@ -1196,7 +1202,14 @@ nav.close ~ .dashboard .top {
 }
 
 .dashboard .top .sidebar-toggle {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    place-items: center;
     color: var(--text-color);
+    background: transparent;
     font-size: 26px;
     cursor: pointer;
 }
@@ -1207,6 +1220,11 @@ nav.close ~ .dashboard .top {
 
 .dashboard #myProfile {
     width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
     border-radius: 50%;
     transition:
         transform 0.2s ease,
@@ -3801,7 +3819,7 @@ tr:nth-child(even) {
         pointer-events: auto;
     }
 
-    nav li a .link-name {
+    nav li button .link-name {
         opacity: 0;
         pointer-events: none;
     }
@@ -3865,11 +3883,15 @@ tr:nth-child(even) {
 
 @media (max-width: 450px) {
     nav {
-        width: 0px;
+        z-index: 10;
+        width: 250px;
+        transform: translateX(-100%);
     }
 
     nav.close {
-        width: 73px;
+        width: 250px;
+        transform: translateX(0);
+        box-shadow: 12px 0 30px rgba(0, 0, 0, 0.18);
     }
 
     nav .logo_name {
@@ -3878,18 +3900,18 @@ tr:nth-child(even) {
     }
 
     nav.close .logo_name {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    nav li button .link-name {
         opacity: 0;
         pointer-events: none;
     }
 
-    nav li a .link-name {
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    nav.close li a .link-name {
-        opacity: 0;
-        pointer-events: none;
+    nav.close li button .link-name {
+        opacity: 1;
+        pointer-events: auto;
     }
 
     nav ~ .dashboard {
@@ -3898,8 +3920,8 @@ tr:nth-child(even) {
     }
 
     nav.close ~ .dashboard {
-        left: 73px;
-        width: calc(100% - 73px);
+        left: 0;
+        width: 100%;
     }
 
     nav ~ .dashboard .top {
@@ -3913,6 +3935,31 @@ tr:nth-child(even) {
     }
 }
 
+.mobile-nav-backdrop {
+    display: none;
+}
+
+@media (max-width: 450px) {
+    .mobile-nav-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 9;
+        display: block;
+        border: 0;
+        background: rgba(0, 0, 0, 0.38);
+        opacity: 0;
+        visibility: hidden;
+        transition:
+            opacity 0.2s ease,
+            visibility 0.2s ease;
+    }
+
+    nav.close + .mobile-nav-backdrop {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
 @keyframes reveal {
     from {
         clip-path: inset(0 0 0 100%);
@@ -3923,17 +3970,17 @@ tr:nth-child(even) {
 }
 
 /* Active nav indicator */
-.nav-links li a.active {
+.nav-links li button.active {
     background-color: var(--hover-bg-medium);
     border-radius: 8px;
 }
-.nav-links li a.active i,
-.nav-links li a.active .link-name {
+.nav-links li button.active i,
+.nav-links li button.active .link-name {
     color: var(--color-hover);
     font-weight: 600;
 }
-body.dark .nav-links li a.active i,
-body.dark .nav-links li a.active .link-name {
+body.dark .nav-links li button.active i,
+body.dark .nav-links li button.active .link-name {
     color: var(--color-hover);
 }
 
@@ -3988,7 +4035,7 @@ tr.room-today td:first-child {
     color: var(--black-light-color);
     width: 100%;
 }
-.empty-state i {
+.empty-state > i {
     font-size: 56px;
     margin-bottom: 16px;
     color: var(--accent-color);
@@ -4369,13 +4416,13 @@ nav.close .nav-section-label {
     pointer-events: none;
 }
 
-.menu-items li a {
+.menu-items li button {
     position: relative;
     height: 42px;
     margin: 2px 0;
 }
 
-.nav-links li a.active::before {
+.nav-links li button.active::before {
     content: '';
     position: absolute;
     top: 10px;
@@ -4741,7 +4788,7 @@ body.dark .top-workspace .demo-badge {
     border-radius: 8px;
 }
 
-.empty-state i {
+.empty-state > i {
     width: 58px;
     height: 58px;
     display: flex;
@@ -4756,6 +4803,10 @@ body.dark .top-workspace .demo-badge {
 
 .empty-state h3 {
     font-size: 18px;
+}
+
+#empty-add-room {
+    margin-top: 20px;
 }
 
 .dataTables_info,

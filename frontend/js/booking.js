@@ -9,6 +9,18 @@ let publicSlots = [];
 let selectedDate;
 let selectedSlot;
 
+function announceBookingStatus(message) {
+    const status = document.getElementById('booking-status');
+    status.textContent = message;
+    status.hidden = !message;
+}
+
+function setActionError(id, message = '') {
+    const error = document.getElementById(id);
+    error.textContent = message;
+    error.hidden = !message;
+}
+
 function showBookingError(message) {
     document.getElementById('booking-loading').hidden = true;
     document.getElementById('booking-shell').hidden = true;
@@ -69,7 +81,8 @@ function renderDates() {
             const weekday = new Intl.DateTimeFormat(undefined, { weekday: 'short', timeZone: 'UTC' }).format(date);
             const day = new Intl.DateTimeFormat(undefined, { day: 'numeric', timeZone: 'UTC' }).format(date);
             const hasSlots = publicSlots.some((slot) => timezoneDateKey(new Date(slot), timezone) === key);
-            return `<button type="button" role="tab" data-date="${key}" class="date-button ${key === selectedDate ? 'active' : ''}" ${hasSlots ? '' : 'disabled'}><span>${weekday}</span><strong>${day}</strong><i></i></button>`;
+            const isSelected = key === selectedDate;
+            return `<button type="button" role="tab" aria-selected="${isSelected}" tabindex="${isSelected ? '0' : '-1'}" data-date="${key}" class="date-button ${isSelected ? 'active' : ''}" ${hasSlots ? '' : 'disabled'}><span>${weekday}</span><strong>${day}</strong><i></i></button>`;
         })
         .join('');
     rail.querySelectorAll('button:not(:disabled)').forEach((button) => {
@@ -79,6 +92,19 @@ function renderDates() {
             renderSlots();
         });
     });
+}
+
+function handleDateKeydown(event) {
+    const dates = [...document.querySelectorAll('.date-button:not(:disabled)')];
+    const currentIndex = dates.indexOf(event.target);
+    if (currentIndex < 0 || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    let nextIndex = currentIndex;
+    if (event.key === 'Home') nextIndex = 0;
+    else if (event.key === 'End') nextIndex = dates.length - 1;
+    else nextIndex = (currentIndex + (event.key === 'ArrowRight' ? 1 : -1) + dates.length) % dates.length;
+    dates[nextIndex].click();
+    document.querySelector(`[data-date="${selectedDate}"]`)?.focus();
 }
 
 function renderSlots() {
@@ -122,6 +148,8 @@ function selectSlot(slot) {
     document.getElementById('selected-time-fact').hidden = false;
     document.getElementById('slot-step').hidden = true;
     document.getElementById('details-step').hidden = false;
+    setActionError('booking-form-error');
+    announceBookingStatus(`Selected ${value}`);
     document.getElementById('guest-name').focus();
 }
 
@@ -164,11 +192,16 @@ async function loadPublicBooking() {
 document.getElementById('back-to-slots').addEventListener('click', () => {
     document.getElementById('details-step').hidden = true;
     document.getElementById('slot-step').hidden = false;
+    setActionError('booking-form-error');
+    document.querySelector(`[data-date="${selectedDate}"]`)?.focus();
 });
+
+document.getElementById('date-rail').addEventListener('keydown', handleDateKeydown);
 
 document.getElementById('details-step').addEventListener('submit', async (event) => {
     event.preventDefault();
     const button = document.getElementById('confirm-booking');
+    setActionError('booking-form-error');
     button.disabled = true;
     button.innerHTML = '<i class="uil uil-spinner-alt spin"></i> Reserving time';
     try {
@@ -198,7 +231,7 @@ document.getElementById('details-step').addEventListener('submit', async (event)
             document.getElementById('details-step').hidden = true;
             document.getElementById('slot-step').hidden = false;
         }
-        window.alert(message);
+        setActionError('booking-form-error', message);
     } finally {
         button.disabled = false;
         button.innerHTML = '<i class="uil uil-calendar-check"></i> Confirm booking';
@@ -228,6 +261,7 @@ async function loadCancellation() {
 
 document.getElementById('cancel-confirm').addEventListener('click', async () => {
     const button = document.getElementById('cancel-confirm');
+    setActionError('cancellation-error');
     button.disabled = true;
     try {
         await axios.post(`${bookingApiPath}/cancel/${encodeURIComponent(bookingIdentifier)}`);
@@ -238,7 +272,7 @@ document.getElementById('cancel-confirm').addEventListener('click', async () => 
             'The time has been released and the calendar cancellation is on its way.';
         button.hidden = true;
     } catch (error) {
-        window.alert(error.response?.data?.message || 'Unable to cancel this booking.');
+        setActionError('cancellation-error', error.response?.data?.message || 'Unable to cancel this booking.');
         button.disabled = false;
     }
 });

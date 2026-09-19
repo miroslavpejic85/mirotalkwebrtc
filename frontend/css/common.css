@@ -52,7 +52,15 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
     .page-loading-spinner {
-        animation-duration: 1.4s;
+        animation-duration: 1.4s !important;
+    }
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
     }
 }
 

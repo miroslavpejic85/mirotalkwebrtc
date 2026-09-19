@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.23
+ * @version 1.7.30
  */
 
 const userAgent = navigator.userAgent;
@@ -26,6 +26,7 @@ const topModeToggle = document.getElementById('topModeToggle');
 const demoBadge = document.getElementById('demoBadge');
 const sidebar = body.querySelector('nav');
 const sidebarToggle = body.querySelector('.sidebar-toggle');
+const mobileNavBackdrop = document.getElementById('mobileNavBackdrop');
 const pageLoadingOverlay = document.getElementById('pageLoadingOverlay');
 
 const navOverview = document.getElementById('navOverview');
@@ -68,6 +69,7 @@ const dsUsers = document.getElementById('dsUsers');
 const dsDashStats = document.getElementById('dsDashStats');
 const statsUsersSection = document.getElementById('statsUsersSection');
 const statsRoomsSectionTitle = document.getElementById('statsRoomsSectionTitle');
+const statsTypesSection = document.getElementById('statsTypesSection');
 const statsTypesSectionTitle = document.getElementById('statsTypesSectionTitle');
 const statTotalUsers = document.getElementById('statTotalUsers');
 const statActiveUsers = document.getElementById('statActiveUsers');
@@ -103,6 +105,7 @@ const statTotalSubsVal = document.getElementById('statTotalSubsVal');
 
 const boxesDS = document.getElementById('boxesDS');
 const statsProjectsSection = document.getElementById('statsProjectsSection');
+statsTypesSection.after(statsProjectsSection);
 
 const boxP2P = document.getElementById('boxP2P');
 const repoP2P = document.getElementById('repoP2P');
@@ -343,7 +346,8 @@ if (getMode && getMode === 'dark') {
     body.classList.toggle('dark');
     topModeToggle.querySelector('i').className = 'uil uil-sun';
 }
-if (getStatus && getStatus === 'close') sidebar.classList.toggle('close');
+if (getStatus && getStatus === 'close' && window.innerWidth > 450) sidebar.classList.add('close');
+updateSidebarExpandedState();
 
 const toolTips = [
     { element: delAllBtn, text: 'Delete rooms', position: 'top' },
@@ -747,8 +751,26 @@ topModeToggle.addEventListener('click', () => {
 
 sidebarToggle.addEventListener('click', () => {
     sidebar.classList.toggle('close');
-    window.localStorage.status = sidebar.classList.contains('close') ? 'close' : 'open';
+    updateSidebarExpandedState();
+    if (window.innerWidth > 450) {
+        window.localStorage.status = sidebar.classList.contains('close') ? 'close' : 'open';
+    }
 });
+
+function updateSidebarExpandedState() {
+    const hasCloseClass = sidebar.classList.contains('close');
+    const isExpanded = window.innerWidth <= 450 ? hasCloseClass : !hasCloseClass;
+    sidebarToggle.setAttribute('aria-expanded', String(isExpanded));
+}
+
+function closeMobileNavigation() {
+    if (window.innerWidth > 450 || !sidebar.classList.contains('close')) return;
+    sidebar.classList.remove('close');
+    updateSidebarExpandedState();
+}
+
+mobileNavBackdrop.addEventListener('click', closeMobileNavigation);
+window.addEventListener('resize', updateSidebarExpandedState);
 
 // Custom dropdown helpers
 function buildCustomDropdownHTML(id, options, selectedValue, translate, disabled) {
@@ -1020,6 +1042,7 @@ openAddBtn.addEventListener('click', () => {
     resetFormValues();
     toggleAddRows();
 });
+document.getElementById('empty-add-room').addEventListener('click', () => openAddBtn.click());
 closeAddBtn.addEventListener('click', () => {
     toggleAddRows();
 });
@@ -1206,8 +1229,15 @@ function navShow(elements = [], activeNav = null) {
     elements.forEach((element, i) => {
         element.style.display = 'block';
     });
-    document.querySelectorAll('.nav-links li a').forEach((a) => a.classList.remove('active'));
-    if (activeNav) activeNav.classList.add('active');
+    document.querySelectorAll('.nav-links li button').forEach((button) => {
+        button.classList.remove('active');
+        button.removeAttribute('aria-current');
+    });
+    if (activeNav) {
+        activeNav.classList.add('active');
+        activeNav.setAttribute('aria-current', 'page');
+    }
+    closeMobileNavigation();
 }
 
 document.getElementById('myInput').addEventListener('keyup', function () {
@@ -1218,10 +1248,12 @@ function toggleAddRows() {
     if (addRowDiv.classList.contains('show')) {
         animateCSS(addRowDiv, 'slideOutRight').then((ok) => {
             addRowDiv.classList.toggle('show');
+            finishPanelClose(addRowDiv);
             hideBackdrop();
         });
     } else {
         addRowDiv.classList.toggle('show');
+        preparePanelOpen(addRowDiv, closeAddBtn);
         showBackdrop();
         animateCSS(addRowDiv, 'slideInRight');
     }
@@ -1231,10 +1263,12 @@ function toggleAccount() {
     if (accountDiv.classList.contains('show')) {
         animateCSS(accountDiv, 'slideOutRight').then((ok) => {
             accountDiv.classList.toggle('show');
+            finishPanelClose(accountDiv);
             hideBackdrop();
         });
     } else {
         accountDiv.classList.toggle('show');
+        preparePanelOpen(accountDiv, accountClose);
         showBackdrop();
         animateCSS(accountDiv, 'slideInRight');
     }
@@ -1244,10 +1278,12 @@ function toggleSettings() {
     if (settingsDiv.classList.contains('show')) {
         animateCSS(settingsDiv, 'slideOutRight').then((ok) => {
             settingsDiv.classList.toggle('show');
+            finishPanelClose(settingsDiv);
             hideBackdrop();
         });
     } else {
         settingsDiv.classList.toggle('show');
+        preparePanelOpen(settingsDiv, settingsClose);
         showBackdrop();
         animateCSS(settingsDiv, 'slideInRight');
     }
@@ -1257,14 +1293,63 @@ function toggleAddUserPanel() {
     if (addUserDiv.classList.contains('show')) {
         animateCSS(addUserDiv, 'slideOutRight').then((ok) => {
             addUserDiv.classList.toggle('show');
+            finishPanelClose(addUserDiv);
             hideBackdrop();
         });
     } else {
         addUserDiv.classList.toggle('show');
+        preparePanelOpen(addUserDiv, closeAddUserBtn);
         showBackdrop();
         animateCSS(addUserDiv, 'slideInRight');
     }
 }
+
+const managedPanels = [addRowDiv, addUserDiv, accountDiv, settingsDiv];
+let panelReturnFocus = null;
+
+function preparePanelOpen(panel, initialFocus) {
+    panelReturnFocus = document.activeElement;
+    panel.setAttribute('aria-hidden', 'false');
+    requestAnimationFrame(() => initialFocus.focus());
+}
+
+function finishPanelClose(panel) {
+    panel.setAttribute('aria-hidden', 'true');
+    panelReturnFocus?.focus();
+    panelReturnFocus = null;
+}
+
+function closeManagedPanel(panel) {
+    if (panel === addRowDiv) toggleAddRows();
+    else if (panel === addUserDiv) toggleAddUserPanel();
+    else if (panel === accountDiv) toggleAccount();
+    else if (panel === settingsDiv) toggleSettings();
+}
+
+document.addEventListener('keydown', (event) => {
+    const activePanel = managedPanels.find((panel) => panel.classList.contains('show'));
+    if (!activePanel) return;
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        closeManagedPanel(activePanel);
+        return;
+    }
+    if (event.key !== 'Tab') return;
+
+    const focusable = [...activePanel.querySelectorAll('button, input, select, textarea, [href], [tabindex]')].filter(
+        (element) => !element.disabled && element.tabIndex >= 0 && element.offsetParent !== null
+    );
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable.at(-1);
+    if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+    }
+});
 
 function showBackdrop() {
     panelBackdrop.classList.remove('hidden');

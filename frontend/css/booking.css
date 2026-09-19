@@ -325,6 +325,30 @@ main {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-soft);
 }
+.booking-status {
+    position: fixed;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+}
+.booking-form-error {
+    margin: 12px 0 0;
+    color: var(--danger);
+    font-size: 13px;
+    line-height: 1.45;
+    text-align: center;
+}
+.date-button:focus-visible,
+.slot-grid button:focus-visible,
+.back-button:focus-visible,
+.confirm-button:focus-visible,
+.cancel-button:focus-visible,
+.text-link:focus-visible,
+.timezone-select select:focus-visible {
+    outline: 3px solid var(--accent-soft);
+    outline-offset: 2px;
+}
 .confirm-button,
 .cancel-button {
     display: flex;
@@ -477,6 +501,16 @@ footer {
     from {
         opacity: 0;
         transform: translateY(10px);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
     }
 }
 @media (max-width: 820px) {

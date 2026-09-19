@@ -31,6 +31,7 @@
                 <span></span>
                 <p>Finding available times</p>
             </div>
+            <p id="booking-status" class="booking-status" role="status" aria-live="polite" hidden></p>
             <section id="booking-error" class="booking-message" hidden>
                 <i class="uil uil-calendar-slash"></i>
                 <h1>Booking page unavailable</h1>
@@ -113,6 +114,7 @@
                         <button id="confirm-booking" class="confirm-button" type="submit">
                             <i class="uil uil-calendar-check"></i> Confirm booking
                         </button>
+                        <p id="booking-form-error" class="booking-form-error" role="alert" hidden></p>
                         <p class="privacy-note">
                             <i class="uil uil-lock"></i> Your details are shared only with the meeting host.
                         </p>
@@ -142,6 +144,7 @@
                 <button id="cancel-confirm" class="cancel-button" type="button">
                     <i class="uil uil-times-circle"></i> Cancel booking
                 </button>
+                <p id="cancellation-error" class="booking-form-error" role="alert" hidden></p>
             </section>
         </main>
 
