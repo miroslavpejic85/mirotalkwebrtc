@@ -129,8 +129,9 @@ For detailed guides and references, visit the **[official documentation](https:/
 `MiroTalk WEB` can run as a paid **SaaS** platform powered by [Stripe](https://stripe.com). Enable it with `SAAS=true` in your `.env`.
 
 - **`SAAS=false` (default):** the application behaves exactly as the open-source self-hosted version - no subscriptions, no payment gating.
-- **`SAAS=true`:** registered users (excluding demo and admin accounts) must hold an active subscription to create/manage rooms and join meetings. Two plans are offered out of the box:
+- **`SAAS=true`:** registered users (excluding demo and admin accounts) must hold an active subscription to create/manage rooms and join meetings. Three plans are offered out of the box:
     - **Monthly** - recurring Stripe subscription.
+    - **Annual** - recurring yearly Stripe subscription.
     - **Lifetime** - one-time Stripe payment.
 
 For full setup, environment variables, Stripe configuration, webhooks, and local testing, see **[docs/STRIPE.md](docs/STRIPE.md)**.
