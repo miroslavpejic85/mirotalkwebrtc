@@ -73,6 +73,9 @@ test('transactional emails use safe branded HTML and plain-text alternatives', a
     assert.match(messages[2].html, /Reset password/);
     assert.match(messages[3].html, /Secure my account/);
     assert.match(messages[4].html, /Set my password/);
+    assert.match(messages[4].text, /Username: <Admin>/);
+    assert.match(messages[4].html, /<strong>Username:<\/strong> &lt;Admin&gt;/);
+    assert.match(messages[4].html, /<strong>Email:<\/strong> user@example\.com/);
     assert.doesNotMatch(messages[4].html, /Password<\/td>|login credentials/i);
 });
 
