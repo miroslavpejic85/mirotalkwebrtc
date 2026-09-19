@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusMap = {
         success: 'statusSuccess',
         already: 'statusAlready',
+        expired: 'statusExpired',
+        invalid: 'statusInvalid',
         error: 'statusError',
     };
 

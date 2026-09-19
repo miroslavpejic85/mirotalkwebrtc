@@ -67,6 +67,7 @@ function loadController(overrides = {}) {
             {
                 isAdmin: overrides.isAdmin || (async () => false),
                 tokenEncode: () => 'token',
+                tokenDecode: overrides.tokenDecode || (() => null),
             },
         ],
         [LOGS_PATH, Logs],
@@ -112,6 +113,10 @@ function createResponse() {
         },
         send(body) {
             this.body = body;
+            return this;
+        },
+        redirect(location) {
+            this.redirectUrl = location;
             return this;
         },
     };
@@ -243,6 +248,83 @@ test('userCreate returns a clear pending state when email confirmation is requir
         email: 'new@example.com',
         code: '?token=token',
     });
+});
+
+test('userResendConfirmation sends a fresh confirmation link', async (t) => {
+    let confirmation;
+    const harness = loadController({
+        nodemailer: {
+            EMAIL_VERIFICATION: true,
+            async sendConfirmationEmail(username, email, code) {
+                confirmation = { username, email, code };
+            },
+        },
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.userResendConfirmation(createRequest(), res);
+
+    assert.equal(res.statusCode, 200);
+    assert.deepEqual(res.body, {
+        pending: true,
+        message: 'A new confirmation link has been sent.',
+    });
+    assert.deepEqual(confirmation, {
+        username: 'new-user',
+        email: 'new@example.com',
+        code: '?token=token',
+    });
+});
+
+test('userResendConfirmation directs confirmed users to sign in', async (t) => {
+    let emailSent = false;
+    const harness = loadController({
+        userFindOne: async () => ({ _id: 'existing-user' }),
+        nodemailer: {
+            EMAIL_VERIFICATION: true,
+            async sendConfirmationEmail() {
+                emailSent = true;
+            },
+        },
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.userResendConfirmation(createRequest(), res);
+
+    assert.equal(res.statusCode, 409);
+    assert.deepEqual(res.body, {
+        confirmed: true,
+        message: 'This account is already confirmed.',
+    });
+    assert.equal(emailSent, false);
+});
+
+test('userConfirmation redirects expired links to recovery guidance', async (t) => {
+    const tokenError = new Error('expired');
+    tokenError.name = 'TokenExpiredError';
+    const harness = loadController({
+        tokenDecode() {
+            throw tokenError;
+        },
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.userConfirmation({ query: { token: 'expired-token' } }, res);
+
+    assert.equal(res.redirectUrl, '/confirmation?status=expired');
+});
+
+test('userConfirmation redirects malformed links to invalid guidance', async (t) => {
+    const harness = loadController({ tokenDecode: () => null });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.userConfirmation({ query: { token: 'invalid-token' } }, res);
+
+    assert.equal(res.redirectUrl, '/confirmation?status=invalid');
 });
 
 test('userLogin persists consent when it auto-registers a new user', async (t) => {

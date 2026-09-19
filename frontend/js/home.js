@@ -22,10 +22,19 @@ const loginBtn = document.getElementById('loginBtn');
 const pageLoadingOverlay = document.getElementById('pageLoadingOverlay');
 
 // tabs
+const tabHeader = document.querySelector('.tab-header');
 const tabLogin = document.getElementById('tabLogin');
 const tabSignup = document.getElementById('tabSignup');
 const loginPanel = document.getElementById('loginPanel');
 const signupPanel = document.getElementById('signupPanel');
+const pendingConfirmationPanel = document.getElementById('pendingConfirmationPanel');
+const pendingConfirmationEmail = document.getElementById('pendingConfirmationEmail');
+const pendingConfirmationStatus = document.getElementById('pendingConfirmationStatus');
+const resendConfirmationBtn = document.getElementById('resendConfirmationBtn');
+const changeConfirmationEmailBtn = document.getElementById('changeConfirmationEmailBtn');
+const pendingSignInBtn = document.getElementById('pendingSignInBtn');
+let pendingRegistration = null;
+let resendCountdownTimer = null;
 
 // branding
 const brandName = document.getElementById('brandName');
@@ -82,7 +91,7 @@ loginPasswordIdInput.value = '';
 // Tab switching
 tabLogin.addEventListener('click', () => switchTab('login'));
 tabSignup.addEventListener('click', () => switchTab('signup'));
-document.querySelector('.tab-header').addEventListener('keydown', (event) => {
+tabHeader.addEventListener('keydown', (event) => {
     if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
     event.preventDefault();
     const nextTab = event.key === 'ArrowLeft' || event.key === 'Home' ? tabLogin : tabSignup;
@@ -154,6 +163,9 @@ function loginAsDemo() {
 
 function switchTab(tab) {
     const showLogin = tab === 'login';
+    tabHeader.hidden = false;
+    pendingConfirmationPanel.hidden = true;
+    pendingConfirmationPanel.classList.remove('active');
     tabLogin.classList.toggle('active', showLogin);
     tabSignup.classList.toggle('active', !showLogin);
     tabLogin.setAttribute('aria-selected', String(showLogin));
@@ -317,8 +329,7 @@ function signupOrLogin(data) {
             console.log('[API] - USER LOGIN RESPONSE', res);
             if (res.pending) {
                 pageLoadingOverlay.hidden = true;
-                showPendingConfirmation(data.email);
-                switchTab('login');
+                showPendingConfirmation(data);
                 return;
             }
             if (res.message) {
@@ -341,28 +352,74 @@ function signupOrLogin(data) {
         });
 }
 
-function showPendingConfirmation(email) {
-    Swal.fire({
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        position: 'top',
-        icon: 'success',
-        title: 'Check your inbox',
-        html: `
-            <p class="pending-email-copy">We sent a confirmation link to <strong>${escapeHtml(email)}</strong>.</p>
-            <p class="pending-email-hint">Open the link to activate your account. If it is not there, check your spam or junk folder.</p>
-        `,
-        confirmButtonText: 'Got it',
-        showClass: { popup: 'animate__animated animate__fadeInDown' },
-        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-    });
+function showPendingConfirmation(data) {
+    pendingRegistration = { ...data };
+    pendingConfirmationEmail.textContent = data.email;
+    pendingConfirmationStatus.textContent = '';
+    tabHeader.hidden = true;
+    loginPanel.hidden = true;
+    signupPanel.hidden = true;
+    loginPanel.classList.remove('active');
+    signupPanel.classList.remove('active');
+    pendingConfirmationPanel.hidden = false;
+    pendingConfirmationPanel.classList.add('active');
+    startResendCountdown();
 }
 
-function escapeHtml(value) {
-    const element = document.createElement('span');
-    element.textContent = value;
-    return element.innerHTML;
+function startResendCountdown(seconds = 30) {
+    clearInterval(resendCountdownTimer);
+    let secondsRemaining = seconds;
+    resendConfirmationBtn.disabled = true;
+    resendConfirmationBtn.innerHTML = `<i class="uil uil-clock"></i> Resend in ${secondsRemaining}s`;
+    resendCountdownTimer = setInterval(() => {
+        secondsRemaining -= 1;
+        if (secondsRemaining > 0) {
+            resendConfirmationBtn.innerHTML = `<i class="uil uil-clock"></i> Resend in ${secondsRemaining}s`;
+            return;
+        }
+        clearInterval(resendCountdownTimer);
+        resendConfirmationBtn.disabled = false;
+        resendConfirmationBtn.innerHTML = '<i class="uil uil-envelope-redo"></i> Resend confirmation';
+    }, 1000);
 }
+
+resendConfirmationBtn.addEventListener('click', async () => {
+    if (!pendingRegistration) return;
+    resendConfirmationBtn.disabled = true;
+    resendConfirmationBtn.innerHTML = '<i class="uil uil-sync"></i> Sending...';
+    pendingConfirmationStatus.textContent = '';
+    pendingConfirmationStatus.classList.remove('error');
+    try {
+        const response = await userResendConfirmation(pendingRegistration);
+        pendingConfirmationStatus.textContent = response.message;
+        startResendCountdown();
+    } catch (error) {
+        const response = error.response?.data;
+        pendingConfirmationStatus.textContent = response?.message || 'Unable to resend right now. Please try again.';
+        pendingConfirmationStatus.classList.add('error');
+        if (response?.confirmed) {
+            resendConfirmationBtn.hidden = true;
+            return;
+        }
+        resendConfirmationBtn.disabled = false;
+        resendConfirmationBtn.innerHTML = '<i class="uil uil-envelope-redo"></i> Try again';
+    }
+});
+
+changeConfirmationEmailBtn.addEventListener('click', () => {
+    clearInterval(resendCountdownTimer);
+    switchTab('signup');
+    signupEmailIdInput.focus();
+    signupEmailIdInput.select();
+});
+
+pendingSignInBtn.addEventListener('click', () => {
+    clearInterval(resendCountdownTimer);
+    loginUsernameInput.value = pendingRegistration?.username || '';
+    loginEmailIdInput.value = pendingRegistration?.email || '';
+    switchTab('login');
+    loginPasswordIdInput.focus();
+});
 
 function elementDisplay(elem, display) {
     if (!elem) return;

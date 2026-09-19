@@ -50,7 +50,7 @@ async function userCreate(req, res) {
             if (nodemailer.EMAIL_VERIFICATION) {
                 log.debug('New user, send email confirmation');
                 const confirmationCode = `?token=${token}`;
-                nodemailer.sendConfirmationEmail(username, email, confirmationCode);
+                await nodemailer.sendConfirmationEmail(username, email, confirmationCode);
                 log.debug('New user, sent email confirmation');
                 return res.status(201).send({
                     pending: true,
@@ -195,7 +195,7 @@ async function userLogin(req, res) {
                 });
                 log.debug('New user, send email confirmation');
                 const confirmationCode = `?token=${confirmationToken}`;
-                nodemailer.sendConfirmationEmail(username, email, confirmationCode);
+                await nodemailer.sendConfirmationEmail(username, email, confirmationCode);
                 log.debug('User login, sent email confirmation');
                 return res.status(201).send({
                     pending: true,
@@ -357,6 +357,7 @@ async function userConfirmation(req, res) {
         log.debug('userConfirmation query', req.query);
         const { token } = req.query;
         const decoded = utils.tokenDecode(token);
+        if (!decoded) return res.redirect('/confirmation?status=invalid');
         log.debug('User confirmation token decoded', decoded);
         const userFindOne = await User.findOne({ email: decoded.email, username: decoded.username });
         if (!userFindOne || Object.keys(userFindOne).length === 0) {
@@ -380,14 +381,7 @@ async function userConfirmation(req, res) {
             res.redirect('/confirmation?status=success');
             if (nodemailer.EMAIL_VERIFICATION) {
                 log.debug('Send email to the user');
-                const safeData = { ...userSaveData.toObject() };
-                delete safeData.password;
-                delete safeData.token;
-                nodemailer.sendConfirmationOkEmail(
-                    userSaveData.username,
-                    userSaveData.email,
-                    JSON.stringify(safeData, null, 4)
-                );
+                nodemailer.sendConfirmationOkEmail(userSaveData.username, userSaveData.email);
             }
         } else {
             log.debug('User already confirmed');
@@ -395,7 +389,40 @@ async function userConfirmation(req, res) {
         }
     } catch (error) {
         log.error('confirmationUser', error);
+        if (error.name === 'TokenExpiredError') return res.redirect('/confirmation?status=expired');
+        if (error.name === 'JsonWebTokenError' || error.name === 'SyntaxError') {
+            return res.redirect('/confirmation?status=invalid');
+        }
         res.redirect('/confirmation?status=error');
+    }
+}
+
+async function userResendConfirmation(req, res) {
+    try {
+        if (!nodemailer.EMAIL_VERIFICATION) {
+            return res.status(400).json({ message: 'Email confirmation is not required.' });
+        }
+
+        const { email, username, password } = req.body;
+        const legalConsent = getLegalConsent(req.body);
+        if (!email || !username || !password || !legalConsent) {
+            return res.status(400).json({ message: 'Valid registration details and consent are required.' });
+        }
+
+        const userFindOne = await User.findOne({ email, username });
+        if (userFindOne && Object.keys(userFindOne).length > 0) {
+            return res.status(409).json({ confirmed: true, message: 'This account is already confirmed.' });
+        }
+
+        const token = utils.tokenEncode({ username, email, password, ...legalConsent });
+        await nodemailer.sendConfirmationEmail(username, email, `?token=${token}`);
+        return res.status(200).json({
+            pending: true,
+            message: 'A new confirmation link has been sent.',
+        });
+    } catch (error) {
+        log.error('userResendConfirmation', error);
+        res.status(400).json({ message: 'We could not resend the confirmation email. Please try again.' });
     }
 }
 
@@ -695,6 +722,7 @@ module.exports = {
     userRoomsAllowed,
     userIsRoomAllowed,
     userConfirmation,
+    userResendConfirmation,
     userGetAll,
     userGet,
     userGetMe,

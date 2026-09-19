@@ -290,6 +290,28 @@
                             <button id="switchToLoginLink" type="button">Sign in</button>
                         </p>
                     </form>
+
+                    <section id="pendingConfirmationPanel" class="tab-panel pending-confirmation" hidden>
+                        <div class="pending-confirmation-icon" aria-hidden="true">
+                            <i class="uil uil-envelope-check"></i>
+                        </div>
+                        <h2>Check your inbox</h2>
+                        <p>
+                            We sent a confirmation link to
+                            <strong id="pendingConfirmationEmail"></strong>
+                        </p>
+                        <p class="pending-confirmation-hint">
+                            Open the link to activate your account. Check your spam or junk folder if you do not see it.
+                        </p>
+                        <p id="pendingConfirmationStatus" class="pending-confirmation-status" aria-live="polite"></p>
+                        <button id="resendConfirmationBtn" class="pending-primary" type="button">
+                            <i class="uil uil-envelope-redo"></i> Resend confirmation
+                        </button>
+                        <div class="pending-confirmation-actions">
+                            <button id="changeConfirmationEmailBtn" type="button">Change email</button>
+                            <button id="pendingSignInBtn" type="button">Sign in</button>
+                        </div>
+                    </section>
                 </div>
 
                 <div class="auth-badges">

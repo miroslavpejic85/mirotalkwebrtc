@@ -14,6 +14,7 @@ const EMAIL_USERNAME = process.env.EMAIL_USERNAME;
 const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
 const EMAIL_FROM = process.env.EMAIL_FROM || EMAIL_USERNAME;
 const EMAIL_VERIFICATION = process.env.EMAIL_VERIFICATION === 'true' || false;
+const CONFIRMATION_LINK_EXPIRY = process.env.JWT_EXP || 'the configured security period';
 const SUPPORT =
     'https://codecanyon.net/item/mirotalk-webrtc-ultimate-bundle-for-seamless-live-smart-communication/47976343'; // Thank you!
 
@@ -235,91 +236,56 @@ function getUpgradeMessage(pricingUrl = `${SERVER_URL}/pricing`) {
 
 function sendConfirmationEmail(name, email, confirmationCode) {
     const confirmationUrl = `${SERVER_URL}/api/v1/user/confirmation/${confirmationCode}`;
-    transport
-        .sendMail({
-            from: EMAIL_USERNAME,
-            to: email,
-            subject: 'MiroTalk WEB - Please confirm your email',
-            html: `
-                <h1>Email Confirmation</h1>
-                <h2>Hello ${escapeHtml(name)}</h2>
-                <p>Thank you for creating your MiroTalk account. Please confirm your email address to activate it.</p>
-                <a href="${safeUrlAttr(confirmationUrl)}" style="background-color: #376df9; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Confirm email</a>
-                <p>If you did not create this account, you can safely ignore this email.</p>
+    const safeName = escapeHtml(name);
+    const safeConfirmationUrl = safeUrlAttr(confirmationUrl);
+    return transport.sendMail({
+        from: EMAIL_FROM,
+        to: email,
+        subject: 'Confirm your email | MiroTalk',
+        text: `Hello ${name},\n\nConfirm your email to activate your MiroTalk account:\n${confirmationUrl}\n\nThis link expires after ${CONFIRMATION_LINK_EXPIRY}. If you did not create this account, you can ignore this email.`,
+        html: `
+                <div style="background:#f3f6fb;padding:32px 16px;font-family:Arial,sans-serif;color:#172033;">
+                    <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #dfe5ee;border-radius:8px;overflow:hidden;">
+                        <div style="padding:24px 32px;border-bottom:1px solid #e8ecf2;font-size:20px;font-weight:700;color:#2457d6;">MiroTalk</div>
+                        <div style="padding:32px;">
+                            <h1 style="margin:0 0 16px;font-size:26px;line-height:1.25;color:#172033;">Confirm your email</h1>
+                            <p style="margin:0 0 12px;line-height:1.6;">Hello ${safeName},</p>
+                            <p style="margin:0 0 24px;line-height:1.6;">Confirm your email address to activate your account and start using MiroTalk.</p>
+                            <a href="${safeConfirmationUrl}" style="display:inline-block;background:#2457d6;color:#ffffff;padding:13px 22px;text-decoration:none;border-radius:6px;font-weight:700;">Confirm email address</a>
+                            <p style="margin:24px 0 8px;font-size:13px;line-height:1.6;color:#5e6878;">This link expires after ${escapeHtml(CONFIRMATION_LINK_EXPIRY)}.</p>
+                            <p style="margin:0;font-size:13px;line-height:1.6;color:#5e6878;">If the button does not work, paste this link into your browser:<br/><a href="${safeConfirmationUrl}" style="color:#2457d6;word-break:break-all;">${safeConfirmationUrl}</a></p>
+                        </div>
+                        <div style="padding:20px 32px;background:#f8fafc;font-size:12px;line-height:1.6;color:#6b7280;">If you did not create this account, you can safely ignore this email.</div>
+                    </div>
+                </div>
             `,
-        })
-        .catch((err) => log.error(err));
+    });
 }
 
-function sendConfirmationOkEmail(name, toEmail, credential) {
-    const credentialObj = JSON.parse(credential);
-    const { role, email, username, active, allow, allowedRooms, createdAt, updatedAt } = credentialObj;
-    log.debug('sendConfirmationOkEmail', credentialObj);
-    transport
+function sendConfirmationOkEmail(name, toEmail) {
+    const signInUrl = `${SERVER_URL}/`;
+    const safeName = escapeHtml(name);
+    const safeSignInUrl = safeUrlAttr(signInUrl);
+    return transport
         .sendMail({
             from: EMAIL_FROM,
             to: toEmail,
-            subject: 'MiroTalk WEB - Email confirmed',
+            subject: 'Your MiroTalk account is ready',
+            text: `Hello ${name},\n\nYour email is confirmed and your MiroTalk account is ready. Sign in to create or schedule your first meeting:\n${signInUrl}`,
             html: `
-                <h1>Email Confirmed</h1>
-                <h2>Hello ${name}</h2>
-                <p>Thank you for confirmation. Here your account info</p>
-                <style>
-                    table {
-                        font-family: arial, sans-serif;
-                        border-collapse: collapse;
-                        width: 100%;
-                    }
-                    td {
-                        border: 1px solid #dddddd;
-                        text-align: left;
-                        padding: 8px;
-                    }
-                    tr:nth-child(even) {
-                        background-color: #dddddd;
-                    }
-                </style>
-                <table>
-                    <tr>
-                        <td>Role</td>
-                        <td>${role}</td>
-                    </tr>
-                    <tr>
-                        <td>Email</td>
-                        <td>${email}</td>
-                    </tr>
-                    <tr>
-                        <td>Username</td>
-                        <td>${username}</td>
-                    </tr>
-                    <tr>
-                        <td>Active</td>
-                        <td>${active}</td>
-                    </tr>
-                    <tr>
-                        <td>Allowed services</td>
-                        <td>${allow}</td>
-                    </tr>
-                    <tr>
-                        <td>Allowed rooms</td>
-                        <td>${allowedRooms}</td>
-                    </tr>
-                    <tr>
-                        <td>Created at</td>
-                        <td>${createdAt}</td>
-                    </tr>
-                    <tr>
-                        <td>Updated at</td>
-                        <td>${updatedAt}</td>
-                    </tr>
-                </table>
-                <br/>
-                <p>Home page</p>
-                <a href="${SERVER_URL}" target="_blank">${SERVER_URL}</a>
-                <br/> 
-                ${getUpgradeMessage()}
-                <p>Thank you for your support!</p> 
-                <p>MiroTalk Team</p>
+                <div style="background:#f3f6fb;padding:32px 16px;font-family:Arial,sans-serif;color:#172033;">
+                    <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #dfe5ee;border-radius:8px;overflow:hidden;">
+                        <div style="padding:24px 32px;border-bottom:1px solid #e8ecf2;font-size:20px;font-weight:700;color:#2457d6;">MiroTalk</div>
+                        <div style="padding:32px;">
+                            <div style="font-size:32px;line-height:1;margin-bottom:18px;color:#15803d;">&#10003;</div>
+                            <h1 style="margin:0 0 16px;font-size:26px;line-height:1.25;color:#172033;">Your account is ready</h1>
+                            <p style="margin:0 0 12px;line-height:1.6;">Hello ${safeName},</p>
+                            <p style="margin:0 0 24px;line-height:1.6;">Your email is confirmed. Sign in to create a meeting room, schedule a call, or invite your team.</p>
+                            <a href="${safeSignInUrl}" style="display:inline-block;background:#2457d6;color:#ffffff;padding:13px 22px;text-decoration:none;border-radius:6px;font-weight:700;">Sign in to MiroTalk</a>
+                        </div>
+                        <div style="padding:20px 32px;background:#f8fafc;font-size:12px;line-height:1.6;color:#6b7280;">You received this message because your MiroTalk email address was confirmed.</div>
+                    </div>
+                </div>
             `,
         })
         .catch((err) => log.error(err));

@@ -61,10 +61,9 @@
                     <div class="form-icon-circle success">
                         <i class="uil uil-check-circle" aria-hidden="true"></i>
                     </div>
-                    <h1>Registration Confirmed!</h1>
+                    <h1>Email confirmed</h1>
                     <p class="form-desc">
-                        Your email has been verified and your account is now active. You can log in with your
-                        credentials.
+                        Your account is active and ready. Sign in to create or schedule your first meeting.
                     </p>
                     <a class="primary-link confirmation-cta" href="/"
                         ><i class="uil uil-sign-in-alt" aria-hidden="true"></i> Continue to Sign in</a
@@ -76,7 +75,7 @@
                     <div class="form-icon-circle warning">
                         <i class="uil uil-info-circle" aria-hidden="true"></i>
                     </div>
-                    <h1>Already Confirmed</h1>
+                    <h1>Already confirmed</h1>
                     <p class="form-desc">
                         This account has already been confirmed. You can log in with your credentials.
                     </p>
@@ -85,19 +84,44 @@
                     >
                 </div>
 
-                <!-- Error -->
+                <!-- Expired -->
+                <div id="statusExpired" class="confirmation-status">
+                    <div class="form-icon-circle warning">
+                        <i class="uil uil-clock" aria-hidden="true"></i>
+                    </div>
+                    <h1>Confirmation link expired</h1>
+                    <p class="form-desc">
+                        For your security, confirmation links are time-limited. Request a new link to continue.
+                    </p>
+                    <a class="primary-link confirmation-cta" href="/?signup=1"
+                        ><i class="uil uil-envelope-redo" aria-hidden="true"></i> Request a new link</a
+                    >
+                </div>
+
+                <!-- Invalid -->
+                <div id="statusInvalid" class="confirmation-status">
+                    <div class="form-icon-circle error">
+                        <i class="uil uil-link-broken" aria-hidden="true"></i>
+                    </div>
+                    <h1>Invalid confirmation link</h1>
+                    <p class="form-desc">
+                        This link is incomplete or no longer valid. Check that you opened the full link from your email.
+                    </p>
+                    <a class="primary-link confirmation-cta" href="/?signup=1"
+                        ><i class="uil uil-envelope-redo" aria-hidden="true"></i> Request a new link</a
+                    >
+                </div>
+
+                <!-- Server error -->
                 <div id="statusError" class="confirmation-status">
                     <div class="form-icon-circle error">
                         <i class="uil uil-exclamation-triangle" aria-hidden="true"></i>
                     </div>
-                    <h1>Confirmation Failed</h1>
+                    <h1>We could not confirm your email</h1>
                     <p class="form-desc">
-                        Something went wrong during confirmation. The link may be invalid or expired. Please try
-                        registering again.
+                        A temporary problem interrupted confirmation. Open the link from your email again in a moment.
                     </p>
-                    <a class="primary-link" href="/"
-                        ><i class="uil uil-user-plus" aria-hidden="true"></i> Return to Registration</a
-                    >
+                    <a class="primary-link" href="/"><i class="uil uil-home" aria-hidden="true"></i> Return home</a>
                 </div>
             </div>
         </main>

@@ -220,35 +220,44 @@ paths:
                 '400':
                     description: Bad request
 
-    /user/confirmation/{token}:
+    /user/confirmation:
         get:
-            security:
-                - authorization: []
             tags:
                 - user
-            summary: User confirmation
-            description: This can only be done by the logged in user.
+            summary: Confirm a user email address
+            description: Validates the emailed confirmation token and redirects to the matching confirmation result page.
             operationId: userConfirmation
             parameters:
                 - name: token
-                  in: path
-                  description: 'The id needs to be fetched.'
+                  in: query
+                  description: Signed confirmation token sent by email.
                   required: true
                   schema:
                       type: string
             responses:
+                '302':
+                    description: Redirects to a success, already confirmed, expired, invalid, or error result page.
+
+    /user/confirmation/resend:
+        post:
+            tags:
+                - user
+            summary: Resend a confirmation email
+            description: Issues a fresh confirmation link for a pending registration.
+            operationId: userResendConfirmation
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UserReq'
+            responses:
                 '200':
-                    description: successful operation
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/UserRes'
+                    description: A new confirmation link was sent.
                 '400':
-                    description: Bad request
-                '403':
-                    description: Forbidden
+                    description: Invalid registration details or email delivery failed.
                 '409':
-                    description: Already confirmed
+                    description: The account is already confirmed.
 
     /user/admin-create:
         post:

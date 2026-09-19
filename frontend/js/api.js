@@ -43,6 +43,14 @@ function userConfirmation(token) {
     }).then((response) => response.data);
 }
 
+function userResendConfirmation(data) {
+    return axios({
+        method: 'POST',
+        url: `${apiPath}/user/confirmation/resend`,
+        data: data,
+    }).then((response) => response.data);
+}
+
 function userGetAll() {
     return axios({
         method: 'GET',

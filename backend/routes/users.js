@@ -41,8 +41,13 @@ router.get('/user/demo-config', loginLimiter, (req, res) => {
 });
 
 //GET: /api/v1/user/confirmation/?token=<token>
-router.get('/user/confirmation', auth, (req, res) => {
+router.get('/user/confirmation', (req, res) => {
     controllersUsers.userConfirmation(req, res);
+});
+
+//POST: /api/v1/user/confirmation/resend
+router.post('/user/confirmation/resend', registrationLimiter, validator, (req, res) => {
+    controllersUsers.userResendConfirmation(req, res);
 });
 
 //GET: /api/v1/user/me (current authenticated user)
