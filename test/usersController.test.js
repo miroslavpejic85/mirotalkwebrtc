@@ -30,8 +30,10 @@ function loadController(overrides = {}) {
         createdUsers.push(this);
     }
     User.findOne = overrides.userFindOne || (async () => null);
+    User.find = overrides.userFind || (async () => []);
     User.findById = overrides.userFindById || (async () => null);
     User.findByIdAndDelete = overrides.userFindByIdAndDelete || (async () => null);
+    User.deleteMany = overrides.userDeleteMany || (async () => ({ deletedCount: 0 }));
     User.prototype.save = async function () {
         this._id = 'user_new';
         return this;
@@ -341,4 +343,73 @@ test('userDelete keeps the account when associated data cleanup fails', async (t
 
     assert.equal(res.statusCode, 400);
     assert.equal(accountDeleted, false);
+});
+
+test('userDeleteRegularUsers preserves admins, demo, and active subscription accounts', async (t) => {
+    const previousDemoEmail = process.env.USER_DEMO_EMAIL;
+    const previousDemoUsername = process.env.USER_DEMO_USERNAME;
+    process.env.USER_DEMO_EMAIL = 'demo@example.com';
+    process.env.USER_DEMO_USERNAME = 'demo';
+    t.after(() => {
+        if (previousDemoEmail === undefined) delete process.env.USER_DEMO_EMAIL;
+        else process.env.USER_DEMO_EMAIL = previousDemoEmail;
+        if (previousDemoUsername === undefined) delete process.env.USER_DEMO_USERNAME;
+        else process.env.USER_DEMO_USERNAME = previousDemoUsername;
+    });
+
+    let findQuery;
+    let deleteQuery;
+    const associatedQueries = [];
+    const users = [
+        { _id: 'user_1', email: 'one@example.com' },
+        { _id: 'user_2', email: 'two@example.com' },
+    ];
+    const model = (name) => ({
+        deleteMany: async (query) => {
+            associatedQueries.push({ name, query });
+            return { deletedCount: 0 };
+        },
+    });
+    const harness = loadController({
+        userFind: async (query) => {
+            findQuery = query;
+            return users;
+        },
+        userDeleteMany: async (query) => {
+            deleteQuery = query;
+            return { deletedCount: 2 };
+        },
+        Room: model('rooms'),
+        Booking: model('bookings'),
+        BookingProfile: model('bookingProfiles'),
+        Event: model('events'),
+        EmailInvitation: model('emailInvitations'),
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.userDeleteRegularUsers({}, res);
+
+    assert.deepEqual(findQuery.role, { $ne: 'admin' });
+    assert.deepEqual(findQuery.$nor.slice(0, 3), [
+        { email: { $in: ['demo@example.com', 'demo'] } },
+        { username: { $in: ['demo@example.com', 'demo'] } },
+        { subscriptionStatus: 'active', subscriptionType: 'lifetime' },
+    ]);
+    assert.deepEqual(findQuery.$nor[3].subscriptionStatus, 'active');
+    assert.deepEqual(findQuery.$nor[3].subscriptionType, { $in: ['monthly', 'yearly'] });
+    assert.deepEqual(findQuery.$nor[3].$or[0], { subscriptionExpiresAt: null });
+    assert.ok(findQuery.$nor[3].$or[1].subscriptionExpiresAt.$gt instanceof Date);
+    assert.deepEqual(
+        associatedQueries,
+        ['rooms', 'bookings', 'bookingProfiles', 'events', 'emailInvitations'].map((name) => ({
+            name,
+            query: { userId: { $in: ['user_1', 'user_2'] } },
+        }))
+    );
+    assert.deepEqual(deleteQuery, { _id: { $in: ['user_1', 'user_2'] } });
+    assert.deepEqual(res.body, {
+        message: '2 users and their associated data have been deleted',
+        deletedCount: 2,
+    });
 });

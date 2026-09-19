@@ -84,10 +84,10 @@ function userDelete(id) {
     }).then((response) => response.data);
 }
 
-function userDeleteALL() {
+function userDeleteRegularUsers() {
     return axios({
         method: 'DELETE',
-        url: `${apiPath}/user/deleteALL`,
+        url: `${apiPath}/user/regular-users`,
         headers: headers,
     }).then((response) => response.data);
 }

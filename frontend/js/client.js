@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.30
+ * @version 1.7.31
  */
 
 const userAgent = navigator.userAgent;
@@ -206,6 +206,7 @@ const addUserPlan = document.getElementById('add-user-plan');
 const addUserExpiry = document.getElementById('add-user-expiry');
 const addUserExpiryField = document.getElementById('add-user-expiry-field');
 const addUserBtn = document.getElementById('add-user-btn');
+const deleteUsersBtn = document.getElementById('delete-users-btn');
 const refreshUsersBtn = document.getElementById('refresh-users-btn');
 
 const myTable = document.getElementById('myTable');
@@ -1127,6 +1128,9 @@ refreshUsersBtn.addEventListener('click', () => {
     loadUsers();
     popupMessage('toast', 'Users refreshed');
 });
+deleteUsersBtn.addEventListener('click', () => {
+    deleteRegularUsers();
+});
 
 document.getElementById('usersSearchInput').addEventListener('keyup', function () {
     usersDataTable.search(this.value).draw();
@@ -1682,6 +1686,42 @@ function deleteUser(id) {
                     popupMessage('error', `Failed to delete user: ${err.message}`);
                 });
         }
+    });
+}
+
+function deleteRegularUsers() {
+    Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        position: 'top',
+        icon: 'warning',
+        title: 'Delete all regular users?',
+        text: 'This permanently deletes every non-admin, non-demo user without an active subscription, including all their associated data. Admin, demo, active lifetime, and active unexpired monthly or annual accounts will be kept.',
+        showDenyButton: true,
+        reverseButtons: true,
+        confirmButtonText: 'Delete users',
+        denyButtonText: 'Cancel',
+        confirmButtonColor: '#ff4d4d',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        deleteUsersBtn.disabled = true;
+        userDeleteRegularUsers()
+            .then((res) => {
+                console.log('[API] - REGULAR USERS DELETE RESPONSE', res);
+                popupMessage('toast', res.message);
+                loadUsers();
+                loadDashboardStats();
+            })
+            .catch((err) => {
+                console.error('[API] - REGULAR USERS DELETE ERROR', err);
+                popupMessage('error', `Failed to delete users: ${err.message}`);
+            })
+            .finally(() => {
+                deleteUsersBtn.disabled = false;
+            });
     });
 }
 

@@ -3406,6 +3406,18 @@ body.dark .addRowDiv .service-card.selected:hover .service-card-desc {
     border-color: var(--accent-color);
 }
 
+.custom-button-danger {
+    color: #fff;
+    background: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+.custom-button.custom-button-danger:hover {
+    background: #d93636;
+    border-color: #d93636;
+    color: #fff;
+}
+
 .custom-button:hover {
     background: var(--color-hover);
     transition: var(--tran-05);
@@ -4639,7 +4651,7 @@ body.dark .top-workspace .demo-badge {
 
 .users-btn-group {
     display: grid;
-    grid-template-columns: 240px max-content 44px;
+    grid-template-columns: 240px max-content 44px 44px;
     align-items: center;
     flex: 0 0 auto;
 }
@@ -6038,7 +6050,7 @@ body.dark #usersTable td .user-plan-badge.yearly {
 
 .users-btn-group {
     display: grid;
-    grid-template-columns: 240px max-content 44px;
+    grid-template-columns: 240px max-content 44px 44px;
     align-items: center;
     flex: 0 0 auto;
 }
@@ -6074,7 +6086,7 @@ body.dark #usersTable td .user-plan-badge.yearly {
 
     .users-btn-group {
         width: 100%;
-        grid-template-columns: minmax(0, 1fr) 44px;
+        grid-template-columns: minmax(0, 1fr) 44px 44px;
     }
 
     .users-plan-filter {
@@ -6088,6 +6100,10 @@ body.dark #usersTable td .user-plan-badge.yearly {
 
     #refresh-users-btn {
         grid-column: 2;
+    }
+
+    #delete-users-btn {
+        grid-column: 3;
     }
 }
 

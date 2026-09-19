@@ -55,6 +55,11 @@ router.get('/user/all', admin, (req, res) => {
     controllersUsers.userGetAll(req, res);
 });
 
+//DELETE: /api/v1/user/regular-users (admin only)
+router.delete('/user/regular-users', admin, (req, res) => {
+    controllersUsers.userDeleteRegularUsers(req, res);
+});
+
 //GET: /api/v1/user/id
 router.get('/user/:id', auth, (req, res) => {
     controllersUsers.userGet(req, res);
@@ -68,11 +73,6 @@ router.patch('/user/:id', auth, validator, (req, res) => {
 //DELETE: /api/v1/user/id
 router.delete('/user/:id', auth, (req, res) => {
     controllersUsers.userDelete(req, res);
-});
-
-//DELETE: /api/v1/user/deleteALL
-router.delete('/user/deleteALL', admin, (req, res) => {
-    controllersUsers.userDeleteALL(req, res);
 });
 
 //CREATE: /api/v1/user/admin-create (admin only, skip email verification)
