@@ -388,18 +388,21 @@ test('userDeleteRegularUsers preserves admins, demo, and active subscription acc
     t.after(harness.cleanup);
     const res = createResponse();
 
-    await harness.controller.userDeleteRegularUsers({}, res);
+    await harness.controller.userDeleteRegularUsers(
+        { user: { email: 'configured-admin@example.com', username: 'configured-admin' } },
+        res
+    );
 
     assert.deepEqual(findQuery.role, { $ne: 'admin' });
-    assert.deepEqual(findQuery.$nor.slice(0, 3), [
-        { email: { $in: ['demo@example.com', 'demo'] } },
-        { username: { $in: ['demo@example.com', 'demo'] } },
+    assert.deepEqual(findQuery.$nor.slice(0, 4), [
+        { email: 'demo@example.com' },
+        { username: 'demo' },
+        { email: 'configured-admin@example.com' },
         { subscriptionStatus: 'active', subscriptionType: 'lifetime' },
     ]);
-    assert.deepEqual(findQuery.$nor[3].subscriptionStatus, 'active');
-    assert.deepEqual(findQuery.$nor[3].subscriptionType, { $in: ['monthly', 'yearly'] });
-    assert.deepEqual(findQuery.$nor[3].$or[0], { subscriptionExpiresAt: null });
-    assert.ok(findQuery.$nor[3].$or[1].subscriptionExpiresAt.$gt instanceof Date);
+    assert.deepEqual(findQuery.$nor[4].subscriptionStatus, 'active');
+    assert.deepEqual(findQuery.$nor[4].subscriptionType, { $in: ['monthly', 'yearly'] });
+    assert.ok(findQuery.$nor[4].subscriptionExpiresAt.$gt instanceof Date);
     assert.deepEqual(
         associatedQueries,
         ['rooms', 'bookings', 'bookingProfiles', 'events', 'emailInvitations'].map((name) => ({
@@ -412,4 +415,52 @@ test('userDeleteRegularUsers preserves admins, demo, and active subscription acc
         message: '2 users and their associated data have been deleted',
         deletedCount: 2,
     });
+});
+
+test('userDeleteRegularUsers retains user records when billing cleanup fails', async (t) => {
+    let usersDeleted = false;
+    const harness = loadController({
+        userFind: async () => [{ _id: 'user_1', email: 'one@example.com' }],
+        userDeleteMany: async () => {
+            usersDeleted = true;
+            return { deletedCount: 1 };
+        },
+        stripeLib: {
+            cleanupUserBilling: async () => {
+                throw new Error('Stripe unavailable');
+            },
+        },
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.userDeleteRegularUsers({ user: { email: 'admin@example.com', username: 'admin' } }, res);
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(usersDeleted, false);
+    assert.deepEqual(res.body, { message: 'Stripe unavailable' });
+});
+
+test('userDeleteRegularUsers retains user records when associated data cleanup fails', async (t) => {
+    let usersDeleted = false;
+    const harness = loadController({
+        userFind: async () => [{ _id: 'user_1', email: 'one@example.com' }],
+        userDeleteMany: async () => {
+            usersDeleted = true;
+            return { deletedCount: 1 };
+        },
+        Event: {
+            deleteMany: async () => {
+                throw new Error('MongoDB unavailable');
+            },
+        },
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.userDeleteRegularUsers({ user: { email: 'admin@example.com', username: 'admin' } }, res);
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(usersDeleted, false);
+    assert.deepEqual(res.body, { message: 'MongoDB unavailable' });
 });

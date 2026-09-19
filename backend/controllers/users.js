@@ -552,16 +552,15 @@ async function userDelete(req, res) {
 
 async function userDeleteRegularUsers(req, res) {
     try {
-        const protectedIdentities = [USER_DEMO.email, USER_DEMO.username].filter(Boolean);
         const protectedAccounts = [
-            ...(protectedIdentities.length > 0
-                ? [{ email: { $in: protectedIdentities } }, { username: { $in: protectedIdentities } }]
-                : []),
+            ...(USER_DEMO.email ? [{ email: USER_DEMO.email }] : []),
+            ...(USER_DEMO.username ? [{ username: USER_DEMO.username }] : []),
+            ...(req.user?.email ? [{ email: req.user.email }] : []),
             { subscriptionStatus: 'active', subscriptionType: 'lifetime' },
             {
                 subscriptionStatus: 'active',
                 subscriptionType: { $in: ['monthly', 'yearly'] },
-                $or: [{ subscriptionExpiresAt: null }, { subscriptionExpiresAt: { $gt: new Date() } }],
+                subscriptionExpiresAt: { $gt: new Date() },
             },
         ];
         const query = {
@@ -575,6 +574,9 @@ async function userDeleteRegularUsers(req, res) {
         }
 
         const userIds = users.map((user) => String(user._id));
+        for (const user of users) {
+            await stripeLib.cleanupUserBilling(user);
+        }
         await Promise.all([
             Room.deleteMany({ userId: { $in: userIds } }),
             Booking.deleteMany({ userId: { $in: userIds } }),
@@ -582,7 +584,6 @@ async function userDeleteRegularUsers(req, res) {
             Event.deleteMany({ userId: { $in: userIds } }),
             EmailInvitation.deleteMany({ userId: { $in: userIds } }),
         ]);
-        await Promise.all(users.map((user) => stripeLib.cleanupUserBilling(user)));
         const result = await User.deleteMany({ _id: { $in: users.map((user) => user._id) } });
 
         return res.json({

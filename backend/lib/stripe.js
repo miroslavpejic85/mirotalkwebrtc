@@ -173,6 +173,7 @@ async function cleanupUserBilling(user) {
             // Ignore "already canceled / not found" so account deletion can proceed.
             if (error?.code !== 'resource_missing') {
                 log.error('cleanupUserBilling: failed to cancel subscription', error);
+                throw error;
             }
         }
     }
@@ -184,6 +185,7 @@ async function cleanupUserBilling(user) {
         } catch (error) {
             if (error?.code !== 'resource_missing') {
                 log.error('cleanupUserBilling: failed to delete customer', error);
+                throw error;
             }
         }
     }

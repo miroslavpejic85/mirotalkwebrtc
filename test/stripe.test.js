@@ -321,3 +321,46 @@ test('retrievePrice loads the configured Stripe Price object', async () => {
     assert.equal(price.unit_amount, 900);
     assert.equal(price.currency, 'usd');
 });
+
+test('cleanupUserBilling cancels the subscription before deleting the customer', async () => {
+    const { lib, fakeStripe } = loadStripeLib({ saasEnabled: true });
+    const operations = [];
+    fakeStripe.subscriptions.cancel = async (id) => operations.push(`subscription:${id}`);
+    fakeStripe.customers.del = async (id) => operations.push(`customer:${id}`);
+
+    await lib.cleanupUserBilling({ stripeSubscriptionId: 'sub_1', stripeCustomerId: 'cus_1' });
+
+    assert.deepEqual(operations, ['subscription:sub_1', 'customer:cus_1']);
+});
+
+test('cleanupUserBilling propagates Stripe failures before deleting the customer', async () => {
+    const { lib, fakeStripe } = loadStripeLib({ saasEnabled: true });
+    let customerDeleted = false;
+    fakeStripe.subscriptions.cancel = async () => {
+        throw new Error('Stripe unavailable');
+    };
+    fakeStripe.customers.del = async () => {
+        customerDeleted = true;
+    };
+
+    await assert.rejects(
+        lib.cleanupUserBilling({ stripeSubscriptionId: 'sub_1', stripeCustomerId: 'cus_1' }),
+        /Stripe unavailable/
+    );
+    assert.equal(customerDeleted, false);
+});
+
+test('cleanupUserBilling tolerates Stripe resources that are already missing', async () => {
+    const { lib, fakeStripe } = loadStripeLib({ saasEnabled: true });
+    const missing = Object.assign(new Error('Resource missing'), { code: 'resource_missing' });
+    fakeStripe.subscriptions.cancel = async () => {
+        throw missing;
+    };
+    fakeStripe.customers.del = async () => {
+        throw missing;
+    };
+
+    await assert.doesNotReject(
+        lib.cleanupUserBilling({ stripeSubscriptionId: 'sub_missing', stripeCustomerId: 'cus_missing' })
+    );
+});
