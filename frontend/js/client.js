@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.50
+ * @version 1.7.55
  */
 
 const userAgent = navigator.userAgent;
@@ -1506,6 +1506,11 @@ function getUserRow(u) {
     userInlineIcons.push(
         `<i id="usave_${u._id}" onclick="saveUser('${u._id}')" class="uil uil-save action-icon" title="Save"></i>`
     );
+    if (u.invitationPending && !isSelf) {
+        userInlineIcons.push(
+            `<button id="uinvite_${u._id}" type="button" onclick="resendUserInvitation('${u._id}')" class="action-icon invite" title="Resend invite" aria-label="Resend invite to ${escapeHtml(u.email)}"><i class="uil uil-envelope-redo" aria-hidden="true"></i></button>`
+        );
+    }
     if (!isSelf) {
         userInlineIcons.push(
             `<i id="udel_${u._id}" onclick="deleteUser('${u._id}')" class="uil uil-trash-alt action-icon danger" title="Delete"></i>`
@@ -1825,6 +1830,38 @@ function promptSendInvitation(username, email) {
         } else {
             popupMessage('toast', 'User created successfully');
         }
+    });
+}
+
+function resendUserInvitation(id) {
+    const username = document.getElementById(`uname_${id}`)?.value;
+    const email = document.getElementById(`uemail_${id}`)?.value;
+    if (!username || !email) return popupMessage('error', 'Unable to identify this user');
+
+    Swal.fire({
+        position: 'top',
+        icon: 'question',
+        title: 'Resend account invitation?',
+        html: `Send <strong>${escapeHtml(email)}</strong> a new password setup link? The previous link will stop working.`,
+        showCancelButton: true,
+        reverseButtons: true,
+        confirmButtonText: '<i class="uil uil-envelope-redo"></i> Resend invite',
+        cancelButtonText: 'Cancel',
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+        const inviteButton = document.getElementById(`uinvite_${id}`);
+        if (inviteButton) btnLoading(inviteButton);
+        userSendInvitation({ username, email })
+            .then(() => {
+                popupMessage('toast', 'A new account setup link was sent');
+                loadUsers();
+            })
+            .catch((err) => {
+                console.error('[API] - RESEND INVITATION ERROR', err);
+                const message = err.response?.data?.message || err.message;
+                popupMessage('error', `Failed to resend invitation: ${message}`);
+                if (inviteButton) btnReset(inviteButton);
+            });
     });
 }
 

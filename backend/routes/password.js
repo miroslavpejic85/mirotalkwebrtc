@@ -138,6 +138,7 @@ router.post('/password/reset/confirm', async (req, res) => {
         user.password = hashedPassword;
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
+        user.accountSetupPending = false;
         await user.save();
 
         log.info('Password reset successful', { email: user.email });
@@ -186,6 +187,9 @@ router.post('/password/change', auth, async (req, res) => {
 
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(newPassword, salt);
+        user.accountSetupPending = false;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
         user.updatedAt = new Date().toISOString();
         await user.save();
 

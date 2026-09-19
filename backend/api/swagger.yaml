@@ -905,6 +905,10 @@ components:
                     type: boolean
                     enum: [true, false]
                     example: true
+                invitationPending:
+                    type: boolean
+                    description: Whether the user still needs to complete password setup from an administrator invitation.
+                    example: false
                 createdAt:
                     type: string
                     example: '2022-12-23T10:35:05.234Z'

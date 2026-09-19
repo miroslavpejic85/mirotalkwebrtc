@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
     active: { type: Boolean, enum: [true, false], default: false },
     resetPasswordToken: { type: String, default: undefined },
     resetPasswordExpires: { type: Date, default: undefined },
+    accountSetupPending: { type: Boolean, default: false },
     subscriptionType: { type: String, enum: ['monthly', 'yearly', 'lifetime', null], default: null },
     subscriptionStatus: { type: String, enum: ['active', 'inactive', 'canceled', null], default: null },
     stripeCustomerId: { type: String, default: undefined },

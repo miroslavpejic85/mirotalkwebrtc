@@ -358,12 +358,17 @@ test('sendInvitation creates a hashed one-time password setup token', async (t) 
     assert.equal(res.body.message, 'Secure account invitation sent successfully');
     assert.equal(user.resetPasswordToken.length, 64);
     assert.ok(user.resetPasswordExpires > Date.now());
+    assert.equal(user.accountSetupPending, true);
     assert.match(invitation.setupUrl, /^https:\/\/meet\.example\.com\/password-reset\?token=/);
     assert.doesNotMatch(invitation.setupUrl, /must-not-be-sent/);
 });
 
-test('sendInvitation removes the setup token when email delivery fails', async (t) => {
+test('sendInvitation preserves the previous setup link when resend delivery fails', async (t) => {
+    const previousExpiry = new Date(Date.now() + 1800000);
     const user = {
+        resetPasswordToken: 'previous-token-hash',
+        resetPasswordExpires: previousExpiry,
+        accountSetupPending: true,
         async save() {},
     };
     const harness = loadController({
@@ -381,8 +386,51 @@ test('sendInvitation removes the setup token when email delivery fails', async (
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, 'Unable to send the account invitation');
-    assert.equal(user.resetPasswordToken, undefined);
-    assert.equal(user.resetPasswordExpires, undefined);
+    assert.equal(user.resetPasswordToken, 'previous-token-hash');
+    assert.equal(user.resetPasswordExpires, previousExpiry);
+    assert.equal(user.accountSetupPending, true);
+});
+
+test('userGetAll exposes invitation status without setup secrets', async (t) => {
+    const users = [
+        {
+            _id: 'user_pending',
+            email: 'pending@example.com',
+            username: 'pending-user',
+            accountSetupPending: true,
+            stripeCustomerId: 'cus_private',
+        },
+        {
+            _id: 'user_ready',
+            email: 'ready@example.com',
+            username: 'ready-user',
+            accountSetupPending: false,
+        },
+    ];
+    const userFind = () => {
+        const query = {
+            select() {
+                return query;
+            },
+            sort() {
+                return query;
+            },
+            async lean() {
+                return users;
+            },
+        };
+        return query;
+    };
+    const harness = loadController({ userFind });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.userGetAll({}, res);
+
+    assert.equal(res.body[0].invitationPending, true);
+    assert.equal(res.body[1].invitationPending, false);
+    assert.equal('accountSetupPending' in res.body[0], false);
+    assert.equal('stripeCustomerId' in res.body[0], false);
 });
 
 test('userLogin persists consent when it auto-registers a new user', async (t) => {

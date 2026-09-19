@@ -4138,6 +4138,14 @@ td .action-group {
     color: var(--accent-color);
 }
 
+.action-icon.invite {
+    color: var(--accent-color);
+}
+
+.action-icon.invite:hover {
+    background-color: var(--accent-bg);
+}
+
 .action-icon.has-unsaved-changes {
     color: #fff;
     background: var(--warning-color);

@@ -431,13 +431,14 @@ async function userGetAll(req, res) {
     try {
         const users = await User.find()
             .select(
-                '_id email username role allow allowedRooms active subscriptionType subscriptionStatus subscriptionExpiresAt stripeCustomerId stripeSubscriptionId createdAt updatedAt'
+                '_id email username role allow allowedRooms active accountSetupPending subscriptionType subscriptionStatus subscriptionExpiresAt stripeCustomerId stripeSubscriptionId createdAt updatedAt'
             )
             .sort({ createdAt: -1 })
             .lean();
         res.json(
-            users.map(({ stripeCustomerId, stripeSubscriptionId, ...user }) => ({
+            users.map(({ stripeCustomerId, stripeSubscriptionId, accountSetupPending, ...user }) => ({
                 ...user,
+                invitationPending: accountSetupPending === true,
                 subscriptionManagedByStripe: !!(stripeCustomerId || stripeSubscriptionId),
             }))
         );
@@ -505,6 +506,9 @@ async function userUpdate(req, res) {
         // Password is allowed for both admin and self
         if (password) {
             updatedFields.password = await bcrypt.hash(password, 10);
+            updatedFields.accountSetupPending = false;
+            updatedFields.resetPasswordToken = undefined;
+            updatedFields.resetPasswordExpires = undefined;
         }
 
         // Administrative fields
@@ -709,9 +713,15 @@ async function sendInvitation(req, res) {
         const user = await User.findOne({ email: email.toLowerCase(), username });
         if (!user) return res.status(404).json({ message: 'User not found' });
 
+        const previousSetup = {
+            token: user.resetPasswordToken,
+            expires: user.resetPasswordExpires,
+            pending: user.accountSetupPending === true,
+        };
         const setupToken = crypto.randomBytes(32).toString('hex');
         user.resetPasswordToken = crypto.createHash('sha256').update(setupToken).digest('hex');
         user.resetPasswordExpires = Date.now() + 3600000;
+        user.accountSetupPending = true;
         await user.save();
 
         const setupUrl = `${process.env.SERVER_URL}/password-reset?token=${setupToken}&setup=1`;
@@ -719,8 +729,9 @@ async function sendInvitation(req, res) {
         try {
             await nodemailer.sendInvitationEmail(username, email, setupUrl);
         } catch (emailError) {
-            user.resetPasswordToken = undefined;
-            user.resetPasswordExpires = undefined;
+            user.resetPasswordToken = previousSetup.token;
+            user.resetPasswordExpires = previousSetup.expires;
+            user.accountSetupPending = previousSetup.pending;
             await user.save();
             throw emailError;
         }
