@@ -327,6 +327,64 @@ test('userConfirmation redirects malformed links to invalid guidance', async (t)
     assert.equal(res.redirectUrl, '/confirmation?status=invalid');
 });
 
+test('sendInvitation creates a hashed one-time password setup token', async (t) => {
+    const previousServerUrl = process.env.SERVER_URL;
+    process.env.SERVER_URL = 'https://meet.example.com';
+    const user = {
+        async save() {},
+    };
+    let invitation;
+    const harness = loadController({
+        userFindOne: async () => user,
+        nodemailer: {
+            async sendInvitationEmail(username, email, setupUrl) {
+                invitation = { username, email, setupUrl };
+            },
+        },
+    });
+    t.after(() => {
+        harness.cleanup();
+        if (previousServerUrl === undefined) delete process.env.SERVER_URL;
+        else process.env.SERVER_URL = previousServerUrl;
+    });
+    const res = createResponse();
+
+    await harness.controller.sendInvitation(
+        { body: { username: 'new-user', email: 'new@example.com', password: 'must-not-be-sent' } },
+        res
+    );
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.body.message, 'Secure account invitation sent successfully');
+    assert.equal(user.resetPasswordToken.length, 64);
+    assert.ok(user.resetPasswordExpires > Date.now());
+    assert.match(invitation.setupUrl, /^https:\/\/meet\.example\.com\/password-reset\?token=/);
+    assert.doesNotMatch(invitation.setupUrl, /must-not-be-sent/);
+});
+
+test('sendInvitation removes the setup token when email delivery fails', async (t) => {
+    const user = {
+        async save() {},
+    };
+    const harness = loadController({
+        userFindOne: async () => user,
+        nodemailer: {
+            async sendInvitationEmail() {
+                throw new Error('SMTP unavailable');
+            },
+        },
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.sendInvitation(createRequest(), res);
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, 'Unable to send the account invitation');
+    assert.equal(user.resetPasswordToken, undefined);
+    assert.equal(user.resetPasswordExpires, undefined);
+});
+
 test('userLogin persists consent when it auto-registers a new user', async (t) => {
     const harness = loadController({ userRegistrationMode: true });
     t.after(harness.cleanup);

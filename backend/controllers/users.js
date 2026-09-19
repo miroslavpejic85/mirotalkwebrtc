@@ -11,6 +11,7 @@ const stripeLib = require('../lib/stripe');
 const utils = require('../common/utils');
 const logs = require('../common/logs');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const { setAuthCookie } = require('../common/authCookie');
 
 const log = new logs('Controllers-users');
@@ -700,16 +701,33 @@ async function userAdminCreate(req, res) {
 
 async function sendInvitation(req, res) {
     try {
-        const { email, username, password } = req.body;
-        if (!email || !username || !password) {
-            return res.status(400).json({ message: 'Email, username, and password are required' });
+        const { email, username } = req.body;
+        if (!email || !username) {
+            return res.status(400).json({ message: 'Email and username are required' });
         }
+
+        const user = await User.findOne({ email: email.toLowerCase(), username });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const setupToken = crypto.randomBytes(32).toString('hex');
+        user.resetPasswordToken = crypto.createHash('sha256').update(setupToken).digest('hex');
+        user.resetPasswordExpires = Date.now() + 3600000;
+        await user.save();
+
+        const setupUrl = `${process.env.SERVER_URL}/password-reset?token=${setupToken}&setup=1`;
         log.debug('Sending invitation email', { email, username });
-        nodemailer.sendInvitationEmail(username, email, password);
-        res.status(200).json({ message: 'Invitation email sent successfully' });
+        try {
+            await nodemailer.sendInvitationEmail(username, email, setupUrl);
+        } catch (emailError) {
+            user.resetPasswordToken = undefined;
+            user.resetPasswordExpires = undefined;
+            await user.save();
+            throw emailError;
+        }
+        res.status(200).json({ message: 'Secure account invitation sent successfully' });
     } catch (error) {
         log.error('sendInvitation', error);
-        res.status(400).json({ message: error.message });
+        res.status(400).json({ message: 'Unable to send the account invitation' });
     }
 }
 

@@ -61,6 +61,24 @@ function formatDurationLabel(minutes) {
     return parts.join(' ') || `${m} minutes`;
 }
 
+function formatMeetingSchedule(startAt, date, time, timezone) {
+    const instant = startAt ? new Date(startAt) : null;
+    if (instant && !Number.isNaN(instant.getTime()) && typeof timezone === 'string' && timezone) {
+        try {
+            return new Intl.DateTimeFormat('en-US', {
+                dateStyle: 'full',
+                timeStyle: 'short',
+                timeZone: timezone,
+            }).format(instant);
+        } catch (error) {
+            log.warn('Unable to format meeting timezone', { timezone, error: error.message });
+        }
+    }
+
+    const localSchedule = [date, time].filter(Boolean).join(' at ');
+    return timezone && localSchedule ? `${localSchedule} (${timezone})` : localSchedule;
+}
+
 // Escape a text value for inclusion in an iCalendar TEXT property per RFC 5545 §3.3.11.
 function icsEscapeText(value) {
     return String(value == null ? '' : value)
@@ -234,171 +252,133 @@ function getUpgradeMessage(pricingUrl = `${SERVER_URL}/pricing`) {
         <br/>`;
 }
 
+function buildEmailHtml({ preheader, title, greeting, content, action, footer }) {
+    const actionUrl = action?.url ? safeUrlAttr(action.url) : '';
+    const actionHtml = actionUrl
+        ? `<div style="margin:28px 0 24px;">
+                <a href="${actionUrl}" style="display:inline-block;background:#2457d6;color:#ffffff;padding:13px 22px;text-decoration:none;border-radius:6px;font-weight:700;">${escapeHtml(action.label)}</a>
+            </div>
+            <p style="margin:0;font-size:13px;line-height:1.6;color:#5e6878;">If the button does not work, paste this link into your browser:<br/><a href="${actionUrl}" style="color:#2457d6;word-break:break-all;">${actionUrl}</a></p>`
+        : '';
+
+    return `<!doctype html>
+        <html lang="en">
+            <body style="margin:0;background:#f3f6fb;padding:32px 16px;font-family:Arial,sans-serif;color:#172033;">
+                <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${escapeHtml(preheader)}</div>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td align="center">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background:#ffffff;border:1px solid #dfe5ee;border-radius:8px;overflow:hidden;">
+                                <tr><td style="padding:24px 32px;border-bottom:1px solid #e8ecf2;font-size:20px;font-weight:700;color:#2457d6;">MiroTalk</td></tr>
+                                <tr>
+                                    <td style="padding:32px;">
+                                        <h1 style="margin:0 0 16px;font-size:26px;line-height:1.25;color:#172033;">${escapeHtml(title)}</h1>
+                                        ${greeting ? `<p style="margin:0 0 12px;line-height:1.6;">${escapeHtml(greeting)}</p>` : ''}
+                                        ${content}
+                                        ${actionHtml}
+                                    </td>
+                                </tr>
+                                <tr><td style="padding:20px 32px;background:#f8fafc;font-size:12px;line-height:1.6;color:#6b7280;">${escapeHtml(footer)}</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </body>
+        </html>`;
+}
+
 function sendConfirmationEmail(name, email, confirmationCode) {
     const confirmationUrl = `${SERVER_URL}/api/v1/user/confirmation/${confirmationCode}`;
-    const safeName = escapeHtml(name);
-    const safeConfirmationUrl = safeUrlAttr(confirmationUrl);
     return transport.sendMail({
         from: EMAIL_FROM,
         to: email,
         subject: 'Confirm your email | MiroTalk',
         text: `Hello ${name},\n\nConfirm your email to activate your MiroTalk account:\n${confirmationUrl}\n\nThis link expires after ${CONFIRMATION_LINK_EXPIRY}. If you did not create this account, you can ignore this email.`,
-        html: `
-                <div style="background:#f3f6fb;padding:32px 16px;font-family:Arial,sans-serif;color:#172033;">
-                    <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #dfe5ee;border-radius:8px;overflow:hidden;">
-                        <div style="padding:24px 32px;border-bottom:1px solid #e8ecf2;font-size:20px;font-weight:700;color:#2457d6;">MiroTalk</div>
-                        <div style="padding:32px;">
-                            <h1 style="margin:0 0 16px;font-size:26px;line-height:1.25;color:#172033;">Confirm your email</h1>
-                            <p style="margin:0 0 12px;line-height:1.6;">Hello ${safeName},</p>
-                            <p style="margin:0 0 24px;line-height:1.6;">Confirm your email address to activate your account and start using MiroTalk.</p>
-                            <a href="${safeConfirmationUrl}" style="display:inline-block;background:#2457d6;color:#ffffff;padding:13px 22px;text-decoration:none;border-radius:6px;font-weight:700;">Confirm email address</a>
-                            <p style="margin:24px 0 8px;font-size:13px;line-height:1.6;color:#5e6878;">This link expires after ${escapeHtml(CONFIRMATION_LINK_EXPIRY)}.</p>
-                            <p style="margin:0;font-size:13px;line-height:1.6;color:#5e6878;">If the button does not work, paste this link into your browser:<br/><a href="${safeConfirmationUrl}" style="color:#2457d6;word-break:break-all;">${safeConfirmationUrl}</a></p>
-                        </div>
-                        <div style="padding:20px 32px;background:#f8fafc;font-size:12px;line-height:1.6;color:#6b7280;">If you did not create this account, you can safely ignore this email.</div>
-                    </div>
-                </div>
-            `,
+        html: buildEmailHtml({
+            preheader: 'Confirm your email to activate your MiroTalk account.',
+            title: 'Confirm your email',
+            greeting: `Hello ${name},`,
+            content: `<p style="margin:0;line-height:1.6;">Confirm your email address to activate your account and start using MiroTalk.</p>
+                <p style="margin:20px 0 0;font-size:13px;line-height:1.6;color:#5e6878;">This link expires after ${escapeHtml(CONFIRMATION_LINK_EXPIRY)}.</p>`,
+            action: { label: 'Confirm email address', url: confirmationUrl },
+            footer: 'If you did not create this account, you can safely ignore this email.',
+        }),
     });
 }
 
 function sendConfirmationOkEmail(name, toEmail) {
     const signInUrl = `${SERVER_URL}/`;
-    const safeName = escapeHtml(name);
-    const safeSignInUrl = safeUrlAttr(signInUrl);
     return transport
         .sendMail({
             from: EMAIL_FROM,
             to: toEmail,
             subject: 'Your MiroTalk account is ready',
             text: `Hello ${name},\n\nYour email is confirmed and your MiroTalk account is ready. Sign in to create or schedule your first meeting:\n${signInUrl}`,
-            html: `
-                <div style="background:#f3f6fb;padding:32px 16px;font-family:Arial,sans-serif;color:#172033;">
-                    <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #dfe5ee;border-radius:8px;overflow:hidden;">
-                        <div style="padding:24px 32px;border-bottom:1px solid #e8ecf2;font-size:20px;font-weight:700;color:#2457d6;">MiroTalk</div>
-                        <div style="padding:32px;">
-                            <div style="font-size:32px;line-height:1;margin-bottom:18px;color:#15803d;">&#10003;</div>
-                            <h1 style="margin:0 0 16px;font-size:26px;line-height:1.25;color:#172033;">Your account is ready</h1>
-                            <p style="margin:0 0 12px;line-height:1.6;">Hello ${safeName},</p>
-                            <p style="margin:0 0 24px;line-height:1.6;">Your email is confirmed. Sign in to create a meeting room, schedule a call, or invite your team.</p>
-                            <a href="${safeSignInUrl}" style="display:inline-block;background:#2457d6;color:#ffffff;padding:13px 22px;text-decoration:none;border-radius:6px;font-weight:700;">Sign in to MiroTalk</a>
-                        </div>
-                        <div style="padding:20px 32px;background:#f8fafc;font-size:12px;line-height:1.6;color:#6b7280;">You received this message because your MiroTalk email address was confirmed.</div>
-                    </div>
-                </div>
-            `,
+            html: buildEmailHtml({
+                preheader: 'Your MiroTalk account is active and ready.',
+                title: 'Your account is ready',
+                greeting: `Hello ${name},`,
+                content:
+                    '<p style="margin:0;line-height:1.6;">Your email is confirmed. Sign in to create a meeting room, schedule a call, or invite your team.</p>',
+                action: { label: 'Sign in to MiroTalk', url: signInUrl },
+                footer: 'You received this message because your MiroTalk email address was confirmed.',
+            }),
         })
         .catch((err) => log.error(err));
 }
 
 function sendPasswordResetEmail(name, email, resetUrl) {
-    transport
-        .sendMail({
-            from: EMAIL_FROM,
-            to: email,
-            subject: 'MiroTalk WEB - Password Reset Request',
-            html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h1 style="color: #316fb2;">Password Reset Request</h1>
-                    <h2>Hello ${name}</h2>
-                    <p>You recently requested to reset your password. Click the button below to reset it:</p>
-                    <div style="margin: 30px 0;">
-                        <a href="${resetUrl}" 
-                           style="background-color: #316fb2; color: white; padding: 12px 24px; 
-                                  text-decoration: none; border-radius: 5px; display: inline-block;">
-                            Reset Password
-                        </a>
-                    </div>
-                    <p>Or copy and paste this link into your browser:</p>
-                    <p style="color: #666; word-break: break-all;">${resetUrl}</p>
-                    <p style="margin-top: 30px; color: #666; font-size: 14px;">
-                        This link will expire in 1 hour.<br>
-                        If you didn't request this, please ignore this email.
-                    </p>
-                    <br/>
-                    ${getUpgradeMessage()}
-                    <p>Thank you for your support!</p>
-                    <p>MiroTalk Team</p>
-                </div>
-            `,
-        })
-        .catch((err) => log.error(err));
+    return transport.sendMail({
+        from: EMAIL_FROM,
+        to: email,
+        subject: 'Reset your password | MiroTalk',
+        text: `Hello ${name},\n\nUse this link to reset your MiroTalk password:\n${resetUrl}\n\nThis link expires in 1 hour. If you did not request a password reset, you can ignore this email.`,
+        html: buildEmailHtml({
+            preheader: 'Use this secure link to reset your MiroTalk password.',
+            title: 'Reset your password',
+            greeting: `Hello ${name},`,
+            content:
+                '<p style="margin:0;line-height:1.6;">We received a request to reset your password. Use the secure link below to choose a new one.</p><p style="margin:20px 0 0;font-size:13px;line-height:1.6;color:#5e6878;">This link expires in 1 hour and can only be used once.</p>',
+            action: { label: 'Reset password', url: resetUrl },
+            footer: 'If you did not request a password reset, you can safely ignore this email.',
+        }),
+    });
 }
 
 function sendPasswordChangeConfirmation(name, email) {
-    transport
-        .sendMail({
-            from: EMAIL_FROM,
-            to: email,
-            subject: 'MiroTalk WEB - Password Changed Successfully',
-            html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h1 style="color: #10b981;">Password Changed Successfully</h1>
-                    <h2>Hello ${name}</h2>
-                    <p>Your password has been successfully changed.</p>
-                    <p style="margin-top: 30px; color: #666; font-size: 14px;">
-                        If you didn't make this change, please contact support immediately.
-                    </p>
-                    <br/>
-                    <p>Home page</p>
-                    <a href="${SERVER_URL}" target="_blank">${SERVER_URL}</a>
-                    <br/>
-                    <p>Thank you for your support!</p>
-                    <p>MiroTalk Team</p>
-                </div>
-            `,
-        })
-        .catch((err) => log.error(err));
+    const resetUrl = `${SERVER_URL}/password-forgot`;
+    return transport.sendMail({
+        from: EMAIL_FROM,
+        to: email,
+        subject: 'Your MiroTalk password was changed',
+        text: `Hello ${name},\n\nYour MiroTalk password was changed successfully. If you did not make this change, reset your password immediately:\n${resetUrl}`,
+        html: buildEmailHtml({
+            preheader: 'Your MiroTalk password was changed.',
+            title: 'Password changed',
+            greeting: `Hello ${name},`,
+            content:
+                '<p style="margin:0;line-height:1.6;">Your password was changed successfully.</p><p style="margin:20px 0 0;padding:14px 16px;background:#fff7ed;border-left:4px solid #f97316;line-height:1.6;color:#9a3412;">If you did not make this change, reset your password immediately.</p>',
+            action: { label: 'Secure my account', url: resetUrl },
+            footer: 'This is an automated security notification from MiroTalk.',
+        }),
+    });
 }
 
-function sendInvitationEmail(name, email, password) {
-    transport
-        .sendMail({
-            from: EMAIL_FROM,
-            to: email,
-            subject: 'MiroTalk WEB - You are invited!',
-            html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h1 style="color: #376df9;">Welcome to MiroTalk!</h1>
-                    <h2>Hello ${name}</h2>
-                    <p>An account has been created for you. Here are your login credentials:</p>
-                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                        <tr>
-                            <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Username</td>
-                            <td style="border: 1px solid #ddd; padding: 10px;">${name}</td>
-                        </tr>
-                        <tr>
-                            <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Email</td>
-                            <td style="border: 1px solid #ddd; padding: 10px;">${email}</td>
-                        </tr>
-                        <tr>
-                            <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Password</td>
-                            <td style="border: 1px solid #ddd; padding: 10px;">${password}</td>
-                        </tr>
-                    </table>
-                    <div style="margin: 30px 0;">
-                        <a href="${SERVER_URL}" 
-                           style="background-color: #376df9; color: white; padding: 12px 24px; 
-                                  text-decoration: none; border-radius: 5px; display: inline-block;">
-                            Sign in Now
-                        </a>
-                    </div>
-                    <div style="margin-top: 30px; padding: 14px 18px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
-                        <p style="margin: 0; color: #856404; font-size: 14px; font-weight: bold;">
-                            ⚠️ Security Notice
-                        </p>
-                        <p style="margin: 6px 0 0; color: #856404; font-size: 14px;">
-                            After signing in, please change your password from your Account settings for security reasons.
-                        </p>
-                    </div>
-                    <br/>
-                    ${getUpgradeMessage()}
-                    <p>Thank you for your support!</p>
-                    <p>MiroTalk Team</p>
-                </div>
-            `,
-        })
-        .catch((err) => log.error(err));
+function sendInvitationEmail(name, email, setupUrl) {
+    return transport.sendMail({
+        from: EMAIL_FROM,
+        to: email,
+        subject: 'Set up your MiroTalk account',
+        text: `Hello ${name},\n\nAn account has been created for you. Choose your password using this secure, single-use link:\n${setupUrl}\n\nThis link expires in 1 hour.`,
+        html: buildEmailHtml({
+            preheader: 'Finish setting up your new MiroTalk account.',
+            title: 'You have been invited',
+            greeting: `Hello ${name},`,
+            content: `<p style="margin:0;line-height:1.6;">An account has been created for <strong>${escapeHtml(email)}</strong>. Choose a password to finish setting it up.</p><p style="margin:20px 0 0;font-size:13px;line-height:1.6;color:#5e6878;">This secure link expires in 1 hour and can only be used once.</p>`,
+            action: { label: 'Set my password', url: setupUrl },
+            footer: 'If you were not expecting this invitation, you can safely ignore this email.',
+        }),
+    });
 }
 
 /**
@@ -427,13 +407,7 @@ function sendRoomInvitationEmail({
     // Defense-in-depth: every interpolated field is HTML-escaped (or URL-sanitized) at render time,
     // even though upstream callers also validate/limit them. Schema-level validators for room/date/time
     // are intentionally permissive, so this is the authoritative XSS boundary for outbound mail.
-    const safeRoomType = escapeHtml(roomType);
-    const safeRoom = escapeHtml(room);
-    const safeDate = escapeHtml(date);
-    const safeTime = escapeHtml(time);
-    const safeTimezone = escapeHtml(timezone);
     const safeRoomUrlAttr = safeUrlAttr(roomUrl);
-    const safeRoomUrlText = escapeHtml(roomUrl);
     const safeInviter = escapeHtml(inviterName);
 
     // Resolve the duration shown in the email body (mirrors the ICS DTEND computation).
@@ -442,31 +416,56 @@ function sendRoomInvitationEmail({
         Number.isFinite(requestedDuration) && requestedDuration >= 5 && requestedDuration <= 1440
             ? Math.round(requestedDuration)
             : ICS_DEFAULT_DURATION_MIN;
-    const safeDuration = escapeHtml(formatDurationLabel(effectiveDuration));
-
-    const rawSubject = typeof subject === 'string' && subject.trim() ? subject.trim() : '';
-    // Cap subject to avoid oversized SMTP headers / DB bloat; nodemailer encodes headers itself.
-    const safeSubject = (rawSubject || `You are invited to a MiroTalk ${roomType || ''} meeting`.trim()).slice(0, 200);
-
     const isReminder = kind === 'reminder';
     const isUpdate = kind === 'update';
     const isCancellation = kind === 'cancellation';
     const calendarMethod = isCancellation ? 'CANCEL' : 'REQUEST';
-    const heading = isCancellation ? 'Cancellation' : isUpdate ? 'Updated' : isReminder ? 'Reminder' : 'Invitation';
-    const greeting = isCancellation
-        ? `The meeting${safeInviter ? ` with ${safeInviter}` : ''} has been canceled.`
+    const title = isCancellation
+        ? 'Meeting canceled'
         : isUpdate
-          ? `The meeting${safeInviter ? ` with ${safeInviter}` : ''} has been updated.`
+          ? 'Meeting details changed'
           : isReminder
-            ? `This is a reminder that your meeting${safeInviter ? ` with ${safeInviter}` : ''} starts soon.`
-            : safeInviter
-              ? `${safeInviter} has invited you to a meeting.`
+            ? 'Your meeting starts soon'
+            : 'You are invited to a meeting';
+    const rawSubject = typeof subject === 'string' && subject.trim() ? subject.trim() : '';
+    const defaultSubject = `${title}: ${room || `MiroTalk ${roomType || ''} meeting`}`.trim();
+    const safeSubject = (rawSubject || defaultSubject).slice(0, 200);
+    const summary = isCancellation
+        ? `The meeting${inviterName ? ` with ${inviterName}` : ''} has been canceled.`
+        : isUpdate
+          ? `The meeting${inviterName ? ` with ${inviterName}` : ''} has been updated.`
+          : isReminder
+            ? `Your meeting${inviterName ? ` with ${inviterName}` : ''} starts soon.`
+            : inviterName
+              ? `${inviterName} has invited you to a meeting.`
               : 'You have been invited to a meeting.';
     const customMessage = message
-        ? `<p style="margin: 16px 0; padding: 12px 16px; background-color: #f4f7fb; border-left: 4px solid #376df9; border-radius: 4px; white-space: pre-wrap;">${escapeHtml(
-              String(message)
-          )}</p>`
+        ? `<div style="margin:20px 0;padding:14px 16px;background:#f4f7fb;border-left:4px solid #2457d6;border-radius:4px;">
+                                <p style="margin:0 0 6px;font-size:12px;font-weight:700;color:#5e6878;">MESSAGE${safeInviter ? ` FROM ${safeInviter.toUpperCase()}` : ''}</p>
+                                <p style="margin:0;line-height:1.6;white-space:pre-wrap;">${escapeHtml(
+                                    String(message)
+                                )}</p>
+                        </div>`
         : '';
+    const details = [
+        ['Service', `MiroTalk ${roomType || ''}`.trim()],
+        ['Room', room],
+        ['When', formatMeetingSchedule(startAt, date, time, timezone)],
+        ['Duration', formatDurationLabel(effectiveDuration)],
+    ].filter(([, value]) => value !== undefined && value !== null && String(value).trim());
+    const detailsHtml = details
+        .map(
+            ([label, value], index) => `<tr>
+                                <td style="padding:11px 12px;border-bottom:${index === details.length - 1 ? '0' : '1px solid #e8ecf2'};color:#5e6878;font-size:13px;vertical-align:top;">${escapeHtml(label)}</td>
+                                <td style="padding:11px 12px;border-bottom:${index === details.length - 1 ? '0' : '1px solid #e8ecf2'};font-weight:600;text-align:right;overflow-wrap:anywhere;">${escapeHtml(value)}</td>
+                        </tr>`
+        )
+        .join('');
+    const plainDetails = details.map(([label, value]) => `${label}: ${value}`).join('\n');
+    const actionLabel = isReminder ? 'Join meeting' : isUpdate ? 'View updated meeting' : 'View meeting';
+    const footer = isCancellation
+        ? 'A calendar cancellation is attached so your calendar can stay up to date.'
+        : 'A calendar invitation is attached for easy scheduling.';
 
     // Attach a calendar invite (.ics) when the room has a valid schedule.
     const icsContent = buildInvitationIcs({
@@ -494,68 +493,17 @@ function sendRoomInvitationEmail({
         to,
         subject: safeSubject,
         icalEvent,
-        html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #376df9;">MiroTalk Meeting ${heading}</h1>
-                <p>${greeting}</p>
+        text: `${title}\n\n${summary}${message ? `\n\nMessage${inviterName ? ` from ${inviterName}` : ''}:\n${message}` : ''}\n\n${plainDetails}${!isCancellation && roomUrl ? `\n\n${actionLabel}: ${roomUrl}` : ''}\n\n${footer}`,
+        html: buildEmailHtml({
+            preheader: summary,
+            title,
+            content: `
+                <p style="margin:0;line-height:1.6;">${escapeHtml(summary)}</p>
                 ${customMessage}
-                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                    <tr>
-                        <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Service</td>
-                        <td style="border: 1px solid #ddd; padding: 10px;">MiroTalk ${safeRoomType}</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Room</td>
-                        <td style="border: 1px solid #ddd; padding: 10px;">${safeRoom}</td>
-                    </tr>
-                    ${
-                        safeDate
-                            ? `<tr>
-                        <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Date</td>
-                        <td style="border: 1px solid #ddd; padding: 10px;">${safeDate}</td>
-                    </tr>`
-                            : ''
-                    }
-                    ${
-                        safeTime
-                            ? `<tr>
-                        <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Time</td>
-                        <td style="border: 1px solid #ddd; padding: 10px;">${safeTime}</td>
-                    </tr>`
-                            : ''
-                    }
-                    ${
-                        safeTimezone
-                            ? `<tr>
-                        <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Timezone</td>
-                        <td style="border: 1px solid #ddd; padding: 10px;">${safeTimezone}</td>
-                    </tr>`
-                            : ''
-                    }
-                    <tr>
-                        <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Duration</td>
-                        <td style="border: 1px solid #ddd; padding: 10px;">${safeDuration}</td>
-                    </tr>
-                </table>
-                ${
-                    !isCancellation
-                        ? `<div style="margin: 30px 0;">
-                    <a href="${safeRoomUrlAttr}"
-                       style="background-color: #376df9; color: white; padding: 12px 24px;
-                              text-decoration: none; border-radius: 5px; display: inline-block;">
-                        Join Meeting
-                    </a>
-                </div>
-                <p>Or copy and paste this link into your browser:</p>
-                <p style="color: #666; word-break: break-all;">${safeRoomUrlText}</p>`
-                        : ''
-                }
-                <br/>
-                ${getUpgradeMessage()}
-                <p>Thank you for your support!</p>
-                <p>MiroTalk Team</p>
-            </div>
-        `,
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:20px 0 0;background:#f8fafc;border:1px solid #e8ecf2;border-radius:6px;border-collapse:separate;border-spacing:0;">${detailsHtml}</table>`,
+            action: !isCancellation && safeRoomUrlAttr ? { label: actionLabel, url: roomUrl } : null,
+            footer,
+        }),
     });
 }
 

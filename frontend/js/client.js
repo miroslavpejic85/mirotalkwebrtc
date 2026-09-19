@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.40
+ * @version 1.7.50
  */
 
 const userAgent = navigator.userAgent;
@@ -1783,7 +1783,7 @@ function createUser() {
                 toggleAddUserPanel();
                 loadUsers();
                 loadDashboardStats();
-                promptSendInvitation(username, email, password);
+                promptSendInvitation(username, email);
             }
         })
         .catch((err) => {
@@ -1796,14 +1796,14 @@ function createUser() {
         });
 }
 
-function promptSendInvitation(username, email, password) {
+function promptSendInvitation(username, email) {
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: true,
         position: 'top',
         icon: 'success',
         title: 'User Created',
-        html: `Send an invitation email to <strong>${email}</strong> with login credentials?`,
+        html: `Send <strong>${escapeHtml(email)}</strong> a secure link to set their password?`,
         showCancelButton: true,
         reverseButtons: true,
         confirmButtonText: '<i class="uil uil-envelope-send"></i> Send Invitation',
@@ -1812,7 +1812,7 @@ function promptSendInvitation(username, email, password) {
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
         if (result.isConfirmed) {
-            userSendInvitation({ username, email, password })
+            userSendInvitation({ username, email })
                 .then((res) => {
                     console.log('[API] - SEND INVITATION RESPONSE', res);
                     popupMessage('toast', 'Invitation email sent successfully');

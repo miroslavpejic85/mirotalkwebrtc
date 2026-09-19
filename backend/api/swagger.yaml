@@ -296,7 +296,7 @@ paths:
             tags:
                 - user
             summary: Send invitation email
-            description: Send an invitation email to a user with their login credentials.
+            description: Send an existing user a one-time link to set their password.
             operationId: sendInvitation
             requestBody:
                 description: Invitation details
@@ -309,16 +309,13 @@ paths:
                                     type: string
                                 username:
                                     type: string
-                                password:
-                                    type: string
                             required:
                                 - email
                                 - username
-                                - password
                 required: true
             responses:
                 '200':
-                    description: Invitation email sent successfully
+                    description: Secure account invitation sent successfully
                     content:
                         application/json:
                             schema:

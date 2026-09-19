@@ -2,10 +2,23 @@
 
 const urlParams = new URLSearchParams(window.location.search);
 const token = urlParams.get('token');
+const isAccountSetup = urlParams.get('setup') === '1';
 const form = document.getElementById('resetPasswordForm');
 const submitButton = form.querySelector('button[type="submit"]');
 const statusMessage = document.getElementById('formStatus');
 const resetFields = document.getElementById('resetFields');
+const actionLabel = isAccountSetup ? 'Set Password' : 'Reset Password';
+const progressLabel = isAccountSetup ? 'Setting password...' : 'Resetting...';
+
+if (isAccountSetup) {
+    document.title = 'MiroTalk WebRTC - Set Password';
+    document.getElementById('passwordPageTitle').textContent = 'Set your password';
+    document.getElementById('passwordPageDescription').textContent =
+        'Choose a secure password to finish setting up your account.';
+    document.getElementById('requestPasswordLink').lastChild.textContent = ' Request a new setup link';
+    submitButton.querySelector('span').textContent = actionLabel;
+    statusMessage.textContent = 'Verifying setup link...';
+}
 
 function setFormStatus(type, message) {
     statusMessage.className = `form-status ${type}`;
@@ -15,14 +28,17 @@ function setFormStatus(type, message) {
 
 function setSubmitting(isSubmitting) {
     submitButton.disabled = isSubmitting;
-    submitButton.querySelector('span').textContent = isSubmitting ? 'Resetting...' : 'Reset Password';
+    submitButton.querySelector('span').textContent = isSubmitting ? progressLabel : actionLabel;
 }
 
 async function initializeResetForm() {
     form.setAttribute('aria-busy', 'true');
 
     if (!token) {
-        setFormStatus('error', 'This password reset link is invalid. Request a new link to continue.');
+        setFormStatus(
+            'error',
+            `This password ${isAccountSetup ? 'setup' : 'reset'} link is invalid. Request a new link to continue.`
+        );
         form.setAttribute('aria-busy', 'false');
         return;
     }
@@ -33,7 +49,7 @@ async function initializeResetForm() {
         if (!response.valid) {
             setFormStatus(
                 'error',
-                'This password reset link is invalid or has expired. Request a new link to continue.'
+                `This password ${isAccountSetup ? 'setup' : 'reset'} link is invalid or has expired. Request a new link to continue.`
             );
             return;
         }
@@ -44,7 +60,11 @@ async function initializeResetForm() {
         document.getElementById('password').focus();
     } catch (err) {
         console.error('Token verification error:', err);
-        const errorMessage = err.response?.data?.message || 'This password reset link is invalid or has expired';
+        const serverMessage = err.response?.data?.message;
+        const errorMessage =
+            isAccountSetup && /reset token/i.test(serverMessage || '')
+                ? 'This account setup link is invalid or has expired. Request a new link to continue.'
+                : serverMessage || 'This password reset link is invalid or has expired.';
         setFormStatus('error', errorMessage);
     } finally {
         form.setAttribute('aria-busy', 'false');
@@ -82,7 +102,12 @@ form.addEventListener('submit', async (e) => {
         const response = await passwordResetConfirm({ token, password });
 
         if (response.message) {
-            setFormStatus('success', 'Your password has been reset. You can now sign in.');
+            setFormStatus(
+                'success',
+                isAccountSetup
+                    ? 'Your password is set and your account is ready. You can now sign in.'
+                    : 'Your password has been reset. You can now sign in.'
+            );
             form.reset();
             resetFields.hidden = true;
             form.classList.add('reset-complete');
