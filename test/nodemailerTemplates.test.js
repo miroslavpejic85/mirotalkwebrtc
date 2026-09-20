@@ -72,9 +72,9 @@ test('transactional emails use safe branded HTML and plain-text alternatives', a
     }
     assert.match(
         messages[1].html,
-        /<h1[^>]*><span role="img" aria-label="Success"[^>]*>&#10003;<\/span>Your account is ready<\/h1>/
+        /<h1[^>]*><span role="img" aria-label="Success"[^>]*font-size:32px[^>]*>&#10004;<\/span>Your account is ready<\/h1>/
     );
-    assert.match(messages[1].html, /&#10003;/);
+    assert.match(messages[1].html, /&#10004;/);
     assert.doesNotMatch(messages[1].html, /aria-label="Success"[^>]*(?:background|border-radius)/);
     assert.match(messages[2].html, /Reset password/);
     assert.match(messages[3].html, /Secure my account/);

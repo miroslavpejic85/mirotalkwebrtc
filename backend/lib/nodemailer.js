@@ -255,7 +255,7 @@ function getUpgradeMessage(pricingUrl = `${SERVER_URL}/pricing`) {
 function buildEmailHtml({ preheader, title, greeting, content, action, footer, success = false }) {
     const actionUrl = action?.url ? safeUrlAttr(action.url) : '';
     const successHtml = success
-        ? '<span role="img" aria-label="Success" style="display:inline-block;margin-right:8px;color:#16a36f;font-size:24px;font-weight:700;line-height:1;vertical-align:2px;">&#10003;</span>'
+        ? '<span role="img" aria-label="Success" style="display:inline-block;margin-right:10px;color:#16a36f;font-size:32px;font-weight:400;line-height:0.8;vertical-align:-2px;">&#10004;</span>'
         : '';
     const actionHtml = actionUrl
         ? `<div style="margin:28px 0 24px;">
