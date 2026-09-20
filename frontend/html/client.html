@@ -1057,12 +1057,24 @@
                                 <input id="usersSearchInput" type="text" placeholder="Search users..." />
                             </div>
                             <div class="users-btn-group">
-                                <select id="usersPlanFilter" class="users-plan-filter" aria-label="Filter by plan">
-                                    <option value="all">All plans</option>
-                                    <option value="monthly">Monthly</option>
-                                    <option value="yearly">Annual</option>
-                                    <option value="lifetime">Lifetime</option>
-                                    <option value="none">None</option>
+                                <select
+                                    id="usersPlanFilter"
+                                    class="users-plan-filter"
+                                    aria-label="Filter by billing status"
+                                >
+                                    <option value="all">All billing statuses</option>
+                                    <optgroup label="Billing status">
+                                        <option value="active">Active subscription</option>
+                                        <option value="no-active">No active plan</option>
+                                        <option value="stripe-managed">Stripe customer</option>
+                                        <option value="not-stripe-managed">Not linked to Stripe</option>
+                                    </optgroup>
+                                    <optgroup label="Plan">
+                                        <option value="monthly">Monthly</option>
+                                        <option value="yearly">Annual</option>
+                                        <option value="lifetime">Lifetime</option>
+                                        <option value="none">None</option>
+                                    </optgroup>
                                 </select>
                                 <button id="open-add-user-btn" class="custom-button">
                                     <i class="uil uil-user-plus"></i> Add New User

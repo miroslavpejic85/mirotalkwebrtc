@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.56
+ * @version 1.7.57
  */
 
 const userAgent = navigator.userAgent;
@@ -1492,12 +1492,13 @@ function getUserRow(u) {
         ? new Date(u.subscriptionExpiresAt).toISOString().split('T')[0]
         : '';
     const plan = getUserPlan(u);
+    const planAttributes = `data-user-plan="${selectedPlan}" data-user-plan-active="${plan.className !== 'none'}" data-stripe-managed="${!!u.subscriptionManagedByStripe}"`;
     const planEditor = u.subscriptionManagedByStripe
-        ? `<div class="user-plan-editor" data-user-plan="${selectedPlan}">
+        ? `<div class="user-plan-editor" ${planAttributes}>
             <span class="user-plan-badge ${plan.className}" title="Managed by Stripe">${plan.label}</span>
             <span class="user-plan-managed"><i class="uil uil-lock"></i> Stripe managed</span>
         </div>`
-        : `<div class="user-plan-editor" data-user-plan="${selectedPlan}">
+        : `<div class="user-plan-editor" ${planAttributes}>
             ${buildCustomDropdownHTML('uplan_' + u._id, planOptions, selectedPlan, false)}
             <input id="uexpires_${u._id}" class="user-plan-expiry" type="date" value="${subscriptionExpires}" aria-label="Subscription expiry" ${['monthly', 'yearly'].includes(selectedPlan) ? '' : 'hidden'} />
         </div>`;
@@ -4307,20 +4308,25 @@ document.querySelectorAll('.users-filter-chip').forEach((chip) => {
     });
 });
 
-// Plan filter select for users table
+// Billing and plan filter select for users table
 const usersPlanFilterEl = document.getElementById('usersPlanFilter');
 if (usersPlanFilterEl) {
     usersPlanFilterEl.addEventListener('change', () => {
-        const plan = usersPlanFilterEl.value;
+        const filter = usersPlanFilterEl.value;
 
         $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter((fn) => !fn._isUserPlanFilter);
 
-        if (plan !== 'all') {
+        if (filter !== 'all') {
             const filterFn = function (settings, data, dataIndex) {
                 if (settings.nTable.id !== 'usersTable') return true;
                 const row = usersDataTable.row(dataIndex).node();
                 const planEditor = row ? row.querySelector('[data-user-plan]') : null;
-                return !!planEditor && planEditor.dataset.userPlan === plan;
+                if (!planEditor) return false;
+                if (filter === 'active') return planEditor.dataset.userPlanActive === 'true';
+                if (filter === 'no-active') return planEditor.dataset.userPlanActive === 'false';
+                if (filter === 'stripe-managed') return planEditor.dataset.stripeManaged === 'true';
+                if (filter === 'not-stripe-managed') return planEditor.dataset.stripeManaged === 'false';
+                return planEditor.dataset.userPlan === filter;
             };
             filterFn._isUserPlanFilter = true;
             $.fn.dataTable.ext.search.push(filterFn);
