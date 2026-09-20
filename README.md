@@ -136,12 +136,12 @@ For detailed guides and references, visit the **[official documentation](https:/
 
 For full setup, environment variables, Stripe configuration, webhooks, and local testing, see **[docs/STRIPE.md](docs/STRIPE.md)**.
 
+</details>
+
 > [!WARNING]
 > **Commercial license required**
 >
 > Running `MiroTalk WEB` in SaaS mode (i.e. reselling access or operating it as a paid service) requires an **Extended** license. See the **[MiroTalk WEB license](https://docs.mirotalk.com/sites/web/)** for details.
-
-</details>
 
 <details open>
 <summary>☁️ Recommended Hosting Providers</summary>
