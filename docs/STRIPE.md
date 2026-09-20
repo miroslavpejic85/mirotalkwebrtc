@@ -44,6 +44,11 @@ billing portal remains limited to payment methods, invoices, and cancellation; p
 
 After checkout, the success page calls `GET /api/v1/stripe/verify?session_id=...`, which activates the subscription immediately from the Checkout Session. The webhook is still used to keep renewals/cancellations in sync, but activation does **not** depend on the webhook arriving first (helpful in local dev).
 
+When paid access is activated, MiroTalk sends one transactional email confirming the plan and renewal date (or no
+recurring charges for Lifetime) with a link to the dashboard. Stripe remains responsible for receipts and payment
+notifications. The Checkout Session or subscription ID prevents the verification fallback and webhook from sending the
+same activation message twice.
+
 ---
 
 ## ⚙️ Environment variables

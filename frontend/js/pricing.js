@@ -26,6 +26,7 @@ initCursorLight();
 
 let currentBilling = null;
 let activationSessionId = null;
+let requestedPlan = null;
 
 function loadPricingAppConfig(config) {
     if (config?.app?.Name) {
@@ -39,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const status = params.get('status');
     const sessionId = params.get('session_id');
+    requestedPlan = ['monthly', 'yearly', 'lifetime'].includes(params.get('plan')) ? params.get('plan') : null;
 
     if (sessionStorage.getItem('appConfig')) {
         loadPricingAppConfig(JSON.parse(sessionStorage.getItem('appConfig')));
@@ -58,8 +60,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // /pricing if the webhook hasn't landed yet.
         waitForActivationThenRedirect(sessionId);
     } else if (status === 'cancel') {
-        popupMessage('warning', 'Checkout canceled. You can pick a plan whenever you are ready.');
-        window.history.replaceState({}, document.title, '/pricing');
+        showPricingNotice('No payment was made', 'Your checkout was canceled. Your plan is still available below.');
+        window.history.replaceState({}, document.title, requestedPlan ? `/pricing?plan=${requestedPlan}` : '/pricing');
+    }
+
+    if (requestedPlan) {
+        if (status !== 'cancel') {
+            showPricingNotice(
+                'Welcome back',
+                `Review the ${formatPlanName(requestedPlan)} plan and continue when ready.`
+            );
+        }
+        highlightPlan(requestedPlan);
     }
 
     getStripePlans()
@@ -118,7 +130,7 @@ function loadPricingBilling() {
 }
 
 function renderPricingBilling(billing) {
-    if (!billing || !billing.subscriptionType) return;
+    if (!billing) return;
 
     const status = document.getElementById('pricingAccountStatus');
     const plan = document.getElementById('pricingAccountPlan');
@@ -129,7 +141,17 @@ function renderPricingBilling(billing) {
     const lifetimeButton = document.getElementById('buyLifetime');
 
     status.classList.remove('hidden');
-    manage.classList.toggle('hidden', !billing.hasBillingAccount);
+    manage.classList.toggle('hidden', !billing.hasBillingAccount || !billing.subscriptionType);
+
+    if (!billing.subscriptionType) {
+        const selectedPlan = requestedPlan;
+        plan.textContent = selectedPlan ? `${formatPlanName(selectedPlan)} checkout not completed` : 'No active plan';
+        detail.textContent = selectedPlan
+            ? 'Continue below. Stripe will show the final price before you confirm.'
+            : 'Choose a plan below to open your dashboard.';
+        if (selectedPlan) highlightPlan(selectedPlan);
+        return;
+    }
 
     if (billing.subscriptionType === 'lifetime' && billing.active) {
         plan.textContent = 'Lifetime access is active';
@@ -173,6 +195,33 @@ function renderPricingBilling(billing) {
 
     plan.textContent = 'No active plan';
     detail.textContent = 'Choose a plan below to restore dashboard access.';
+}
+
+function formatPlanName(plan) {
+    if (plan === 'yearly') return 'Annual';
+    if (plan === 'lifetime') return 'Lifetime';
+    return 'Monthly';
+}
+
+function highlightPlan(plan) {
+    const buttons = {
+        monthly: document.getElementById('subscribeMonthly'),
+        yearly: document.getElementById('subscribeYearly'),
+        lifetime: document.getElementById('buyLifetime'),
+    };
+    document.querySelectorAll('.pricing-card.is-selected-plan').forEach((card) => {
+        card.classList.remove('is-selected-plan');
+    });
+    const button = buttons[plan];
+    if (!button) return;
+    button.closest('.pricing-card')?.classList.add('is-selected-plan');
+    button.textContent = `Continue with ${formatPlanName(plan)}`;
+}
+
+function showPricingNotice(title, message) {
+    document.getElementById('pricingNoticeTitle').textContent = title;
+    document.getElementById('pricingNoticeMessage').textContent = message;
+    document.getElementById('pricingNotice').classList.remove('hidden');
 }
 
 function waitForActivationThenRedirect(sessionId) {

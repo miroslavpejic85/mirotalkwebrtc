@@ -5,6 +5,7 @@ const stripeLib = require('../lib/stripe');
 const logs = require('../common/logs');
 const config = require('../config');
 const { isSubscriptionActive } = require('../middleware/saas');
+const nodemailer = require('../lib/nodemailer');
 
 const log = new logs('Controllers-stripe');
 
@@ -43,7 +44,7 @@ async function createCheckout(req, res) {
         }
 
         const successUrl = `${SERVER_URL}/pricing?status=success&session_id={CHECKOUT_SESSION_ID}`;
-        const cancelUrl = `${SERVER_URL}/pricing?status=cancel`;
+        const cancelUrl = `${SERVER_URL}/pricing?status=cancel&plan=${plan}`;
 
         let session;
         if (plan === 'monthly') {
@@ -101,6 +102,15 @@ async function changePlan(req, res) {
         user.subscriptionCancelAtPeriodEnd = isSubscriptionEnding(subscription);
         user.updatedAt = new Date().toISOString();
         await user.save();
+
+        if (isSubscriptionActive(user)) {
+            await sendPlanActivationEmailOnce(
+                { _id: user._id },
+                `subscription:${subscription.id}:plan:${user.subscriptionType}`,
+                user.subscriptionType,
+                user.subscriptionExpiresAt
+            );
+        }
 
         log.debug('Subscription upgraded', { email: user.email, plan: user.subscriptionType });
         return res.status(200).json({
@@ -279,6 +289,12 @@ async function verifySession(req, res) {
             user.subscriptionCancelAtPeriodEnd = false;
             user.updatedAt = new Date().toISOString();
             await user.save();
+            await sendPlanActivationEmailOnce(
+                { _id: user._id },
+                `checkout:${session.id}`,
+                user.subscriptionType,
+                user.subscriptionExpiresAt
+            );
             log.debug('Lifetime activated via verifySession', { email: user.email });
         } else if (session.mode === 'subscription' && session.subscription) {
             if (user.subscriptionType === 'lifetime' && user.subscriptionStatus === 'active') {
@@ -292,6 +308,14 @@ async function verifySession(req, res) {
             user.subscriptionCancelAtPeriodEnd = isSubscriptionEnding(subscription);
             user.updatedAt = new Date().toISOString();
             await user.save();
+            if (isSubscriptionActive(user)) {
+                await sendPlanActivationEmailOnce(
+                    { _id: user._id },
+                    `subscription:${subscription.id}`,
+                    user.subscriptionType,
+                    user.subscriptionExpiresAt
+                );
+            }
             log.debug('Recurring subscription activated via verifySession', {
                 email: user.email,
                 plan: user.subscriptionType,
@@ -331,21 +355,36 @@ async function handleWebhook(req, res) {
             case 'checkout.session.completed': {
                 const session = event.data.object;
                 // Lifetime payments only (subscriptions are handled by their own events).
-                if (session.mode === 'payment') {
-                    await activateLifetimeByCustomer(session.customer);
+                if (session.mode === 'payment' && session.payment_status === 'paid') {
+                    await activateLifetimeByCustomer(session.customer, session.id);
                     log.debug('Lifetime purchase activated', { customer: session.customer });
                 }
                 break;
             }
             case 'customer.subscription.created': {
                 const subscription = event.data.object;
+                const subscriptionType = getRecurringPlan(subscription);
+                const subscriptionStatus = mapSubscriptionStatus(subscription.status);
+                const subscriptionExpiresAt = subscriptionEndToDate(subscription);
                 await updateUserByCustomer(subscription.customer, {
-                    subscriptionType: getRecurringPlan(subscription),
-                    subscriptionStatus: mapSubscriptionStatus(subscription.status),
+                    subscriptionType,
+                    subscriptionStatus,
                     stripeSubscriptionId: subscription.id,
-                    subscriptionExpiresAt: subscriptionEndToDate(subscription),
+                    subscriptionExpiresAt,
                     subscriptionCancelAtPeriodEnd: isSubscriptionEnding(subscription),
                 });
+                if (subscriptionStatus === 'active') {
+                    await sendPlanActivationEmailOnce(
+                        {
+                            stripeCustomerId: subscription.customer,
+                            stripeSubscriptionId: subscription.id,
+                            subscriptionType,
+                        },
+                        `subscription:${subscription.id}`,
+                        subscriptionType,
+                        subscriptionExpiresAt
+                    );
+                }
                 log.debug('Recurring subscription created', { customer: subscription.customer });
                 break;
             }
@@ -431,7 +470,33 @@ async function updateUserByCustomer(customerId, update) {
     await User.updateOne({ stripeCustomerId: customerId, subscriptionType: { $ne: 'lifetime' } }, { $set: update });
 }
 
-async function activateLifetimeByCustomer(customerId) {
+async function sendPlanActivationEmailOnce(identity, activationKey, plan, expiresAt) {
+    const user = await User.findOneAndUpdate(
+        { ...identity, subscriptionActivationEmailKey: { $ne: activationKey } },
+        { $set: { subscriptionActivationEmailKey: activationKey } },
+        { returnDocument: 'after' }
+    );
+    if (!user) return;
+
+    try {
+        await nodemailer.sendPlanActivatedEmail(user.username, user.email, plan, expiresAt);
+    } catch (error) {
+        try {
+            await User.updateOne(
+                { _id: user._id, subscriptionActivationEmailKey: activationKey },
+                { $unset: { subscriptionActivationEmailKey: '' } }
+            );
+        } catch (cleanupError) {
+            log.error('Unable to release plan activation email marker', {
+                email: user.email,
+                error: cleanupError.message,
+            });
+        }
+        log.error('Unable to send plan activation email', { email: user.email, error: error.message });
+    }
+}
+
+async function activateLifetimeByCustomer(customerId, checkoutSessionId) {
     if (!customerId) return;
 
     const user = await User.findOne({ stripeCustomerId: customerId });
@@ -448,6 +513,12 @@ async function activateLifetimeByCustomer(customerId) {
     user.subscriptionCancelAtPeriodEnd = false;
     user.updatedAt = new Date().toISOString();
     await user.save();
+    await sendPlanActivationEmailOnce(
+        { _id: user._id },
+        `checkout:${checkoutSessionId}`,
+        user.subscriptionType,
+        user.subscriptionExpiresAt
+    );
 }
 
 module.exports = {

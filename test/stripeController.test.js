@@ -9,9 +9,10 @@ const USER_PATH = path.resolve(__dirname, '../backend/models/users.js');
 const STRIPE_PATH = path.resolve(__dirname, '../backend/lib/stripe.js');
 const CONFIG_PATH = path.resolve(__dirname, '../backend/config.js');
 const SAAS_PATH = path.resolve(__dirname, '../backend/middleware/saas.js');
+const NODEMAILER_PATH = path.resolve(__dirname, '../backend/lib/nodemailer.js');
 
-function loadController({ user, stripeOverrides = {} }) {
-    const calls = { checkout: [], canceled: [], planChanges: [], updated: [] };
+function loadController({ user, stripeOverrides = {}, mailerOverrides = {} }) {
+    const calls = { checkout: [], canceled: [], emails: [], planChanges: [], updated: [] };
     const stripe = {
         isEnabled: () => true,
         createSubscriptionCheckout: async () => {
@@ -29,6 +30,7 @@ function loadController({ user, stripeOverrides = {} }) {
         cancelSubscription: async (id) => calls.canceled.push(id),
         constructEvent: () => ({ type: 'unhandled', data: { object: {} } }),
         retrieveCheckoutSession: async () => ({
+            id: 'cs_test',
             mode: 'payment',
             payment_status: 'paid',
             customer: 'cus_test',
@@ -60,7 +62,32 @@ function loadController({ user, stripeOverrides = {} }) {
     };
     const User = {
         findOne: () => user,
-        updateOne: async (filter, update) => calls.updated.push({ filter, update }),
+        updateOne: async (filter, update) => {
+            calls.updated.push({ filter, update });
+            const matchesCustomer = !filter.stripeCustomerId || user.stripeCustomerId === filter.stripeCustomerId;
+            const excludesCurrentPlan = filter.subscriptionType?.$ne === user.subscriptionType;
+            const matchesId = !filter._id || String(user._id) === String(filter._id);
+            if (matchesCustomer && !excludesCurrentPlan && matchesId && update.$set) {
+                Object.assign(user, update.$set);
+            }
+            if (
+                update.$unset?.subscriptionActivationEmailKey !== undefined &&
+                user.subscriptionActivationEmailKey === filter.subscriptionActivationEmailKey
+            ) {
+                delete user.subscriptionActivationEmailKey;
+            }
+        },
+        findOneAndUpdate: async (filter, update) => {
+            if (filter.stripeCustomerId && user.stripeCustomerId !== filter.stripeCustomerId) return null;
+            if (filter.stripeSubscriptionId && user.stripeSubscriptionId !== filter.stripeSubscriptionId) return null;
+            if (filter.subscriptionType && user.subscriptionType !== filter.subscriptionType) return null;
+            const activationKey = filter.subscriptionActivationEmailKey?.$ne;
+            if (activationKey && user.subscriptionActivationEmailKey === activationKey) return null;
+            if (update.$set?.subscriptionActivationEmailKey) {
+                user.subscriptionActivationEmailKey = update.$set.subscriptionActivationEmailKey;
+            }
+            return user;
+        },
     };
     const config = {
         SAAS: {
@@ -76,6 +103,13 @@ function loadController({ user, stripeOverrides = {} }) {
         [STRIPE_PATH, stripe],
         [CONFIG_PATH, config],
         [SAAS_PATH, { isSubscriptionActive }],
+        [
+            NODEMAILER_PATH,
+            {
+                sendPlanActivatedEmail: async (...args) => calls.emails.push(args),
+                ...mailerOverrides,
+            },
+        ],
     ]);
     const previous = new Map();
 
@@ -128,6 +162,7 @@ function activeMonthlyUser() {
     const user = {
         _id: 'user_1',
         email: 'user@example.com',
+        username: 'Test User',
         subscriptionType: 'monthly',
         subscriptionStatus: 'active',
         subscriptionExpiresAt: new Date(Date.now() + 86400000),
@@ -166,6 +201,7 @@ test('createCheckout allows an active monthly user to upgrade to Lifetime', asyn
 
 test('changePlan upgrades an active monthly subscription to yearly', async (t) => {
     const user = activeMonthlyUser();
+    user.subscriptionActivationEmailKey = 'subscription:sub_monthly';
     const harness = loadController({ user });
     t.after(harness.cleanup);
     const res = createResponse();
@@ -176,6 +212,9 @@ test('changePlan upgrades an active monthly subscription to yearly', async (t) =
     assert.equal(res.body.subscriptionType, 'yearly');
     assert.equal(user.subscriptionType, 'yearly');
     assert.deepEqual(harness.calls.planChanges, ['sub_monthly']);
+    assert.equal(harness.calls.emails.length, 1);
+    assert.deepEqual(harness.calls.emails[0].slice(0, 3), ['Test User', 'user@example.com', 'yearly']);
+    assert.equal(user.subscriptionActivationEmailKey, 'subscription:sub_monthly:plan:yearly');
 });
 
 test('changePlan rejects yearly to monthly downgrades', async (t) => {
@@ -304,6 +343,130 @@ test('verifySession activates the yearly plan from Checkout metadata', async (t)
     assert.equal(res.body.active, true);
     assert.equal(user.subscriptionType, 'yearly');
     assert.equal(user.stripeSubscriptionId, 'sub_new');
+    assert.deepEqual(harness.calls.emails[0].slice(0, 3), ['Test User', 'user@example.com', 'yearly']);
+});
+
+test('verifySession and webhook send only one email for the same subscription', async (t) => {
+    const user = activeMonthlyUser();
+    user.username = 'Test User';
+    user.subscriptionType = null;
+    user.subscriptionStatus = null;
+    const subscription = {
+        id: 'sub_new',
+        customer: 'cus_test',
+        status: 'active',
+        current_period_end: Math.floor(Date.now() / 1000) + 86400,
+        metadata: { plan: 'yearly' },
+    };
+    const harness = loadController({
+        user,
+        stripeOverrides: {
+            retrieveCheckoutSession: async () => ({
+                id: 'cs_yearly',
+                mode: 'subscription',
+                subscription: subscription.id,
+                customer: subscription.customer,
+                metadata: { userId: String(user._id), plan: 'yearly' },
+            }),
+            retrieveSubscription: async () => subscription,
+            constructEvent: () => ({ type: 'customer.subscription.created', data: { object: subscription } }),
+        },
+    });
+    t.after(harness.cleanup);
+
+    await harness.controller.verifySession(
+        { query: { session_id: 'cs_yearly' }, user: { email: user.email } },
+        createResponse()
+    );
+    await harness.controller.handleWebhook({ headers: {}, body: Buffer.from('{}') }, createResponse());
+
+    assert.equal(harness.calls.emails.length, 1);
+    assert.equal(user.subscriptionActivationEmailKey, 'subscription:sub_new');
+});
+
+test('verifySession and webhook send only one email for the same Lifetime checkout', async (t) => {
+    const user = activeMonthlyUser();
+    const session = {
+        id: 'cs_lifetime',
+        mode: 'payment',
+        payment_status: 'paid',
+        customer: 'cus_test',
+        metadata: { userId: String(user._id), plan: 'lifetime' },
+    };
+    const harness = loadController({
+        user,
+        stripeOverrides: {
+            retrieveCheckoutSession: async () => session,
+            constructEvent: () => ({ type: 'checkout.session.completed', data: { object: session } }),
+        },
+    });
+    t.after(harness.cleanup);
+
+    await harness.controller.verifySession(
+        { query: { session_id: session.id }, user: { email: user.email } },
+        createResponse()
+    );
+    await harness.controller.handleWebhook({ headers: {}, body: Buffer.from('{}') }, createResponse());
+
+    assert.equal(harness.calls.emails.length, 1);
+    assert.equal(user.subscriptionActivationEmailKey, 'checkout:cs_lifetime');
+});
+
+test('unpaid Lifetime checkout webhook does not activate access or send email', async (t) => {
+    const user = activeMonthlyUser();
+    const harness = loadController({
+        user,
+        stripeOverrides: {
+            constructEvent: () => ({
+                type: 'checkout.session.completed',
+                data: {
+                    object: {
+                        id: 'cs_unpaid',
+                        mode: 'payment',
+                        payment_status: 'unpaid',
+                        customer: 'cus_test',
+                    },
+                },
+            }),
+        },
+    });
+    t.after(harness.cleanup);
+
+    await harness.controller.handleWebhook({ headers: {}, body: Buffer.from('{}') }, createResponse());
+
+    assert.equal(user.subscriptionType, 'monthly');
+    assert.equal(harness.calls.emails.length, 0);
+    assert.deepEqual(harness.calls.canceled, []);
+});
+
+test('activation remains successful and a later verification retries after email failure', async (t) => {
+    const user = activeMonthlyUser();
+    let attempts = 0;
+    const harness = loadController({
+        user,
+        mailerOverrides: {
+            sendPlanActivatedEmail: async () => {
+                attempts++;
+                if (attempts === 1) throw new Error('SMTP unavailable');
+            },
+        },
+    });
+    t.after(harness.cleanup);
+
+    const firstResponse = createResponse();
+    await harness.controller.verifySession(
+        { query: { session_id: 'cs_test' }, user: { email: user.email } },
+        firstResponse
+    );
+    assert.equal(firstResponse.body.active, true);
+    assert.equal(user.subscriptionActivationEmailKey, undefined);
+
+    await harness.controller.verifySession(
+        { query: { session_id: 'cs_test' }, user: { email: user.email } },
+        createResponse()
+    );
+    assert.equal(attempts, 2);
+    assert.equal(user.subscriptionActivationEmailKey, 'checkout:cs_test');
 });
 
 test('subscription webhook stores yearly plan metadata', async (t) => {
@@ -333,6 +496,8 @@ test('subscription webhook stores yearly plan metadata', async (t) => {
     assert.equal(res.statusCode, 200);
     assert.equal(harness.calls.updated.length, 1);
     assert.equal(harness.calls.updated[0].update.$set.subscriptionType, 'yearly');
+    assert.equal(harness.calls.emails.length, 1);
+    assert.equal(harness.calls.emails[0][2], 'yearly');
 });
 
 test('subscription update webhook trusts the yearly price over stale monthly metadata', async (t) => {
@@ -362,6 +527,34 @@ test('subscription update webhook trusts the yearly price over stale monthly met
 
     assert.equal(res.statusCode, 200);
     assert.equal(harness.calls.updated[0].update.$set.subscriptionType, 'yearly');
+});
+
+test('stale recurring creation does not email a Lifetime user', async (t) => {
+    const user = activeMonthlyUser();
+    user.subscriptionType = 'lifetime';
+    user.stripeSubscriptionId = undefined;
+    const harness = loadController({
+        user,
+        stripeOverrides: {
+            constructEvent: () => ({
+                type: 'customer.subscription.created',
+                data: {
+                    object: {
+                        id: 'sub_stale',
+                        customer: 'cus_test',
+                        status: 'active',
+                        current_period_end: Math.floor(Date.now() / 1000) + 86400,
+                        metadata: { plan: 'monthly' },
+                    },
+                },
+            }),
+        },
+    });
+    t.after(harness.cleanup);
+
+    await harness.controller.handleWebhook({ headers: {}, body: Buffer.from('{}') }, createResponse());
+
+    assert.equal(harness.calls.emails.length, 0);
 });
 
 test('getBilling reconciles a scheduled cancellation without marking access inactive', async (t) => {

@@ -70,6 +70,12 @@ test('transactional emails use safe branded HTML and plain-text alternatives', a
         assert.doesNotMatch(message.html, /<Admin>/);
         assert.doesNotMatch(message.html, /CodeCanyon|View pricing options/);
     }
+    assert.match(
+        messages[1].html,
+        /<h1[^>]*><span role="img" aria-label="Success"[^>]*>&#10003;<\/span>Your account is ready<\/h1>/
+    );
+    assert.match(messages[1].html, /&#10003;/);
+    assert.doesNotMatch(messages[1].html, /aria-label="Success"[^>]*(?:background|border-radius)/);
     assert.match(messages[2].html, /Reset password/);
     assert.match(messages[3].html, /Secure my account/);
     assert.match(messages[4].html, /Set my password/);
@@ -118,4 +124,26 @@ test('meeting emails provide readable details and purpose-specific actions', asy
     assert.match(messages[3].subject, /^Meeting canceled:/);
     assert.doesNotMatch(messages[3].html, />View meeting</);
     assert.equal(messages[3].icalEvent.method, 'CANCEL');
+});
+
+test('plan activation emails identify access without duplicating a receipt', async (t) => {
+    const harness = loadMailer();
+    t.after(harness.cleanup);
+
+    await harness.mailer.sendPlanActivatedEmail(
+        '<Admin>',
+        'user@example.com',
+        'yearly',
+        new Date('2027-09-20T00:00:00.000Z')
+    );
+    await harness.mailer.sendPlanActivatedEmail('<Admin>', 'user@example.com', 'lifetime', null);
+
+    assert.equal(harness.messages.length, 2);
+    assert.match(harness.messages[0].subject, /Annual plan is active/);
+    assert.match(harness.messages[0].html, /September 20, 2027/);
+    assert.match(harness.messages[0].html, />Open dashboard</);
+    assert.match(harness.messages[1].subject, /Lifetime plan is active/);
+    assert.match(harness.messages[1].html, /no recurring charges/i);
+    assert.doesNotMatch(harness.messages[0].html, /amount|receipt number|charged/i);
+    assert.doesNotMatch(harness.messages[0].html, /<Admin>/);
 });

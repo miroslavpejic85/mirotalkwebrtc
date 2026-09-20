@@ -252,8 +252,11 @@ function getUpgradeMessage(pricingUrl = `${SERVER_URL}/pricing`) {
         <br/>`;
 }
 
-function buildEmailHtml({ preheader, title, greeting, content, action, footer }) {
+function buildEmailHtml({ preheader, title, greeting, content, action, footer, success = false }) {
     const actionUrl = action?.url ? safeUrlAttr(action.url) : '';
+    const successHtml = success
+        ? '<span role="img" aria-label="Success" style="display:inline-block;margin-right:8px;color:#16a36f;font-size:24px;font-weight:700;line-height:1;vertical-align:2px;">&#10003;</span>'
+        : '';
     const actionHtml = actionUrl
         ? `<div style="margin:28px 0 24px;">
                 <a href="${actionUrl}" style="display:inline-block;background:#2457d6;color:#ffffff;padding:13px 22px;text-decoration:none;border-radius:6px;font-weight:700;">${escapeHtml(action.label)}</a>
@@ -272,7 +275,7 @@ function buildEmailHtml({ preheader, title, greeting, content, action, footer })
                                 <tr><td style="padding:24px 32px;border-bottom:1px solid #e8ecf2;font-size:20px;font-weight:700;color:#2457d6;">MiroTalk</td></tr>
                                 <tr>
                                     <td style="padding:32px;">
-                                        <h1 style="margin:0 0 16px;font-size:26px;line-height:1.25;color:#172033;">${escapeHtml(title)}</h1>
+                                        <h1 style="margin:0 0 16px;font-size:26px;line-height:1.25;color:#172033;">${successHtml}${escapeHtml(title)}</h1>
                                         ${greeting ? `<p style="margin:0 0 12px;line-height:1.6;">${escapeHtml(greeting)}</p>` : ''}
                                         ${content}
                                         ${actionHtml}
@@ -318,6 +321,7 @@ function sendConfirmationOkEmail(name, toEmail) {
                 preheader: 'Your MiroTalk account is active and ready.',
                 title: 'Your account is ready',
                 greeting: `Hello ${name},`,
+                success: true,
                 content:
                     '<p style="margin:0;line-height:1.6;">Your email is confirmed. Sign in to create a meeting room, schedule a call, or invite your team.</p>',
                 action: { label: 'Sign in to MiroTalk', url: signInUrl },
@@ -325,6 +329,31 @@ function sendConfirmationOkEmail(name, toEmail) {
             }),
         })
         .catch((err) => log.error(err));
+}
+
+function sendPlanActivatedEmail(name, toEmail, plan, expiresAt) {
+    const dashboardUrl = `${SERVER_URL}/client`;
+    const planLabel = plan === 'yearly' ? 'Annual' : plan === 'lifetime' ? 'Lifetime' : 'Monthly';
+    const renewalDate = expiresAt
+        ? new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(expiresAt))
+        : null;
+    const accessDetail = renewalDate ? `Your plan renews on ${renewalDate}.` : 'Your access has no recurring charges.';
+
+    return transport.sendMail({
+        from: EMAIL_FROM,
+        to: toEmail,
+        subject: `Your MiroTalk ${planLabel} plan is active`,
+        text: `Hello ${name},\n\nYour ${planLabel} plan is active. ${accessDetail}\n\nOpen your dashboard:\n${dashboardUrl}`,
+        html: buildEmailHtml({
+            preheader: `Your MiroTalk ${planLabel} plan is active.`,
+            title: 'Your plan is active',
+            greeting: `Hello ${name},`,
+            success: true,
+            content: `<p style="margin:0;line-height:1.6;">Your <strong>${escapeHtml(planLabel)}</strong> plan is active. You can now open your dashboard and use your workspace.</p><p style="margin:20px 0 0;padding:14px 16px;background:#f8fafc;border-left:4px solid #16a36f;line-height:1.6;"><strong>${escapeHtml(accessDetail)}</strong></p>`,
+            action: { label: 'Open dashboard', url: dashboardUrl },
+            footer: 'Stripe handles payment receipts and billing notifications separately.',
+        }),
+    });
 }
 
 function sendPasswordResetEmail(name, email, resetUrl) {
@@ -510,6 +539,7 @@ function sendRoomInvitationEmail({
 module.exports = {
     sendConfirmationEmail,
     sendConfirmationOkEmail,
+    sendPlanActivatedEmail,
     sendPasswordResetEmail,
     sendPasswordChangeConfirmation,
     sendInvitationEmail,

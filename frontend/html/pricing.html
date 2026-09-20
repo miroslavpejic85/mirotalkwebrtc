@@ -78,13 +78,21 @@
                 </p>
             </header>
 
+            <section id="pricingNotice" class="pricing-notice hidden" aria-live="polite">
+                <i class="uil uil-info-circle" aria-hidden="true"></i>
+                <div>
+                    <strong id="pricingNoticeTitle"></strong>
+                    <span id="pricingNoticeMessage"></span>
+                </div>
+            </section>
+
             <section id="pricingAccountStatus" class="pricing-account-status hidden" aria-live="polite">
                 <div>
                     <span>Your account</span>
                     <strong id="pricingAccountPlan"></strong>
                     <small id="pricingAccountDetail"></small>
                 </div>
-                <button id="pricingManageBilling" type="button" class="pricing-secondary-btn">
+                <button id="pricingManageBilling" type="button" class="pricing-secondary-btn hidden">
                     <i class="uil uil-cog"></i> Manage billing
                 </button>
             </section>

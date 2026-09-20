@@ -164,7 +164,9 @@ body.pricing-page {
 }
 
 .checkout-status.hidden,
+.pricing-notice.hidden,
 .pricing-account-status.hidden,
+.pricing-secondary-btn.hidden,
 .checkout-status-actions.hidden,
 .checkout-status-spinner.hidden {
     display: none;
@@ -229,6 +231,33 @@ body.pricing-page {
     background: rgba(78, 211, 162, 0.08);
     border: 1px solid rgba(78, 211, 162, 0.3);
     border-radius: 8px;
+}
+
+.pricing-notice {
+    width: min(900px, 100%);
+    box-sizing: border-box;
+    padding: 15px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    color: var(--text-color);
+    background: rgba(255, 255, 255, 0.06);
+    border-left: 3px solid var(--accent-color);
+}
+
+.pricing-notice i {
+    color: var(--accent-color);
+    font-size: 20px;
+}
+
+.pricing-notice div {
+    display: grid;
+    gap: 3px;
+}
+
+.pricing-notice span {
+    color: var(--text-light);
+    font-size: 13px;
 }
 
 .pricing-account-status > div {
@@ -347,6 +376,13 @@ body.pricing-page {
 .pricing-card.featured {
     padding: 33px;
     border: 2px solid var(--accent-color);
+}
+
+.pricing-card.is-selected-plan {
+    border-color: var(--accent-color);
+    box-shadow:
+        0 0 0 2px rgba(78, 211, 162, 0.2),
+        var(--box-shadow);
 }
 
 .pricing-badge {

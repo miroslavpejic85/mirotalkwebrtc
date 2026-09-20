@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.57
+ * @version 1.8.10
  */
 
 const userAgent = navigator.userAgent;
@@ -589,13 +589,14 @@ function showDemoAccountPrompt(currentUser) {
 }
 
 function handleUserRoles() {
-    const userPromise = isOidcMode ? userGetMe() : userGet(userId);
-    userPromise
+    userGetMe()
         .then((res) => {
             console.log('[API] - USER ROLES GET RESPONSE', res);
             if (res.message) {
                 popupMessage('warning', `${res.message}`);
             } else {
+                userId = res._id;
+                window.sessionStorage.userId = res._id;
                 const { role, allow, allowedRooms } = res;
                 user.role = role;
                 user.allowedRooms = allowedRooms;
@@ -3444,8 +3445,7 @@ function removeLastRow() {
 }
 
 function getMyAccount() {
-    const userPromise = isOidcMode ? userGetMe() : userGet(userId);
-    userPromise
+    userGetMe()
         .then((res) => {
             console.log('[API] - USER GET RESPONSE', res);
             if (res.message) {
