@@ -67,6 +67,9 @@ STRIPE_PROMO_ACTIVE=false          # Show a promotion badge on the pricing page
 STRIPE_PROMO_TEXT=Save 20%         # Text displayed inside the promotion badge
 ```
 
+The regular comparison prices are configured in `SAAS.promo.regularPrices` in `backend/config.js`. They are display
+only; the active Stripe Price IDs remain the source of truth for the promotional amounts charged at checkout.
+
 > ⚠️ Only `STRIPE_PUBLISHABLE_KEY`, the price IDs, and promotion settings are exposed to the frontend. The **secret key** and **webhook secret** are read server-side only and are never sent to the browser.
 
 | Variable                   | Where to find it in Stripe                               |

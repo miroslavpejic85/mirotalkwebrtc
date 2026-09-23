@@ -451,13 +451,31 @@ body.pricing-page {
 
 .pricing-card-price {
     margin: 24px 0 8px;
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0 8px;
     color: #fff;
     font-size: 44px;
     font-weight: 700;
 }
 
+.pricing-regular-price {
+    flex-basis: 100%;
+    margin-bottom: -6px;
+    color: var(--text-light);
+    font-size: 22px;
+    font-weight: 500;
+    text-decoration-color: #ffc45c;
+    text-decoration-thickness: 2px;
+}
+
+.pricing-regular-price.hidden {
+    display: none;
+}
+
 .pricing-card-price small {
-    margin-left: 5px;
+    margin-left: -3px;
     color: var(--text-light);
     font-size: 14px;
     font-weight: 500;

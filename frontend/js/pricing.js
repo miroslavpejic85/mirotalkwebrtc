@@ -40,6 +40,13 @@ function loadPricingAppConfig(config) {
     const showPromo = config?.saas?.promo?.active === true && Boolean(promoText);
     document.getElementById('pricingPromoText').textContent = showPromo ? promoText : '';
     promo.classList.toggle('hidden', !showPromo);
+
+    ['monthly', 'yearly', 'lifetime'].forEach((plan) => {
+        const regularPrice = config?.saas?.promo?.regularPrices?.[plan]?.trim();
+        const element = document.getElementById(`${plan}RegularPrice`);
+        element.textContent = showPromo && regularPrice ? regularPrice : '';
+        element.classList.toggle('hidden', !showPromo || !regularPrice);
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {

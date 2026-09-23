@@ -161,6 +161,11 @@ module.exports = {
         promo: {
             active: process.env.STRIPE_PROMO_ACTIVE === 'true',
             text: (process.env.STRIPE_PROMO_TEXT || '').trim(),
+            regularPrices: {
+                monthly: '$9',
+                yearly: '$79',
+                lifetime: '$199',
+            },
         },
         pricing: {
             monthly: '$9',
