@@ -233,6 +233,7 @@ mongoose
                 },
                 saas: {
                     enabled: config?.SAAS?.enabled,
+                    promo: config?.SAAS?.promo,
                 },
             });
         });

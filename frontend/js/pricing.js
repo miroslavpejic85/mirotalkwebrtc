@@ -34,6 +34,12 @@ function loadPricingAppConfig(config) {
             element.textContent = config.app.Name;
         });
     }
+
+    const promoText = config?.saas?.promo?.text?.trim();
+    const promo = document.getElementById('pricingPromo');
+    const showPromo = config?.saas?.promo?.active === true && Boolean(promoText);
+    document.getElementById('pricingPromoText').textContent = showPromo ? promoText : '';
+    promo.classList.toggle('hidden', !showPromo);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -42,16 +48,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const sessionId = params.get('session_id');
     requestedPlan = ['monthly', 'yearly', 'lifetime'].includes(params.get('plan')) ? params.get('plan') : null;
 
-    if (sessionStorage.getItem('appConfig')) {
-        loadPricingAppConfig(JSON.parse(sessionStorage.getItem('appConfig')));
-    } else {
-        getAppConfig()
-            .then((config) => {
-                sessionStorage.setItem('appConfig', JSON.stringify(config));
-                loadPricingAppConfig(config);
-            })
-            .catch(() => {});
-    }
+    const cachedConfig = sessionStorage.getItem('appConfig');
+    getAppConfig()
+        .then((config) => {
+            sessionStorage.setItem('appConfig', JSON.stringify(config));
+            loadPricingAppConfig(config);
+        })
+        .catch(() => {
+            if (cachedConfig) loadPricingAppConfig(JSON.parse(cachedConfig));
+        });
 
     if (status === 'success') {
         // The Stripe webhook activates the subscription asynchronously, so verify

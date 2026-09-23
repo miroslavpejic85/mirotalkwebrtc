@@ -158,6 +158,10 @@ module.exports = {
         monthlyPriceId: process.env.STRIPE_MONTHLY_PRICE_ID || '',
         yearlyPriceId: process.env.STRIPE_YEARLY_PRICE_ID || '',
         lifetimePriceId: process.env.STRIPE_LIFETIME_PRICE_ID || '',
+        promo: {
+            active: process.env.STRIPE_PROMO_ACTIVE === 'true',
+            text: (process.env.STRIPE_PROMO_TEXT || '').trim(),
+        },
         pricing: {
             monthly: '$9',
             yearly: '$79',

@@ -166,6 +166,7 @@ body.pricing-page {
 .checkout-status.hidden,
 .pricing-notice.hidden,
 .pricing-account-status.hidden,
+.pricing-promo.hidden,
 .pricing-secondary-btn.hidden,
 .checkout-status-actions.hidden,
 .checkout-status-spinner.hidden {
@@ -335,6 +336,31 @@ body.pricing-page {
     font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
+}
+
+.pricing-promo {
+    width: fit-content;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 16px auto 0;
+    padding: 8px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #fff4d6;
+    background: rgba(245, 166, 35, 0.16);
+    border: 1px solid rgba(245, 166, 35, 0.48);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.pricing-promo i {
+    flex: 0 0 auto;
+    color: #ffc45c;
+    font-size: 17px;
 }
 
 .pricing-header h1 {
