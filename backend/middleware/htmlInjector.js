@@ -37,6 +37,7 @@ class HtmlInjector {
         const legal = this.config?.LEGAL || {};
         const analytics = this.config?.ANALYTICS || {};
         return {
+            APP_NAME: escapeHtml(this.config?.App?.Name || 'MiroTalk WEB'),
             OG_TYPE: this.config?.OG?.type || 'app-webrtc',
             OG_SITE_NAME: this.config?.OG?.siteName || 'MiroTalk WEB',
             OG_TITLE: this.config?.OG?.title || 'MiroTalk WEB - Open Source WebRTC Video SaaS Platform',
@@ -104,7 +105,7 @@ class HtmlInjector {
 
         try {
             // Replace configured metadata and legal placeholders.
-            const modifiedHTML = this.cache[filePath].replace(/{{((?:OG|LEGAL|ANALYTICS)_[A-Z_]+)}}/g, (_, key) => {
+            const modifiedHTML = this.cache[filePath].replace(/{{((?:APP|OG|LEGAL|ANALYTICS)_[A-Z_]+)}}/g, (_, key) => {
                 return this.injectData[key] || '';
             });
 

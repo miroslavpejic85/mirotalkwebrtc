@@ -8,6 +8,9 @@ const HtmlInjector = require('../backend/middleware/htmlInjector');
 test('injectHtml replaces and escapes deployment legal metadata', () => {
     const injector = Object.create(HtmlInjector.prototype);
     injector.config = {
+        App: {
+            Name: 'Example <Cloud>',
+        },
         LEGAL: {
             policyVersion: '2026-09-18',
             operatorName: 'Example & Partners',
@@ -21,7 +24,7 @@ test('injectHtml replaces and escapes deployment legal metadata', () => {
     };
     injector.injectData = injector.getInjectData();
     injector.cache = {
-        legal: '{{LEGAL_OPERATOR_NAME}}|{{LEGAL_FORUM_URL}}|{{ANALYTICS_ORIGIN}}|{{LEGAL_POLICY_VERSION}}',
+        legal: '{{APP_NAME}}|{{LEGAL_OPERATOR_NAME}}|{{LEGAL_FORUM_URL}}|{{ANALYTICS_ORIGIN}}|{{LEGAL_POLICY_VERSION}}',
     };
     let body;
 
@@ -34,6 +37,6 @@ test('injectHtml replaces and escapes deployment legal metadata', () => {
 
     assert.equal(
         body,
-        'Example &amp; Partners|https://forum.example.com/?topic=terms&amp;view=all|https://stats.example.com|2026-09-18'
+        'Example &lt;Cloud&gt;|Example &amp; Partners|https://forum.example.com/?topic=terms&amp;view=all|https://stats.example.com|2026-09-18'
     );
 });
