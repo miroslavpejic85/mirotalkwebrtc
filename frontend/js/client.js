@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.17
+ * @version 1.8.18
  */
 
 const userAgent = navigator.userAgent;
@@ -1505,6 +1505,11 @@ function getUserRow(u) {
         </div>`;
 
     const userInlineIcons = [];
+    if (u.stripeSubscriptionDashboardUrl) {
+        userInlineIcons.push(
+            `<a href="${escapeHtml(u.stripeSubscriptionDashboardUrl)}" target="_blank" rel="noopener noreferrer" class="action-icon" title="Open subscription in Stripe" aria-label="Open ${escapeHtml(u.username)}'s subscription in Stripe"><i class="uil uil-external-link-alt" aria-hidden="true"></i></a>`
+        );
+    }
     userInlineIcons.push(
         `<i id="usave_${u._id}" onclick="saveUser('${u._id}')" class="uil uil-save action-icon" title="Save"></i>`
     );

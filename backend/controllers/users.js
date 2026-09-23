@@ -440,6 +440,9 @@ async function userGetAll(req, res) {
                 ...user,
                 invitationPending: accountSetupPending === true,
                 subscriptionManagedByStripe: !!(stripeCustomerId || stripeSubscriptionId),
+                stripeSubscriptionDashboardUrl: stripeSubscriptionId
+                    ? `https://dashboard.stripe.com${process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_') ? '/test' : ''}/subscriptions/${encodeURIComponent(stripeSubscriptionId)}`
+                    : null,
             }))
         );
     } catch (error) {

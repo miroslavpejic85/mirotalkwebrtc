@@ -392,6 +392,12 @@ test('sendInvitation preserves the previous setup link when resend delivery fail
 });
 
 test('userGetAll exposes invitation status without setup secrets', async (t) => {
+    const previousStripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    process.env.STRIPE_SECRET_KEY = 'sk_test_example';
+    t.after(() => {
+        if (previousStripeSecretKey === undefined) delete process.env.STRIPE_SECRET_KEY;
+        else process.env.STRIPE_SECRET_KEY = previousStripeSecretKey;
+    });
     const users = [
         {
             _id: 'user_pending',
@@ -399,6 +405,7 @@ test('userGetAll exposes invitation status without setup secrets', async (t) => 
             username: 'pending-user',
             accountSetupPending: true,
             stripeCustomerId: 'cus_private',
+            stripeSubscriptionId: 'sub_private',
         },
         {
             _id: 'user_ready',
@@ -431,6 +438,12 @@ test('userGetAll exposes invitation status without setup secrets', async (t) => 
     assert.equal(res.body[1].invitationPending, false);
     assert.equal('accountSetupPending' in res.body[0], false);
     assert.equal('stripeCustomerId' in res.body[0], false);
+    assert.equal('stripeSubscriptionId' in res.body[0], false);
+    assert.equal(
+        res.body[0].stripeSubscriptionDashboardUrl,
+        'https://dashboard.stripe.com/test/subscriptions/sub_private'
+    );
+    assert.equal(res.body[1].stripeSubscriptionDashboardUrl, null);
 });
 
 test('userLogin persists consent when it auto-registers a new user', async (t) => {
