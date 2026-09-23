@@ -651,6 +651,16 @@ html[data-theme='light'] .pricing-page .nav-links > a.pricing-signin {
     border-color: #cdd4df;
 }
 
+html[data-theme='light'] .pricing-promo {
+    color: #704000;
+    background: #fff4d6;
+    border-color: #d58a0b;
+}
+
+html[data-theme='light'] .pricing-promo i {
+    color: #9b5700;
+}
+
 html[data-theme='light'] .pricing-header h1,
 html[data-theme='light'] .checkout-status h1,
 html[data-theme='light'] .pricing-card-title,
