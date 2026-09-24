@@ -1456,6 +1456,19 @@ body.dark .stat-card:hover {
     letter-spacing: 0.5px;
 }
 
+.room-type-badge {
+    margin-top: 6px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 2px 7px;
+    color: var(--black-light-color);
+    background: var(--panel-color);
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
 .upcoming-reminders-list {
     display: grid;
     gap: 8px;
