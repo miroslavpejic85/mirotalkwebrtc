@@ -200,6 +200,11 @@ body {
     margin: 0;
 }
 
+.password-hint {
+    text-align: center;
+    white-space: nowrap;
+}
+
 .password-success {
     color: #39b980;
     font-weight: 600;
@@ -474,6 +479,7 @@ button:active {
 .legal-consent span {
     min-width: 0;
     flex: 1;
+    white-space: nowrap;
 }
 
 .legal-consent a {
@@ -719,6 +725,12 @@ button:active {
     .main {
         width: 92vw;
         min-width: 300px;
+    }
+}
+
+@media screen and (max-width: 360px) {
+    .legal-consent span {
+        white-space: normal;
     }
 }
 
