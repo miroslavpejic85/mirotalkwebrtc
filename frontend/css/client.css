@@ -1919,6 +1919,15 @@ body.dark #myTable tbody tr:hover {
         order: 1;
     }
 
+    #myTable .room-type-control {
+        display: inline-grid;
+        min-width: 80px;
+    }
+
+    #myTable .room-type-intent {
+        display: none;
+    }
+
     #myTable .recurring-cell {
         order: 2;
         text-align: left;
@@ -3483,6 +3492,19 @@ td .custom-dropdown-trigger {
 td .custom-dropdown-option {
     padding: 6px 10px;
     font-size: 14px;
+}
+
+.room-type-control {
+    display: grid;
+    min-width: 130px;
+    gap: 4px;
+}
+
+.room-type-intent {
+    color: var(--text-color-light);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
 }
 
 .data .join {
@@ -6213,6 +6235,101 @@ body.dark #usersTable td .user-plan-badge.yearly {
     font-size: 10px;
 }
 
+.addrow-disclosure {
+    margin: 0 0 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--box1-color) 72%, transparent);
+    overflow: hidden;
+}
+
+.addrow-disclosure > summary {
+    display: flex;
+    min-height: 64px;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px;
+    color: var(--text-color);
+    cursor: pointer;
+    list-style: none;
+    transition: background-color 0.2s ease;
+}
+
+.addrow-disclosure > summary::-webkit-details-marker {
+    display: none;
+}
+
+.addrow-disclosure > summary:hover {
+    background: var(--hover-bg-light);
+}
+
+.addrow-disclosure-copy {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    align-items: center;
+    gap: 9px;
+}
+
+.addrow-disclosure-copy > i {
+    color: var(--accent-color);
+    font-size: 18px;
+}
+
+.addrow-disclosure-copy > span {
+    display: grid;
+    min-width: 0;
+    gap: 2px;
+}
+
+.addrow-disclosure-copy strong {
+    font-size: 13px;
+}
+
+.addrow-disclosure-copy small {
+    color: var(--text-color-light);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.addrow-disclosure-action {
+    padding: 5px 8px;
+    border-radius: 6px;
+    color: var(--accent-color);
+    background: var(--hover-bg-light);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.addrow-disclosure > summary::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    flex: 0 0 8px;
+    border-right: 2px solid var(--text-color-light);
+    border-bottom: 2px solid var(--text-color-light);
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+}
+
+.addrow-disclosure[open] > summary::after {
+    transform: rotate(225deg);
+}
+
+.addrow-disclosure > summary:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 3px;
+}
+
+.addrow-disclosure-content {
+    padding: 0 14px 18px;
+    border-bottom: 0;
+}
+
+.addrow-disclosure-content .addrow-section-label {
+    margin-top: 4px;
+}
+
 .addrow-field {
     min-height: 56px;
     margin-bottom: 10px;
@@ -6285,12 +6402,14 @@ body.dark #usersTable td .user-plan-badge.yearly {
     }
 
     .addRowDiv .service-card {
-        min-height: 54px;
+        min-height: 76px;
         justify-content: center;
     }
 
     .addRowDiv .service-card-desc {
-        display: none;
+        display: block;
+        font-size: 10px;
+        line-height: 1.3;
     }
 }
 

@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.18
+ * @version 1.8.20
  */
 
 const userAgent = navigator.userAgent;
@@ -176,6 +176,7 @@ const panelBackdrop = document.getElementById('panelBackdrop');
 
 const addType = document.getElementById('add-type');
 const addTypeCards = document.getElementById('add-type-cards');
+const addFormatSummaryValue = document.getElementById('add-format-summary-value');
 const addTag = document.getElementById('add-tag');
 const addEmail = document.getElementById('add-email');
 const addPhone = document.getElementById('add-phone');
@@ -214,6 +215,13 @@ const myTableBody = document.getElementById('myTableBody');
 
 const DURATION_OPTIONS = [15, 30, 45, 60, 90, 120, 180, 240, 480];
 const DEFAULT_DURATION_MIN = 30;
+const ROOM_TYPE_LABELS = {
+    P2P: 'Small meeting',
+    SFU: 'Large meeting',
+    C2C: 'One-to-one call',
+    BRO: 'Broadcast',
+    CME: 'Direct call',
+};
 const generatedTextAnimationFrames = new WeakMap();
 
 function dropdownSearchRender(data, type) {
@@ -761,17 +769,28 @@ sidebarToggle.addEventListener('click', () => {
 
 function updateSidebarExpandedState() {
     const hasCloseClass = sidebar.classList.contains('close');
-    const isExpanded = window.innerWidth <= 450 ? hasCloseClass : !hasCloseClass;
+    const isMobileNavigation = window.innerWidth <= 450;
+    const isExpanded = isMobileNavigation ? hasCloseClass : !hasCloseClass;
     sidebarToggle.setAttribute('aria-expanded', String(isExpanded));
+    sidebar.inert = isMobileNavigation && !isExpanded;
+    if (isMobileNavigation && !isExpanded) {
+        sidebar.setAttribute('aria-hidden', 'true');
+    } else {
+        sidebar.removeAttribute('aria-hidden');
+    }
 }
 
-function closeMobileNavigation() {
+function closeMobileNavigation(restoreFocus = false) {
     if (window.innerWidth > 450 || !sidebar.classList.contains('close')) return;
     sidebar.classList.remove('close');
     updateSidebarExpandedState();
+    if (restoreFocus) sidebarToggle.focus();
 }
 
-mobileNavBackdrop.addEventListener('click', closeMobileNavigation);
+mobileNavBackdrop.addEventListener('click', () => closeMobileNavigation(true));
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeMobileNavigation(true);
+});
 window.addEventListener('resize', updateSidebarExpandedState);
 
 // Custom dropdown helpers
@@ -831,6 +850,12 @@ function initCustomDropdowns(container) {
             dd.querySelector('.custom-dropdown-value').textContent = opt.textContent;
             const searchWrapper = dd.closest('[data-search]');
             if (searchWrapper) searchWrapper.dataset.search = opt.textContent;
+            const roomTypeControl = dd.closest('.room-type-control');
+            if (roomTypeControl) {
+                const intent = ROOM_TYPE_LABELS[opt.dataset.value] || opt.textContent;
+                roomTypeControl.querySelector('.room-type-intent').textContent = intent;
+                roomTypeControl.title = `${opt.dataset.value} - ${intent}`;
+            }
             dd.classList.remove('open');
             trigger.setAttribute('aria-expanded', 'false');
             trigger.focus();
@@ -2256,9 +2281,14 @@ function getRow(obj) {
         obj.duration != null && obj.duration !== '' ? Number(obj.duration) : DEFAULT_DURATION_MIN,
         isPast
     );
+    const roomTypeIntent = ROOM_TYPE_LABELS[obj.type] || obj.type;
+    const roomTypeControl = `<div class="room-type-control" title="${obj.type} - ${roomTypeIntent}">
+        <span class="room-type-intent">${roomTypeIntent}</span>
+        ${buildCustomDropdownHTML(obj._id + '_type', typeOptions, obj.type, false, isPast)}
+    </div>`;
 
     return [
-        buildCustomDropdownHTML(obj._id + '_type', typeOptions, obj.type, false, isPast),
+        roomTypeControl,
         `<input id="${obj._id}_tag" type="text" name="tag" aria-label="Meeting title" placeholder="Meeting title" value="${obj.tag}"${ro}/>`,
         `<input id="${obj._id}_email" type="email" name="email" aria-label="Email address" placeholder="Email address" value="${obj.email}"${ro}/>`,
         `<input id="${obj._id}_phone" type="text" name="text" aria-label="Phone number" placeholder="Phone number" value="${obj.phone}"${ro}/>`,
@@ -4030,6 +4060,7 @@ if (addTypeCards) {
             c.setAttribute('tabindex', isSel ? '0' : '-1');
         });
         addType.value = card.dataset.value;
+        addFormatSummaryValue.textContent = card.dataset.summary;
         updateRoomLinkPreview();
     };
     addTypeCards.addEventListener('click', (e) => {
@@ -4217,6 +4248,7 @@ function toggleRoomsList(hasData) {
     const tableWrapper = document.getElementById('myTable_wrapper');
     elemDisplay(emptyState, !hasData);
     elemDisplay(filterBar, hasData);
+    elemDisplay(openAddBtn, hasData);
     if (tableWrapper) tableWrapper.style.display = hasData ? '' : 'none';
 }
 

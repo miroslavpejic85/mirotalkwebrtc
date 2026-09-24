@@ -13,6 +13,7 @@ const signupPasswordIdInput = document.getElementById('signupPasswordIdInput');
 const signupRepeatPasswordIdInput = document.getElementById('signupRepeatPasswordIdInput');
 const signupConsentInput = document.getElementById('signupConsentInput');
 const signupBtn = document.getElementById('signupBtn');
+const signupPasswordRequirements = document.getElementById('signupPasswordRequirements');
 
 // login
 const loginUsernameInput = document.getElementById('loginUsernameInput');
@@ -204,9 +205,10 @@ function handleSignup(e) {
         signupPasswordIdInput,
         signupRepeatPasswordIdInput
     );
+    const passwordValid = validateSignupPassword();
     const passwordsMatch = validateMatchingPasswords();
     const consentValid = validateConsent();
-    if (!fieldsValid || !passwordsMatch || !consentValid) {
+    if (!fieldsValid || !passwordValid || !passwordsMatch || !consentValid) {
         signupPanel.querySelector('[aria-invalid="true"]')?.focus();
         return false;
     }
@@ -251,6 +253,31 @@ function validateMatchingPasswords() {
     return true;
 }
 
+function getPasswordRuleState(password) {
+    return {
+        length: password.length >= 6 && password.length <= 36,
+        lowercase: /[a-z]/.test(password),
+        uppercase: /[A-Z]/.test(password),
+        number: /[0-9]/.test(password),
+        special: /[!%&@#$^*?_~]/.test(password),
+    };
+}
+
+function updatePasswordRequirements() {
+    const rules = getPasswordRuleState(signupPasswordIdInput.value);
+    signupPasswordRequirements.querySelectorAll('[data-password-rule]').forEach((item) => {
+        item.classList.toggle('met', rules[item.dataset.passwordRule]);
+    });
+    return Object.values(rules).every(Boolean);
+}
+
+function validateSignupPassword() {
+    if (!signupPasswordIdInput.value) return false;
+    if (updatePasswordRequirements()) return true;
+    setFieldError(signupPasswordIdInput, 'Use a password that meets every requirement below.');
+    return false;
+}
+
 function validateConsent() {
     const errorId = 'signupConsentInputError';
     let error = document.getElementById(errorId);
@@ -286,13 +313,18 @@ function setFieldError(input, message) {
         input.closest('.input-group')?.insertAdjacentElement('afterend', error);
     }
     error.textContent = message;
-    input.setAttribute('aria-describedby', errorId);
+    const descriptionIds = input === signupPasswordIdInput ? `signupPasswordRequirements ${errorId}` : errorId;
+    input.setAttribute('aria-describedby', descriptionIds);
 }
 
 function clearFieldError(input) {
     document.getElementById(`${input.id}Error`)?.remove();
     input.removeAttribute('aria-invalid');
-    input.removeAttribute('aria-describedby');
+    if (input === signupPasswordIdInput) {
+        input.setAttribute('aria-describedby', 'signupPasswordRequirements');
+    } else {
+        input.removeAttribute('aria-describedby');
+    }
     input.closest('.input-group')?.classList.remove('invalid');
 }
 
@@ -312,6 +344,9 @@ function clearConsentError() {
     signupPasswordIdInput,
     signupRepeatPasswordIdInput,
 ].forEach((input) => input.addEventListener('input', () => clearFieldError(input)));
+
+signupPasswordIdInput.addEventListener('input', updatePasswordRequirements);
+updatePasswordRequirements();
 
 signupPasswordIdInput.addEventListener('input', () => {
     if (signupPasswordIdInput.value === signupRepeatPasswordIdInput.value) {
