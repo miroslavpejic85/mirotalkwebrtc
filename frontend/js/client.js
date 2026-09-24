@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.21
+ * @version 1.8.22
  */
 
 const userAgent = navigator.userAgent;
@@ -222,6 +222,20 @@ const ROOM_TYPE_LABELS = {
     BRO: 'Broadcast',
     CME: 'Direct call',
 };
+
+['booking-room-type', 'event-room-type'].forEach((id) => {
+    const select = document.getElementById(id);
+    if (!select) return;
+
+    [...select.options].forEach((option) => {
+        const roomType = option.value;
+        const label = ROOM_TYPE_LABELS[roomType];
+        if (!label) return;
+        option.value = roomType;
+        option.textContent = `${roomType} - ${label}`;
+    });
+});
+
 const generatedTextAnimationFrames = new WeakMap();
 
 function dropdownSearchRender(data, type) {
