@@ -13,7 +13,10 @@ const signupPasswordIdInput = document.getElementById('signupPasswordIdInput');
 const signupRepeatPasswordIdInput = document.getElementById('signupRepeatPasswordIdInput');
 const signupConsentInput = document.getElementById('signupConsentInput');
 const signupBtn = document.getElementById('signupBtn');
+const signupPasswordGuidance = document.getElementById('signupPasswordGuidance');
 const signupPasswordRequirements = document.getElementById('signupPasswordRequirements');
+const signupPasswordHint = signupPasswordGuidance.querySelector('.password-hint');
+const signupPasswordSuccess = signupPasswordGuidance.querySelector('.password-success');
 
 // login
 const loginUsernameInput = document.getElementById('loginUsernameInput');
@@ -268,13 +271,23 @@ function updatePasswordRequirements() {
     signupPasswordRequirements.querySelectorAll('[data-password-rule]').forEach((item) => {
         item.classList.toggle('met', rules[item.dataset.passwordRule]);
     });
-    return Object.values(rules).every(Boolean);
+    const isValid = Object.values(rules).every(Boolean);
+    const showRules =
+        !isValid && (document.activeElement === signupPasswordIdInput || signupPasswordIdInput.ariaInvalid === 'true');
+    signupPasswordHint.hidden = isValid || showRules;
+    signupPasswordRequirements.hidden = isValid || !showRules;
+    signupPasswordSuccess.hidden = !isValid;
+    return isValid;
 }
 
 function validateSignupPassword() {
-    if (!signupPasswordIdInput.value) return false;
+    if (!signupPasswordIdInput.value) {
+        updatePasswordRequirements();
+        return false;
+    }
     if (updatePasswordRequirements()) return true;
     setFieldError(signupPasswordIdInput, 'Use a password that meets every requirement below.');
+    updatePasswordRequirements();
     return false;
 }
 
@@ -313,7 +326,7 @@ function setFieldError(input, message) {
         input.closest('.input-group')?.insertAdjacentElement('afterend', error);
     }
     error.textContent = message;
-    const descriptionIds = input === signupPasswordIdInput ? `signupPasswordRequirements ${errorId}` : errorId;
+    const descriptionIds = input === signupPasswordIdInput ? `signupPasswordGuidance ${errorId}` : errorId;
     input.setAttribute('aria-describedby', descriptionIds);
 }
 
@@ -321,7 +334,7 @@ function clearFieldError(input) {
     document.getElementById(`${input.id}Error`)?.remove();
     input.removeAttribute('aria-invalid');
     if (input === signupPasswordIdInput) {
-        input.setAttribute('aria-describedby', 'signupPasswordRequirements');
+        input.setAttribute('aria-describedby', 'signupPasswordGuidance');
     } else {
         input.removeAttribute('aria-describedby');
     }
@@ -346,6 +359,8 @@ function clearConsentError() {
 ].forEach((input) => input.addEventListener('input', () => clearFieldError(input)));
 
 signupPasswordIdInput.addEventListener('input', updatePasswordRequirements);
+signupPasswordIdInput.addEventListener('focus', updatePasswordRequirements);
+signupPasswordIdInput.addEventListener('blur', updatePasswordRequirements);
 updatePasswordRequirements();
 
 signupPasswordIdInput.addEventListener('input', () => {

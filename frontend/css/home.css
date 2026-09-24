@@ -183,15 +183,34 @@ body {
     line-height: 1.4;
 }
 
-.password-requirements {
-    display: flex;
+.password-guidance {
     width: 72%;
     margin: -2px auto 10px;
+    color: var(--text-muted);
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.password-guidance [hidden] {
+    display: none;
+}
+
+.password-hint,
+.password-success {
+    margin: 0;
+}
+
+.password-success {
+    color: #39b980;
+    font-weight: 600;
+}
+
+.password-requirements {
+    display: flex;
+    margin: 0;
     padding: 0;
     flex-wrap: wrap;
     gap: 5px 10px;
-    color: var(--text-muted);
-    font-size: 11px;
     list-style: none;
 }
 

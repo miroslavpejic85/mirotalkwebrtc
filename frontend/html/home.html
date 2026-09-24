@@ -240,7 +240,7 @@
                                 name="Password"
                                 placeholder="Password"
                                 autocomplete="new-password"
-                                aria-describedby="signupPasswordRequirements"
+                                aria-describedby="signupPasswordGuidance"
                                 required
                             />
                             <button
@@ -252,13 +252,17 @@
                                 <i class="uil uil-eye"></i>
                             </button>
                         </div>
-                        <ul id="signupPasswordRequirements" class="password-requirements" aria-live="polite">
-                            <li data-password-rule="length">6–36 characters</li>
-                            <li data-password-rule="lowercase">Lowercase</li>
-                            <li data-password-rule="uppercase">Uppercase</li>
-                            <li data-password-rule="number">Number</li>
-                            <li data-password-rule="special">Special character</li>
-                        </ul>
+                        <div id="signupPasswordGuidance" class="password-guidance" aria-live="polite">
+                            <p class="password-hint">Use 6–36 characters with mixed case, a number and a symbol.</p>
+                            <ul id="signupPasswordRequirements" class="password-requirements" hidden>
+                                <li data-password-rule="length">6–36 characters</li>
+                                <li data-password-rule="lowercase">Lowercase</li>
+                                <li data-password-rule="uppercase">Uppercase</li>
+                                <li data-password-rule="number">Number</li>
+                                <li data-password-rule="special">Special character</li>
+                            </ul>
+                            <p class="password-success" hidden><i class="uil uil-check-circle"></i> Strong password</p>
+                        </div>
                         <div class="input-group">
                             <i class="uil uil-lock"></i>
                             <label class="sr-only" for="signupRepeatPasswordIdInput">Confirm password</label>
