@@ -198,7 +198,7 @@ Do you find MiroTalk WEB indispensable for your needs? Join us in supporting thi
 
 ---
 
-<p align="center">🌐 Explore the full MiroTalk suite (SFU, P2P, BRO, C2C, WEB, CME, ADM) → <a href="https://docs.mirotalk.com/overview/"><strong>MiroTalk Overview</strong></a></p>
+<p align="center">🌐 Explore the full MiroTalk suite (SFU, P2P, BRO, C2C, WEB, CME, ADM) → <a href="https://docs.mirotalk.com/sites/overview"><strong>MiroTalk Overview</strong></a></p>
 
 ---
 
