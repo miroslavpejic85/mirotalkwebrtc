@@ -87,8 +87,6 @@ body.pricing-page {
     grid-column: 1 / -1;
     grid-row: 2;
     justify-self: center;
-    width: auto;
-    height: 40px;
     color: var(--text-light) !important;
     background-color: transparent !important;
 }
@@ -132,7 +130,6 @@ body.pricing-page {
 
     .pricing-account-modal .swal2-cancel {
         grid-row: 3;
-        width: auto;
     }
 }
 

@@ -3711,6 +3711,7 @@ tr:nth-child(even) {
     border-radius: 8px !important;
     font-size: 14px !important;
     font-weight: 500 !important;
+    min-width: 120px;
 }
 
 .swal2-cancel {
@@ -3718,6 +3719,7 @@ tr:nth-child(even) {
     border-radius: 8px !important;
     font-size: 14px !important;
     font-weight: 500 !important;
+    min-width: 120px;
 }
 
 .swal2-cancel.demo-explore-button {

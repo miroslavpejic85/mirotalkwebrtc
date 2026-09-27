@@ -450,6 +450,7 @@ button:active {
     margin: 2px auto 8px;
     display: flex;
     align-items: flex-start;
+    justify-content: center;
     gap: 10px;
     box-sizing: border-box;
     color: var(--text-light);
@@ -478,7 +479,7 @@ button:active {
 
 .legal-consent span {
     min-width: 0;
-    flex: 1;
+    flex: 0 1 auto;
     white-space: nowrap;
 }
 
@@ -657,7 +658,7 @@ button:active {
     border-radius: 8px !important;
     font-size: 14px !important;
     font-weight: 500 !important;
-    width: 120px;
+    min-width: 120px;
 }
 
 .swal2-cancel {
@@ -665,7 +666,7 @@ button:active {
     border-radius: 8px !important;
     font-size: 14px !important;
     font-weight: 500 !important;
-    width: 120px;
+    min-width: 120px;
 }
 
 .swal2-deny {
