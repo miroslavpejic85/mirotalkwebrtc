@@ -3873,7 +3873,7 @@ tr:nth-child(even) {
         pointer-events: none;
     }
 
-    nav.close li a .link-name {
+    nav.close li button .link-name {
         opacity: 1;
         pointer-events: auto;
     }
@@ -6168,20 +6168,9 @@ body.dark #usersTable td .user-plan-badge.yearly {
     }
 
     nav.close {
-        width: 73px;
+        width: 250px;
         padding: 18px 12px 14px;
         border-right: 1px solid var(--border-color);
-    }
-
-    nav.close .nav-section-label {
-        height: 1px;
-        margin: 14px 8px 8px;
-        padding: 0;
-        background-color: var(--border-color);
-    }
-
-    nav.close .nav-section-label span {
-        display: none;
     }
 }
 
