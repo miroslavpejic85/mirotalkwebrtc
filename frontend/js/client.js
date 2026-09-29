@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.27
+ * @version 1.8.28
  */
 
 const userAgent = navigator.userAgent;
@@ -27,6 +27,7 @@ const demoBadge = document.getElementById('demoBadge');
 const sidebar = body.querySelector('nav');
 const sidebarToggle = body.querySelector('.sidebar-toggle');
 const mobileNavBackdrop = document.getElementById('mobileNavBackdrop');
+const mobileSidebarQuery = window.matchMedia('(max-width: 450px)');
 const pageLoadingOverlay = document.getElementById('pageLoadingOverlay');
 
 const navOverview = document.getElementById('navOverview');
@@ -373,7 +374,7 @@ if (getMode && getMode === 'dark') {
     body.classList.toggle('dark');
     topModeToggle.querySelector('i').className = 'uil uil-sun';
 }
-if (getStatus && getStatus === 'close' && window.innerWidth > 450) sidebar.classList.add('close');
+if (getStatus && getStatus === 'close' && !mobileSidebarQuery.matches) sidebar.classList.add('close');
 updateSidebarExpandedState();
 
 const toolTips = [
@@ -780,14 +781,14 @@ topModeToggle.addEventListener('click', () => {
 sidebarToggle.addEventListener('click', () => {
     sidebar.classList.toggle('close');
     updateSidebarExpandedState();
-    if (window.innerWidth > 450) {
+    if (!mobileSidebarQuery.matches) {
         window.localStorage.status = sidebar.classList.contains('close') ? 'close' : 'open';
     }
 });
 
 function updateSidebarExpandedState() {
     const hasCloseClass = sidebar.classList.contains('close');
-    const isMobileNavigation = window.innerWidth <= 450;
+    const isMobileNavigation = mobileSidebarQuery.matches;
     const isExpanded = isMobileNavigation ? hasCloseClass : !hasCloseClass;
     sidebarToggle.setAttribute('aria-expanded', String(isExpanded));
     sidebar.inert = isMobileNavigation && !isExpanded;
@@ -799,7 +800,7 @@ function updateSidebarExpandedState() {
 }
 
 function closeMobileNavigation(restoreFocus = false) {
-    if (window.innerWidth > 450 || !sidebar.classList.contains('close')) return;
+    if (!mobileSidebarQuery.matches || !sidebar.classList.contains('close')) return;
     sidebar.classList.remove('close');
     updateSidebarExpandedState();
     if (restoreFocus) sidebarToggle.focus();

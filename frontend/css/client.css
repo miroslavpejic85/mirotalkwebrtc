@@ -3932,7 +3932,9 @@ tr:nth-child(even) {
 
 @media (max-width: 450px) {
     nav {
-        z-index: 10;
+        z-index: 20;
+        height: 100vh;
+        height: 100dvh;
         width: 250px;
         transform: translateX(-100%);
     }
@@ -4500,6 +4502,7 @@ nav.close .nav-section-label {
     padding: 10px 28px;
     background-color: color-mix(in srgb, var(--panel-color) 94%, transparent);
     border-bottom: 1px solid var(--border-color);
+    -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
 }
 
