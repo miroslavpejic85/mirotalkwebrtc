@@ -3854,7 +3854,7 @@ tr:nth-child(even) {
         width: 73px;
     }
 
-    nav.close {
+    nav.open {
         width: 250px;
     }
 
@@ -3863,7 +3863,7 @@ tr:nth-child(even) {
         pointer-events: none;
     }
 
-    nav.close .logo_name {
+    nav.open .logo_name {
         opacity: 1;
         pointer-events: auto;
     }
@@ -3873,7 +3873,7 @@ tr:nth-child(even) {
         pointer-events: none;
     }
 
-    nav.close li button .link-name {
+    nav.open li button .link-name {
         opacity: 1;
         pointer-events: auto;
     }
@@ -3883,7 +3883,7 @@ tr:nth-child(even) {
         width: calc(100% - 73px);
     }
 
-    nav.close ~ .dashboard {
+    nav.open ~ .dashboard {
         left: 250px;
         width: calc(100% - 250px);
     }
@@ -3893,7 +3893,7 @@ tr:nth-child(even) {
         width: calc(100% - 73px);
     }
 
-    nav.close ~ .dashboard .top {
+    nav.open ~ .dashboard .top {
         left: 250px;
         width: calc(100% - 250px);
     }
@@ -3939,7 +3939,7 @@ tr:nth-child(even) {
         transform: translateX(-100%);
     }
 
-    nav.close {
+    nav.open {
         width: 250px;
         transform: translateX(0);
         box-shadow: 12px 0 30px rgba(0, 0, 0, 0.18);
@@ -3950,7 +3950,7 @@ tr:nth-child(even) {
         pointer-events: none;
     }
 
-    nav.close .logo_name {
+    nav.open .logo_name {
         opacity: 1;
         pointer-events: auto;
     }
@@ -3960,7 +3960,7 @@ tr:nth-child(even) {
         pointer-events: none;
     }
 
-    nav.close li button .link-name {
+    nav.open li button .link-name {
         opacity: 1;
         pointer-events: auto;
     }
@@ -3970,7 +3970,7 @@ tr:nth-child(even) {
         width: 100%;
     }
 
-    nav.close ~ .dashboard {
+    nav.open ~ .dashboard {
         left: 0;
         width: 100%;
     }
@@ -3980,7 +3980,7 @@ tr:nth-child(even) {
         width: 100%;
     }
 
-    nav.close ~ .dashboard .top {
+    nav.open ~ .dashboard .top {
         left: 0;
         width: 100%;
     }
@@ -4005,7 +4005,7 @@ tr:nth-child(even) {
             visibility 0.2s ease;
     }
 
-    nav.close + .mobile-nav-backdrop {
+    nav.open + .mobile-nav-backdrop {
         opacity: 1;
         visibility: visible;
     }
@@ -4882,7 +4882,7 @@ body.dark .top-workspace .demo-badge {
         pointer-events: none;
     }
 
-    nav.close .nav-section-label {
+    nav.open .nav-section-label {
         opacity: 1;
     }
 }
@@ -6170,7 +6170,7 @@ body.dark #usersTable td .user-plan-badge.yearly {
         border-right: 0;
     }
 
-    nav.close {
+    nav.open {
         width: 250px;
         padding: 18px 12px 14px;
         border-right: 1px solid var(--border-color);

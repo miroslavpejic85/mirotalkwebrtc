@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.28
+ * @version 1.8.29
  */
 
 const userAgent = navigator.userAgent;
@@ -28,6 +28,7 @@ const sidebar = body.querySelector('nav');
 const sidebarToggle = body.querySelector('.sidebar-toggle');
 const mobileNavBackdrop = document.getElementById('mobileNavBackdrop');
 const mobileSidebarQuery = window.matchMedia('(max-width: 450px)');
+const compactSidebarQuery = window.matchMedia('(max-width: 1000px)');
 const pageLoadingOverlay = document.getElementById('pageLoadingOverlay');
 
 const navOverview = document.getElementById('navOverview');
@@ -374,8 +375,7 @@ if (getMode && getMode === 'dark') {
     body.classList.toggle('dark');
     topModeToggle.querySelector('i').className = 'uil uil-sun';
 }
-if (getStatus && getStatus === 'close' && !mobileSidebarQuery.matches) sidebar.classList.add('close');
-updateSidebarExpandedState();
+syncSidebarForViewport();
 
 const toolTips = [
     { element: delAllBtn, text: 'Delete rooms', position: 'top' },
@@ -779,17 +779,24 @@ topModeToggle.addEventListener('click', () => {
 });
 
 sidebarToggle.addEventListener('click', () => {
-    sidebar.classList.toggle('close');
+    if (compactSidebarQuery.matches) {
+        sidebar.classList.toggle('open');
+    } else {
+        sidebar.classList.toggle('close');
+    }
     updateSidebarExpandedState();
     if (!mobileSidebarQuery.matches) {
-        window.localStorage.status = sidebar.classList.contains('close') ? 'close' : 'open';
+        window.localStorage.status = isSidebarExpanded() ? 'open' : 'close';
     }
 });
 
+function isSidebarExpanded() {
+    return compactSidebarQuery.matches ? sidebar.classList.contains('open') : !sidebar.classList.contains('close');
+}
+
 function updateSidebarExpandedState() {
-    const hasCloseClass = sidebar.classList.contains('close');
+    const isExpanded = isSidebarExpanded();
     const isMobileNavigation = mobileSidebarQuery.matches;
-    const isExpanded = isMobileNavigation ? hasCloseClass : !hasCloseClass;
     sidebarToggle.setAttribute('aria-expanded', String(isExpanded));
     sidebar.inert = isMobileNavigation && !isExpanded;
     if (isMobileNavigation && !isExpanded) {
@@ -800,16 +807,28 @@ function updateSidebarExpandedState() {
 }
 
 function closeMobileNavigation(restoreFocus = false) {
-    if (!mobileSidebarQuery.matches || !sidebar.classList.contains('close')) return;
-    sidebar.classList.remove('close');
+    if (!mobileSidebarQuery.matches || !sidebar.classList.contains('open')) return;
+    sidebar.classList.remove('open');
     updateSidebarExpandedState();
     if (restoreFocus) sidebarToggle.focus();
+}
+
+function syncSidebarForViewport() {
+    sidebar.classList.remove('close', 'open');
+    if (!mobileSidebarQuery.matches) {
+        const stateClass = compactSidebarQuery.matches ? 'open' : 'close';
+        const stateValue = compactSidebarQuery.matches ? 'open' : 'close';
+        sidebar.classList.toggle(stateClass, window.localStorage.status === stateValue);
+    }
+    updateSidebarExpandedState();
 }
 
 mobileNavBackdrop.addEventListener('click', () => closeMobileNavigation(true));
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') closeMobileNavigation(true);
 });
+mobileSidebarQuery.addEventListener('change', syncSidebarForViewport);
+compactSidebarQuery.addEventListener('change', syncSidebarForViewport);
 window.addEventListener('resize', updateSidebarExpandedState);
 
 // Custom dropdown helpers
