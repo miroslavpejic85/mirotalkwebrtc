@@ -30,7 +30,7 @@
         const icon = toggle.querySelector('i');
         if (icon) icon.className = isLight ? 'uil uil-moon' : 'uil uil-sun';
         toggle.setAttribute('aria-label', isLight ? 'Switch to dark mode' : 'Switch to light mode');
-        toggle.title = isLight ? 'Dark mode' : 'Light mode';
+        toggle.dataset.tippyContent = isLight ? 'Dark mode' : 'Light mode';
     }
 
     function initThemeToggles() {

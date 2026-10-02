@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.42
+ * @version 1.8.45
  */
 
 const userAgent = navigator.userAgent;
@@ -894,7 +894,7 @@ function initCustomDropdowns(container) {
             if (roomTypeControl) {
                 const intent = ROOM_TYPE_LABELS[opt.dataset.value] || opt.textContent;
                 roomTypeControl.querySelector('.room-type-intent').textContent = intent;
-                roomTypeControl.title = `${opt.dataset.value} - ${intent}`;
+                roomTypeControl.dataset.tippyContent = `${opt.dataset.value} - ${intent}`;
             }
             dd.classList.remove('open');
             trigger.setAttribute('aria-expanded', 'false');
@@ -1561,7 +1561,7 @@ function getUserRow(u) {
     const planAttributes = `data-user-plan="${selectedPlan}" data-user-plan-active="${plan.className !== 'none'}" data-stripe-managed="${!!u.subscriptionManagedByStripe}"`;
     const planEditor = u.subscriptionManagedByStripe
         ? `<div class="user-plan-editor" ${planAttributes}>
-            <span class="user-plan-badge ${plan.className}" title="Managed by Stripe">${plan.label}</span>
+            <span class="user-plan-badge ${plan.className}" data-tippy-content="Managed by Stripe">${plan.label}</span>
             <span class="user-plan-managed"><i class="uil uil-lock"></i> Stripe managed</span>
         </div>`
         : `<div class="user-plan-editor" ${planAttributes}>
@@ -1572,20 +1572,20 @@ function getUserRow(u) {
     const userInlineIcons = [];
     if (u.stripeSubscriptionDashboardUrl) {
         userInlineIcons.push(
-            `<a href="${escapeHtml(u.stripeSubscriptionDashboardUrl)}" target="_blank" rel="noopener noreferrer" class="action-icon" title="Open subscription in Stripe" aria-label="Open ${escapeHtml(u.username)}'s subscription in Stripe"><i class="uil uil-external-link-alt" aria-hidden="true"></i></a>`
+            `<a href="${escapeHtml(u.stripeSubscriptionDashboardUrl)}" target="_blank" rel="noopener noreferrer" class="action-icon" data-tippy-content="Open subscription in Stripe" aria-label="Open ${escapeHtml(u.username)}'s subscription in Stripe"><i class="uil uil-external-link-alt" aria-hidden="true"></i></a>`
         );
     }
     userInlineIcons.push(
-        `<i id="usave_${u._id}" onclick="saveUser('${u._id}')" class="uil uil-save action-icon" title="Save"></i>`
+        `<i id="usave_${u._id}" onclick="saveUser('${u._id}')" class="uil uil-save action-icon" data-tippy-content="Save"></i>`
     );
     if (u.invitationPending && !isSelf) {
         userInlineIcons.push(
-            `<button id="uinvite_${u._id}" type="button" onclick="resendUserInvitation('${u._id}')" class="action-icon invite" title="Resend invite" aria-label="Resend invite to ${escapeHtml(u.email)}"><i class="uil uil-envelope-redo" aria-hidden="true"></i></button>`
+            `<button id="uinvite_${u._id}" type="button" onclick="resendUserInvitation('${u._id}')" class="action-icon invite" data-tippy-content="Resend invite" aria-label="Resend invite to ${escapeHtml(u.email)}"><i class="uil uil-envelope-redo" aria-hidden="true"></i></button>`
         );
     }
     if (!isSelf) {
         userInlineIcons.push(
-            `<i id="udel_${u._id}" onclick="deleteUser('${u._id}')" class="uil uil-trash-alt action-icon danger" title="Delete"></i>`
+            `<i id="udel_${u._id}" onclick="deleteUser('${u._id}')" class="uil uil-trash-alt action-icon danger" data-tippy-content="Delete"></i>`
         );
     }
 
@@ -2198,19 +2198,19 @@ function getRow(obj) {
                       : 'Reminder queued for delivery';
         if (status === 'scheduled') {
             automationBadges.push(
-                `<button id="${obj._id}_reminder" type="button" class="recurring-badge reminder-badge" onclick="disableRoomReminder('${obj._id}')" data-tippy="${escapeHtml(tooltip)}"><i class="uil uil-bell"></i>Reminder</button>`
+                `<button id="${obj._id}_reminder" type="button" class="recurring-badge reminder-badge" onclick="disableRoomReminder('${obj._id}')" data-tippy-content="${escapeHtml(tooltip)}"><i class="uil uil-bell"></i>Reminder</button>`
             );
         } else if (status !== 'canceled') {
             const icon =
                 status === 'sent' ? 'uil-check' : status === 'failed' ? 'uil-exclamation-triangle' : 'uil-clock';
             automationBadges.push(
-                `<span id="${obj._id}_reminder" class="recurring-badge reminder-badge-${status}" data-tippy="${escapeHtml(tooltip)}"><i class="uil ${icon}"></i>${status}</span>`
+                `<span id="${obj._id}_reminder" class="recurring-badge reminder-badge-${status}" data-tippy-content="${escapeHtml(tooltip)}"><i class="uil ${icon}"></i>${status}</span>`
             );
         }
     }
     const automationCell = automationBadges.length
         ? automationBadges.join('')
-        : `<span class="recurring-badge recurring-badge-off" data-tippy="No invitation automation enabled"><i class="uil uil-bell-slash"></i>Off</span>`;
+        : `<span class="recurring-badge recurring-badge-off" data-tippy-content="No invitation automation enabled"><i class="uil uil-bell-slash"></i>Off</span>`;
 
     // Inline primary actions (1-click)
     const inlineIcons = [];
@@ -2322,7 +2322,7 @@ function getRow(obj) {
         isPast
     );
     const roomTypeIntent = ROOM_TYPE_LABELS[obj.type] || obj.type;
-    const roomTypeControl = `<div class="room-type-control" title="${obj.type} - ${roomTypeIntent}">
+    const roomTypeControl = `<div class="room-type-control" data-tippy-content="${obj.type} - ${roomTypeIntent}">
         <span class="room-type-intent">${roomTypeIntent}</span>
         ${buildCustomDropdownHTML(obj._id + '_type', typeOptions, obj.type, false, isPast)}
     </div>`;
@@ -2790,7 +2790,7 @@ function buildInvitationHistoryContent(data, roomId) {
             delivery.appendChild(invitationStatusBadge(attendee.deliveryStatus));
             const activity = document.createElement('td');
             activity.textContent = invitationHistoryDate(attendee.lastActivityAt);
-            if (attendee.lastError) activity.title = attendee.lastError;
+            if (attendee.lastError) activity.dataset.tippyContent = attendee.lastError;
             row.append(email, response, delivery, activity);
             body.appendChild(row);
         });
@@ -2826,7 +2826,7 @@ function buildInvitationHistoryContent(data, roomId) {
             title.textContent = `${event.kind} · ${event.recipient}`;
             const meta = document.createElement('span');
             meta.textContent = `${invitationHistoryDate(event.sentAt || event.createdAt)} · ${event.attempts} attempt${event.attempts === 1 ? '' : 's'}`;
-            if (event.lastError) meta.title = event.lastError;
+            if (event.lastError) meta.dataset.tippyContent = event.lastError;
             detail.append(title, meta);
             item.append(icon, detail, invitationStatusBadge(event.status));
             list.appendChild(item);
@@ -3687,21 +3687,21 @@ function changeMyPassword() {
                     <label>Current Password</label>
                     <div class="password-input-wrap">
                         <input type="password" id="swal-current-password" class="swal2-input" placeholder="Current password">
-                        <button type="button" class="password-action-btn swal-toggle-pw" title="Show password"><i class="uil uil-eye"></i></button>
+                        <button type="button" class="password-action-btn swal-toggle-pw" data-tippy-content="Show password" aria-label="Show password"><i class="uil uil-eye"></i></button>
                     </div>
                 </div>
                 <div>
                     <label>New Password</label>
                     <div class="password-input-wrap">
                         <input type="password" id="swal-new-password" class="swal2-input" placeholder="New password (min 6 chars)">
-                        <button type="button" class="password-action-btn swal-toggle-pw" title="Show password"><i class="uil uil-eye"></i></button>
+                        <button type="button" class="password-action-btn swal-toggle-pw" data-tippy-content="Show password" aria-label="Show password"><i class="uil uil-eye"></i></button>
                     </div>
                 </div>
                 <div>
                     <label>Confirm New Password</label>
                     <div class="password-input-wrap">
                         <input type="password" id="swal-confirm-password" class="swal2-input" placeholder="Confirm new password">
-                        <button type="button" class="password-action-btn swal-toggle-pw" title="Show password"><i class="uil uil-eye"></i></button>
+                        <button type="button" class="password-action-btn swal-toggle-pw" data-tippy-content="Show password" aria-label="Show password"><i class="uil uil-eye"></i></button>
                     </div>
                 </div>
             </div>
@@ -3783,6 +3783,9 @@ function togglePasswordVisibility(input, btn) {
         input.type = 'password';
         icon.classList.replace('uil-eye-slash', 'uil-eye');
     }
+    const label = input.type === 'password' ? 'Show password' : 'Hide password';
+    btn.dataset.tippyContent = label;
+    btn.setAttribute('aria-label', label);
 }
 
 function refreshPage() {

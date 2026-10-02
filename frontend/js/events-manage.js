@@ -143,8 +143,8 @@ function renderEvents() {
                 minute: '2-digit',
             }).format(new Date(event.startAt));
             const publicActions = event.published
-                ? `<button type="button" data-action="share" title="Copy public link" aria-label="Copy public link"><i class="uil uil-link"></i></button>
-                    <button type="button" data-action="open" title="Open public page" aria-label="Open public page"><i class="uil uil-external-link-alt"></i></button>`
+                ? `<button type="button" data-action="share" data-tippy-content="Copy public link" aria-label="Copy public link"><i class="uil uil-link"></i></button>
+                    <button type="button" data-action="open" data-tippy-content="Open public page" aria-label="Open public page"><i class="uil uil-external-link-alt"></i></button>`
                 : '';
             return `<article class="event-item" data-event-id="${escapeHtml(event.id)}">
                 <div class="event-item-top"><span class="event-service">${escapeHtml(event.roomType)}</span><span class="event-status ${event.published ? '' : 'is-draft'}">${event.published ? 'Public' : 'Draft'}</span></div>
@@ -152,9 +152,9 @@ function renderEvents() {
                 <p><i class="uil uil-calendar-alt"></i> ${escapeHtml(when)} · ${event.duration} min</p>
                 <div class="event-item-actions">
                     ${publicActions}
-                    <button type="button" class="action-icon action-primary" data-action="join" title="Join meeting" aria-label="Join meeting"><i class="uil uil-video"></i><span class="action-label">Join</span></button>
-                    <button type="button" data-action="edit" title="Edit event" aria-label="Edit event"><i class="uil uil-pen"></i></button>
-                    <button type="button" class="action-icon danger" data-action="delete" title="Delete event" aria-label="Delete event"><i class="uil uil-trash-alt"></i></button>
+                    <button type="button" class="action-icon action-primary" data-action="join" data-tippy-content="Join meeting" aria-label="Join meeting"><i class="uil uil-video"></i><span class="action-label">Join</span></button>
+                    <button type="button" data-action="edit" data-tippy-content="Edit event" aria-label="Edit event"><i class="uil uil-pen"></i></button>
+                    <button type="button" class="action-icon danger" data-action="delete" data-tippy-content="Delete event" aria-label="Delete event"><i class="uil uil-trash-alt"></i></button>
                 </div>
             </article>`;
         })

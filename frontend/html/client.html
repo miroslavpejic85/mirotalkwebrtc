@@ -43,6 +43,7 @@
         <script defer src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
         <script defer src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"></script>
         <script defer src="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy-bundle.umd.min.js"></script>
+        <script defer src="../js/tooltips.js"></script>
         <script defer src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/1.0.37/ua-parser.min.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
@@ -1043,7 +1044,7 @@
                                     type="button"
                                     class="addrow-gen-btn"
                                     aria-label="Generate random room name"
-                                    title="Generate random room name"
+                                    data-tippy-content="Generate random room name"
                                 >
                                     <i class="uil uil-sync"></i>
                                 </button>
@@ -1074,7 +1075,7 @@
                                     type="button"
                                     class="addrow-link-preview-copy"
                                     aria-label="Copy room link"
-                                    title="Copy link"
+                                    data-tippy-content="Copy link"
                                 >
                                     <i class="uil uil-copy"></i>
                                 </button>
@@ -1137,7 +1138,7 @@
                                     id="delete-users-btn"
                                     class="custom-button custom-button-icon custom-button-danger"
                                     aria-label="Delete all regular users"
-                                    title="Delete all regular users"
+                                    data-tippy-content="Delete all regular users"
                                 >
                                     <i class="uil uil-trash-alt"></i>
                                 </button>
@@ -1247,7 +1248,7 @@
                                 type="button"
                                 id="add-user-generate-password"
                                 class="addrow-gen-btn"
-                                title="Generate password"
+                                data-tippy-content="Generate password"
                             >
                                 <i class="uil uil-sync"></i>
                             </button>
@@ -1358,16 +1359,14 @@
                                     value="*"
                                 />
                             </div>
-                            <div class="addrow-field-help">
+                            <button
+                                type="button"
+                                class="addrow-field-help"
+                                aria-label="Allowed rooms help"
+                                data-tippy-content="* allows access to all rooms. For specific rooms, use comma-separated names: room1, room2, room3"
+                            >
                                 <i class="uil uil-question-circle"></i>
-                                <div class="addrow-field-help-tooltip">
-                                    <span><code>*</code> allows access to all rooms</span>
-                                    <span
-                                        >For specific rooms, use comma-separated names:
-                                        <code>room1, room2, room3</code></span
-                                    >
-                                </div>
-                            </div>
+                            </button>
                         </div>
                     </div>
 
