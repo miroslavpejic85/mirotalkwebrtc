@@ -236,6 +236,11 @@ function showPricingNotice(title, message) {
     document.getElementById('pricingNotice').classList.remove('hidden');
 }
 
+function redirectToDashboard() {
+    const token = window.sessionStorage.userToken;
+    window.location.href = token ? `/client/?token=${encodeURIComponent(token)}` : '/client';
+}
+
 function waitForActivationThenRedirect(sessionId) {
     activationSessionId = sessionId;
     // Clean the query string so a refresh does not re-trigger this flow.
@@ -245,14 +250,6 @@ function waitForActivationThenRedirect(sessionId) {
         'We are confirming your plan. Keep this page open for a moment.',
         true
     );
-
-    const redirectToDashboard = () => {
-        // The /client route authenticates via the token query param (same as the
-        // normal login flow), so the user is taken straight into the dashboard
-        // without being asked to log in again.
-        const token = window.sessionStorage.userToken;
-        window.location.href = token ? `/client/?token=${encodeURIComponent(token)}` : '/client';
-    };
 
     // Server-side fallback: activate immediately from the checkout session so we
     // do not depend solely on the webhook (which may be delayed or unconfigured).
@@ -452,7 +449,11 @@ async function upgradeToYearly(button) {
         const billing = await stripeChangePlan('yearly');
         currentBilling = { ...currentBilling, ...billing };
         renderPricingBilling(currentBilling);
-        popupMessage('success', 'Your annual plan is now active.');
+        if (billing.active && billing.subscriptionType === 'yearly') {
+            redirectToDashboard();
+            return;
+        }
+        popupMessage('info', 'Your annual upgrade is awaiting payment confirmation.');
     } catch (error) {
         popupMessage('error', error?.response?.data?.message || 'Unable to upgrade your plan. Please try again.');
         button.disabled = false;
