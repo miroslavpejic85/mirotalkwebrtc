@@ -129,10 +129,7 @@ async function userLogin(req, res) {
         const payload = { username: username, email: email, password: password };
         const token = utils.tokenEncode(payload);
 
-        //const userFindOne = await User.findOne({ email: email });
-        const userFindOne = await User.findOne({
-            $or: [{ email: email }, { username: username }],
-        });
+        const userFindOne = await User.findOne({ email, username });
 
         if (!Object.is(userFindOne, null) && userFindOne.active) {
             log.debug('User found, but we going to check if the provided password exists');
@@ -153,12 +150,22 @@ async function userLogin(req, res) {
                     if ((await utils.isAdmin(email, username, password)) && userFindOne.role !== 'admin') {
                         userFindOne.role = 'admin';
                     }
-                    userFindOne.token = token;
+                    const loginToken = utils.tokenEncode({
+                        userId: String(userFindOne._id),
+                        email: userFindOne.email,
+                        username: userFindOne.username,
+                        password,
+                    });
+                    userFindOne.token = loginToken;
                     userFindOne.updatedAt = dateNow;
                     const saveUserFindOne = await userFindOne.save();
                     log.debug('User login OK', saveUserFindOne);
-                    setAuthCookie(res, token);
-                    res.status(201).json(saveUserFindOne);
+                    setAuthCookie(res, loginToken);
+                    const safeUser = saveUserFindOne.toObject();
+                    delete safeUser.password;
+                    delete safeUser.resetPasswordToken;
+                    delete safeUser.resetPasswordExpires;
+                    res.status(201).json(safeUser);
                 } else {
                     log.debug('User found, wrong password!');
                     return res.status(201).send({
@@ -633,10 +640,11 @@ async function userDeleteRegularUsers(req, res) {
 
 async function userGetMe(req, res) {
     try {
-        const { email, username } = req.user;
-        const userFindOne = await User.findOne({
-            $or: [{ email: email }, { username: username }],
-        }).select('-password -resetPasswordToken -resetPasswordExpires');
+        const { userId, email, username } = req.user;
+        const identity = userId ? { _id: userId, email, username } : { email, username };
+        const userFindOne = await User.findOne(identity).select(
+            '-password -token -resetPasswordToken -resetPasswordExpires'
+        );
 
         if (!userFindOne) {
             return res.status(404).json({ message: 'User not found' });

@@ -219,7 +219,7 @@ async function reconcileMonthlySubscription(user) {
     try {
         const subscription = await stripeLib.retrieveSubscription(user.stripeSubscriptionId);
         user.subscriptionType = getRecurringPlan(subscription);
-        user.subscriptionStatus = mapSubscriptionStatus(subscription.status);
+        user.subscriptionStatus = user.subscriptionType ? mapSubscriptionStatus(subscription.status) : 'inactive';
         user.subscriptionExpiresAt = subscriptionEndToDate(subscription);
         user.subscriptionCancelAtPeriodEnd = isSubscriptionEnding(subscription);
         user.updatedAt = new Date().toISOString();
@@ -266,42 +266,33 @@ async function verifySession(req, res) {
         // Ensure the session actually belongs to the authenticated user.
         const sessionUserId = session.metadata && session.metadata.userId;
         const belongsToUser =
-            (sessionUserId && sessionUserId === String(user._id)) ||
-            (user.stripeCustomerId && session.customer === user.stripeCustomerId);
+            sessionUserId === String(user._id) &&
+            !!session.customer &&
+            (!user.stripeCustomerId || session.customer === user.stripeCustomerId);
         if (!belongsToUser) {
             log.warn('verifySession: session does not belong to user', { email: user.email });
             return res.status(403).json({ message: 'Session does not belong to this user' });
         }
 
-        // Persist the customer id if it was not stored yet.
-        if (session.customer && !user.stripeCustomerId) {
-            user.stripeCustomerId = session.customer;
-        }
-
         if (session.mode === 'payment' && session.payment_status === 'paid') {
-            if (isRecurringPlan(user.subscriptionType) && user.stripeSubscriptionId) {
-                await stripeLib.cancelSubscription(user.stripeSubscriptionId);
+            if (!(await activateLifetime(user, session))) {
+                return res.status(400).json({ message: 'Invalid or revoked Lifetime payment' });
             }
-            user.subscriptionType = 'lifetime';
-            user.subscriptionStatus = 'active';
-            user.stripeSubscriptionId = undefined;
-            user.subscriptionExpiresAt = null;
-            user.subscriptionCancelAtPeriodEnd = false;
-            user.updatedAt = new Date().toISOString();
-            await user.save();
-            await sendPlanActivationEmailOnce(
-                { _id: user._id },
-                `checkout:${session.id}`,
-                user.subscriptionType,
-                user.subscriptionExpiresAt
-            );
             log.debug('Lifetime activated via verifySession', { email: user.email });
         } else if (session.mode === 'subscription' && session.subscription) {
             if (user.subscriptionType === 'lifetime' && user.subscriptionStatus === 'active') {
                 return res.status(200).json({ active: true });
             }
             const subscription = await stripeLib.retrieveSubscription(session.subscription);
-            user.subscriptionType = getRecurringPlan(subscription, session.metadata?.plan);
+            const plan = getRecurringPlan(subscription);
+            if (
+                !plan ||
+                subscription.id !== resourceId(session.subscription) ||
+                resourceId(subscription.customer) !== session.customer
+            ) {
+                return res.status(400).json({ message: 'Invalid subscription purchase' });
+            }
+            user.subscriptionType = plan;
             user.subscriptionStatus = mapSubscriptionStatus(subscription.status);
             user.stripeSubscriptionId = subscription.id;
             user.subscriptionExpiresAt = subscriptionEndToDate(subscription);
@@ -322,7 +313,6 @@ async function verifySession(req, res) {
             });
         } else {
             // Payment not completed yet.
-            await user.save();
             return res.status(200).json({ active: isSubscriptionActive(user), pending: true });
         }
 
@@ -355,16 +345,36 @@ async function handleWebhook(req, res) {
             case 'checkout.session.completed': {
                 const session = event.data.object;
                 // Lifetime payments only (subscriptions are handled by their own events).
-                if (session.mode === 'payment' && session.payment_status === 'paid') {
-                    await activateLifetimeByCustomer(session.customer, session.id);
-                    log.debug('Lifetime purchase activated', { customer: session.customer });
+                if (
+                    session.mode === 'payment' &&
+                    session.payment_status === 'paid' &&
+                    session.metadata?.plan === 'lifetime'
+                ) {
+                    const currentSession = await stripeLib.retrieveCheckoutSession(session.id);
+                    const user = await User.findOne({ stripeCustomerId: currentSession.customer });
+                    if (user && (await activateLifetime(user, currentSession))) {
+                        log.debug('Lifetime purchase activated', { customer: session.customer });
+                    }
+                }
+                break;
+            }
+            case 'charge.refunded': {
+                if (event.data.object.amount_refunded > 0) await revokeLifetimePayment(event.data.object);
+                break;
+            }
+            case 'charge.dispute.created':
+            case 'charge.dispute.closed': {
+                const dispute = event.data.object;
+                if (event.type === 'charge.dispute.created' || dispute.status === 'lost') {
+                    const charge = await stripeLib.retrieveCharge(resourceId(dispute.charge));
+                    await revokeLifetimePayment(charge);
                 }
                 break;
             }
             case 'customer.subscription.created': {
                 const subscription = event.data.object;
                 const subscriptionType = getRecurringPlan(subscription);
-                const subscriptionStatus = mapSubscriptionStatus(subscription.status);
+                const subscriptionStatus = subscriptionType ? mapSubscriptionStatus(subscription.status) : 'inactive';
                 const subscriptionExpiresAt = subscriptionEndToDate(subscription);
                 await updateUserByCustomer(subscription.customer, {
                     subscriptionType,
@@ -390,9 +400,10 @@ async function handleWebhook(req, res) {
             }
             case 'customer.subscription.updated': {
                 const subscription = event.data.object;
+                const subscriptionType = getRecurringPlan(subscription);
                 await updateUserByCustomer(subscription.customer, {
-                    subscriptionType: getRecurringPlan(subscription),
-                    subscriptionStatus: mapSubscriptionStatus(subscription.status),
+                    subscriptionType,
+                    subscriptionStatus: subscriptionType ? mapSubscriptionStatus(subscription.status) : 'inactive',
                     subscriptionExpiresAt: subscriptionEndToDate(subscription),
                     subscriptionCancelAtPeriodEnd: isSubscriptionEnding(subscription),
                 });
@@ -432,12 +443,13 @@ function isRecurringPlan(plan) {
     return plan === 'monthly' || plan === 'yearly';
 }
 
-function getRecurringPlan(subscription, checkoutPlan) {
-    const priceId = subscription.items?.data?.[0]?.price?.id;
-    if (priceId) return priceId === config.SAAS.yearlyPriceId ? 'yearly' : 'monthly';
-
-    const plan = checkoutPlan || subscription.metadata?.plan;
-    return isRecurringPlan(plan) ? plan : 'monthly';
+function getRecurringPlan(subscription) {
+    const items = subscription.items?.data;
+    if (!items || items.length !== 1 || subscription.items.has_more) return null;
+    const priceId = items[0].price?.id;
+    if (priceId && priceId === config.SAAS.yearlyPriceId) return 'yearly';
+    if (priceId && priceId === config.SAAS.monthlyPriceId) return 'monthly';
+    return null;
 }
 
 /**
@@ -496,28 +508,131 @@ async function sendPlanActivationEmailOnce(identity, activationKey, plan, expire
     }
 }
 
-async function activateLifetimeByCustomer(customerId, checkoutSessionId) {
-    if (!customerId) return;
+function resourceId(resource) {
+    return typeof resource === 'string' ? resource : resource?.id;
+}
 
-    const user = await User.findOne({ stripeCustomerId: customerId });
-    if (!user) return;
+function isLifetimeProduct(session, user) {
+    const items = session.line_items;
+    return (
+        session.mode === 'payment' &&
+        session.metadata?.plan === 'lifetime' &&
+        session.metadata?.userId === String(user._id) &&
+        !!session.customer &&
+        (!user.stripeCustomerId || session.customer === user.stripeCustomerId) &&
+        !!config.SAAS.lifetimePriceId &&
+        items?.has_more === false &&
+        items.data?.length === 1 &&
+        items.data[0].price?.id === config.SAAS.lifetimePriceId &&
+        items.data[0].quantity === 1
+    );
+}
+
+async function activateLifetime(user, session) {
+    const payment = session.payment_intent;
+    const charge = payment?.latest_charge;
+    if (
+        !isLifetimeProduct(session, user) ||
+        session.status !== 'complete' ||
+        session.payment_status !== 'paid' ||
+        !payment?.id ||
+        payment.status !== 'succeeded' ||
+        resourceId(payment.customer) !== session.customer ||
+        !charge?.id ||
+        charge.paid !== true ||
+        charge.captured !== true ||
+        charge.refunded ||
+        charge.amount_refunded > 0 ||
+        charge.disputed ||
+        resourceId(charge.payment_intent) !== payment.id ||
+        resourceId(charge.customer) !== session.customer ||
+        !(session.amount_total > 0) ||
+        payment.amount_received !== session.amount_total ||
+        payment.currency !== session.currency ||
+        charge.currency !== session.currency ||
+        user.revokedLifetimePaymentIntentIds?.includes(payment.id)
+    )
+        return false;
 
     if (isRecurringPlan(user.subscriptionType) && user.stripeSubscriptionId) {
         await stripeLib.cancelSubscription(user.stripeSubscriptionId);
     }
 
-    user.subscriptionType = 'lifetime';
-    user.subscriptionStatus = 'active';
-    user.stripeSubscriptionId = undefined;
-    user.subscriptionExpiresAt = null;
-    user.subscriptionCancelAtPeriodEnd = false;
-    user.updatedAt = new Date().toISOString();
-    await user.save();
+    const activated = await User.findOneAndUpdate(
+        { _id: user._id, revokedLifetimePaymentIntentIds: { $ne: payment.id } },
+        {
+            $set: {
+                subscriptionType: 'lifetime',
+                subscriptionStatus: 'active',
+                stripeCustomerId: session.customer,
+                stripeLifetimePaymentIntentId: payment.id,
+                stripeLifetimeCheckoutSessionId: session.id,
+                subscriptionExpiresAt: null,
+                subscriptionCancelAtPeriodEnd: false,
+                updatedAt: new Date().toISOString(),
+            },
+            $unset: { stripeSubscriptionId: '' },
+        },
+        { returnDocument: 'after' }
+    );
+    if (!activated) return false;
+    Object.assign(user, {
+        subscriptionType: 'lifetime',
+        subscriptionStatus: 'active',
+        subscriptionExpiresAt: null,
+        stripeSubscriptionId: undefined,
+        subscriptionCancelAtPeriodEnd: false,
+    });
     await sendPlanActivationEmailOnce(
         { _id: user._id },
-        `checkout:${checkoutSessionId}`,
+        `checkout:${session.id}`,
         user.subscriptionType,
         user.subscriptionExpiresAt
+    );
+    return true;
+}
+
+async function revokeLifetimePayment(charge) {
+    const customerId = resourceId(charge.customer);
+    const paymentId = resourceId(charge.payment_intent);
+    if (!customerId || !paymentId) return;
+
+    await User.updateOne(
+        { stripeCustomerId: customerId },
+        { $addToSet: { revokedLifetimePaymentIntentIds: paymentId } }
+    );
+    const user = await User.findOne({ stripeCustomerId: customerId }).select('+subscriptionActivationEmailKey');
+    if (!user || user.subscriptionType !== 'lifetime') return;
+
+    if (!user.stripeLifetimePaymentIntentId) {
+        const sessions = await stripeLib.listCheckoutSessionsForPayment(paymentId);
+        let matchingSession;
+        for (const session of sessions.data) {
+            if (session.metadata?.userId !== String(user._id) || session.metadata?.plan !== 'lifetime') continue;
+            const currentSession = await stripeLib.retrieveCheckoutSession(session.id);
+            const recordedPurchase =
+                user.subscriptionActivationEmailKey === `checkout:${currentSession.id}` &&
+                currentSession.metadata?.userId === String(user._id) &&
+                currentSession.metadata?.plan === 'lifetime' &&
+                currentSession.customer === customerId;
+            if (
+                (recordedPurchase || isLifetimeProduct(currentSession, user)) &&
+                resourceId(currentSession.payment_intent) === paymentId
+            ) {
+                matchingSession = currentSession;
+                break;
+            }
+        }
+        if (!matchingSession) return;
+        await User.updateOne(
+            { _id: user._id, stripeLifetimePaymentIntentId: { $exists: false }, subscriptionType: 'lifetime' },
+            { $set: { stripeLifetimePaymentIntentId: paymentId, stripeLifetimeCheckoutSessionId: matchingSession.id } }
+        );
+    }
+
+    await User.updateOne(
+        { stripeCustomerId: customerId, subscriptionType: 'lifetime', stripeLifetimePaymentIntentId: paymentId },
+        { $set: { subscriptionStatus: 'canceled', updatedAt: new Date().toISOString() } }
     );
 }
 

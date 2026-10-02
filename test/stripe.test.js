@@ -22,11 +22,12 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const Module = require('node:module');
+const Stripe = require('stripe');
 
 // The API version pinned by backend/lib/stripe.js. This must match the version
-// expected by the installed Stripe Node SDK (v22.6 -> '2026-08-26.dahlia').
+// expected by the installed Stripe Node SDK (v23.0 -> '2026-09-30.endive').
 // Update this constant if the SDK / lib pin changes.
-const EXPECTED_API_VERSION = '2026-08-26.dahlia';
+const EXPECTED_API_VERSION = '2026-09-30.endive';
 
 const LIB_PATH = path.resolve(__dirname, '../backend/lib/stripe.js');
 const CONFIG_PATH = path.resolve(__dirname, '../backend/config.js');
@@ -141,6 +142,10 @@ function loadStripeLib({ saasEnabled = true, env = {} } = {}) {
         Object.assign(process.env, previousEnv);
     }
 }
+
+test('the pinned API version matches the installed Stripe SDK', () => {
+    assert.equal(EXPECTED_API_VERSION, Stripe.API_VERSION);
+});
 
 test('initializes the Stripe SDK with the pinned API version when SAAS is enabled', () => {
     const { lib, initArgs } = loadStripeLib({ saasEnabled: true });
@@ -320,6 +325,27 @@ test('retrievePrice loads the configured Stripe Price object', async () => {
     assert.equal(price.id, 'price_monthly');
     assert.equal(price.unit_amount, 900);
     assert.equal(price.currency, 'usd');
+});
+
+test('retrieveCheckoutSession expands purchased prices and the current payment charge', async () => {
+    const { lib, fakeStripe } = loadStripeLib();
+    fakeStripe.checkout.sessions.retrieve = async (id, options) => {
+        assert.equal(id, 'cs_lifetime');
+        assert.deepEqual(options.expand, ['line_items', 'payment_intent.latest_charge']);
+        return { id };
+    };
+    await lib.retrieveCheckoutSession('cs_lifetime');
+});
+
+test('payment reversal helpers retrieve charges and payment-specific Checkout Sessions', async () => {
+    const { lib, fakeStripe } = loadStripeLib();
+    fakeStripe.charges = { retrieve: async (id) => ({ id }) };
+    fakeStripe.checkout.sessions.list = async (params) => {
+        assert.deepEqual(params, { payment_intent: 'pi_lifetime', limit: 100 });
+        return { data: [{ id: 'cs_lifetime' }] };
+    };
+    assert.equal((await lib.retrieveCharge('ch_lifetime')).id, 'ch_lifetime');
+    assert.equal((await lib.listCheckoutSessionsForPayment('pi_lifetime')).data[0].id, 'cs_lifetime');
 });
 
 test('cleanupUserBilling cancels the subscription before deleting the customer', async () => {

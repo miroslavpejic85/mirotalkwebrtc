@@ -113,6 +113,9 @@ Subscribe to at least these events:
 - `customer.subscription.created`
 - `customer.subscription.updated`
 - `customer.subscription.deleted`
+- `charge.refunded`
+- `charge.dispute.created`
+- `charge.dispute.closed`
 
 ---
 

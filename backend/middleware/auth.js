@@ -53,7 +53,9 @@ const auth = async (req, res, next) => {
         try {
             const oidcUser = req.oidc.user;
             const dbUser = await findOrCreateOidcUser(oidcUser);
+            if (!dbUser.active) return res.status(403).json({ message: 'Account is inactive' });
             req.user = {
+                userId: String(dbUser._id),
                 email: dbUser.email,
                 username: dbUser.username,
                 password: ADMIN_EMAIL === dbUser.email && ADMIN_USERNAME === dbUser.username ? ADMIN_PASSWORD : '',
@@ -84,9 +86,20 @@ const auth = async (req, res, next) => {
         }
 
         const decoded = utils.tokenDecode(token);
-
-        //log.debug('jwt auth decoded', decoded);
-        req.user = decoded;
+        if (!decoded || typeof decoded.email !== 'string' || typeof decoded.username !== 'string') {
+            throw new Error('Invalid identity');
+        }
+        const identity = decoded.userId
+            ? { _id: decoded.userId, active: true }
+            : { email: decoded.email, username: decoded.username, active: true };
+        const dbUser = await User.findOne(identity).select('_id email username');
+        if (!dbUser) throw new Error('Account not found or inactive');
+        req.user = {
+            ...decoded,
+            userId: String(dbUser._id),
+            email: dbUser.email,
+            username: dbUser.username,
+        };
     } catch (err) {
         if (!isApiRequest && req.accepts('html')) {
             return res.redirect('/');

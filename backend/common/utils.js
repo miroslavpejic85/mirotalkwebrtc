@@ -45,6 +45,7 @@ function tokenEncode(token) {
     if (!token) return '';
 
     const {
+        userId,
         username = 'username',
         email = 'email',
         password = 'password',
@@ -59,6 +60,7 @@ function tokenEncode(token) {
         email: String(email),
         password: String(password),
     };
+    if (userId) payload.userId = String(userId);
     if (termsAcceptedAt) payload.termsAcceptedAt = new Date(termsAcceptedAt).toISOString();
     if (termsVersion) payload.termsVersion = String(termsVersion);
     if (privacyPolicyVersion) payload.privacyPolicyVersion = String(privacyPolicyVersion);

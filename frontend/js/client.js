@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.30
+ * @version 1.8.40
  */
 
 const userAgent = navigator.userAgent;
@@ -441,7 +441,9 @@ $(document).ready(async function () {
             if (me && me._id) {
                 userId = me._id;
                 window.sessionStorage.userId = me._id;
-                window.sessionStorage.userToken = me.token || '';
+                window.sessionStorage.removeItem('userToken');
+                userToken = '';
+                delete headers['x-access-token'];
             }
             // Update logout link for OIDC
             const topLogout = document.getElementById('topLogout');

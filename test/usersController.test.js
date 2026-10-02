@@ -66,13 +66,13 @@ function loadController(overrides = {}) {
             UTILS_PATH,
             {
                 isAdmin: overrides.isAdmin || (async () => false),
-                tokenEncode: () => 'token',
+                tokenEncode: overrides.tokenEncode || (() => 'token'),
                 tokenDecode: overrides.tokenDecode || (() => null),
             },
         ],
         [LOGS_PATH, Logs],
-        [AUTH_COOKIE_PATH, { setAuthCookie() {} }],
-        [BCRYPT_PATH, { hash: async () => 'hashed-password' }],
+        [AUTH_COOKIE_PATH, { setAuthCookie: overrides.setAuthCookie || (() => {}) }],
+        [BCRYPT_PATH, overrides.bcrypt || { hash: async () => 'hashed-password' }],
     ]);
     const previous = new Map();
 
@@ -469,6 +469,87 @@ test('userLogin rejects auto-registration without current legal consent', async 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.message, 'Current Terms of Service and Privacy Policy must be accepted');
     assert.equal(harness.createdUsers.length, 0);
+});
+
+test('userLogin rejects an email paired with another account username', async (t) => {
+    const harness = loadController({
+        userRegistrationMode: false,
+        userFindOne: async (identity) => {
+            assert.deepEqual(identity, { email: 'paid@example.com', username: 'attacker' });
+            return null;
+        },
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+    await harness.controller.userLogin(createRequest({ email: 'paid@example.com', username: 'attacker' }), res);
+    assert.equal(res.body.token, undefined);
+    assert.equal(harness.createdUsers.length, 0);
+});
+
+test('userLogin issues a token bound to the canonical database account', async (t) => {
+    let payload;
+    let finish;
+    const completed = new Promise((resolve) => {
+        finish = resolve;
+    });
+    const user = {
+        _id: 'user_1',
+        email: 'new@example.com',
+        username: 'new-user',
+        active: true,
+        password: 'hashed-password',
+        async save() {
+            return this;
+        },
+        toObject() {
+            return { ...this };
+        },
+    };
+    const harness = loadController({
+        userFindOne: async () => user,
+        tokenEncode: (identity) => {
+            payload = identity;
+            return 'bound-token';
+        },
+        bcrypt: { compare: (password, hash, callback) => callback(null, true) },
+        setAuthCookie: () => {},
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+    const json = res.json;
+    res.json = function (body) {
+        json.call(this, body);
+        finish();
+        return this;
+    };
+    await harness.controller.userLogin(createRequest(), res);
+    await completed;
+    assert.equal(payload.userId, 'user_1');
+    assert.equal(payload.email, user.email);
+    assert.equal(res.body.password, undefined);
+    assert.equal(res.body.token, 'bound-token');
+});
+
+test('userGetMe uses an exact identity and excludes the stored token', async (t) => {
+    const harness = loadController({
+        userFindOne: (identity) => {
+            assert.deepEqual(identity, { _id: 'user_1', email: 'owner@example.com', username: 'shared-name' });
+            return {
+                select: async (fields) => {
+                    assert.ok(fields.split(' ').includes('-token'));
+                    return { _id: 'user_1', email: 'owner@example.com' };
+                },
+            };
+        },
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+    await harness.controller.userGetMe(
+        { user: { userId: 'user_1', email: 'owner@example.com', username: 'shared-name' } },
+        res
+    );
+    assert.equal(res.body.token, undefined);
+    assert.equal(res.body._id, 'user_1');
 });
 
 test('userDelete removes every user-owned collection and billing data', async (t) => {

@@ -18,7 +18,7 @@ if (SAAS_ENABLED) {
     if (!STRIPE_SECRET_KEY) {
         log.error('SAAS mode enabled but STRIPE_SECRET_KEY is missing');
     } else {
-        stripe = require('stripe')(STRIPE_SECRET_KEY, { apiVersion: '2026-08-26.dahlia' });
+        stripe = require('stripe')(STRIPE_SECRET_KEY, { apiVersion: '2026-09-30.endive' });
         log.info('Stripe initialized', {
             monthlyPrice: !!STRIPE_MONTHLY_PRICE_ID,
             yearlyPrice: !!STRIPE_YEARLY_PRICE_ID,
@@ -148,7 +148,17 @@ async function cancelSubscription(subscriptionId) {
  * Retrieve a Checkout Session by id (used to verify payment on the success page).
  */
 async function retrieveCheckoutSession(sessionId) {
-    return stripe.checkout.sessions.retrieve(sessionId);
+    return stripe.checkout.sessions.retrieve(sessionId, {
+        expand: ['line_items', 'payment_intent.latest_charge'],
+    });
+}
+
+async function retrieveCharge(chargeId) {
+    return stripe.charges.retrieve(chargeId);
+}
+
+async function listCheckoutSessionsForPayment(paymentIntentId) {
+    return stripe.checkout.sessions.list({ payment_intent: paymentIntentId, limit: 100 });
 }
 
 async function retrievePrice(priceId) {
@@ -203,6 +213,8 @@ module.exports = {
     upgradeSubscriptionToYearly,
     cancelSubscription,
     retrieveCheckoutSession,
+    retrieveCharge,
+    listCheckoutSessionsForPayment,
     retrievePrice,
     cleanupUserBilling,
 };
