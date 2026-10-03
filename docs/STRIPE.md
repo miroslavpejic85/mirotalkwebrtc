@@ -51,34 +51,18 @@ same activation message twice.
 
 ### Administrator subscription notifications
 
-Set `SAAS_ADMIN_EMAIL_NOTIFICATIONS=true` and configure `ADMIN_EMAIL` plus the SMTP settings
-(`EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USERNAME`, `EMAIL_PASSWORD`, and `EMAIL_FROM`) in `.env`, then restart.
-Notifications are disabled by default and do not depend on `EMAIL_VERIFICATION`.
+Set `SAAS_ADMIN_EMAIL_NOTIFICATIONS=true`, `ADMIN_EMAIL`, and SMTP settings (`EMAIL_HOST`, `EMAIL_PORT`,
+`EMAIL_USERNAME`, `EMAIL_PASSWORD`, `EMAIL_FROM`) in `.env`, then restart. Notifications are off by default.
 
-- `customer.subscription.created` sends the administrator a **new subscription** email for Monthly/Annual plans.
-  It includes the actual Stripe status: creation is not necessarily successful payment (for example, `incomplete`).
-- `customer.subscription.deleted` sends a **subscription ended** email. For end-of-period cancellation,
-  this arrives when the subscription ends, not when the customer schedules cancellation.
-- Monthly-to-Annual upgrades send a **subscription upgraded** email directly from the app's upgrade flow.
-  `customer.subscription.updated` also sends this notification when its previous items show a Monthly price
-  changing to the configured Annual price. Routine renewals, status changes, and scheduled cancellations do not
-  send upgrade emails. The app and webhook share a notification key, so they do not send duplicate upgrade emails.
+- `customer.subscription.created`: new Monthly/Annual subscription (may be `incomplete`, not paid).
+- `customer.subscription.deleted`: subscription ended, not merely scheduled for cancellation.
+- Monthly-to-Annual upgrade: emailed by the app; the webhook also detects this specific change. Routine updates
+  don't trigger upgrade emails.
 
-All notifications include branded HTML, a plain-text alternative, customer details, the plan, dates in UTC, and a
-button opening the subscription in Stripe. Test-mode emails are clearly labeled and link to the test dashboard.
-In SaaS mode, email and admin user-list links include the Stripe account ID resolved from the app's API key,
-so they open the correct account or sandbox rather than relying on the account currently selected in the browser.
-You must still sign in with a Stripe user who has access to that account. Account lookup failures are logged and
-retried on the next request; failed email notifications remain eligible for webhook retries.
-The existing customer activation email is unchanged; no new customer cancellation email is sent.
-Lifetime purchases are not covered by these recurring-subscription notifications.
-
-Notification markers are stored per user, event type, and subscription ID to suppress duplicate webhook deliveries,
-including concurrent deliveries. SMTP failures are logged, release the marker, and return HTTP 500 so Stripe can retry.
-An SMTP failure during the app's upgrade request does not undo or report failure for a successful billing change;
-it is logged and the upgrade webhook can retry the notification.
-As with the customer activation email, delivery is not transactional with MongoDB: a process crash during sending
-can leave a marker behind, so this is not an exactly-once delivery guarantee.
+Emails include customer, plan, dates, and a Stripe link; test-mode messages are labeled. Lifetime purchases and
+customer cancellation emails aren't included; the existing activation email is unchanged. Duplicate webhook events
+are suppressed, and SMTP failures can be retried by Stripe. Delivery isn't exactly-once if the app crashes while
+sending.
 
 ---
 
