@@ -54,10 +54,14 @@ same activation message twice.
 Set `SAAS_ADMIN_EMAIL_NOTIFICATIONS=true`, `ADMIN_EMAIL`, and SMTP settings (`EMAIL_HOST`, `EMAIL_PORT`,
 `EMAIL_USERNAME`, `EMAIL_PASSWORD`, `EMAIL_FROM`) in `.env`, then restart. Notifications are off by default.
 
-- `customer.subscription.created`: new Monthly/Annual subscription (may be `incomplete`, not paid).
-- `customer.subscription.deleted`: subscription ended, not merely scheduled for cancellation.
-- Monthly-to-Annual upgrade: emailed by the app; the webhook also detects this specific change. Routine updates
-  don't trigger upgrade emails.
+- `customer.subscription.created` sends the administrator a **new subscription** email for Monthly/Annual plans.
+  It includes the actual Stripe status: creation is not necessarily successful payment (for example, `incomplete`).
+- `customer.subscription.deleted` sends a **subscription ended** email. For end-of-period cancellation,
+  this arrives when the subscription ends, not when the customer schedules cancellation.
+- Monthly-to-Annual upgrades send a **subscription upgraded** email directly from the app's upgrade flow.
+  `customer.subscription.updated` also sends this notification when its previous items show a Monthly price
+  changing to the configured Annual price. Routine renewals, status changes, and scheduled cancellations do not
+  send upgrade emails. The app and webhook share a notification key, so they do not send duplicate upgrade emails.
 
 Emails include customer, plan, dates, and a Stripe link; test-mode messages are labeled. Lifetime purchases and
 customer cancellation emails aren't included; the existing activation email is unchanged. Duplicate webhook events
