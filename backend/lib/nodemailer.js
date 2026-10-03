@@ -356,6 +356,81 @@ function sendPlanActivatedEmail(name, toEmail, plan, expiresAt) {
     });
 }
 
+function sendAdminSubscriptionEmail({
+    eventType,
+    name,
+    email,
+    plan,
+    status,
+    subscriptionId,
+    livemode,
+    dashboardUrl,
+    eventAt,
+    expiresAt,
+}) {
+    const to = process.env.ADMIN_EMAIL?.trim();
+    if (!to) throw new Error('ADMIN_EMAIL is required for subscription notifications');
+    const isCreated = eventType === 'customer.subscription.created';
+    const isUpgraded = eventType === 'customer.subscription.updated';
+    if (!isCreated && !isUpgraded && eventType !== 'customer.subscription.deleted') {
+        throw new Error(`Unsupported admin subscription email event: ${eventType}`);
+    }
+    const planLabel = plan === 'yearly' ? 'Annual' : 'Monthly';
+    const actionLabel = isCreated ? 'created' : isUpgraded ? 'upgraded' : 'ended';
+    const title = isCreated ? 'New subscription created' : isUpgraded ? 'Subscription upgraded' : 'Subscription ended';
+    const summary = isCreated
+        ? 'A customer has created a recurring subscription. Check its Stripe status below; creation alone does not confirm payment.'
+        : isUpgraded
+          ? 'A customer has upgraded from Monthly to Annual billing. Check the subscription status below; Stripe handles any prorated charges separately.'
+          : 'A recurring subscription has ended. This is the end of the subscription, not just a scheduled cancellation.';
+    if (
+        !/^https:\/\/dashboard\.stripe\.com\/acct_[A-Za-z0-9]+\/(?:test\/)?subscriptions\/[^/?#]+$/.test(dashboardUrl)
+    ) {
+        throw new Error('An account-scoped Stripe Dashboard URL is required for subscription notifications');
+    }
+    const formatDate = (value) =>
+        value && !Number.isNaN(new Date(value).getTime())
+            ? new Intl.DateTimeFormat('en-US', {
+                  dateStyle: 'long',
+                  timeStyle: 'short',
+                  timeZone: 'UTC',
+              }).format(new Date(value)) + ' UTC'
+            : 'Not provided';
+    const details = [
+        ['Customer', name],
+        ['Email', email],
+        ...(isUpgraded ? [['Previous plan', 'Monthly']] : []),
+        ['Plan', planLabel],
+        ['Stripe status', status],
+        ['Subscription ID', subscriptionId],
+        [isCreated ? 'Created at' : isUpgraded ? 'Upgraded at' : 'Ended at', formatDate(eventAt)],
+        ['Billing period ends', formatDate(expiresAt)],
+        ['Environment', livemode ? 'Live' : 'Test'],
+    ];
+    const detailsHtml = details
+        .map(
+            ([label, value]) =>
+                `<tr><td style="padding:10px 14px;color:#5e6878;vertical-align:top;font-size:13px;">${escapeHtml(label)}</td><td style="padding:10px 14px;font-weight:700;word-break:break-word;font-size:13px;">${escapeHtml(value)}</td></tr>`
+        )
+        .join('');
+    const accent = isCreated || isUpgraded ? '#16a36f' : '#b45309';
+    return transport.sendMail({
+        from: EMAIL_FROM,
+        to,
+        subject: `${livemode ? '' : '[Test] '}MiroTalk: ${planLabel} subscription ${actionLabel}`,
+        text: `${title}\n\n${summary}\n\n${details.map(([label, value]) => `${label}: ${value}`).join('\n')}\n\nView subscription in Stripe:\n${dashboardUrl}`,
+        html: buildEmailHtml({
+            preheader: `${planLabel} subscription ${actionLabel} for ${email}.`,
+            title,
+            greeting: 'Hello administrator,',
+            success: isCreated || isUpgraded,
+            content: `<p style="margin:0;padding:14px 16px;background:#f8fafc;border-left:4px solid ${accent};line-height:1.6;">${escapeHtml(summary)}</p><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:20px 0;background:#f8fafc;border:1px solid #e8ecf2;border-radius:6px;border-collapse:separate;border-spacing:0;">${detailsHtml}</table>`,
+            action: { label: 'View subscription in Stripe', url: dashboardUrl },
+            footer: 'Administrator notification from MiroTalk. Stripe remains the source of truth for billing and payments.',
+        }),
+    });
+}
+
 function sendPasswordResetEmail(name, email, resetUrl) {
     return transport.sendMail({
         from: EMAIL_FROM,
@@ -540,6 +615,7 @@ module.exports = {
     sendConfirmationEmail,
     sendConfirmationOkEmail,
     sendPlanActivatedEmail,
+    sendAdminSubscriptionEmail,
     sendPasswordResetEmail,
     sendPasswordChangeConfirmation,
     sendInvitationEmail,

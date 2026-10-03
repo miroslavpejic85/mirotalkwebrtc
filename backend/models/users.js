@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema({
     subscriptionExpiresAt: { type: Date, default: null },
     subscriptionCancelAtPeriodEnd: { type: Boolean, default: false },
     subscriptionActivationEmailKey: { type: String, default: undefined, select: false },
+    subscriptionAdminEmailKeys: { type: [String], default: undefined, select: false },
     termsAcceptedAt: { type: Date, default: null },
     termsVersion: { type: String, default: null },
     privacyPolicyVersion: { type: String, default: null },

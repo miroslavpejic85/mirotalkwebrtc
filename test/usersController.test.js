@@ -61,7 +61,15 @@ function loadController(overrides = {}) {
         [EVENT_PATH, Event],
         [EMAIL_INVITATION_PATH, EmailInvitation],
         [NODEMAILER_PATH, overrides.nodemailer || { getUpgradeMessage: () => '' }],
-        [STRIPE_PATH, overrides.stripeLib || { cleanupUserBilling: async () => {} }],
+        [
+            STRIPE_PATH,
+            overrides.stripeLib || {
+                cleanupUserBilling: async () => {},
+                isEnabled: () => true,
+                getSubscriptionDashboardUrl: async (id) =>
+                    `https://dashboard.stripe.com/acct_test/test/subscriptions/${encodeURIComponent(id)}`,
+            },
+        ],
         [
             UTILS_PATH,
             {
@@ -441,9 +449,68 @@ test('userGetAll exposes invitation status without setup secrets', async (t) => 
     assert.equal('stripeSubscriptionId' in res.body[0], false);
     assert.equal(
         res.body[0].stripeSubscriptionDashboardUrl,
-        'https://dashboard.stripe.com/test/subscriptions/sub_private'
+        'https://dashboard.stripe.com/acct_test/test/subscriptions/sub_private'
     );
     assert.equal(res.body[1].stripeSubscriptionDashboardUrl, null);
+});
+
+test('userGetAll preserves legacy Dashboard links when SaaS is disabled', async (t) => {
+    const previousKey = process.env.STRIPE_SECRET_KEY;
+    process.env.STRIPE_SECRET_KEY = 'sk_test_example';
+    t.after(() => {
+        if (previousKey === undefined) delete process.env.STRIPE_SECRET_KEY;
+        else process.env.STRIPE_SECRET_KEY = previousKey;
+    });
+    const query = {
+        select() {
+            return this;
+        },
+        sort() {
+            return this;
+        },
+        async lean() {
+            return [{ stripeSubscriptionId: 'sub_legacy' }];
+        },
+    };
+    const harness = loadController({
+        userFind: () => query,
+        stripeLib: { isEnabled: () => false },
+    });
+    t.after(harness.cleanup);
+    const response = createResponse();
+    await harness.controller.userGetAll({}, response);
+    assert.equal(
+        response.body[0].stripeSubscriptionDashboardUrl,
+        'https://dashboard.stripe.com/test/subscriptions/sub_legacy'
+    );
+});
+
+test('userGetAll surfaces a Stripe Dashboard account lookup failure', async (t) => {
+    const query = {
+        select() {
+            return this;
+        },
+        sort() {
+            return this;
+        },
+        async lean() {
+            return [{ stripeSubscriptionId: 'sub_test' }];
+        },
+    };
+    const harness = loadController({
+        userFind: () => query,
+        stripeLib: {
+            isEnabled: () => true,
+            getSubscriptionDashboardUrl: async () => {
+                throw new Error('Stripe account lookup unavailable');
+            },
+        },
+    });
+    t.after(harness.cleanup);
+    const response = createResponse();
+    await harness.controller.userGetAll({}, response);
+    assert.equal(response.statusCode, 400);
+    assert.equal(response.body.message, 'Stripe account lookup unavailable');
 });
 
 test('userLogin persists consent when it auto-registers a new user', async (t) => {

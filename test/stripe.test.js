@@ -47,6 +47,9 @@ function loadStripeLib({ saasEnabled = true, env = {} } = {}) {
 
     // A minimal fake of the Stripe SDK surface used by the wrapper.
     const fakeStripe = {
+        accounts: {
+            retrieve: async () => ({ id: 'acct_test123' }),
+        },
         customers: {
             create: async (params) => ({ id: 'cus_test_123', __params: params }),
         },
@@ -145,6 +148,52 @@ function loadStripeLib({ saasEnabled = true, env = {} } = {}) {
 
 test('the pinned API version matches the installed Stripe SDK', () => {
     assert.equal(EXPECTED_API_VERSION, Stripe.API_VERSION);
+});
+
+test('Dashboard subscription links scope test and live mode to the API key account', async () => {
+    const { lib, fakeStripe } = loadStripeLib();
+    let lookups = 0;
+    fakeStripe.accounts.retrieve = async () => {
+        lookups++;
+        return { id: 'acct_test123' };
+    };
+    const urls = await Promise.all([
+        lib.getSubscriptionDashboardUrl('sub_test'),
+        lib.getSubscriptionDashboardUrl('sub_live', true),
+    ]);
+    assert.deepEqual(urls, [
+        'https://dashboard.stripe.com/acct_test123/test/subscriptions/sub_test',
+        'https://dashboard.stripe.com/acct_test123/subscriptions/sub_live',
+    ]);
+    assert.equal(lookups, 1);
+    assert.equal(
+        await lib.getSubscriptionDashboardUrl('sub_/encoded', false),
+        'https://dashboard.stripe.com/acct_test123/test/subscriptions/sub_%2Fencoded'
+    );
+    assert.equal(lookups, 1);
+});
+
+test('Dashboard account lookups surface failures and retry rather than caching rejection', async () => {
+    const { lib, fakeStripe } = loadStripeLib();
+    let lookups = 0;
+    fakeStripe.accounts.retrieve = async () => {
+        if (++lookups === 1) throw new Error('Stripe unavailable');
+        return { id: 'acct_test123' };
+    };
+    await assert.rejects(lib.getSubscriptionDashboardUrl('sub_test'), /Stripe unavailable/);
+    assert.equal(
+        await lib.getSubscriptionDashboardUrl('sub_test'),
+        'https://dashboard.stripe.com/acct_test123/test/subscriptions/sub_test'
+    );
+    assert.equal(lookups, 2);
+});
+
+test('Dashboard links reject invalid account IDs and disabled Stripe integrations', async () => {
+    const { lib, fakeStripe } = loadStripeLib();
+    fakeStripe.accounts.retrieve = async () => ({ id: 'invalid/account' });
+    await assert.rejects(lib.getSubscriptionDashboardUrl('sub_test'), /invalid account ID/);
+    const disabled = loadStripeLib({ saasEnabled: false });
+    await assert.rejects(disabled.lib.getSubscriptionDashboardUrl('sub_test'), /Stripe is not enabled/);
 });
 
 test('initializes the Stripe SDK with the pinned API version when SAAS is enabled', () => {

@@ -13,6 +13,7 @@ const STRIPE_YEARLY_PRICE_ID = process.env.STRIPE_YEARLY_PRICE_ID;
 const STRIPE_LIFETIME_PRICE_ID = process.env.STRIPE_LIFETIME_PRICE_ID;
 
 let stripe = null;
+let stripeAccountIdPromise = null;
 
 if (SAAS_ENABLED) {
     if (!STRIPE_SECRET_KEY) {
@@ -30,6 +31,25 @@ if (SAAS_ENABLED) {
 
 function isEnabled() {
     return SAAS_ENABLED && !!stripe;
+}
+
+async function getSubscriptionDashboardUrl(subscriptionId, livemode = !/^(sk|rk)_test_/.test(STRIPE_SECRET_KEY || '')) {
+    if (!isEnabled()) throw new Error('Stripe is not enabled');
+    if (!stripeAccountIdPromise) {
+        stripeAccountIdPromise = stripe.accounts
+            .retrieve()
+            .then((account) => {
+                if (!/^acct_[A-Za-z0-9]+$/.test(account.id)) throw new Error('Stripe returned an invalid account ID');
+                return account.id;
+            })
+            .catch((error) => {
+                stripeAccountIdPromise = null;
+                log.error('Unable to resolve Stripe Dashboard account', error);
+                throw error;
+            });
+    }
+    const accountId = await stripeAccountIdPromise;
+    return `https://dashboard.stripe.com/${accountId}/${livemode ? '' : 'test/'}subscriptions/${encodeURIComponent(subscriptionId)}`;
 }
 
 /**
@@ -203,6 +223,7 @@ async function cleanupUserBilling(user) {
 
 module.exports = {
     isEnabled,
+    getSubscriptionDashboardUrl,
     getOrCreateCustomer,
     createSubscriptionCheckout,
     createYearlySubscriptionCheckout,

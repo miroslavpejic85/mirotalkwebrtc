@@ -13,9 +13,11 @@ function loadMailer() {
     const previousNodemailer = require.cache[NODEMAILER_PATH];
     const previousServerUrl = process.env.SERVER_URL;
     const previousJwtExp = process.env.JWT_EXP;
+    const previousAdminEmail = process.env.ADMIN_EMAIL;
 
     process.env.SERVER_URL = 'https://meet.example.com';
     process.env.JWT_EXP = '1h';
+    process.env.ADMIN_EMAIL = 'admin@example.com';
     require.cache[NODEMAILER_PATH] = {
         id: NODEMAILER_PATH,
         filename: NODEMAILER_PATH,
@@ -44,6 +46,8 @@ function loadMailer() {
             else process.env.SERVER_URL = previousServerUrl;
             if (previousJwtExp === undefined) delete process.env.JWT_EXP;
             else process.env.JWT_EXP = previousJwtExp;
+            if (previousAdminEmail === undefined) delete process.env.ADMIN_EMAIL;
+            else process.env.ADMIN_EMAIL = previousAdminEmail;
         },
     };
 }
@@ -146,4 +150,104 @@ test('plan activation emails identify access without duplicating a receipt', asy
     assert.match(harness.messages[1].html, /no recurring charges/i);
     assert.doesNotMatch(harness.messages[0].html, /amount|receipt number|charged/i);
     assert.doesNotMatch(harness.messages[0].html, /<Admin>/);
+});
+
+test('admin subscription templates include escaped details, UTC dates and Stripe links', async (t) => {
+    const harness = loadMailer();
+    t.after(harness.cleanup);
+    const details = {
+        eventType: 'customer.subscription.created',
+        name: '<Customer>',
+        email: 'customer@example.com',
+        plan: 'yearly',
+        status: 'incomplete',
+        subscriptionId: 'sub_test',
+        livemode: false,
+        dashboardUrl: 'https://dashboard.stripe.com/acct_test/test/subscriptions/sub_test',
+        eventAt: new Date('2026-09-20T12:00:00.000Z'),
+        expiresAt: new Date('2027-09-20T12:00:00.000Z'),
+    };
+    await harness.mailer.sendAdminSubscriptionEmail(details);
+    await harness.mailer.sendAdminSubscriptionEmail({
+        ...details,
+        eventType: 'customer.subscription.deleted',
+        plan: 'monthly',
+        status: 'canceled',
+        livemode: true,
+        dashboardUrl: 'https://dashboard.stripe.com/acct_test/subscriptions/sub_test',
+        expiresAt: null,
+    });
+    const [created, ended] = harness.messages;
+    for (const message of harness.messages) {
+        assert.equal(message.to, 'admin@example.com');
+        assert.ok(message.text);
+        assert.match(message.html, /MiroTalk/);
+        assert.match(message.html, /&lt;Customer&gt;/);
+        assert.doesNotMatch(message.html, /<Customer>/);
+        assert.match(message.html, /customer@example\.com/);
+        assert.match(message.html, /UTC/);
+        assert.match(message.html, />View subscription in Stripe</);
+        assert.match(message.text, /Customer: <Customer>/);
+    }
+    assert.equal(created.subject, '[Test] MiroTalk: Annual subscription created');
+    assert.match(created.html, /September 20, 2027/);
+    assert.match(created.html, /incomplete/);
+    assert.match(created.text, /does not confirm payment/);
+    assert.match(created.html, /https:\/\/dashboard\.stripe\.com\/acct_test\/test\/subscriptions\/sub_test/);
+    assert.equal(ended.subject, 'MiroTalk: Monthly subscription ended');
+    assert.match(ended.html, /canceled/);
+    assert.match(ended.html, /Not provided/);
+    assert.match(ended.html, /https:\/\/dashboard\.stripe\.com\/acct_test\/subscriptions\/sub_test/);
+    assert.doesNotMatch(ended.html, /aria-label="Success"/);
+});
+
+test('admin Annual upgrade email identifies both plans without claiming a new subscription', async (t) => {
+    const harness = loadMailer();
+    t.after(harness.cleanup);
+    await harness.mailer.sendAdminSubscriptionEmail({
+        eventType: 'customer.subscription.updated',
+        name: '<Customer>',
+        email: 'customer@example.com',
+        plan: 'yearly',
+        status: 'active',
+        subscriptionId: 'sub_upgrade',
+        livemode: false,
+        dashboardUrl: 'https://dashboard.stripe.com/acct_test/test/subscriptions/sub_upgrade',
+        eventAt: new Date('2026-10-03T06:00:00.000Z'),
+        expiresAt: new Date('2027-10-03T06:00:00.000Z'),
+    });
+    const message = harness.messages[0];
+    assert.equal(message.to, 'admin@example.com');
+    assert.equal(message.subject, '[Test] MiroTalk: Annual subscription upgraded');
+    assert.match(message.text, /Previous plan: Monthly/);
+    assert.match(message.text, /Plan: Annual/);
+    assert.match(message.text, /Upgraded at:.*UTC/);
+    assert.match(message.html, /Subscription upgraded/);
+    assert.match(message.html, /&lt;Customer&gt;/);
+    assert.match(message.html, /prorated charges separately/);
+    assert.match(message.html, /https:\/\/dashboard\.stripe\.com\/acct_test\/test\/subscriptions\/sub_upgrade/);
+    assert.doesNotMatch(message.html, /New subscription created|Subscription ended|<Customer>/);
+});
+
+test('admin subscription templates reject missing recipients and unsupported events', async (t) => {
+    const harness = loadMailer();
+    t.after(harness.cleanup);
+    assert.throws(
+        () => harness.mailer.sendAdminSubscriptionEmail({ eventType: 'invoice.paid' }),
+        /Unsupported admin subscription email event/
+    );
+    assert.throws(
+        () =>
+            harness.mailer.sendAdminSubscriptionEmail({
+                eventType: 'customer.subscription.created',
+                dashboardUrl: 'https://dashboard.stripe.com/test/subscriptions/sub_test',
+            }),
+        /account-scoped Stripe Dashboard URL is required/
+    );
+    process.env.ADMIN_EMAIL = '';
+    assert.throws(
+        () => harness.mailer.sendAdminSubscriptionEmail({ eventType: 'customer.subscription.created' }),
+        /ADMIN_EMAIL is required/
+    );
+    assert.equal(harness.messages.length, 0);
 });

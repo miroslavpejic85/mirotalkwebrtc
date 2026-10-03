@@ -443,14 +443,18 @@ async function userGetAll(req, res) {
             .sort({ createdAt: -1 })
             .lean();
         res.json(
-            users.map(({ stripeCustomerId, stripeSubscriptionId, accountSetupPending, ...user }) => ({
-                ...user,
-                invitationPending: accountSetupPending === true,
-                subscriptionManagedByStripe: !!(stripeCustomerId || stripeSubscriptionId),
-                stripeSubscriptionDashboardUrl: stripeSubscriptionId
-                    ? `https://dashboard.stripe.com${process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_') ? '/test' : ''}/subscriptions/${encodeURIComponent(stripeSubscriptionId)}`
-                    : null,
-            }))
+            await Promise.all(
+                users.map(async ({ stripeCustomerId, stripeSubscriptionId, accountSetupPending, ...user }) => ({
+                    ...user,
+                    invitationPending: accountSetupPending === true,
+                    subscriptionManagedByStripe: !!(stripeCustomerId || stripeSubscriptionId),
+                    stripeSubscriptionDashboardUrl: stripeSubscriptionId
+                        ? stripeLib.isEnabled()
+                            ? await stripeLib.getSubscriptionDashboardUrl(stripeSubscriptionId)
+                            : `https://dashboard.stripe.com${process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_') ? '/test' : ''}/subscriptions/${encodeURIComponent(stripeSubscriptionId)}`
+                        : null,
+                }))
+            )
         );
     } catch (error) {
         log.error('getAllUsers', error);

@@ -49,6 +49,37 @@ recurring charges for Lifetime) with a link to the dashboard. Stripe remains res
 notifications. The Checkout Session or subscription ID prevents the verification fallback and webhook from sending the
 same activation message twice.
 
+### Administrator subscription notifications
+
+Set `SAAS_ADMIN_EMAIL_NOTIFICATIONS=true` and configure `ADMIN_EMAIL` plus the SMTP settings
+(`EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USERNAME`, `EMAIL_PASSWORD`, and `EMAIL_FROM`) in `.env`, then restart.
+Notifications are disabled by default and do not depend on `EMAIL_VERIFICATION`.
+
+- `customer.subscription.created` sends the administrator a **new subscription** email for Monthly/Annual plans.
+  It includes the actual Stripe status: creation is not necessarily successful payment (for example, `incomplete`).
+- `customer.subscription.deleted` sends a **subscription ended** email. For end-of-period cancellation,
+  this arrives when the subscription ends, not when the customer schedules cancellation.
+- Monthly-to-Annual upgrades send a **subscription upgraded** email directly from the app's upgrade flow.
+  `customer.subscription.updated` also sends this notification when its previous items show a Monthly price
+  changing to the configured Annual price. Routine renewals, status changes, and scheduled cancellations do not
+  send upgrade emails. The app and webhook share a notification key, so they do not send duplicate upgrade emails.
+
+All notifications include branded HTML, a plain-text alternative, customer details, the plan, dates in UTC, and a
+button opening the subscription in Stripe. Test-mode emails are clearly labeled and link to the test dashboard.
+In SaaS mode, email and admin user-list links include the Stripe account ID resolved from the app's API key,
+so they open the correct account or sandbox rather than relying on the account currently selected in the browser.
+You must still sign in with a Stripe user who has access to that account. Account lookup failures are logged and
+retried on the next request; failed email notifications remain eligible for webhook retries.
+The existing customer activation email is unchanged; no new customer cancellation email is sent.
+Lifetime purchases are not covered by these recurring-subscription notifications.
+
+Notification markers are stored per user, event type, and subscription ID to suppress duplicate webhook deliveries,
+including concurrent deliveries. SMTP failures are logged, release the marker, and return HTTP 500 so Stripe can retry.
+An SMTP failure during the app's upgrade request does not undo or report failure for a successful billing change;
+it is logged and the upgrade webhook can retry the notification.
+As with the customer activation email, delivery is not transactional with MongoDB: a process crash during sending
+can leave a marker behind, so this is not an exactly-once delivery guarantee.
+
 ---
 
 ## ⚙️ Environment variables

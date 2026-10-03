@@ -11,10 +11,22 @@ const CONFIG_PATH = path.resolve(__dirname, '../backend/config.js');
 const SAAS_PATH = path.resolve(__dirname, '../backend/middleware/saas.js');
 const NODEMAILER_PATH = path.resolve(__dirname, '../backend/lib/nodemailer.js');
 
-function loadController({ user, stripeOverrides = {}, mailerOverrides = {} }) {
-    const calls = { checkout: [], canceled: [], emails: [], planChanges: [], updated: [] };
+function loadController({
+    user,
+    stripeOverrides = {},
+    mailerOverrides = {},
+    adminNotifications = false,
+    adminEmail = 'admin@example.com',
+}) {
+    const previousAdminNotifications = process.env.SAAS_ADMIN_EMAIL_NOTIFICATIONS;
+    const previousAdminEmail = process.env.ADMIN_EMAIL;
+    process.env.SAAS_ADMIN_EMAIL_NOTIFICATIONS = String(adminNotifications);
+    process.env.ADMIN_EMAIL = adminEmail;
+    const calls = { checkout: [], canceled: [], emails: [], adminEmails: [], planChanges: [], updated: [] };
     const stripe = {
         isEnabled: () => true,
+        getSubscriptionDashboardUrl: async (id, livemode) =>
+            `https://dashboard.stripe.com/acct_test/${livemode ? '' : 'test/'}subscriptions/${encodeURIComponent(id)}`,
         createSubscriptionCheckout: async () => {
             calls.checkout.push('monthly');
             return { url: 'https://stripe.test/monthly' };
@@ -48,6 +60,8 @@ function loadController({ user, stripeOverrides = {}, mailerOverrides = {} }) {
             calls.planChanges.push(id);
             return {
                 id,
+                customer: 'cus_test',
+                livemode: false,
                 status: 'active',
                 current_period_end: Math.floor(Date.now() / 1000) + 31536000,
                 cancel_at_period_end: false,
@@ -88,6 +102,11 @@ function loadController({ user, stripeOverrides = {}, mailerOverrides = {} }) {
             if (update.$set) {
                 Object.assign(user, update.$set);
             }
+            if (update.$pull?.subscriptionAdminEmailKeys) {
+                user.subscriptionAdminEmailKeys = (user.subscriptionAdminEmailKeys || []).filter(
+                    (key) => key !== update.$pull.subscriptionAdminEmailKeys
+                );
+            }
             if (
                 update.$unset?.subscriptionActivationEmailKey !== undefined &&
                 user.subscriptionActivationEmailKey === filter.subscriptionActivationEmailKey
@@ -107,6 +126,14 @@ function loadController({ user, stripeOverrides = {}, mailerOverrides = {} }) {
             if (filter.subscriptionType && user.subscriptionType !== filter.subscriptionType) return null;
             const activationKey = filter.subscriptionActivationEmailKey?.$ne;
             if (activationKey && user.subscriptionActivationEmailKey === activationKey) return null;
+            const adminKey = filter.subscriptionAdminEmailKeys?.$ne;
+            if (adminKey && user.subscriptionAdminEmailKeys?.includes(adminKey)) return null;
+            if (update.$addToSet?.subscriptionAdminEmailKeys) {
+                user.subscriptionAdminEmailKeys = [
+                    ...(user.subscriptionAdminEmailKeys || []),
+                    update.$addToSet.subscriptionAdminEmailKeys,
+                ];
+            }
             if (update.$set) Object.assign(user, update.$set);
             if (update.$unset) for (const field of Object.keys(update.$unset)) delete user[field];
             return user;
@@ -130,6 +157,7 @@ function loadController({ user, stripeOverrides = {}, mailerOverrides = {} }) {
             NODEMAILER_PATH,
             {
                 sendPlanActivatedEmail: async (...args) => calls.emails.push(args),
+                sendAdminSubscriptionEmail: async (details) => calls.adminEmails.push(details),
                 ...mailerOverrides,
             },
         ],
@@ -148,6 +176,10 @@ function loadController({ user, stripeOverrides = {}, mailerOverrides = {} }) {
         controller,
         calls,
         cleanup() {
+            if (previousAdminNotifications === undefined) delete process.env.SAAS_ADMIN_EMAIL_NOTIFICATIONS;
+            else process.env.SAAS_ADMIN_EMAIL_NOTIFICATIONS = previousAdminNotifications;
+            if (previousAdminEmail === undefined) delete process.env.ADMIN_EMAIL;
+            else process.env.ADMIN_EMAIL = previousAdminEmail;
             delete require.cache[CONTROLLER_PATH];
             for (const [modulePath, cached] of previous) {
                 if (cached) require.cache[modulePath] = cached;
@@ -197,6 +229,289 @@ function activeMonthlyUser() {
     user.select = async () => user;
     return user;
 }
+
+function adminSubscriptionEvent(type = 'customer.subscription.created', overrides = {}) {
+    return {
+        type,
+        created: 1791000000,
+        livemode: true,
+        data: {
+            object: {
+                id: 'sub_monthly',
+                customer: 'cus_test',
+                status: type === 'customer.subscription.deleted' ? 'canceled' : 'active',
+                created: 1790000000,
+                current_period_end: 1792000000,
+                items: { data: [{ price: { id: 'price_monthly' } }] },
+                ...overrides,
+            },
+        },
+    };
+}
+
+test('admin subscription emails deduplicate concurrent deliveries and distinguish creation from ending', async (t) => {
+    const user = activeMonthlyUser();
+    let event = adminSubscriptionEvent();
+    const harness = loadController({
+        user,
+        adminNotifications: true,
+        stripeOverrides: { constructEvent: () => event },
+    });
+    t.after(harness.cleanup);
+    const request = { headers: {}, body: Buffer.from('{}') };
+    const responses = [createResponse(), createResponse()];
+    await Promise.all(responses.map((response) => harness.controller.handleWebhook(request, response)));
+    assert.ok(responses.every((response) => response.statusCode === 200));
+    assert.equal(harness.calls.adminEmails.length, 1);
+    assert.equal(harness.calls.emails.length, 1);
+    assert.deepEqual(harness.calls.adminEmails[0], {
+        eventType: 'customer.subscription.created',
+        name: user.username,
+        email: user.email,
+        plan: 'monthly',
+        status: 'active',
+        subscriptionId: 'sub_monthly',
+        livemode: true,
+        dashboardUrl: 'https://dashboard.stripe.com/acct_test/subscriptions/sub_monthly',
+        eventAt: new Date(1790000000000),
+        expiresAt: new Date(1792000000000),
+    });
+
+    event = adminSubscriptionEvent('customer.subscription.deleted', { ended_at: 1791000100 });
+    await harness.controller.handleWebhook(request, createResponse());
+    await harness.controller.handleWebhook(request, createResponse());
+    assert.equal(harness.calls.adminEmails.length, 2);
+    assert.equal(harness.calls.adminEmails[1].eventType, 'customer.subscription.deleted');
+    assert.equal(harness.calls.adminEmails[1].status, 'canceled');
+    assert.equal(harness.calls.adminEmails[1].eventAt.getTime(), 1791000100000);
+    assert.equal(user.subscriptionStatus, 'canceled');
+    assert.equal(harness.calls.emails.length, 1);
+
+    event = adminSubscriptionEvent('customer.subscription.created', { id: 'sub_second' });
+    await harness.controller.handleWebhook(request, createResponse());
+    event = adminSubscriptionEvent();
+    await harness.controller.handleWebhook(request, createResponse());
+    assert.equal(harness.calls.adminEmails.length, 3);
+});
+
+test('admin subscription notification failures return 500 and allow a webhook retry', async (t) => {
+    const user = activeMonthlyUser();
+    let attempts = 0;
+    const harness = loadController({
+        user,
+        adminNotifications: true,
+        stripeOverrides: { constructEvent: () => adminSubscriptionEvent('customer.subscription.deleted') },
+        mailerOverrides: {
+            sendAdminSubscriptionEmail: async () => {
+                if (++attempts === 1) throw new Error('SMTP unavailable');
+            },
+        },
+    });
+    t.after(harness.cleanup);
+    const request = { headers: {}, body: Buffer.from('{}') };
+    const failed = createResponse();
+    await harness.controller.handleWebhook(request, failed);
+    assert.equal(failed.statusCode, 500);
+    assert.deepEqual(user.subscriptionAdminEmailKeys, []);
+    const retried = createResponse();
+    await harness.controller.handleWebhook(request, retried);
+    assert.equal(retried.statusCode, 200);
+    await harness.controller.handleWebhook(request, createResponse());
+    assert.equal(attempts, 2);
+    assert.equal(user.subscriptionStatus, 'canceled');
+});
+
+test('admin subscription notifications are disabled by default', async (t) => {
+    const user = activeMonthlyUser();
+    const harness = loadController({
+        user,
+        stripeOverrides: { constructEvent: () => adminSubscriptionEvent() },
+    });
+    t.after(harness.cleanup);
+    await harness.controller.handleWebhook({ headers: {}, body: Buffer.from('{}') }, createResponse());
+    assert.equal(harness.calls.adminEmails.length, 0);
+    assert.equal(user.subscriptionAdminEmailKeys, undefined);
+    assert.equal(harness.calls.emails.length, 1);
+});
+
+test('Dashboard account lookup failure releases the email marker for webhook retry', async (t) => {
+    const user = activeMonthlyUser();
+    let lookups = 0;
+    const harness = loadController({
+        user,
+        adminNotifications: true,
+        stripeOverrides: {
+            constructEvent: () => adminSubscriptionEvent(),
+            getSubscriptionDashboardUrl: async () => {
+                if (++lookups === 1) throw new Error('Stripe account lookup unavailable');
+                return 'https://dashboard.stripe.com/acct_test/subscriptions/sub_monthly';
+            },
+        },
+    });
+    t.after(harness.cleanup);
+    const request = { headers: {}, body: Buffer.from('{}') };
+    const failed = createResponse();
+    await harness.controller.handleWebhook(request, failed);
+    assert.equal(failed.statusCode, 500);
+    assert.deepEqual(user.subscriptionAdminEmailKeys, []);
+    assert.equal(harness.calls.adminEmails.length, 0);
+    const retried = createResponse();
+    await harness.controller.handleWebhook(request, retried);
+    assert.equal(retried.statusCode, 200);
+    assert.equal(harness.calls.adminEmails.length, 1);
+});
+
+test('enabled admin notifications require a recipient before claiming a delivery', async (t) => {
+    const user = activeMonthlyUser();
+    const harness = loadController({
+        user,
+        adminNotifications: true,
+        adminEmail: '',
+        stripeOverrides: { constructEvent: () => adminSubscriptionEvent() },
+    });
+    t.after(harness.cleanup);
+    const response = createResponse();
+    await harness.controller.handleWebhook({ headers: {}, body: Buffer.from('{}') }, response);
+    assert.equal(response.statusCode, 500);
+    assert.equal(user.subscriptionAdminEmailKeys, undefined);
+    assert.equal(harness.calls.adminEmails.length, 0);
+});
+
+test('admin creation email reports incomplete status without sending customer activation', async (t) => {
+    const user = activeMonthlyUser();
+    const event = adminSubscriptionEvent('customer.subscription.created', {
+        status: 'incomplete',
+        items: { data: [{ price: { id: 'price_yearly' } }] },
+    });
+    event.livemode = false;
+    const harness = loadController({
+        user,
+        adminNotifications: true,
+        stripeOverrides: { constructEvent: () => event },
+    });
+    t.after(harness.cleanup);
+    await harness.controller.handleWebhook({ headers: {}, body: Buffer.from('{}') }, createResponse());
+    assert.equal(harness.calls.emails.length, 0);
+    assert.equal(harness.calls.adminEmails.length, 1);
+    assert.equal(harness.calls.adminEmails[0].status, 'incomplete');
+    assert.equal(harness.calls.adminEmails[0].plan, 'yearly');
+    assert.equal(harness.calls.adminEmails[0].livemode, false);
+});
+
+test('admin subscription emails exclude updates and unrelated Stripe plans', async (t) => {
+    const user = activeMonthlyUser();
+    let event = adminSubscriptionEvent('customer.subscription.updated');
+    const harness = loadController({
+        user,
+        adminNotifications: true,
+        stripeOverrides: { constructEvent: () => event },
+    });
+    t.after(harness.cleanup);
+    await harness.controller.handleWebhook({ headers: {}, body: Buffer.from('{}') }, createResponse());
+    event = adminSubscriptionEvent('customer.subscription.created', {
+        items: { data: [{ price: { id: 'price_unrelated' } }] },
+    });
+    await harness.controller.handleWebhook({ headers: {}, body: Buffer.from('{}') }, createResponse());
+    assert.equal(harness.calls.adminEmails.length, 0);
+});
+
+function adminUpgradeEvent() {
+    const event = adminSubscriptionEvent('customer.subscription.updated', {
+        items: { data: [{ price: { id: 'price_yearly' } }] },
+    });
+    event.data.previous_attributes = { items: { data: [{ price: { id: 'price_monthly' } }] } };
+    return event;
+}
+
+test('Annual upgrade sends one admin email across the app request and webhook', async (t) => {
+    const user = activeMonthlyUser();
+    const harness = loadController({
+        user,
+        adminNotifications: true,
+        stripeOverrides: { constructEvent: adminUpgradeEvent },
+    });
+    t.after(harness.cleanup);
+    const response = createResponse();
+    await harness.controller.changePlan({ body: { plan: 'yearly' }, user: { email: user.email } }, response);
+    assert.equal(response.statusCode, 200);
+    assert.equal(harness.calls.adminEmails.length, 1);
+    assert.equal(harness.calls.adminEmails[0].eventType, 'customer.subscription.updated');
+    assert.equal(harness.calls.adminEmails[0].plan, 'yearly');
+    assert.equal(harness.calls.adminEmails[0].livemode, false);
+    const request = { headers: {}, body: Buffer.from('{}') };
+    await harness.controller.handleWebhook(request, createResponse());
+    await harness.controller.handleWebhook(request, createResponse());
+    assert.equal(harness.calls.adminEmails.length, 1);
+    assert.deepEqual(user.subscriptionAdminEmailKeys, ['customer.subscription.updated:sub_monthly:plan:yearly']);
+});
+
+test('upgrade webhook identifies the price transition even after local reconciliation', async (t) => {
+    const user = activeMonthlyUser();
+    user.subscriptionType = 'yearly';
+    const harness = loadController({
+        user,
+        adminNotifications: true,
+        stripeOverrides: { constructEvent: adminUpgradeEvent },
+    });
+    t.after(harness.cleanup);
+    const request = { headers: {}, body: Buffer.from('{}') };
+    const responses = [createResponse(), createResponse()];
+    await Promise.all(responses.map((response) => harness.controller.handleWebhook(request, response)));
+    assert.ok(responses.every((response) => response.statusCode === 200));
+    assert.equal(harness.calls.adminEmails.length, 1);
+    assert.equal(harness.calls.adminEmails[0].eventAt.getTime(), 1791000000000);
+});
+
+test('SMTP failure preserves a successful Annual upgrade and the webhook retries its email', async (t) => {
+    const user = activeMonthlyUser();
+    let attempts = 0;
+    const harness = loadController({
+        user,
+        adminNotifications: true,
+        stripeOverrides: { constructEvent: adminUpgradeEvent },
+        mailerOverrides: {
+            sendAdminSubscriptionEmail: async () => {
+                if (++attempts <= 2) throw new Error('SMTP unavailable');
+            },
+        },
+    });
+    t.after(harness.cleanup);
+    const upgraded = createResponse();
+    await harness.controller.changePlan({ body: { plan: 'yearly' }, user: { email: user.email } }, upgraded);
+    assert.equal(upgraded.statusCode, 200);
+    assert.equal(user.subscriptionType, 'yearly');
+    assert.deepEqual(user.subscriptionAdminEmailKeys, []);
+    const request = { headers: {}, body: Buffer.from('{}') };
+    const failed = createResponse();
+    await harness.controller.handleWebhook(request, failed);
+    assert.equal(failed.statusCode, 500);
+    const retried = createResponse();
+    await harness.controller.handleWebhook(request, retried);
+    assert.equal(retried.statusCode, 200);
+    await harness.controller.handleWebhook(request, createResponse());
+    assert.equal(attempts, 3);
+});
+
+test('yearly renewals and scheduled cancellations do not send upgrade notifications', async (t) => {
+    const user = activeMonthlyUser();
+    let event = adminUpgradeEvent();
+    event.data.previous_attributes = {
+        items: { data: [{ price: { id: 'price_yearly' } }] },
+    };
+    const harness = loadController({
+        user,
+        adminNotifications: true,
+        stripeOverrides: { constructEvent: () => event },
+    });
+    t.after(harness.cleanup);
+    const request = { headers: {}, body: Buffer.from('{}') };
+    await harness.controller.handleWebhook(request, createResponse());
+    event = adminUpgradeEvent();
+    event.data.previous_attributes = { cancel_at_period_end: false };
+    event.data.object.cancel_at_period_end = true;
+    await harness.controller.handleWebhook(request, createResponse());
+    assert.equal(harness.calls.adminEmails.length, 0);
+});
 
 function lifetimePayment(user) {
     return {

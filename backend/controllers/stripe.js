@@ -112,6 +112,22 @@ async function changePlan(req, res) {
             );
         }
 
+        if (user.subscriptionType === 'yearly') {
+            try {
+                await sendAdminSubscriptionEmailOnce({
+                    type: 'customer.subscription.updated',
+                    created: Math.floor(Date.now() / 1000),
+                    livemode: subscription.livemode,
+                    data: { object: subscription },
+                });
+            } catch (error) {
+                log.warn('Upgrade completed but admin email failed; subscription webhook can retry', {
+                    subscription: subscription.id,
+                    error: error.message,
+                });
+            }
+        }
+
         log.debug('Subscription upgraded', { email: user.email, plan: user.subscriptionType });
         return res.status(200).json({
             subscriptionType: user.subscriptionType,
@@ -395,18 +411,23 @@ async function handleWebhook(req, res) {
                         subscriptionExpiresAt
                     );
                 }
+                await sendAdminSubscriptionEmailOnce(event);
                 log.debug('Recurring subscription created', { customer: subscription.customer });
                 break;
             }
             case 'customer.subscription.updated': {
                 const subscription = event.data.object;
                 const subscriptionType = getRecurringPlan(subscription);
+                const previousPlan = getRecurringPlan({ items: event.data.previous_attributes?.items });
                 await updateUserByCustomer(subscription.customer, {
                     subscriptionType,
                     subscriptionStatus: subscriptionType ? mapSubscriptionStatus(subscription.status) : 'inactive',
                     subscriptionExpiresAt: subscriptionEndToDate(subscription),
                     subscriptionCancelAtPeriodEnd: isSubscriptionEnding(subscription),
                 });
+                if (previousPlan === 'monthly' && subscriptionType === 'yearly') {
+                    await sendAdminSubscriptionEmailOnce(event);
+                }
                 log.debug('Subscription updated', { customer: subscription.customer, status: subscription.status });
                 break;
             }
@@ -416,6 +437,7 @@ async function handleWebhook(req, res) {
                     subscriptionStatus: 'canceled',
                     subscriptionCancelAtPeriodEnd: false,
                 });
+                await sendAdminSubscriptionEmailOnce(event);
                 log.debug('Subscription canceled', { customer: subscription.customer });
                 break;
             }
@@ -505,6 +527,69 @@ async function sendPlanActivationEmailOnce(identity, activationKey, plan, expire
             });
         }
         log.error('Unable to send plan activation email', { email: user.email, error: error.message });
+    }
+}
+
+async function sendAdminSubscriptionEmailOnce(event) {
+    if (process.env.SAAS_ADMIN_EMAIL_NOTIFICATIONS !== 'true') return;
+    const subscription = event.data.object;
+    const plan = getRecurringPlan(subscription);
+    if (!plan) {
+        log.debug('Skipping admin email for an unrecognized subscription plan', { subscription: subscription.id });
+        return;
+    }
+    if (!process.env.ADMIN_EMAIL?.trim()) {
+        throw new Error('ADMIN_EMAIL is required when SAAS_ADMIN_EMAIL_NOTIFICATIONS is enabled');
+    }
+
+    const user = await User.findOne({ stripeCustomerId: resourceId(subscription.customer) });
+    if (!user) {
+        log.warn('Unable to send admin subscription email: customer has no local user', {
+            customer: resourceId(subscription.customer),
+        });
+        return;
+    }
+    const notificationKey = `${event.type}:${subscription.id}${event.type === 'customer.subscription.updated' ? ':plan:yearly' : ''}`;
+    const claimed = await User.findOneAndUpdate(
+        { _id: user._id, subscriptionAdminEmailKeys: { $ne: notificationKey } },
+        { $addToSet: { subscriptionAdminEmailKeys: notificationKey } },
+        { returnDocument: 'after' }
+    );
+    if (!claimed) return;
+
+    try {
+        await nodemailer.sendAdminSubscriptionEmail({
+            eventType: event.type,
+            name: user.username,
+            email: user.email,
+            plan,
+            status: subscription.status,
+            subscriptionId: subscription.id,
+            livemode: event.livemode === true,
+            dashboardUrl: await stripeLib.getSubscriptionDashboardUrl(subscription.id, event.livemode === true),
+            eventAt: new Date(
+                (event.type === 'customer.subscription.created'
+                    ? subscription.created || event.created
+                    : event.type === 'customer.subscription.deleted'
+                      ? subscription.ended_at || event.created
+                      : event.created) * 1000
+            ),
+            expiresAt: subscriptionEndToDate(subscription),
+        });
+    } catch (error) {
+        log.error('Unable to send admin subscription email', {
+            subscription: subscription.id,
+            error: error.message,
+        });
+        try {
+            await User.updateOne({ _id: user._id }, { $pull: { subscriptionAdminEmailKeys: notificationKey } });
+        } catch (cleanupError) {
+            log.error('Unable to release admin subscription email marker', {
+                subscription: subscription.id,
+                error: cleanupError.message,
+            });
+        }
+        throw error;
     }
 }
 
