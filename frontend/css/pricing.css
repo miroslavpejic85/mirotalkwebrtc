@@ -85,7 +85,7 @@ body.pricing-page {
     justify-self: center;
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
     .pricing-account-modal .pricing-account-actions,
     .pricing-confirm-modal .pricing-modal-actions {
         width: 100%;

@@ -161,6 +161,19 @@ test('dialog actions suppress ordinary focus decoration but retain a keyboard fo
     assert.match(focusVisible[1], /outline-offset: 3px;/);
 });
 
+test('translated dialog labels can wrap and share full-width mobile actions', () => {
+    const styles = readFrontend('css/common.css');
+    assert.match(styles, /white-space: normal;/);
+    assert.match(styles, /overflow-wrap: anywhere;/);
+    assert.match(styles, /@media \(max-width: 480px\)/);
+    assert.match(styles, /flex: 1 1 100%;\s+width: 100%;/);
+    const demoStyles = readFrontend('css/client.css');
+    assert.match(demoStyles, /\.swal2-actions\.demo-account-actions\s*\{\s*width: calc\(100% - 40px\);/);
+    assert.match(demoStyles, /\.swal2-actions \.demo-account-button\s*\{\s*flex: 1 1 190px;\s*\}/);
+    assert.match(clientSource, /actions: 'demo-account-actions'/);
+    assert.match(readFrontend('css/pricing.css'), /@media \(max-width: 480px\)/);
+});
+
 test('primary and destructive button backgrounds meet WCAG AA contrast for white text', () => {
     const styles = readFrontend('css/common.css');
     const backgrounds = [...styles.matchAll(/background-color: (#[a-f\d]{6});/gi)].map((match) => match[1]);
