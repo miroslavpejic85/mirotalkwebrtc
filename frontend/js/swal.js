@@ -1,5 +1,10 @@
 'use strict';
 
+Swal = Swal.mixin({
+    buttonsStyling: false,
+    reverseButtons: true,
+});
+
 let activeToast = null;
 
 function popupMessage(type, message, timer = 3000) {

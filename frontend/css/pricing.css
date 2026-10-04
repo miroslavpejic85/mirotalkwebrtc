@@ -56,26 +56,17 @@ body.pricing-page {
 .pricing-confirm-modal .pricing-modal-action {
     box-sizing: border-box;
     width: 170px;
-    height: 48px;
+    min-height: 48px;
     margin: 0 !important;
     padding: 0 16px;
     align-items: center;
     justify-content: center;
     gap: 7px;
-    white-space: nowrap;
 }
 
 .pricing-account-modal .swal2-deny {
     grid-column: 1;
     grid-row: 1;
-    color: var(--hover-color);
-    background-color: transparent !important;
-    border: 1px solid var(--accent-color) !important;
-}
-
-.pricing-account-modal .swal2-deny:hover {
-    color: #fff;
-    background-color: var(--hover-bg-strong) !important;
 }
 
 .pricing-account-modal .swal2-confirm {
@@ -87,13 +78,6 @@ body.pricing-page {
     grid-column: 1 / -1;
     grid-row: 2;
     justify-self: center;
-    color: var(--text-light) !important;
-    background-color: transparent !important;
-}
-
-.pricing-account-modal .swal2-cancel:hover {
-    color: #fff !important;
-    background-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 .pricing-account-modal-single .swal2-confirm {

@@ -230,7 +230,10 @@ document.getElementById('events-list').addEventListener('click', async (clickEve
         text: 'The public page and linked meeting room will be removed.',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Delete',
+        focusCancel: true,
+        customClass: { confirmButton: 'swal-action-danger' },
+        confirmButtonText: 'Delete event',
+        cancelButtonText: 'Keep event',
     });
     if (!result.isConfirmed) return;
     await eventDelete(event.id);

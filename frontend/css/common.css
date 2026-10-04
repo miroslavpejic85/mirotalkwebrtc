@@ -13,6 +13,103 @@ body {
 }
 
 /*--------------------------------------------------------------
+# Dialog Actions
+--------------------------------------------------------------*/
+
+.swal2-actions {
+    gap: 12px;
+    max-width: calc(100% - 40px);
+}
+
+.swal2-actions .swal2-confirm,
+.swal2-actions .swal2-cancel,
+.swal2-actions .swal2-deny {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    width: auto;
+    height: auto;
+    min-width: 120px;
+    min-height: 44px;
+    margin: 0;
+    padding: 10px 18px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.swal2-actions .swal2-confirm {
+    color: #fff;
+    background-color: #245edb;
+}
+
+.swal2-actions .swal2-confirm:hover {
+    background-color: #2454c6;
+}
+
+.swal2-actions .swal2-cancel,
+.swal2-actions .swal2-deny {
+    color: var(--text-color);
+    background-color: transparent;
+    border-color: #858b95;
+}
+
+.swal2-actions .swal2-cancel:hover,
+.swal2-actions .swal2-deny:hover {
+    background-color: var(--hover-bg-strong);
+}
+
+.swal2-actions .swal2-confirm.swal-action-danger {
+    color: #fff;
+    background-color: #c62828;
+}
+
+.swal2-actions .swal2-confirm.swal-action-danger:hover {
+    background-color: #a51f1f;
+}
+
+.swal2-actions .swal2-confirm:focus,
+.swal2-actions .swal2-cancel:focus,
+.swal2-actions .swal2-deny:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.swal2-actions .swal2-confirm:focus-visible,
+.swal2-actions .swal2-cancel:focus-visible,
+.swal2-actions .swal2-deny:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 3px;
+}
+
+.swal2-actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 420px) {
+    .swal2-actions {
+        width: calc(100% - 40px);
+    }
+
+    .swal2-actions .swal2-confirm,
+    .swal2-actions .swal2-cancel,
+    .swal2-actions .swal2-deny {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+}
+
+/*--------------------------------------------------------------
 # Page Loading Overlay
 --------------------------------------------------------------*/
 

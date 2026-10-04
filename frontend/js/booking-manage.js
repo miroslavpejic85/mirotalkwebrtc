@@ -305,10 +305,11 @@ document.getElementById('booking-list').addEventListener('click', async (event) 
         inputPlaceholder: 'Briefly explain why the meeting is being canceled...',
         inputAttributes: { maxlength: '500', 'aria-label': 'Cancellation reason' },
         showCancelButton: true,
+        focusCancel: true,
+        customClass: { confirmButton: 'swal-action-danger' },
         confirmButtonText: '<i class="uil uil-trash-alt"></i> Cancel booking',
         cancelButtonText: 'Keep booking',
         reverseButtons: true,
-        confirmButtonColor: '#ff4d4d',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     });

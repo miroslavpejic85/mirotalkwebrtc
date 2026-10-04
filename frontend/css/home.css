@@ -652,35 +652,6 @@ button:active {
     outline: none !important;
 }
 
-/* Buttons */
-.swal2-confirm {
-    background-color: var(--accent-color) !important;
-    border-radius: 8px !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    min-width: 120px;
-}
-
-.swal2-cancel {
-    background-color: #ff4d4d !important;
-    border-radius: 8px !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    min-width: 120px;
-}
-
-.swal2-deny {
-    border-radius: 8px !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
-}
-
-.swal2-confirm:focus,
-.swal2-cancel:focus,
-.swal2-deny:focus {
-    box-shadow: 0 0 0 3px var(--hover-ring) !important;
-}
-
 /* Close button */
 .swal2-close {
     color: var(--text-color) !important;
