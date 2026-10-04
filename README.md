@@ -170,8 +170,6 @@ Contributions are welcome and greatly appreciated! Whether it's bug fixes, featu
 2. Create your feature branch
 3. Submit a pull request
 
-When changing SweetAlert actions, keep labels flexible for browser translation. Shared styles in [frontend/css/common.css](frontend/css/common.css) stack buttons at viewport widths up to 480px and allow longer labels to wrap. Check mobile dialogs with translated labels, including the demo prompt and pricing actions.
-
 Have questions? Join our [Discord community](https://discord.gg/rgGYfeYW3N)!
 
 </details>
