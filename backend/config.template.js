@@ -84,6 +84,17 @@ module.exports = {
                 Shields: 'https://img.shields.io/github/stars/miroslavpejic85/call-me?style=flat',
             },
         },
+        RND: {
+            Visible: true,
+            Label: 'MiroTalk RND',
+            Home: 'https://rnd.mirotalk.com',
+            GitHub: {
+                Visible: true,
+                Repo: 'https://github.com/miroslavpejic85/mirotalkrnd',
+                Star: 'https://github.com/miroslavpejic85/mirotalkrnd/stargazers',
+                Shields: 'https://img.shields.io/github/stars/miroslavpejic85/mirotalkrnd?style=flat',
+            },
+        },
     },
     HTML: {
         about: {

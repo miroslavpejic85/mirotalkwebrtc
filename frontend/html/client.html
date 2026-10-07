@@ -133,6 +133,12 @@
                             <span id="navCMELabel" class="link-name">MiroTalk CME</span>
                         </button>
                     </li>
+                    <li>
+                        <button id="navRND" type="button">
+                            <i class="uil uil-shuffle"></i>
+                            <span id="navRNDLabel" class="link-name">MiroTalk RND</span>
+                        </button>
+                    </li>
                     <li id="navResources" class="nav-section-label"><span>Resources</span></li>
                     <li>
                         <button id="navAbout" type="button" data-umami-event="About button">
@@ -327,6 +333,28 @@
                                     <img
                                         id="shieldsCME"
                                         src="https://img.shields.io/github/stars/miroslavpejic85/call-me?style=flat"
+                                        alt="GitHub stars"
+                                    />
+                                </a>
+                            </div>
+                            <div id="boxRND" class="box stat-accent-red">
+                                <div class="stat-icon-wrap"><i class="uil uil-shuffle"></i></div>
+                                <a
+                                    id="repoRND"
+                                    class="text"
+                                    href="https://github.com/miroslavpejic85/mirotalkrnd"
+                                    target="_blank"
+                                    >MiroTalk RND</a
+                                >
+                                <a
+                                    id="starRND"
+                                    class="number"
+                                    href="https://github.com/miroslavpejic85/mirotalkrnd/stargazers"
+                                    target="_blank"
+                                >
+                                    <img
+                                        id="shieldsRND"
+                                        src="https://img.shields.io/github/stars/miroslavpejic85/mirotalkrnd?style=flat"
                                         alt="GitHub stars"
                                     />
                                 </a>
@@ -1677,6 +1705,14 @@
                             picture-in-picture;
                         "
                         src="https://cme.mirotalk.com"
+                    ></iframe>
+                </div>
+
+                <div id="rnd" class="dash-iframe">
+                    <iframe
+                        id="rnd-iframe"
+                        allow="camera; microphone; fullscreen; autoplay; picture-in-picture"
+                        src="https://rnd.mirotalk.com"
                     ></iframe>
                 </div>
             </div>
