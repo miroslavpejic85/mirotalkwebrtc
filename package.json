@@ -1,11 +1,11 @@
 {
     "name": "mirotalkwebrtc",
-    "version": "1.8.60",
+    "version": "1.8.61",
     "description": "MiroTalk WebRTC admin",
     "main": "server.js",
     "scripts": {
         "start": "node backend/server.js",
-        "start-dev": "nodemon backend/server.js",
+        "dev": "node --watch backend/server.js",
         "env": "cp .env.template .env",
         "cfg": "cp backend/config.template.js backend/config.js",
         "mongo:up": "docker-compose -f docker-compose-mongo.yml up -d",
@@ -58,7 +58,6 @@
         "twilio": "^6.1.2"
     },
     "devDependencies": {
-        "nodemon": "^3.1.14",
         "prettier": "3.9.9"
     }
 }
