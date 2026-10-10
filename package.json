@@ -1,6 +1,6 @@
 {
     "name": "mirotalkwebrtc",
-    "version": "1.8.63",
+    "version": "1.8.64",
     "description": "MiroTalk WebRTC admin",
     "main": "server.js",
     "scripts": {
@@ -58,6 +58,6 @@
         "twilio": "^6.1.2"
     },
     "devDependencies": {
-        "prettier": "3.9.9"
+        "prettier": "3.9.10"
     }
 }

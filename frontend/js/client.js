@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.63
+ * @version 1.8.64
  */
 
 const userAgent = navigator.userAgent;
@@ -4012,11 +4012,11 @@ function getRoomURL(data, bro = true) {
             roomURL = `${config.MiroTalk.P2P.Join}${data.room}`;
             break;
         case 'SFU':
-            const name = window.localStorage.name || data.email;
+            // No name param: SFU would skip the prejoin screen (like P2P /join/ shows it)
             roomURL =
                 tokens.sfu !== ''
-                    ? `${config.MiroTalk.SFU.Join}?room=${data.room}&name=${name}&token=${tokens.sfu}`
-                    : `${config.MiroTalk.SFU.Join}?room=${data.room}&name=${name}`;
+                    ? `${config.MiroTalk.SFU.Join}?room=${data.room}&token=${tokens.sfu}`
+                    : `${config.MiroTalk.SFU.Join}?room=${data.room}`;
             break;
         case 'C2C':
             roomURL = `${config.MiroTalk.C2C.Room}${data.room}`;
