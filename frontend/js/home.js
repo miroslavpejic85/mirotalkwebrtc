@@ -106,6 +106,7 @@ tabHeader.addEventListener('keydown', (event) => {
 // Landing CTA buttons -> switch to the proper auth tab and scroll the card into view
 const heroSignUpBtn = document.getElementById('heroSignUpBtn');
 const heroDemoBtn = document.getElementById('heroDemoBtn');
+const heroActions = document.querySelector('.hero-actions');
 const navSignUpBtn = document.getElementById('navSignUpBtn');
 const navSignInBtn = document.getElementById('navSignInBtn');
 const switchToLoginLink = document.getElementById('switchToLoginLink');
@@ -159,6 +160,7 @@ function loginAsDemo() {
 
     function loadDemoCredentials(demoCredentials) {
         if (demoCredentials && demoCredentials.enabled) {
+            heroActions?.classList.add('hero-actions--has-demo');
             heroDemoBtn.hidden = false;
             heroDemoBtn.addEventListener('click', loginAsDemo);
         }

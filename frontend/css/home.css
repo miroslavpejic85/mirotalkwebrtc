@@ -1467,6 +1467,25 @@ html[data-theme='light'] .workflow-band {
     }
 }
 
+@media screen and (min-width: 981px) and (max-width: 1220px) {
+    .hero-actions.hero-actions--has-demo {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-width: 520px;
+        align-items: stretch;
+    }
+
+    .hero-actions.hero-actions--has-demo .hero-cta-primary,
+    .hero-actions.hero-actions--has-demo .hero-cta-secondary {
+        width: 100%;
+    }
+
+    .hero-actions.hero-actions--has-demo .hero-cta-secondary {
+        grid-column: 1 / -1;
+        box-sizing: border-box;
+    }
+}
+
 @media screen and (max-width: 560px) {
     .nav-links > a,
     .nav-links .nav-signin {
