@@ -145,6 +145,7 @@ function loadController({
             monthlyPriceId: 'price_monthly',
             yearlyPriceId: 'price_yearly',
             lifetimePriceId: 'price_lifetime',
+            legacyMonthlyPriceIds: ['price_old_monthly'],
         },
     };
 
@@ -867,6 +868,35 @@ test('subscription webhook stores the purchased yearly plan', async (t) => {
     assert.equal(harness.calls.updated[0].update.$set.subscriptionType, 'yearly');
     assert.equal(harness.calls.emails.length, 1);
     assert.equal(harness.calls.emails[0][2], 'yearly');
+});
+
+test('subscription webhook recognizes a legacy monthly price as the monthly plan', async (t) => {
+    const user = activeMonthlyUser();
+    const harness = loadController({
+        user,
+        stripeOverrides: {
+            constructEvent: () => ({
+                type: 'customer.subscription.updated',
+                data: {
+                    object: {
+                        id: 'sub_monthly',
+                        customer: 'cus_test',
+                        status: 'active',
+                        current_period_end: Math.floor(Date.now() / 1000) + 86400,
+                        metadata: { plan: 'monthly' },
+                        items: { data: [{ price: { id: 'price_old_monthly' } }] },
+                    },
+                },
+            }),
+        },
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.handleWebhook({ headers: {}, body: Buffer.from('{}') }, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(harness.calls.updated[0].update.$set.subscriptionType, 'monthly');
 });
 
 test('subscription update webhook trusts the yearly price over stale monthly metadata', async (t) => {

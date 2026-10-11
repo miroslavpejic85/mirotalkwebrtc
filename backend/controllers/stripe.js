@@ -469,9 +469,17 @@ function getRecurringPlan(subscription) {
     const items = subscription.items?.data;
     if (!items || items.length !== 1 || subscription.items.has_more) return null;
     const priceId = items[0].price?.id;
-    if (priceId && priceId === config.SAAS.yearlyPriceId) return 'yearly';
-    if (priceId && priceId === config.SAAS.monthlyPriceId) return 'monthly';
+    if (isPriceId(priceId, config.SAAS.yearlyPriceId, config.SAAS.legacyYearlyPriceIds)) return 'yearly';
+    if (isPriceId(priceId, config.SAAS.monthlyPriceId, config.SAAS.legacyMonthlyPriceIds)) return 'monthly';
     return null;
+}
+
+/**
+ * Return whether a Stripe price ID is the current plan price or one of its legacy prices.
+ */
+function isPriceId(priceId, currentId, legacyIds) {
+    if (!priceId) return false;
+    return priceId === currentId || (Array.isArray(legacyIds) && legacyIds.includes(priceId));
 }
 
 /**
@@ -608,7 +616,7 @@ function isLifetimeProduct(session, user) {
         !!config.SAAS.lifetimePriceId &&
         items?.has_more === false &&
         items.data?.length === 1 &&
-        items.data[0].price?.id === config.SAAS.lifetimePriceId &&
+        isPriceId(items.data[0].price?.id, config.SAAS.lifetimePriceId, config.SAAS.legacyLifetimePriceIds) &&
         items.data[0].quantity === 1
     );
 }

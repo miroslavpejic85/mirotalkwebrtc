@@ -100,6 +100,8 @@ only; the active Stripe Price IDs remain the source of truth for the promotional
 | `STRIPE_YEARLY_PRICE_ID`   | Product catalog → your annual product → _Price ID_       |
 | `STRIPE_LIFETIME_PRICE_ID` | Product catalog → your lifetime product → _Price ID_     |
 
+> **Changing prices:** Stripe prices are immutable, so a new price has a new ID. Existing subscribers stay on their old price, and the plan is detected from the Price ID. Keep the old IDs in `STRIPE_LEGACY_MONTHLY_PRICE_IDS`, `STRIPE_LEGACY_YEARLY_PRICE_IDS` or `STRIPE_LEGACY_LIFETIME_PRICE_IDS` (comma-separated) so they are still recognized. New checkouts always use the current `STRIPE_*_PRICE_ID`.
+
 ---
 
 ## 🛠️ One-time Stripe setup

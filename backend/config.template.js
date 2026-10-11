@@ -1,5 +1,11 @@
 'use strict';
 
+const parsePriceIds = (value) =>
+    (value || '')
+        .split(',')
+        .map((id) => id.trim())
+        .filter(Boolean);
+
 module.exports = {
     Language: 'en', // https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes
     App: {
@@ -169,6 +175,10 @@ module.exports = {
         monthlyPriceId: process.env.STRIPE_MONTHLY_PRICE_ID || '',
         yearlyPriceId: process.env.STRIPE_YEARLY_PRICE_ID || '',
         lifetimePriceId: process.env.STRIPE_LIFETIME_PRICE_ID || '',
+        // Older Price IDs (comma-separated) still recognized for existing subscribers/purchases.
+        legacyMonthlyPriceIds: parsePriceIds(process.env.STRIPE_LEGACY_MONTHLY_PRICE_IDS),
+        legacyYearlyPriceIds: parsePriceIds(process.env.STRIPE_LEGACY_YEARLY_PRICE_IDS),
+        legacyLifetimePriceIds: parsePriceIds(process.env.STRIPE_LEGACY_LIFETIME_PRICE_IDS),
         promo: {
             active: process.env.STRIPE_PROMO_ACTIVE === 'true',
             text: (process.env.STRIPE_PROMO_TEXT || '').trim(),
