@@ -7,6 +7,8 @@ Swal = Swal.mixin({
 
 let activeToast = null;
 
+const popupTitles = { info: 'Info', success: 'Success', warning: 'Warning', error: 'Error' };
+
 function popupMessage(type, message, timer = 3000) {
     switch (type) {
         case 'info':
@@ -18,7 +20,7 @@ function popupMessage(type, message, timer = 3000) {
                 allowEscapeKey: false,
                 position: 'top',
                 icon: type,
-                title: type,
+                title: popupTitles[type],
                 html: message,
                 showClass: { popup: 'animate__animated animate__fadeInDown' },
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },

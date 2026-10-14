@@ -18,7 +18,7 @@
         } else {
             tippy(element, {
                 content,
-                placement: 'top',
+                placement: element.dataset.tippyPlacement || 'top',
                 allowHTML: false,
                 appendTo: () => document.body,
                 zIndex: 10000,

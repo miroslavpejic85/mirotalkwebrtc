@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.66
+ * @version 1.8.70
  */
 
 const userAgent = navigator.userAgent;
@@ -557,6 +557,7 @@ function loadConfig(cfg) {
     navRNDLabel.textContent = config.MiroTalk.RND?.Label || 'MiroTalk RND';
     tableAppName.textContent = appName;
     rowAppName.textContent = appName;
+    syncNavTooltips();
 }
 
 function handleTokens(cfg) {
@@ -827,6 +828,21 @@ function updateSidebarExpandedState() {
     } else {
         sidebar.removeAttribute('aria-hidden');
     }
+    syncNavTooltips();
+}
+
+// Icon-only (collapsed) navigation shows each item's label as a tooltip.
+function syncNavTooltips() {
+    const showTooltips = !isSidebarExpanded() && !mobileSidebarQuery.matches;
+    sidebar.querySelectorAll('.menu-items li button').forEach((button) => {
+        const label = button.querySelector('.link-name')?.textContent.trim();
+        if (showTooltips && label) {
+            button.dataset.tippyPlacement = 'right';
+            button.dataset.tippyContent = label;
+        } else {
+            delete button.dataset.tippyContent;
+        }
+    });
 }
 
 function closeMobileNavigation(restoreFocus = false) {
@@ -3559,6 +3575,13 @@ function removeLastRow() {
     }
 }
 
+function setAccountDate(input, value) {
+    const date = value ? new Date(value) : null;
+    const isValid = date && !Number.isNaN(date.getTime());
+    input.value = isValid ? date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : value || '-';
+    input.title = value || '';
+}
+
 function getMyAccount() {
     userGetMe()
         .then((res) => {
@@ -3567,10 +3590,11 @@ function getMyAccount() {
                 popupMessage('warning', `${res.message}`);
             } else {
                 accountID.value = res._id;
+                accountID.title = res._id || '';
                 accountEmail.value = res.email;
                 accountUsername.value = res.username;
-                accountCreatedAt.value = res.createdAt;
-                accountUpdatedAt.value = res.updatedAt;
+                setAccountDate(accountCreatedAt, res.createdAt);
+                setAccountDate(accountUpdatedAt, res.updatedAt);
                 accountServicesAllowed.value = res.allow;
                 accountRoomsAllowed.value = res.allowedRooms;
                 accountRole.value = res.role === 'admin' ? 'Admin' : 'Guest';

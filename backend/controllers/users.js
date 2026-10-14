@@ -227,40 +227,9 @@ async function userLogin(req, res) {
                 log.debug('User create OK', userSaveData);
                 return res.status(201).send({
                     success: true,
-                    message: `<style>
-                    .container {
-                        text-align: center;
-                        background-color: var(--primary-color);
-                        border-radius: 10px;
-                        padding: 20px;
-                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-                    }
-                    h1 {
-                        color: #4CAF50;
-                        margin-bottom: 10px;
-                    }
-                    p {
-                        color: var(--text-color);
-                        margin-bottom: 20px;
-                    }
-                    a {
-                        text-decoration: none;
-                        color: #4CAF50;
-                        font-weight: bold;
-                        border: 2px solid #4CAF50;
-                        border-radius: 5px;
-                        padding: 10px 20px;
-                        display: inline-block;
-                        transition: background-color 0.3s, color 0.3s;
-                    }
-                    a:hover {
-                        background-color: #4CAF50;
-                        color: #fff;
-                    }
-                    </style>
-                    <div class="container">
-                        <h1>Account created!</h1>
-                        <p>Click on Login and enjoy!</p>
+                    message: `<div class="account-created">
+                        <h3>Account created!</h3>
+                        <p>You can now sign in to your workspace.</p>
                         ${nodemailer.getUpgradeMessage('/pricing')}
                     </div>`,
                 });

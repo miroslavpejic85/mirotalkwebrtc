@@ -6,26 +6,33 @@
 }
 
 :root {
-    --body-color: #fff;
+    --body-color: #f6f7fb;
     --primary-color: #3a3b3c;
     --color-hover: #439fff;
     --panel-color: #fff;
-    --text-color: #000;
-    --black-light-color: #707070;
-    --border-color: #e6e5e5;
+    --text-color: #161b26;
+    --black-light-color: #5d6574;
+    --border-color: #e2e6ee;
     --toggle-color: #ddd;
-    --box1-color: #f2f2f2;
-    --box2-color: #f2f2f2;
-    --box3-color: #f2f2f2;
-    --box4-color: #f2f2f2;
+    --box1-color: #f1f3f8;
+    --box2-color: #f1f3f8;
+    --box3-color: #f1f3f8;
+    --box4-color: #f1f3f8;
     --title-icon-color: #fff;
     --tran-05: all 0.5s ease;
     --tran-03: all 0.3s ease;
     --i-act-color-hover: #efff;
     --input-color-schema: light;
-    --tr-child-color: #f2f2f2;
-    --accent-color: #376df9;
-    --danger-color: #ff4d4d;
+    --tr-child-color: #f4f6fa;
+    --accent-color: #2f63e8;
+    --accent-text: #2f63e8;
+    --danger-color: #d92d2d;
+    --danger-text: #d92d2d;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
+    --shadow-md: 0 6px 18px rgba(16, 24, 40, 0.08);
     --success-color: #4caf50;
     --warning-color: #ff9800;
     --purple-color: #9c27b0;
@@ -53,13 +60,23 @@ body {
     background-color: var(--body-color);
 }
 
+/* Component display rules must never override the native hidden attribute. */
+[hidden] {
+    display: none !important;
+}
+
 body.dark {
     --body-color: #18191a;
     --primary-color: #3a3b3c;
     --color-hover: #439fff;
     --panel-color: #242526;
-    --text-color: #ccc;
-    --black-light-color: #ccc;
+    --text-color: #e4e6eb;
+    --black-light-color: #a8adb5;
+    --accent-color: #376df9;
+    --accent-text: #7aa2ff;
+    --danger-text: #ff7b7b;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 8px 22px rgba(0, 0, 0, 0.35);
     --border-color: #4d4c4c;
     --toggle-color: #fff;
     --box1-color: #3a3b3c;
@@ -6547,5 +6564,305 @@ body.dark #usersTable td .user-plan-badge.yearly {
     .account-field-row {
         flex-direction: column;
         gap: 0;
+    }
+}
+
+/* ==================== Workspace UX Polish ==================== */
+/* Shared hierarchy, surfaces and responsive fixes layered on top of the components above. */
+
+/* Typography & hierarchy */
+.client-page-header h1,
+.overview-header-title {
+    letter-spacing: -0.01em;
+}
+
+.page-eyebrow,
+.account-eyebrow,
+.settings-eyebrow,
+.addrow-eyebrow {
+    color: var(--accent-text);
+    letter-spacing: 0.06em;
+}
+
+.nav-section-label,
+.top-workspace span,
+.stats-section-title,
+.account-section-label,
+.settings-section-label,
+.events-list-heading span,
+.availability-aside-heading span {
+    letter-spacing: 0.06em;
+}
+
+/* Navigation */
+.nav-links li button.active,
+body.dark .nav-links li button.active {
+    background-color: var(--accent-bg);
+}
+
+.nav-links li button.active i,
+.nav-links li button.active .link-name,
+body.dark .nav-links li button.active i,
+body.dark .nav-links li button.active .link-name {
+    color: var(--accent-text);
+}
+
+/* Surfaces: white cards on a tinted canvas (light) and raised panels (dark) */
+.availability-main,
+.availability-aside,
+.events-list-panel,
+.events-layout > .availability-section,
+.empty-state {
+    box-shadow: var(--shadow-sm);
+}
+
+.events-layout > .availability-section {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--panel-color);
+}
+
+/* Consistent list panel headings (Availability + Events) */
+.availability-aside-heading span {
+    display: block;
+    margin-top: 0;
+    color: var(--black-light-color);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.availability-aside-heading h2 {
+    margin-top: 2px;
+}
+
+/* Overview header matches the other page headers */
+.overview-header {
+    align-items: flex-end;
+    margin-bottom: 26px;
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.overview-header-icon {
+    display: none;
+}
+
+.overview-header-title {
+    margin: 0 0 7px;
+    font-size: 30px;
+    font-weight: 700;
+}
+
+.overview-refresh-btn {
+    min-height: 40px;
+    background: var(--panel-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.overview-refresh-btn:hover {
+    color: var(--accent-text);
+    background: var(--accent-bg);
+    border-color: var(--accent-color);
+}
+
+/* Stat cards: even grid, no orphan full-width cards */
+.stats-container,
+.dash-content .boxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 14px;
+}
+
+.stat-card,
+.dash-content .boxes .box {
+    min-width: 0;
+    background-color: var(--panel-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.stat-card:hover,
+.dash-content .boxes .box:hover,
+body.dark .stat-card:hover,
+body.dark .dash-content .boxes .box:hover {
+    border-color: color-mix(in srgb, var(--accent-color) 40%, var(--border-color));
+    box-shadow: var(--shadow-md);
+}
+
+.stat-card .stat-value-sm {
+    font-size: 18px;
+}
+
+.stat-card .stat-label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
+/* Rooms table: keep schedule data readable; the table scrolls horizontally when space runs out */
+@media (min-width: 561px) {
+    #myTable th,
+    #myTable td {
+        padding-right: 8px;
+        padding-left: 8px;
+    }
+
+    #myTable td input {
+        overflow: hidden;
+        font-size: 13px;
+        text-overflow: ellipsis;
+    }
+
+    #myTable .room-title-cell input,
+    #myTable .room-email-cell input,
+    #myTable .room-phone-cell input,
+    #myTable .room-name-cell input {
+        min-width: 84px;
+    }
+
+    #myTable .room-date-cell input {
+        min-width: 92px;
+    }
+
+    #myTable .room-time-cell input {
+        min-width: 56px;
+    }
+}
+
+/* Account drawer */
+.accountDiv .account-field-label,
+.addRowDiv .addrow-field-label {
+    margin: 0 0 1px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+}
+
+/* Creation drawers: the submit is the primary action */
+.addRowDiv .addrow-submit-btn {
+    color: #fff;
+    background-color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    font-weight: 600;
+}
+
+.addRowDiv .addrow-submit-btn:hover {
+    background-color: color-mix(in srgb, var(--accent-color) 88%, #000);
+    border-color: color-mix(in srgb, var(--accent-color) 88%, #000);
+    filter: none;
+}
+
+.accountDiv .account-field-content input {
+    overflow: hidden;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.accountDiv .account-actions .account-change-password-btn,
+.accountDiv .account-actions .account-delete-btn {
+    min-width: 0;
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.accountDiv .account-actions .account-change-password-btn {
+    color: var(--text-color);
+    background-color: var(--panel-color);
+    border: 1px solid var(--border-color);
+}
+
+.accountDiv .account-actions .account-change-password-btn:hover {
+    color: var(--accent-text);
+    background-color: var(--accent-bg);
+    border-color: var(--accent-color);
+}
+
+.accountDiv .account-actions .account-delete-btn {
+    color: var(--danger-text);
+    background-color: transparent;
+    border: 1px solid color-mix(in srgb, var(--danger-color) 55%, transparent);
+}
+
+.accountDiv .account-actions .account-delete-btn:hover {
+    color: #fff;
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+    filter: none;
+}
+
+@media (max-width: 700px) {
+    /* Meetings toolbar: primary action on top, search and icon actions share one row */
+    #roomsBtnDiv {
+        flex-wrap: wrap;
+    }
+
+    #roomsBtnDiv .rooms-search-box {
+        flex: 1 1 0;
+        width: auto;
+        min-width: 0;
+    }
+
+    #roomsBtnDiv .rooms-btn-group {
+        display: contents;
+    }
+
+    #roomsBtnDiv #open-add-btn {
+        order: -1;
+        flex: 1 1 100%;
+    }
+
+    #myInput {
+        min-width: 0;
+    }
+}
+
+@media (max-width: 560px) {
+    .client-page-header h1,
+    .overview-header-title {
+        font-size: 26px;
+    }
+
+    .overview-header {
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .stats-container,
+    .dash-content .boxes {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .stats-container > :last-child:nth-child(odd),
+    .dash-content .boxes > :last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+    }
+
+    .stat-card,
+    .dash-content .boxes .box {
+        min-height: 0;
+        padding: 14px 10px;
+    }
+
+    .stat-icon-wrap {
+        width: 32px;
+        height: 32px;
+        margin-bottom: 8px;
+    }
+
+    .stat-icon-wrap i {
+        font-size: 17px;
+    }
+
+    .stat-card .stat-value {
+        font-size: 22px;
+    }
+
+    .stat-card .stat-value-sm {
+        font-size: 15px;
     }
 }

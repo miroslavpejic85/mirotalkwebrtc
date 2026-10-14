@@ -513,6 +513,49 @@ button:active {
     color: var(--text-color) !important;
 }
 
+.account-created h3 {
+    margin: 0 0 8px;
+    color: var(--text-color);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.account-created p {
+    margin: 0 0 10px;
+    color: var(--text-light);
+    line-height: 1.55;
+}
+
+.account-created a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    margin-top: 6px;
+    padding: 8px 18px;
+    border: 1px solid var(--accent-color);
+    border-radius: 8px;
+    color: var(--hover-color);
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+
+.account-created a:hover {
+    background-color: var(--hover-bg-strong);
+}
+
+.account-created a:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 3px;
+}
+
+.account-created br {
+    display: none;
+}
+
 .pending-email-copy,
 .pending-email-hint {
     margin: 0 auto;
