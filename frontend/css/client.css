@@ -1081,6 +1081,7 @@ body.dark .nav-links li button:hover {
     height: 100%;
     color: var(--black-light-color);
     font-size: 20px;
+    line-height: 1;
     align-items: center;
     justify-content: center;
 }
@@ -1106,6 +1107,19 @@ body.dark .nav-links li button:hover {
 nav.close li button .link-name {
     opacity: 0;
     pointer-events: none;
+    position: absolute;
+    width: 0;
+    overflow: hidden;
+}
+
+nav.close .menu-items li button {
+    justify-content: center;
+    padding-inline: 0;
+}
+
+nav.close .menu-items li button i {
+    min-width: 45px;
+    width: 45px;
 }
 
 .nav-links li button:hover i,
