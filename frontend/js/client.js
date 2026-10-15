@@ -5,11 +5,9 @@
  *
  * @link    GitHub: https://github.com/miroslavpejic85/mirotalkwebrtc
  * @link    Live demo: https://webrtc.mirotalk.com
- * @license For open source under AGPL-3.0
- * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
- * @license https://codecanyon.net/item/a-selfhosted-mirotalks-webrtc-rooms-scheduler-server/42643313
+ * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/cme/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.70
+ * @version 1.8.71
  */
 
 const userAgent = navigator.userAgent;
