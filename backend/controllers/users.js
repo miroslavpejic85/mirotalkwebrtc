@@ -365,6 +365,11 @@ async function userConfirmation(req, res) {
             res.redirect('/confirmation?status=already');
         }
     } catch (error) {
+        // Duplicate email: the account was already created (double click / link prefetch race, or email taken)
+        if (error.code === 11000) {
+            log.warn('confirmationUser duplicate email, already confirmed');
+            return res.redirect('/confirmation?status=already');
+        }
         log.error('confirmationUser', error);
         if (error.name === 'TokenExpiredError') return res.redirect('/confirmation?status=expired');
         if (error.name === 'JsonWebTokenError' || error.name === 'SyntaxError') {
