@@ -12,6 +12,7 @@ module.exports = {
         Name: 'MiroTalk WEB',
         Logo: '../Images/logo.png',
         Image: '../Images/mirotalk-web.png',
+        ShowVersion: true, // show app version in home footer
     },
     OG: {
         type: 'app-webrtc',

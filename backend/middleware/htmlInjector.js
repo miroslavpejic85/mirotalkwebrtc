@@ -1,5 +1,6 @@
 const fs = require('fs');
 
+const packageJson = require('../../package.json');
 const logs = require('../common/logs');
 
 const log = new logs('HtmlInjector');
@@ -38,6 +39,7 @@ class HtmlInjector {
         const analytics = this.config?.ANALYTICS || {};
         return {
             APP_NAME: escapeHtml(this.config?.App?.Name || 'MiroTalk WEB'),
+            APP_VERSION: this.config?.App?.ShowVersion === false ? '' : escapeHtml(`v${packageJson.version}`),
             OG_TYPE: this.config?.OG?.type || 'app-webrtc',
             OG_SITE_NAME: this.config?.OG?.siteName || 'MiroTalk WEB',
             OG_TITLE: this.config?.OG?.title || 'MiroTalk WEB - Open Source WebRTC Video SaaS Platform',

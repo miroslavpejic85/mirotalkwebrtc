@@ -1320,6 +1320,15 @@ body.home > .swal2-container {
     margin: 0;
 }
 
+.footer-version {
+    margin-left: 6px;
+    opacity: 0.75;
+}
+
+.footer-version:empty {
+    display: none;
+}
+
 .landing-footer-inner nav {
     display: flex;
     flex-wrap: wrap;
