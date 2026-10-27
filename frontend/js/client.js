@@ -7,7 +7,7 @@
  * @link    Live demo: https://webrtc.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/cme/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.74
+ * @version 1.8.75
  */
 
 const userAgent = navigator.userAgent;
@@ -61,6 +61,7 @@ const tableAppName = document.getElementById('tableAppName');
 const rowAppName = document.getElementById('rowAppName');
 
 const myProfile = document.getElementById('myProfile');
+const topLogout = document.getElementById('topLogout');
 
 const dsOverview = document.getElementById('dsOverview');
 const dsRooms = document.getElementById('dsRooms');
@@ -452,7 +453,6 @@ $(document).ready(async function () {
                 delete headers['x-access-token'];
             }
             // Update logout link for OIDC
-            const topLogout = document.getElementById('topLogout');
             if (topLogout) topLogout.setAttribute('href', '/logout');
 
             // Replace account icon with OIDC profile picture
@@ -799,6 +799,30 @@ topModeToggle.addEventListener('click', () => {
     topModeToggle.querySelector('i').className = isDark ? 'uil uil-sun' : 'uil uil-moon';
     updateFlatpickrTheme();
 });
+
+topLogout?.addEventListener('click', (e) => {
+    e.preventDefault();
+    confirmLogout(topLogout.getAttribute('href') || '/logout');
+});
+
+function confirmLogout(logoutUrl) {
+    Swal.fire({
+        position: 'top',
+        icon: 'question',
+        title: 'Log out',
+        text: 'Are you sure you want to log out?',
+        showCancelButton: true,
+        showCloseButton: true,
+        focusCancel: true,
+        reverseButtons: true,
+        confirmButtonText: 'Log out',
+        cancelButtonText: 'Cancel',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then((result) => {
+        if (result.isConfirmed) openURL(logoutUrl);
+    });
+}
 
 sidebarToggle.addEventListener('click', () => {
     if (compactSidebarQuery.matches) {

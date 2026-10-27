@@ -116,6 +116,24 @@ test('confirming account deletion still deletes the current account and logs out
     assert.deepEqual(redirects, ['/logout']);
 });
 
+test('logout asks for confirmation and only redirects when confirmed', async () => {
+    const dismissed = loadClientDialog('confirmLogout');
+    dismissed.context.confirmLogout('/logout');
+    await Promise.resolve();
+    assert.equal(dismissed.options.length, 1);
+    assert.equal(dismissed.options[0].title, 'Log out');
+    assert.equal(dismissed.options[0].showCancelButton, true);
+    assert.equal(dismissed.options[0].focusCancel, true);
+    assert.equal(dismissed.options[0].confirmButtonText, 'Log out');
+    assert.deepEqual(dismissed.redirects, []);
+
+    const confirmed = loadClientDialog('confirmLogout', true);
+    confirmed.context.confirmLogout('/logout');
+    await Promise.resolve();
+    await Promise.resolve();
+    assert.deepEqual(confirmed.redirects, ['/logout']);
+});
+
 for (const [file, title] of [
     ['js/client.js', 'Expired rooms found'],
     ['js/client.js', 'Recurring invitation active'],
