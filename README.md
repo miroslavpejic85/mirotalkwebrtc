@@ -101,6 +101,15 @@ Open [http://localhost:9000](http://localhost:9000) - done!
 
 </details>
 
+<details open>
+<summary>🚀 One-Click Deploy</summary>
+
+<br/>
+
+[![Deploy on RepoCloud](https://d16t0pc4846x52.cloudfront.net/deploylobe.svg)](https://repocloud.io/details/MiroTalk%20WebRTC/)
+
+</details>
+
 <details>
 <summary>📚 Documentation</summary>
 
