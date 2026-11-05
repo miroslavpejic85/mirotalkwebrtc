@@ -1163,6 +1163,30 @@
                                     <i class="uil uil-sync"></i>
                                 </button>
                                 <button
+                                    id="export-users-btn"
+                                    class="custom-button custom-button-icon"
+                                    aria-label="Export users backup"
+                                    data-tippy-content="Export users (backup)"
+                                >
+                                    <i class="uil uil-file-download-alt"></i>
+                                </button>
+                                <button
+                                    id="import-users-btn"
+                                    class="custom-button custom-button-icon"
+                                    aria-label="Import users backup"
+                                    data-tippy-content="Import users (restore backup)"
+                                >
+                                    <i class="uil uil-file-upload-alt"></i>
+                                </button>
+                                <input
+                                    id="import-users-file"
+                                    type="file"
+                                    accept="application/json,.json"
+                                    hidden
+                                    aria-hidden="true"
+                                    tabindex="-1"
+                                />
+                                <button
                                     id="delete-users-btn"
                                     class="custom-button custom-button-icon custom-button-danger"
                                     aria-label="Delete all regular users"

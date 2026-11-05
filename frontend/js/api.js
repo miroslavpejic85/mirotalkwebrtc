@@ -100,6 +100,23 @@ function userDeleteRegularUsers() {
     }).then((response) => response.data);
 }
 
+function userExport() {
+    return axios({
+        method: 'GET',
+        url: `${apiPath}/user/export`,
+        headers: headers,
+    }).then((response) => response.data);
+}
+
+function userImport(backup, dryRun) {
+    return axios({
+        method: 'POST',
+        url: `${apiPath}/user/import`,
+        headers: headers,
+        data: { backup, dryRun },
+    }).then((response) => response.data);
+}
+
 // API ROOM
 
 function roomCreate(data) {
@@ -395,5 +412,14 @@ function stripeVerifySession(sessionId) {
         method: 'GET',
         url: `${apiPath}/stripe/verify?session_id=${encodeURIComponent(sessionId)}`,
         headers: headers,
+    }).then((response) => response.data);
+}
+
+function stripeSyncUsers(ids) {
+    return axios({
+        method: 'POST',
+        url: `${apiPath}/stripe/sync-users`,
+        headers: headers,
+        data: { ids },
     }).then((response) => response.data);
 }

@@ -10,6 +10,9 @@ const { loginLimiter, registrationLimiter } = require('../middleware/rateLimiter
 const router = express.Router();
 const controllersUsers = require('../controllers/users');
 
+const USERS_IMPORT_PATH = '/user/import';
+const USERS_IMPORT_BODY_LIMIT = '20mb';
+
 //CREATE: /api/v1/user
 router.post('/user', registrationLimiter, validator, (req, res) => {
     controllersUsers.userCreate(req, res);
@@ -65,6 +68,16 @@ router.delete('/user/regular-users', admin, (req, res) => {
     controllersUsers.userDeleteRegularUsers(req, res);
 });
 
+//GET: /api/v1/user/export (admin only, users backup)
+router.get('/user/export', admin, (req, res) => {
+    controllersUsers.userExport(req, res);
+});
+
+//POST: /api/v1/user/import (admin only, restore users backup; body parsed only after admin auth)
+router.post(USERS_IMPORT_PATH, admin, express.json({ limit: USERS_IMPORT_BODY_LIMIT }), (req, res) => {
+    controllersUsers.userImport(req, res);
+});
+
 //GET: /api/v1/user/id
 router.get('/user/:id', auth, (req, res) => {
     controllersUsers.userGet(req, res);
@@ -91,3 +104,4 @@ router.post('/user/invite', admin, (req, res) => {
 });
 
 module.exports = router;
+module.exports.USERS_IMPORT_PATH = USERS_IMPORT_PATH;

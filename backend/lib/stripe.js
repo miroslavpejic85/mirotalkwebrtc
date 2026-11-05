@@ -181,6 +181,14 @@ async function listCheckoutSessionsForPayment(paymentIntentId) {
     return stripe.checkout.sessions.list({ payment_intent: paymentIntentId, limit: 100 });
 }
 
+async function retrievePaymentIntent(paymentIntentId) {
+    return stripe.paymentIntents.retrieve(paymentIntentId, { expand: ['latest_charge'] });
+}
+
+async function retrieveCustomer(customerId) {
+    return stripe.customers.retrieve(customerId);
+}
+
 async function retrievePrice(priceId) {
     return stripe.prices.retrieve(priceId);
 }
@@ -236,6 +244,8 @@ module.exports = {
     retrieveCheckoutSession,
     retrieveCharge,
     listCheckoutSessionsForPayment,
+    retrievePaymentIntent,
+    retrieveCustomer,
     retrievePrice,
     cleanupUserBilling,
 };

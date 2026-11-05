@@ -34,6 +34,7 @@ function loadController(overrides = {}) {
     User.findById = overrides.userFindById || (async () => null);
     User.findByIdAndDelete = overrides.userFindByIdAndDelete || (async () => null);
     User.deleteMany = overrides.userDeleteMany || (async () => ({ deletedCount: 0 }));
+    User.insertMany = overrides.userInsertMany || (async (docs) => docs);
     User.prototype.save = async function () {
         this._id = 'user_new';
         return this;
@@ -44,6 +45,7 @@ function loadController(overrides = {}) {
 
     class Logs {
         debug() {}
+        info() {}
         error() {}
     }
 
@@ -76,6 +78,7 @@ function loadController(overrides = {}) {
                 isAdmin: overrides.isAdmin || (async () => false),
                 tokenEncode: overrides.tokenEncode || (() => 'token'),
                 tokenDecode: overrides.tokenDecode || (() => null),
+                isValidEmail: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || 'invalid',
             },
         ],
         [LOGS_PATH, Logs],
@@ -812,4 +815,218 @@ test('userDeleteRegularUsers retains user records when associated data cleanup f
     assert.equal(res.statusCode, 400);
     assert.equal(usersDeleted, false);
     assert.deepEqual(res.body, { message: 'MongoDB unavailable' });
+});
+
+function chainableQuery(result, calls = {}) {
+    return {
+        select(fields) {
+            calls.select = fields;
+            return this;
+        },
+        sort(order) {
+            calls.sort = order;
+            return this;
+        },
+        async lean() {
+            return result;
+        },
+    };
+}
+
+const BCRYPT_HASH = '$2a$10$' + 'a'.repeat(53);
+
+function createBackup(users, overrides = {}) {
+    return { format: 'mirotalkwebrtc-users', schemaVersion: 1, users, ...overrides };
+}
+
+test('userExport returns a versioned backup without session or reset secrets', async (t) => {
+    const calls = {};
+    const harness = loadController({
+        userFind: () => chainableQuery([{ _id: 'u1', email: 'one@example.com', password: BCRYPT_HASH }], calls),
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+    res.headers = {};
+    res.setHeader = (name, value) => {
+        res.headers[name] = value;
+    };
+
+    await harness.controller.userExport({ user: { email: 'admin@example.com' } }, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.headers['Cache-Control'], 'no-store');
+    assert.equal(res.body.format, 'mirotalkwebrtc-users');
+    assert.equal(res.body.schemaVersion, 1);
+    assert.equal(res.body.appVersion, require('../package.json').version);
+    assert.equal(res.body.count, 1);
+    assert.equal(res.body.users[0].password, BCRYPT_HASH);
+    for (const field of ['-token', '-resetPasswordToken', '-resetPasswordExpires']) {
+        assert.ok(calls.select.split(' ').includes(field), `${field} must be excluded`);
+    }
+});
+
+test('userImport rejects files that are not users backups', async (t) => {
+    const harness = loadController();
+    t.after(harness.cleanup);
+
+    for (const [backup, message] of [
+        [undefined, 'Invalid backup file'],
+        [{ format: 'other', schemaVersion: 1, users: [{}] }, 'This file is not a MiroTalk users backup'],
+        [createBackup([{}], { schemaVersion: '<img>' }), 'Unsupported backup schema version'],
+        [createBackup([]), 'The backup does not contain any users'],
+    ]) {
+        const res = createResponse();
+        await harness.controller.userImport({ body: { backup, dryRun: true } }, res);
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.message, message);
+    }
+});
+
+test('userImport dry run reports new, existing, conflicting and invalid users without writing', async (t) => {
+    let inserted = false;
+    const harness = loadController({
+        userFind: () =>
+            chainableQuery([
+                { _id: 'aaaaaaaaaaaaaaaaaaaaaaaa', email: 'Existing@Example.com', stripeCustomerId: 'cus_taken' },
+            ]),
+        userInsertMany: async () => {
+            inserted = true;
+            return [];
+        },
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.userImport(
+        {
+            body: {
+                dryRun: true,
+                backup: createBackup([
+                    { email: 'new@example.com', username: 'new', password: BCRYPT_HASH },
+                    { email: 'existing@example.com', username: 'existing' },
+                    { _id: 'aaaaaaaaaaaaaaaaaaaaaaaa', email: 'other@example.com', username: 'other' },
+                    { email: 'billing@example.com', username: 'billing', stripeCustomerId: 'cus_taken' },
+                    { email: 'new@example.com', username: 'duplicate' },
+                    { email: 'plain@example.com', username: 'plain', password: 'SecurePassword123!' },
+                    { email: 'not-an-email', username: 'bad' },
+                    { email: 'role@example.com', username: 'role', role: 'superuser' },
+                ]),
+            },
+        },
+        res
+    );
+
+    assert.equal(inserted, false);
+    assert.equal(res.body.dryRun, true);
+    assert.equal(res.body.total, 8);
+    assert.equal(res.body.toCreate, 1);
+    assert.equal(res.body.created, 0);
+    assert.deepEqual(
+        res.body.skipped.map(({ email, reason }) => [email, reason]),
+        [
+            ['existing@example.com', 'Email already exists'],
+            ['other@example.com', 'User ID already exists'],
+            ['billing@example.com', 'Stripe billing is already linked to another user'],
+            ['new@example.com', 'Email already exists'],
+        ]
+    );
+    assert.deepEqual(
+        res.body.invalid.map(({ reason }) => reason),
+        ['Invalid password hash', 'Invalid email', 'Invalid role']
+    );
+});
+
+test('userImport restores users with their ids, hashes, billing and timestamps', async (t) => {
+    let insertedDocs;
+    let insertOptions;
+    const harness = loadController({
+        userFind: () => chainableQuery([]),
+        userInsertMany: async (docs, options) => {
+            insertedDocs = docs;
+            insertOptions = options;
+            return docs;
+        },
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.userImport(
+        {
+            user: { email: 'admin@example.com' },
+            body: {
+                backup: createBackup([
+                    {
+                        _id: 'bbbbbbbbbbbbbbbbbbbbbbbb',
+                        email: 'restored@example.com',
+                        username: 'restored',
+                        password: BCRYPT_HASH,
+                        role: 'admin',
+                        allow: ['P2P'],
+                        allowedRooms: ['team'],
+                        active: true,
+                        subscriptionType: 'lifetime',
+                        subscriptionStatus: 'active',
+                        stripeCustomerId: 'cus_1',
+                        createdAt: '2025-01-02T03:04:05.000Z',
+                        token: 'must-not-be-imported',
+                        resetPasswordToken: 'must-not-be-imported',
+                    },
+                ]),
+            },
+        },
+        res
+    );
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.body.created, 1);
+    assert.equal(res.body.failed, 0);
+    assert.equal(res.body.stripeSyncAvailable, true);
+    assert.equal(res.body.stripeLinkedCount, 1);
+    assert.deepEqual(res.body.stripeSyncIds, ['bbbbbbbbbbbbbbbbbbbbbbbb']);
+    assert.deepEqual(insertOptions, { ordered: false });
+    const [doc] = insertedDocs;
+    assert.equal(doc._id, 'bbbbbbbbbbbbbbbbbbbbbbbb');
+    assert.equal(doc.password, BCRYPT_HASH);
+    assert.equal(doc.role, 'admin');
+    assert.equal(doc.stripeCustomerId, 'cus_1');
+    assert.equal(doc.createdAt.toISOString(), '2025-01-02T03:04:05.000Z');
+    assert.equal(doc.token, undefined);
+    assert.equal(doc.resetPasswordToken, undefined);
+});
+
+test('userImport reports partially failed inserts', async (t) => {
+    const harness = loadController({
+        userFind: () => chainableQuery([]),
+        userInsertMany: async (docs) => {
+            const error = new Error('E11000 duplicate key');
+            error.insertedDocs = docs.slice(1);
+            throw error;
+        },
+    });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.userImport(
+        {
+            body: {
+                backup: createBackup([
+                    { email: 'one@example.com', username: 'one' },
+                    { email: 'two@example.com', username: 'two' },
+                ]),
+            },
+        },
+        res
+    );
+
+    assert.equal(res.body.created, 1);
+    assert.equal(res.body.failed, 1);
+});
+
+test('user timestamps default to the document creation time, not module load time', async () => {
+    const User = require('../backend/models/users');
+    const first = new User({ email: 'a@example.com' });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    const second = new User({ email: 'b@example.com' });
+    assert.ok(second.createdAt > first.createdAt);
+    assert.ok(second.updatedAt > first.updatedAt);
 });

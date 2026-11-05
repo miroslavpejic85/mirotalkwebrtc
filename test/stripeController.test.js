@@ -78,6 +78,12 @@ function loadController({
     };
     const User = {
         findOne: () => user,
+        find: (filter) => ({
+            select() {
+                return this;
+            },
+            lean: async () => (user && (filter?._id?.$in || []).map(String).includes(String(user._id)) ? [user] : []),
+        }),
         updateOne: async (filter, update) => {
             calls.updated.push({ filter, update });
             const matchesCustomer = !filter.stripeCustomerId || user.stripeCustomerId === filter.stripeCustomerId;
@@ -106,6 +112,9 @@ function loadController({
                 user.subscriptionAdminEmailKeys = (user.subscriptionAdminEmailKeys || []).filter(
                     (key) => key !== update.$pull.subscriptionAdminEmailKeys
                 );
+            }
+            for (const field of Object.keys(update.$unset || {})) {
+                if (field !== 'subscriptionActivationEmailKey') delete user[field];
             }
             if (
                 update.$unset?.subscriptionActivationEmailKey !== undefined &&
@@ -1361,4 +1370,248 @@ test('a recorded legacy purchase is revoked after the configured Lifetime price 
     t.after(harness.cleanup);
     await harness.controller.handleWebhook({ headers: {}, body: Buffer.from('{}') }, createResponse());
     assert.equal(user.subscriptionStatus, 'canceled');
+});
+
+function billingUser(overrides = {}) {
+    return {
+        _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+        email: 'restored@example.com',
+        subscriptionType: 'monthly',
+        subscriptionStatus: 'active',
+        subscriptionExpiresAt: new Date(Date.now() + 86400000),
+        subscriptionCancelAtPeriodEnd: false,
+        stripeCustomerId: 'cus_test',
+        stripeSubscriptionId: 'sub_monthly',
+        ...overrides,
+    };
+}
+
+const liveCustomer = { retrieveCustomer: async (id) => ({ id, deleted: false }) };
+
+function lifetimePaymentIntent(chargeOverrides = {}) {
+    return {
+        id: 'pi_lifetime',
+        status: 'succeeded',
+        customer: 'cus_test',
+        latest_charge: {
+            id: 'ch_lifetime',
+            paid: true,
+            captured: true,
+            refunded: false,
+            amount_refunded: 0,
+            disputed: false,
+            ...chargeOverrides,
+        },
+    };
+}
+
+test('billing sync updates a restored subscription from its current Stripe state without emails', async (t) => {
+    const user = billingUser();
+    const periodEnd = Math.floor(Date.now() / 1000) - 60;
+    const harness = loadController({
+        user,
+        stripeOverrides: {
+            ...liveCustomer,
+            retrieveSubscription: async (id) => ({
+                id,
+                customer: 'cus_test',
+                status: 'canceled',
+                current_period_end: periodEnd,
+                cancel_at_period_end: false,
+                items: { data: [{ price: { id: 'price_monthly' } }] },
+            }),
+        },
+    });
+    t.after(harness.cleanup);
+
+    const result = await harness.controller.syncUserBilling(user);
+
+    assert.equal(result.status, 'updated');
+    assert.ok(result.changes.includes('Status: active → canceled'));
+    assert.equal(user.subscriptionStatus, 'canceled');
+    assert.equal(user.subscriptionExpiresAt.getTime(), periodEnd * 1000);
+    assert.equal(user.stripeSubscriptionId, 'sub_monthly');
+    assert.deepEqual(harness.calls.emails, []);
+    assert.deepEqual(harness.calls.adminEmails, []);
+});
+
+test('billing sync cancels and unlinks subscriptions and customers deleted in Stripe', async (t) => {
+    const missing = () => Object.assign(new Error('No such resource'), { code: 'resource_missing' });
+    const user = billingUser();
+    const harness = loadController({
+        user,
+        stripeOverrides: {
+            retrieveSubscription: async () => {
+                throw missing();
+            },
+            retrieveCustomer: async () => {
+                throw missing();
+            },
+        },
+    });
+    t.after(harness.cleanup);
+
+    const result = await harness.controller.syncUserBilling(user);
+
+    assert.equal(result.status, 'updated');
+    assert.equal(user.subscriptionStatus, 'canceled');
+    assert.equal(user.stripeSubscriptionId, undefined);
+    assert.equal(user.stripeCustomerId, undefined);
+    assert.ok(result.changes.includes('Stripe customer was deleted; billing link removed'));
+});
+
+test('billing sync unlinks a Stripe customer that was deleted', async (t) => {
+    const user = billingUser({ subscriptionType: null, subscriptionStatus: null, stripeSubscriptionId: undefined });
+    const harness = loadController({
+        user,
+        stripeOverrides: { retrieveCustomer: async (id) => ({ id, deleted: true }) },
+    });
+    t.after(harness.cleanup);
+
+    const result = await harness.controller.syncUserBilling(user);
+
+    assert.equal(result.status, 'updated');
+    assert.equal(user.stripeCustomerId, undefined);
+});
+
+test('billing sync leaves an up-to-date subscription untouched', async (t) => {
+    const user = billingUser();
+    const periodEnd = Math.floor(user.subscriptionExpiresAt.getTime() / 1000);
+    user.subscriptionExpiresAt = new Date(periodEnd * 1000);
+    const harness = loadController({
+        user,
+        stripeOverrides: {
+            ...liveCustomer,
+            retrieveSubscription: async (id) => ({
+                id,
+                customer: 'cus_test',
+                status: 'active',
+                current_period_end: periodEnd,
+                cancel_at_period_end: false,
+                items: { data: [{ price: { id: 'price_monthly' } }] },
+            }),
+        },
+    });
+    t.after(harness.cleanup);
+
+    const result = await harness.controller.syncUserBilling(user);
+
+    assert.deepEqual(result, { status: 'unchanged', changes: [] });
+    assert.deepEqual(harness.calls.updated, []);
+});
+
+test('billing sync refuses a subscription owned by another Stripe customer', async (t) => {
+    const user = billingUser();
+    const harness = loadController({
+        user,
+        stripeOverrides: {
+            ...liveCustomer,
+            retrieveSubscription: async (id) => ({ id, customer: 'cus_other', status: 'active', items: { data: [] } }),
+        },
+    });
+    t.after(harness.cleanup);
+
+    await assert.rejects(harness.controller.syncUserBilling(user), /different Stripe customer/);
+    assert.deepEqual(harness.calls.updated, []);
+});
+
+test('billing sync revokes a restored Lifetime plan whose payment was refunded', async (t) => {
+    const user = billingUser({
+        subscriptionType: 'lifetime',
+        subscriptionExpiresAt: null,
+        stripeSubscriptionId: undefined,
+        stripeLifetimePaymentIntentId: 'pi_lifetime',
+    });
+    const harness = loadController({
+        user,
+        stripeOverrides: {
+            retrievePaymentIntent: async () => lifetimePaymentIntent({ refunded: true, amount_refunded: 19900 }),
+        },
+    });
+    t.after(harness.cleanup);
+
+    const result = await harness.controller.syncUserBilling(user);
+
+    assert.equal(result.status, 'updated');
+    assert.equal(user.subscriptionStatus, 'canceled');
+    assert.deepEqual(user.revokedLifetimePaymentIntentIds, ['pi_lifetime']);
+    assert.equal(user.stripeCustomerId, 'cus_test');
+});
+
+test('billing sync keeps a valid Lifetime plan active', async (t) => {
+    const user = billingUser({
+        subscriptionType: 'lifetime',
+        subscriptionExpiresAt: null,
+        stripeSubscriptionId: undefined,
+        stripeLifetimePaymentIntentId: 'pi_lifetime',
+    });
+    const harness = loadController({
+        user,
+        stripeOverrides: { retrievePaymentIntent: async () => lifetimePaymentIntent() },
+    });
+    t.after(harness.cleanup);
+
+    const result = await harness.controller.syncUserBilling(user);
+
+    assert.deepEqual(result, { status: 'unchanged', changes: [] });
+});
+
+test('billing sync skips users that are not linked to Stripe', async (t) => {
+    const user = billingUser({ stripeCustomerId: undefined, stripeSubscriptionId: undefined });
+    const harness = loadController({ user });
+    t.after(harness.cleanup);
+
+    const result = await harness.controller.syncUserBilling(user);
+
+    assert.equal(result.status, 'skipped');
+});
+
+test('syncUsersBilling validates ids and reports per-user results', async (t) => {
+    const user = billingUser();
+    const harness = loadController({
+        user,
+        stripeOverrides: {
+            ...liveCustomer,
+            retrieveSubscription: async () => {
+                throw new Error('Stripe unavailable');
+            },
+        },
+    });
+    t.after(harness.cleanup);
+
+    const invalid = createResponse();
+    await harness.controller.syncUsersBilling({ body: { ids: ['not-an-id'] } }, invalid);
+    assert.equal(invalid.statusCode, 400);
+
+    const tooMany = createResponse();
+    await harness.controller.syncUsersBilling(
+        { body: { ids: Array.from({ length: 51 }, () => 'aaaaaaaaaaaaaaaaaaaaaaaa') } },
+        tooMany
+    );
+    assert.equal(tooMany.statusCode, 400);
+
+    const res = createResponse();
+    await harness.controller.syncUsersBilling(
+        { body: { ids: ['aaaaaaaaaaaaaaaaaaaaaaaa', 'bbbbbbbbbbbbbbbbbbbbbbbb'] } },
+        res
+    );
+    assert.equal(res.statusCode, 200);
+    assert.deepEqual(
+        res.body.results.map(({ id, status, message }) => ({ id, status, message })),
+        [
+            { id: 'aaaaaaaaaaaaaaaaaaaaaaaa', status: 'error', message: 'Stripe unavailable' },
+            { id: 'bbbbbbbbbbbbbbbbbbbbbbbb', status: 'error', message: 'User not found' },
+        ]
+    );
+});
+
+test('syncUsersBilling is unavailable when Stripe is disabled', async (t) => {
+    const harness = loadController({ user: billingUser(), stripeOverrides: { isEnabled: () => false } });
+    t.after(harness.cleanup);
+    const res = createResponse();
+
+    await harness.controller.syncUsersBilling({ body: { ids: ['aaaaaaaaaaaaaaaaaaaaaaaa'] } }, res);
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.message, 'Stripe is not enabled');
 });

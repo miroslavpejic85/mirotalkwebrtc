@@ -7,7 +7,7 @@
  * @link    Live demo: https://webrtc.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/cme/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.75
+ * @version 1.8.80
  */
 
 const userAgent = navigator.userAgent;
@@ -218,6 +218,10 @@ const addUserExpiryField = document.getElementById('add-user-expiry-field');
 const addUserBtn = document.getElementById('add-user-btn');
 const deleteUsersBtn = document.getElementById('delete-users-btn');
 const refreshUsersBtn = document.getElementById('refresh-users-btn');
+const exportUsersBtn = document.getElementById('export-users-btn');
+const importUsersBtn = document.getElementById('import-users-btn');
+const importUsersFile = document.getElementById('import-users-file');
+const USERS_BACKUP_MAX_BYTES = 20 * 1024 * 1024;
 
 const myTable = document.getElementById('myTable');
 const myTableBody = document.getElementById('myTableBody');
@@ -1260,6 +1264,17 @@ refreshUsersBtn.addEventListener('click', () => {
 deleteUsersBtn.addEventListener('click', () => {
     deleteRegularUsers();
 });
+exportUsersBtn.addEventListener('click', () => {
+    exportUsers();
+});
+importUsersBtn.addEventListener('click', () => {
+    importUsersFile.value = '';
+    importUsersFile.click();
+});
+importUsersFile.addEventListener('change', () => {
+    const file = importUsersFile.files?.[0];
+    if (file) importUsersBackup(file);
+});
 
 document.getElementById('usersSearchInput').addEventListener('keyup', function () {
     usersDataTable.search(this.value).draw();
@@ -1868,6 +1883,260 @@ function deleteRegularUsers() {
                 deleteUsersBtn.disabled = false;
             });
     });
+}
+
+function getUsersFilterSummary() {
+    return {
+        search: document.getElementById('usersSearchInput').value.trim() || null,
+        created: document.querySelector('.users-filter-chip.active')?.dataset.filter || 'all',
+        billing: document.getElementById('usersPlanFilter')?.value || 'all',
+    };
+}
+
+function exportUsers() {
+    const totalCount = usersDataTable.rows().count();
+    if (totalCount === 0) {
+        popupMessage('info', 'There are no users to export');
+        return;
+    }
+    const filteredIds = usersDataTable
+        .rows({ search: 'applied' })
+        .nodes()
+        .toArray()
+        .map((row) => row.id.replace(/^user_/, ''));
+    const canExportFiltered = filteredIds.length > 0 && filteredIds.length < totalCount;
+
+    Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        position: 'top',
+        icon: 'info',
+        title: 'Export users backup',
+        html: `<div class="users-backup-dialog">
+            <p>The file includes password hashes and Stripe billing IDs, so users can sign in again after a restore. Store it somewhere safe and never share it.</p>
+            ${canExportFiltered ? '<p>A filtered export only contains users matching the current search and filters. Use <b>Export all</b> for a full backup.</p>' : ''}
+        </div>`,
+        showCancelButton: true,
+        showDenyButton: canExportFiltered,
+        reverseButtons: true,
+        confirmButtonText: canExportFiltered ? `Export filtered (${filteredIds.length})` : `Export all (${totalCount})`,
+        denyButtonText: `Export all (${totalCount})`,
+        cancelButtonText: 'Cancel',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then((result) => {
+        if (result.isConfirmed) downloadUsersBackup(canExportFiltered ? filteredIds : null);
+        else if (result.isDenied) downloadUsersBackup(null);
+    });
+}
+
+function downloadUsersBackup(ids) {
+    exportUsersBtn.disabled = true;
+    userExport()
+        .then((backup) => {
+            if (!backup || !Array.isArray(backup.users)) {
+                throw new Error(backup?.message || 'Unexpected export response');
+            }
+            const idSet = ids ? new Set(ids) : null;
+            const users = idSet ? backup.users.filter((u) => idSet.has(String(u._id))) : backup.users;
+            const scope = idSet ? 'filtered' : 'all';
+            const content = JSON.stringify(
+                { ...backup, scope, filter: idSet ? getUsersFilterSummary() : null, count: users.length, users },
+                null,
+                2
+            );
+            const stamp = String(backup.exportedAt || new Date().toISOString())
+                .slice(0, 19)
+                .replace(/[:T]/g, '-');
+            const url = URL.createObjectURL(new Blob([content], { type: 'application/json;charset=utf-8' }));
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `mirotalk-users-${scope}-${stamp}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            popupMessage('toast', `Exported ${users.length} user${users.length === 1 ? '' : 's'}`);
+        })
+        .catch((err) => {
+            console.error('[API] - USERS EXPORT ERROR', err);
+            popupMessage('error', `Failed to export users: ${escapeHtml(err.response?.data?.message || err.message)}`);
+        })
+        .finally(() => {
+            exportUsersBtn.disabled = false;
+        });
+}
+
+function formatUserCount(count) {
+    return `${count} user${count === 1 ? '' : 's'}`;
+}
+
+function buildUsersImportCounts(counts) {
+    return `<ul class="users-import-counts">
+        ${counts.map(([label, value]) => `<li><span>${label}</span><b>${Number(value) || 0}</b></li>`).join('')}
+    </ul>`;
+}
+
+function buildUsersImportIssues(items, total) {
+    const shown = items.slice(0, 10);
+    if (shown.length === 0) return '';
+    const hidden = total - shown.length;
+    return `<ul class="users-import-issues">
+        ${shown.map(([label, detail]) => `<li>${escapeHtml(label)}: ${escapeHtml(detail)}</li>`).join('')}
+        ${hidden > 0 ? `<li>…and ${hidden} more</li>` : ''}
+    </ul>`;
+}
+
+function buildStripeSyncSummary(report, stripeResults) {
+    const linked = report.stripeLinkedCount || 0;
+    if (!linked) return '';
+    if (!report.stripeSyncAvailable) {
+        return `<p>${formatUserCount(linked)} linked to Stripe, but Stripe is not enabled on this server, so their billing will not be re-synced.</p>`;
+    }
+    if (report.dryRun) {
+        return `<p>${formatUserCount(linked)} linked to Stripe. Their plan and billing status will be re-synced from Stripe after the import.</p>`;
+    }
+    if (!stripeResults) return '';
+
+    const countOf = (status) => stripeResults.filter((item) => item.status === status).length;
+    const details = stripeResults
+        .filter((item) => item.status === 'updated' || item.status === 'error')
+        .map((item) => [
+            item.email || item.id,
+            item.status === 'error' ? `Failed: ${item.message}` : item.changes.join('; '),
+        ]);
+    return `<p class="users-import-section">Stripe re-sync</p>
+        ${buildUsersImportCounts([
+            ['Updated from Stripe', countOf('updated')],
+            ['Already up to date', countOf('unchanged') + countOf('skipped')],
+            ['Failed', countOf('error')],
+        ])}
+        ${buildUsersImportIssues(details, details.length)}`;
+}
+
+function buildUsersImportSummary(report, stripeResults) {
+    const counts = [
+        ['Users in file', report.total],
+        [report.dryRun ? 'Will be created' : 'Created', report.dryRun ? report.toCreate : report.created],
+        ['Skipped', report.skippedCount],
+        ['Invalid', report.invalidCount],
+    ];
+    if (!report.dryRun && report.failed) counts.push(['Failed', report.failed]);
+
+    const issues = [...(report.skipped || []), ...(report.invalid || [])].map((item) => [
+        item.email || `Record #${item.index + 1}`,
+        item.reason,
+    ]);
+
+    return `<div class="users-backup-dialog">
+        ${buildUsersImportCounts(counts)}
+        ${buildUsersImportIssues(issues, report.skippedCount + report.invalidCount)}
+        <p>Existing users are never modified.</p>
+        ${buildStripeSyncSummary(report, stripeResults)}
+    </div>`;
+}
+
+async function syncImportedUsersWithStripe(ids) {
+    const batchSize = 20;
+    const results = [];
+    Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        position: 'top',
+        title: 'Syncing billing with Stripe',
+        html: `<div class="users-backup-dialog"><p id="users-stripe-sync-progress">0 / ${ids.length} users</p></div>`,
+        showConfirmButton: false,
+        didOpen: () => Swal.showLoading(),
+    });
+    for (let i = 0; i < ids.length; i += batchSize) {
+        const batch = ids.slice(i, i + batchSize);
+        try {
+            const response = await stripeSyncUsers(batch);
+            if (!Array.isArray(response?.results)) throw new Error(response?.message || 'Unexpected sync response');
+            results.push(...response.results);
+        } catch (err) {
+            const message = err.response?.data?.message || err.message;
+            results.push(...batch.map((id) => ({ id, email: null, status: 'error', changes: [], message })));
+        }
+        const progress = document.getElementById('users-stripe-sync-progress');
+        if (progress) progress.textContent = `${Math.min(i + batchSize, ids.length)} / ${ids.length} users`;
+    }
+    console.log('[API] - USERS STRIPE SYNC RESPONSE', results);
+    return results;
+}
+
+function isUsersImportReport(report) {
+    return report && typeof report.total === 'number' && typeof report.toCreate === 'number';
+}
+
+async function importUsersBackup(file) {
+    if (file.size > USERS_BACKUP_MAX_BYTES) {
+        popupMessage('warning', 'The backup file is larger than 20 MB');
+        return;
+    }
+    let backup;
+    try {
+        backup = JSON.parse(await file.text());
+    } catch (err) {
+        popupMessage('error', 'The selected file is not a valid JSON backup');
+        return;
+    }
+
+    importUsersBtn.disabled = true;
+    try {
+        const preview = await userImport(backup, true);
+        if (!isUsersImportReport(preview)) throw new Error(preview?.message || 'Unexpected import response');
+
+        if (preview.toCreate === 0) {
+            Swal.fire({
+                position: 'top',
+                icon: 'info',
+                title: 'Nothing to import',
+                html: buildUsersImportSummary(preview),
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+            });
+            return;
+        }
+
+        const result = await Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            position: 'top',
+            icon: 'question',
+            title: 'Import users?',
+            html: buildUsersImportSummary(preview),
+            showCancelButton: true,
+            reverseButtons: true,
+            confirmButtonText: `Import ${preview.toCreate} user${preview.toCreate === 1 ? '' : 's'}`,
+            cancelButtonText: 'Cancel',
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        });
+        if (!result.isConfirmed) return;
+
+        const report = await userImport(backup, false);
+        if (!isUsersImportReport(report)) throw new Error(report?.message || 'Unexpected import response');
+        console.log('[API] - USERS IMPORT RESPONSE', report);
+        const stripeResults =
+            report.stripeSyncAvailable && report.stripeSyncIds?.length
+                ? await syncImportedUsersWithStripe(report.stripeSyncIds)
+                : null;
+        loadUsers();
+        loadDashboardStats();
+        const hasProblems = report.failed || stripeResults?.some((item) => item.status === 'error');
+        Swal.fire({
+            position: 'top',
+            icon: hasProblems ? 'warning' : 'success',
+            title: 'Import finished',
+            html: buildUsersImportSummary(report, stripeResults),
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        });
+    } catch (err) {
+        console.error('[API] - USERS IMPORT ERROR', err);
+        popupMessage('error', `Failed to import users: ${escapeHtml(err.response?.data?.message || err.message)}`);
+    } finally {
+        importUsersBtn.disabled = false;
+    }
 }
 
 function createUser() {

@@ -116,7 +116,10 @@ mongoose
         });
 
         app.use(express.urlencoded({ extended: true, limit: '10kb' }));
-        app.use(express.json({ limit: '10kb' }));
+        const jsonParser = express.json({ limit: '10kb' });
+        const usersImportPath = `${apiPath}${users.USERS_IMPORT_PATH}`;
+        // The users backup import parses its larger body in its own route, after admin auth.
+        app.use((req, res, next) => (req.path === usersImportPath ? next() : jsonParser(req, res, next)));
         app.use(cookieParser());
 
         // OIDC middleware (when enabled, handles /login, /logout, /callback routes)
@@ -250,6 +253,10 @@ mongoose
                     error: err.message,
                 });
                 return res.status(400).send({ status: 400, message: 'Invalid URL encoding' });
+            }
+            if (err.type === 'entity.too.large') {
+                log.warn('Request body too large', { url: req.url, limit: err.limit });
+                return res.status(413).send({ status: 413, message: 'Request body is too large' });
             }
             // Handle other errors
             log.error('Unhandled error', {

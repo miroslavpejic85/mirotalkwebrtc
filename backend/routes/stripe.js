@@ -2,6 +2,7 @@
 
 const express = require('express');
 const auth = require('../middleware/auth');
+const admin = require('../middleware/admin');
 const demo = require('../middleware/demo');
 
 const router = express.Router();
@@ -35,6 +36,11 @@ router.get('/stripe/billing', auth, (req, res) => {
 //VERIFY SESSION: /api/v1/stripe/verify?session_id=cs_xxx
 router.get('/stripe/verify', auth, (req, res) => {
     controllersStripe.verifySession(req, res);
+});
+
+//SYNC USERS BILLING: /api/v1/stripe/sync-users (admin only, e.g. after restoring a users backup)
+router.post('/stripe/sync-users', admin, (req, res) => {
+    controllersStripe.syncUsersBilling(req, res);
 });
 
 module.exports = router;

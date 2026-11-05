@@ -28,8 +28,8 @@ const userSchema = new mongoose.Schema({
     termsAcceptedAt: { type: Date, default: null },
     termsVersion: { type: String, default: null },
     privacyPolicyVersion: { type: String, default: null },
-    createdAt: { type: Date, default: new Date().toISOString() },
-    updatedAt: { type: Date, default: new Date().toISOString() },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model('User', userSchema);

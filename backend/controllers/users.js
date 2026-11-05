@@ -18,6 +18,25 @@ const log = new logs('Controllers-users');
 
 const USER_REGISTRATION_MODE = process.env.USER_REGISTRATION_MODE == 'true';
 const LEGAL_POLICY_VERSION = process.env.LEGAL_POLICY_VERSION || '2026-09-18';
+const { version: APP_VERSION } = require('../../package.json');
+
+const USERS_BACKUP_FORMAT = 'mirotalkwebrtc-users';
+const USERS_BACKUP_SCHEMA_VERSION = 1;
+const USERS_IMPORT_MAX = 20000;
+const USERS_IMPORT_REPORT_LIMIT = 100;
+// Session/reset secrets are never exported; select:false email keys are excluded by the schema.
+const USERS_BACKUP_EXCLUDED_FIELDS = '-token -resetPasswordToken -resetPasswordExpires -__v';
+const BCRYPT_HASH_REGEX = /^\$2[abxy]\$\d{2}\$[./A-Za-z0-9]{53}$/;
+const OBJECT_ID_REGEX = /^[a-f\d]{24}$/i;
+const IMPORT_ROLES = ['admin', 'guest'];
+const IMPORT_SUBSCRIPTION_TYPES = ['monthly', 'yearly', 'lifetime'];
+const IMPORT_SUBSCRIPTION_STATUSES = ['active', 'inactive', 'canceled'];
+const IMPORT_STRIPE_ID_FIELDS = [
+    'stripeCustomerId',
+    'stripeSubscriptionId',
+    'stripeLifetimePaymentIntentId',
+    'stripeLifetimeCheckoutSessionId',
+];
 
 const USER_DEMO = {
     enabled: process.env.USER_DEMO_MODE == 'true',
@@ -731,6 +750,208 @@ async function sendInvitation(req, res) {
     }
 }
 
+function sanitizeImportedUser(raw) {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { error: 'Invalid user record' };
+
+    const user = {};
+    const isEmpty = (value) => value === undefined || value === null;
+
+    if (!isEmpty(raw._id)) {
+        if (typeof raw._id !== 'string' || !OBJECT_ID_REGEX.test(raw._id)) return { error: 'Invalid _id' };
+        user._id = raw._id;
+    }
+
+    const email = typeof raw.email === 'string' ? raw.email.trim() : '';
+    if (!email || utils.isValidEmail(email) !== true) return { error: 'Invalid email' };
+    user.email = email;
+
+    const username = typeof raw.username === 'string' ? raw.username.trim() : '';
+    if (!username || username.length > 100) return { error: 'Invalid username' };
+    user.username = username;
+
+    if (!isEmpty(raw.password)) {
+        // Only bcrypt hashes are accepted so a backup can never inject a plaintext password.
+        if (typeof raw.password !== 'string' || !BCRYPT_HASH_REGEX.test(raw.password)) {
+            return { error: 'Invalid password hash' };
+        }
+        user.password = raw.password;
+    }
+
+    const role = isEmpty(raw.role) ? 'guest' : raw.role;
+    if (!IMPORT_ROLES.includes(role)) return { error: 'Invalid role' };
+    user.role = role;
+
+    for (const field of ['allow', 'allowedRooms', 'revokedLifetimePaymentIntentIds']) {
+        if (isEmpty(raw[field])) continue;
+        if (!Array.isArray(raw[field]) || !raw[field].every((item) => typeof item === 'string')) {
+            return { error: `Invalid ${field}` };
+        }
+        user[field] = raw[field];
+    }
+
+    for (const field of ['active', 'accountSetupPending', 'subscriptionCancelAtPeriodEnd']) {
+        if (isEmpty(raw[field])) continue;
+        if (typeof raw[field] !== 'boolean') return { error: `Invalid ${field}` };
+        user[field] = raw[field];
+    }
+
+    for (const [field, allowed] of [
+        ['subscriptionType', IMPORT_SUBSCRIPTION_TYPES],
+        ['subscriptionStatus', IMPORT_SUBSCRIPTION_STATUSES],
+    ]) {
+        if (raw[field] === undefined) continue;
+        if (raw[field] !== null && !allowed.includes(raw[field])) return { error: `Invalid ${field}` };
+        user[field] = raw[field];
+    }
+
+    for (const field of IMPORT_STRIPE_ID_FIELDS) {
+        if (isEmpty(raw[field])) continue;
+        if (typeof raw[field] !== 'string' || !raw[field].trim()) return { error: `Invalid ${field}` };
+        user[field] = raw[field].trim();
+    }
+
+    for (const field of ['termsVersion', 'privacyPolicyVersion']) {
+        if (raw[field] === undefined) continue;
+        if (raw[field] !== null && typeof raw[field] !== 'string') return { error: `Invalid ${field}` };
+        user[field] = raw[field];
+    }
+
+    for (const field of ['subscriptionExpiresAt', 'termsAcceptedAt', 'createdAt', 'updatedAt']) {
+        if (isEmpty(raw[field])) continue;
+        const date = typeof raw[field] === 'string' ? new Date(raw[field]) : null;
+        if (!date || Number.isNaN(date.getTime())) return { error: `Invalid ${field}` };
+        user[field] = date;
+    }
+
+    return { user };
+}
+
+function parseUsersBackup(backup) {
+    if (!backup || typeof backup !== 'object' || Array.isArray(backup)) {
+        return { error: 'Invalid backup file' };
+    }
+    if (backup.format !== USERS_BACKUP_FORMAT) {
+        return { error: 'This file is not a MiroTalk users backup' };
+    }
+    if (backup.schemaVersion !== USERS_BACKUP_SCHEMA_VERSION) {
+        return { error: 'Unsupported backup schema version' };
+    }
+    if (!Array.isArray(backup.users) || backup.users.length === 0) {
+        return { error: 'The backup does not contain any users' };
+    }
+    if (backup.users.length > USERS_IMPORT_MAX) {
+        return { error: `A backup can contain at most ${USERS_IMPORT_MAX} users` };
+    }
+    return { users: backup.users };
+}
+
+async function userExport(req, res) {
+    try {
+        const users = await User.find().select(USERS_BACKUP_EXCLUDED_FIELDS).sort({ createdAt: 1 }).lean();
+        log.info('Users backup exported', { by: req.user?.email, count: users.length });
+        res.setHeader('Cache-Control', 'no-store');
+        res.json({
+            format: USERS_BACKUP_FORMAT,
+            schemaVersion: USERS_BACKUP_SCHEMA_VERSION,
+            appVersion: APP_VERSION,
+            exportedAt: new Date().toISOString(),
+            count: users.length,
+            users,
+        });
+    } catch (error) {
+        log.error('userExport', error);
+        res.status(400).json({ message: 'Unable to export users' });
+    }
+}
+
+async function userImport(req, res) {
+    try {
+        const { backup, dryRun } = req.body || {};
+        const parsed = parseUsersBackup(backup);
+        if (parsed.error) return res.status(400).json({ message: parsed.error });
+
+        const existingUsers = await User.find()
+            .select(['_id', 'email', ...IMPORT_STRIPE_ID_FIELDS].join(' '))
+            .lean();
+        const takenEmails = new Set(existingUsers.map((user) => String(user.email || '').toLowerCase()));
+        const takenIds = new Set(existingUsers.map((user) => String(user._id)));
+        const takenStripeIds = new Set(
+            existingUsers.flatMap((user) => IMPORT_STRIPE_ID_FIELDS.map((field) => user[field]).filter(Boolean))
+        );
+
+        const toCreate = [];
+        const skipped = [];
+        const invalid = [];
+
+        parsed.users.forEach((raw, index) => {
+            const { user, error } = sanitizeImportedUser(raw);
+            if (error) {
+                invalid.push({ index, email: typeof raw?.email === 'string' ? raw.email : null, reason: error });
+                return;
+            }
+            const emailKey = user.email.toLowerCase();
+            const stripeIds = IMPORT_STRIPE_ID_FIELDS.map((field) => user[field]).filter(Boolean);
+            let reason = null;
+            if (takenEmails.has(emailKey)) reason = 'Email already exists';
+            else if (user._id && takenIds.has(user._id.toLowerCase())) reason = 'User ID already exists';
+            else if (stripeIds.some((id) => takenStripeIds.has(id))) {
+                reason = 'Stripe billing is already linked to another user';
+            }
+            if (reason) {
+                skipped.push({ index, email: user.email, reason });
+                return;
+            }
+            takenEmails.add(emailKey);
+            if (user._id) takenIds.add(user._id.toLowerCase());
+            stripeIds.forEach((id) => takenStripeIds.add(id));
+            toCreate.push(user);
+        });
+
+        const hasStripeLink = (user) => IMPORT_STRIPE_ID_FIELDS.some((field) => !!user[field]);
+        let created = 0;
+        let failed = 0;
+        let stripeSyncIds = [];
+        if (dryRun !== true && toCreate.length > 0) {
+            let insertedDocs;
+            try {
+                insertedDocs = await User.insertMany(toCreate, { ordered: false });
+            } catch (insertError) {
+                if (!Array.isArray(insertError.insertedDocs)) throw insertError;
+                insertedDocs = insertError.insertedDocs;
+                log.error('userImport partial insert', insertError);
+            }
+            created = insertedDocs.length;
+            stripeSyncIds = insertedDocs.filter(hasStripeLink).map((doc) => String(doc._id));
+            failed = toCreate.length - created;
+            log.info('Users backup imported', {
+                by: req.user?.email,
+                created,
+                failed,
+                skipped: skipped.length,
+                invalid: invalid.length,
+            });
+        }
+
+        res.json({
+            dryRun: dryRun === true,
+            total: parsed.users.length,
+            toCreate: toCreate.length,
+            created,
+            failed,
+            skippedCount: skipped.length,
+            invalidCount: invalid.length,
+            stripeLinkedCount: dryRun === true ? toCreate.filter(hasStripeLink).length : stripeSyncIds.length,
+            stripeSyncAvailable: stripeLib.isEnabled(),
+            stripeSyncIds,
+            skipped: skipped.slice(0, USERS_IMPORT_REPORT_LIMIT),
+            invalid: invalid.slice(0, USERS_IMPORT_REPORT_LIMIT),
+        });
+    } catch (error) {
+        log.error('userImport', error);
+        res.status(400).json({ message: 'Unable to import users' });
+    }
+}
+
 module.exports = {
     userCreate,
     userAdminCreate,
@@ -747,5 +968,7 @@ module.exports = {
     userUpdate,
     userDelete,
     userDeleteRegularUsers,
+    userExport,
+    userImport,
     sendInvitation,
 };

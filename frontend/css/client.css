@@ -4655,7 +4655,7 @@ body.dark .top-workspace .demo-badge {
 
 .users-btn-group {
     display: grid;
-    grid-template-columns: 240px max-content 44px 44px;
+    grid-template-columns: 240px max-content repeat(4, 44px);
     align-items: center;
     flex: 0 0 auto;
 }
@@ -6054,7 +6054,7 @@ body.dark #usersTable td .user-plan-badge.yearly {
 
 .users-btn-group {
     display: grid;
-    grid-template-columns: 240px max-content 44px 44px;
+    grid-template-columns: 240px max-content repeat(4, 44px);
     align-items: center;
     flex: 0 0 auto;
 }
@@ -6081,6 +6081,49 @@ body.dark #usersTable td .user-plan-badge.yearly {
     font-size: 13px;
 }
 
+.users-backup-dialog {
+    text-align: left;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.users-backup-dialog p {
+    margin: 10px 0 0;
+}
+
+.users-import-counts,
+.users-import-issues {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.users-import-counts li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.users-import-issues {
+    max-height: 160px;
+    margin-top: 12px;
+    overflow-y: auto;
+    color: var(--black-light-color);
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.users-import-issues li {
+    padding: 2px 0;
+}
+
+.users-backup-dialog .users-import-section {
+    margin: 16px 0 4px;
+    font-weight: 600;
+}
+
 @media (max-width: 700px) {
     .users-search-box {
         width: 100%;
@@ -6090,7 +6133,7 @@ body.dark #usersTable td .user-plan-badge.yearly {
 
     .users-btn-group {
         width: 100%;
-        grid-template-columns: minmax(0, 1fr) 44px 44px;
+        grid-template-columns: minmax(0, 1fr) repeat(4, 44px);
     }
 
     .users-plan-filter {
@@ -6106,8 +6149,46 @@ body.dark #usersTable td .user-plan-badge.yearly {
         grid-column: 2;
     }
 
-    #delete-users-btn {
+    #export-users-btn {
         grid-column: 3;
+    }
+
+    #import-users-btn {
+        grid-column: 4;
+    }
+
+    #delete-users-btn {
+        grid-column: 5;
+    }
+}
+
+@media (max-width: 480px) {
+    .users-btn-group {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    #open-add-user-btn {
+        grid-column: 1 / -1;
+    }
+
+    #refresh-users-btn {
+        grid-column: 1;
+    }
+
+    #export-users-btn {
+        grid-column: 2;
+    }
+
+    #import-users-btn {
+        grid-column: 3;
+    }
+
+    #delete-users-btn {
+        grid-column: 4;
+    }
+
+    .users-btn-group .custom-button-icon {
+        width: 100%;
     }
 }
 

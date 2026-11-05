@@ -729,6 +729,199 @@ async function revokeLifetimePayment(charge) {
     );
 }
 
+const BILLING_SYNC_MAX_USERS = 50;
+const BILLING_SYNC_CONCURRENCY = 4;
+const BILLING_SYNC_SELECT =
+    'email subscriptionType subscriptionStatus subscriptionExpiresAt subscriptionCancelAtPeriodEnd stripeCustomerId stripeSubscriptionId stripeLifetimePaymentIntentId revokedLifetimePaymentIntentIds';
+const OBJECT_ID_REGEX = /^[a-f\d]{24}$/i;
+
+function isStripeResourceMissing(error) {
+    return error?.code === 'resource_missing';
+}
+
+function sameBillingValue(current, next) {
+    if (current instanceof Date || next instanceof Date) {
+        return (current ? new Date(current).getTime() : null) === (next ? new Date(next).getTime() : null);
+    }
+    return (current ?? null) === (next ?? null);
+}
+
+function describeBillingChange(field, current, next) {
+    switch (field) {
+        case 'subscriptionType':
+            return `Plan: ${current || 'none'} → ${next || 'none'}`;
+        case 'subscriptionStatus':
+            return `Status: ${current || 'none'} → ${next || 'none'}`;
+        case 'subscriptionExpiresAt':
+            return `Expiry: ${next ? new Date(next).toISOString().slice(0, 10) : 'none'}`;
+        case 'subscriptionCancelAtPeriodEnd':
+            return next ? 'Set to cancel at period end' : 'No longer cancels at period end';
+        default:
+            return field;
+    }
+}
+
+/**
+ * Re-read a user's billing state from Stripe (e.g. after restoring a backup) and
+ * update the stored plan when it drifted. Never sends activation or admin emails.
+ */
+async function syncUserBilling(user) {
+    const isStripeLifetime = user.subscriptionType === 'lifetime' && !!user.stripeLifetimePaymentIntentId;
+    const hasSubscription = !!user.stripeSubscriptionId && user.subscriptionType !== 'lifetime';
+    if (!isStripeLifetime && !hasSubscription && !user.stripeCustomerId) {
+        return { status: 'skipped', changes: [], message: 'Not linked to Stripe' };
+    }
+
+    const set = {};
+    const unset = {};
+    const notes = [];
+    let revokedPaymentId = null;
+
+    if (isStripeLifetime) {
+        const paymentId = user.stripeLifetimePaymentIntentId;
+        const payment = await stripeLib.retrievePaymentIntent(paymentId);
+        const charge = payment.latest_charge;
+        const refundedOrDisputed = !!charge && (!!charge.refunded || charge.amount_refunded > 0 || !!charge.disputed);
+        const valid =
+            payment.status === 'succeeded' &&
+            (!user.stripeCustomerId || resourceId(payment.customer) === user.stripeCustomerId) &&
+            charge?.paid === true &&
+            charge.captured === true &&
+            !refundedOrDisputed &&
+            !user.revokedLifetimePaymentIntentIds?.includes(paymentId);
+        if (refundedOrDisputed && !user.revokedLifetimePaymentIntentIds?.includes(paymentId)) {
+            revokedPaymentId = paymentId;
+            notes.push('Lifetime payment was refunded or disputed');
+        }
+        Object.assign(
+            set,
+            valid
+                ? { subscriptionStatus: 'active', subscriptionExpiresAt: null, subscriptionCancelAtPeriodEnd: false }
+                : { subscriptionStatus: 'canceled' }
+        );
+    }
+
+    if (hasSubscription) {
+        try {
+            const subscription = await stripeLib.retrieveSubscription(user.stripeSubscriptionId);
+            if (user.stripeCustomerId && resourceId(subscription.customer) !== user.stripeCustomerId) {
+                throw new Error('Subscription belongs to a different Stripe customer');
+            }
+            const plan = getRecurringPlan(subscription);
+            Object.assign(set, {
+                subscriptionType: plan,
+                subscriptionStatus: plan ? mapSubscriptionStatus(subscription.status) : 'inactive',
+                subscriptionExpiresAt: subscriptionEndToDate(subscription),
+                subscriptionCancelAtPeriodEnd: isSubscriptionEnding(subscription),
+            });
+        } catch (error) {
+            if (!isStripeResourceMissing(error)) throw error;
+            Object.assign(set, { subscriptionStatus: 'canceled', subscriptionCancelAtPeriodEnd: false });
+            unset.stripeSubscriptionId = '';
+            notes.push('Subscription no longer exists in Stripe');
+        }
+    }
+
+    // Lifetime users keep their customer link so refund/dispute webhooks can still find them.
+    if (user.stripeCustomerId && !isStripeLifetime) {
+        let customerDeleted = false;
+        try {
+            customerDeleted = !!(await stripeLib.retrieveCustomer(user.stripeCustomerId)).deleted;
+        } catch (error) {
+            if (!isStripeResourceMissing(error)) throw error;
+            customerDeleted = true;
+        }
+        if (customerDeleted) {
+            unset.stripeCustomerId = '';
+            if (user.stripeSubscriptionId) unset.stripeSubscriptionId = '';
+            notes.push('Stripe customer was deleted; billing link removed');
+        }
+    }
+
+    const changes = Object.entries(set)
+        .filter(([field, value]) => !sameBillingValue(user[field], value))
+        .map(([field, value]) => describeBillingChange(field, user[field], value));
+    const hasUnset = Object.keys(unset).length > 0;
+    if (changes.length === 0 && !hasUnset && !revokedPaymentId) {
+        return { status: 'unchanged', changes: [] };
+    }
+
+    const update = { $set: { ...set, updatedAt: new Date().toISOString() } };
+    if (hasUnset) update.$unset = unset;
+    if (revokedPaymentId) update.$addToSet = { revokedLifetimePaymentIntentIds: revokedPaymentId };
+    await User.updateOne({ _id: user._id }, update);
+
+    return { status: 'updated', changes: [...changes, ...new Set(notes)] };
+}
+
+async function mapWithConcurrency(items, limit, worker) {
+    const results = new Array(items.length);
+    let next = 0;
+    const run = async () => {
+        while (next < items.length) {
+            const index = next++;
+            results[index] = await worker(items[index]);
+        }
+    };
+    await Promise.all(Array.from({ length: Math.min(limit, items.length) }, run));
+    return results;
+}
+
+/**
+ * Admin only: re-sync billing for a batch of users from Stripe.
+ * Body: { ids: [userId, ...] } (max BILLING_SYNC_MAX_USERS per request)
+ */
+async function syncUsersBilling(req, res) {
+    try {
+        if (!stripeLib.isEnabled()) {
+            return res.status(400).json({ message: 'Stripe is not enabled' });
+        }
+        const ids = req.body?.ids;
+        if (
+            !Array.isArray(ids) ||
+            ids.length === 0 ||
+            ids.length > BILLING_SYNC_MAX_USERS ||
+            !ids.every((id) => typeof id === 'string' && OBJECT_ID_REGEX.test(id))
+        ) {
+            return res.status(400).json({ message: `Provide between 1 and ${BILLING_SYNC_MAX_USERS} valid user IDs` });
+        }
+
+        const uniqueIds = [...new Set(ids.map((id) => id.toLowerCase()))];
+        const users = await User.find({ _id: { $in: uniqueIds } })
+            .select(BILLING_SYNC_SELECT)
+            .lean();
+        const usersById = new Map(users.map((user) => [String(user._id), user]));
+
+        const results = await mapWithConcurrency(uniqueIds, BILLING_SYNC_CONCURRENCY, async (id) => {
+            const user = usersById.get(id);
+            if (!user) return { id, email: null, status: 'error', changes: [], message: 'User not found' };
+            try {
+                return { id, email: user.email, ...(await syncUserBilling(user)) };
+            } catch (error) {
+                log.warn('Stripe billing sync failed', { email: user.email, error: error.message });
+                return {
+                    id,
+                    email: user.email,
+                    status: 'error',
+                    changes: [],
+                    message: error.message || 'Stripe request failed',
+                };
+            }
+        });
+
+        log.info('Users billing synced with Stripe', {
+            by: req.user?.email,
+            total: results.length,
+            updated: results.filter((result) => result.status === 'updated').length,
+            errors: results.filter((result) => result.status === 'error').length,
+        });
+        return res.status(200).json({ results });
+    } catch (error) {
+        log.error('syncUsersBilling', error);
+        return res.status(400).json({ message: 'Unable to sync billing with Stripe' });
+    }
+}
+
 module.exports = {
     getPlans,
     createCheckout,
@@ -737,4 +930,6 @@ module.exports = {
     getBilling,
     verifySession,
     handleWebhook,
+    syncUserBilling,
+    syncUsersBilling,
 };
